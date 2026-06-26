@@ -81,6 +81,26 @@ func DegToRad(deg float64) float64 { return deg * math.Pi / 180 }
 // RadToDeg converts radians to degrees.
 func RadToDeg(rad float64) float64 { return rad * 180 / math.Pi }
 
+// Point is an (x, y) pair in SVG units.
+type Point struct{ X, Y float64 }
+
+// PositionFromAngle returns the cartesian point at the given angle (radians,
+// measured from the +x axis) and distance from the origin. Mirrors nivo's
+// core/lib/polar/utils.positionFromAngle.
+func PositionFromAngle(angle, distance float64) Point {
+	return Point{X: math.Cos(angle) * distance, Y: math.Sin(angle) * distance}
+}
+
+// NormalizeAngleDegrees maps an arbitrary angle (degrees) into [0, 360).
+// Mirrors nivo's core/lib/polar/utils.normalizeAngleDegrees.
+func NormalizeAngleDegrees(angle float64) float64 {
+	a := math.Mod(angle, 360)
+	if a < 0 {
+		a += 360
+	}
+	return a
+}
+
 // GetNormalizedAngle maps an arbitrary angle (degrees, 0 = top, clockwise)
 // into [0, 360).
 func GetNormalizedAngle(angleDeg float64) float64 {

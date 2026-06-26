@@ -105,7 +105,7 @@ func Axis(props AxisProps, theme *theming.Theme) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(props.Length))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 27, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 30, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -123,7 +123,7 @@ func Axis(props AxisProps, theme *theming.Theme) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(stroke)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 28, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 33, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 				if templ_7745c5c3_Err != nil {
@@ -142,7 +142,7 @@ func Axis(props AxisProps, theme *theming.Theme) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(strokeWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 29, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 36, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
@@ -165,7 +165,7 @@ func Axis(props AxisProps, theme *theming.Theme) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(props.Length))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 32, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 44, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -183,7 +183,7 @@ func Axis(props AxisProps, theme *theming.Theme) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(stroke)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 33, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 46, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 				if templ_7745c5c3_Err != nil {
@@ -202,7 +202,7 @@ func Axis(props AxisProps, theme *theming.Theme) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(strokeWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 34, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 49, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 				if templ_7745c5c3_Err != nil {
@@ -268,7 +268,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("translate(%s,%s)", fmtN(tick.X1), fmtN(tick.Y1)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 49, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 65, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 			if templ_7745c5c3_Err != nil {
@@ -281,7 +281,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(tick.X2 - tick.X1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 50, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 69, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -294,7 +294,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(tick.Y2 - tick.Y1))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 50, Col: 82}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 70, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(tStroke)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 51, Col: 39}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 72, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 				if templ_7745c5c3_Err != nil {
@@ -331,7 +331,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(tStrokeWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 52, Col: 59}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 75, Col: 38}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 				if templ_7745c5c3_Err != nil {
@@ -354,7 +354,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(tickTransform(props, tick))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 56, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 80, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 				if templ_7745c5c3_Err != nil {
@@ -367,7 +367,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(tick.TextAnchor)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 57, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 81, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 				if templ_7745c5c3_Err != nil {
@@ -380,7 +380,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(tick.DominantBaseline)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 58, Col: 46}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 82, Col: 46}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 				if templ_7745c5c3_Err != nil {
@@ -398,7 +398,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 					var templ_7745c5c3_Var19 string
 					templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(fill)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 59, Col: 32}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 84, Col: 17}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 					if templ_7745c5c3_Err != nil {
@@ -417,7 +417,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 					var templ_7745c5c3_Var20 string
 					templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(fontSizeAny(fontSize))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 60, Col: 59}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 87, Col: 39}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 					if templ_7745c5c3_Err != nil {
@@ -436,7 +436,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 					var templ_7745c5c3_Var21 string
 					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(fontFamily)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 61, Col: 51}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 90, Col: 30}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 					if templ_7745c5c3_Err != nil {
@@ -454,7 +454,7 @@ func AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) tem
 				var templ_7745c5c3_Var22 string
 				templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(tick.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 62, Col: 17}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 92, Col: 17}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 				if templ_7745c5c3_Err != nil {
@@ -505,7 +505,7 @@ func AxisLegend(props AxisProps, theme *theming.Theme) templ.Component {
 		var templ_7745c5c3_Var24 string
 		templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("translate(%s,%s) rotate(%s)", fmtN(x), fmtN(y), fmtN(rotation)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 73, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 103, Col: 90}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 		if templ_7745c5c3_Err != nil {
@@ -518,7 +518,7 @@ func AxisLegend(props AxisProps, theme *theming.Theme) templ.Component {
 		var templ_7745c5c3_Var25 string
 		templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(anchor)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 74, Col: 22}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 104, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 		if templ_7745c5c3_Err != nil {
@@ -536,7 +536,7 @@ func AxisLegend(props AxisProps, theme *theming.Theme) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.ResolveAttributeValue(fill)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 76, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 107, Col: 14}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var26)
 			if templ_7745c5c3_Err != nil {
@@ -555,7 +555,7 @@ func AxisLegend(props AxisProps, theme *theming.Theme) templ.Component {
 			var templ_7745c5c3_Var27 string
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.ResolveAttributeValue(fontSizeAny(fontSize))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 77, Col: 56}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 110, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var27)
 			if templ_7745c5c3_Err != nil {
@@ -574,7 +574,7 @@ func AxisLegend(props AxisProps, theme *theming.Theme) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.ResolveAttributeValue(fontFamily)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 78, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 113, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
 			if templ_7745c5c3_Err != nil {
@@ -592,7 +592,7 @@ func AxisLegend(props AxisProps, theme *theming.Theme) templ.Component {
 		var templ_7745c5c3_Var29 string
 		templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.JoinStringErrs(props.Legend)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 79, Col: 16}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/axis.templ`, Line: 115, Col: 16}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 		if templ_7745c5c3_Err != nil {

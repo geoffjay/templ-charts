@@ -106,7 +106,7 @@ func Crosshair(props CrosshairProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.Theme.Stroke)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 17, Col: 61}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 18, Col: 32}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
@@ -125,7 +125,7 @@ func Crosshair(props CrosshairProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(props.Theme.StrokeWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 18, Col: 81}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 21, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 				if templ_7745c5c3_Err != nil {
@@ -144,7 +144,7 @@ func Crosshair(props CrosshairProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(props.Theme.StrokeOpacity))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 19, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 24, Col: 53}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 				if templ_7745c5c3_Err != nil {
@@ -163,7 +163,7 @@ func Crosshair(props CrosshairProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.Theme.StrokeDasharray)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 20, Col: 89}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/tooltip/crosshair.templ`, Line: 27, Col: 51}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 				if templ_7745c5c3_Err != nil {

@@ -139,7 +139,7 @@ func Grid(props GridProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(stroke)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/grid.templ`, Line: 37, Col: 37}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/grid.templ`, Line: 38, Col: 20}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 				if templ_7745c5c3_Err != nil {
@@ -158,7 +158,7 @@ func Grid(props GridProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtN(strokeWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/grid.templ`, Line: 38, Col: 57}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/axes/grid.templ`, Line: 41, Col: 37}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 				if templ_7745c5c3_Err != nil {
