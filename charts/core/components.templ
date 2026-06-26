@@ -1,0 +1,172 @@
+package core
+
+import "fmt"
+
+// SvgWrapper renders the outer <svg> element with xmlns, dimensions, an
+// optional background rect, an optional <defs> block, and a translated inner
+// <g> containing the chart layers. Mirrors @nivo/core's SvgWrapper.
+//
+// The inner content is supplied as a pre-rendered SVG string so chart
+// packages can compose their layer pipeline outside and inject it.
+templ SvgWrapper(props SvgWrapperProps, inner string) {
+	<svg
+		xmlns="http://www.w3.org/2000/svg"
+		width={ fmtFloat(props.Width) }
+		height={ fmtFloat(props.Height) }
+		if props.Role != "" {
+			role={ props.Role }
+		}
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		if props.AriaLabelledBy != "" {
+			aria-labelledby={ props.AriaLabelledBy }
+		}
+		if props.AriaDescribedBy != "" {
+			aria-describedby={ props.AriaDescribedBy }
+		}
+		if props.IsFocusable {
+			tabindex="0"
+		}
+	>
+		@Defs(props.Defs)
+		if props.Background != "" {
+			<rect width={ fmtFloat(props.Width) } height={ fmtFloat(props.Height) } fill={ props.Background }></rect>
+		}
+		<g transform={ fmt.Sprintf("translate(%s,%s)", fmtFloat(props.Margin.Left), fmtFloat(props.Margin.Top)) }>
+			{ inner }
+		</g>
+	</svg>
+}
+
+// Defs renders the <defs> block containing all gradient/pattern definitions.
+// Empty defs render nothing. Mirrors @nivo/core's Defs component.
+templ Defs(defs []Def) {
+	if len(defs) > 0 {
+		<defs>
+			for _, d := range defs {
+				@defOne(d)
+			}
+		</defs>
+	}
+}
+
+// defOne dispatches on def type to render the appropriate pattern/gradient.
+templ defOne(d Def) {
+	switch d.Type {
+		case DefTypeLinearGradient:
+			@linearGradientDef(d)
+		case DefTypePatternDots:
+			@patternDotsDef(d)
+		case DefTypePatternLines:
+			@patternLinesDef(d)
+		case DefTypePatternSquares:
+			@patternSquaresDef(d)
+	}
+}
+
+templ linearGradientDef(d Def) {
+	<linearGradient id={ d.ID } x1="0" x2="0" y1="0" y2="1">
+		for _, stop := range d.Colors {
+			<stop offset={ fmt.Sprintf("%g%%", stop.Offset) } stop-color={ stop.Color } stop-opacity={ fmtFloat(opacityOr1(stop.Opacity)) }></stop>
+		}
+	</linearGradient>
+}
+
+templ patternDotsDef(d Def) {
+	{{ p := computePatternDots(d) }}
+	<pattern id={ d.ID } width={ fmtFloat(p.FullSize) } height={ fmtFloat(p.FullSize) } patternUnits="userSpaceOnUse">
+		<rect width={ fmtFloat(p.FullSize) } height={ fmtFloat(p.FullSize) } fill={ p.Background }></rect>
+		<circle cx={ fmtFloat(p.HalfPadding + p.Radius) } cy={ fmtFloat(p.HalfPadding + p.Radius) } r={ fmtFloat(p.Radius) } fill={ p.Color }></circle>
+		if d.Stagger {
+			<circle cx={ fmtFloat(p.HalfPadding*3 + p.Radius*2) } cy={ fmtFloat(p.HalfPadding*3 + p.Radius*2) } r={ fmtFloat(p.Radius) } fill={ p.Color }></circle>
+		}
+	</pattern>
+}
+
+templ patternSquaresDef(d Def) {
+	{{ p := computePatternSquares(d) }}
+	<pattern id={ d.ID } width={ fmtFloat(p.FullSize) } height={ fmtFloat(p.FullSize) } patternUnits="userSpaceOnUse">
+		<rect width={ fmtFloat(p.FullSize) } height={ fmtFloat(p.FullSize) } fill={ p.Background }></rect>
+		<rect x={ fmtFloat(p.HalfPadding) } y={ fmtFloat(p.HalfPadding) } width={ fmtFloat(p.Size) } height={ fmtFloat(p.Size) } fill={ p.Color }></rect>
+		if d.Stagger {
+			<rect x={ fmtFloat(p.HalfPadding*3 + p.Size) } y={ fmtFloat(p.HalfPadding*3 + p.Size) } width={ fmtFloat(p.Size) } height={ fmtFloat(p.Size) } fill={ p.Color }></rect>
+		}
+	</pattern>
+}
+
+templ patternLinesDef(d Def) {
+	{{ p := computePatternLines(d) }}
+	<pattern id={ d.ID } width={ fmtFloat(p.Width) } height={ fmtFloat(p.Height) } patternUnits="userSpaceOnUse">
+		<rect width={ fmtFloat(p.Width) } height={ fmtFloat(p.Height) } fill={ p.Background } strokeWidth="0"></rect>
+		<path d={ p.Path } strokeWidth={ fmtFloat(p.LineWidth) } stroke={ p.Color } strokeLinecap="square"></path>
+	</pattern>
+}
+
+// DotsItem renders a single dot: a <g translate(x,y)> containing a circle
+// (size = diameter) and an optional label <text>. Mirrors nivo's DotsItem
+// (minus spring animation).
+templ DotsItem(props DotsItemProps) {
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtFloat(props.X), fmtFloat(props.Y)) } style="pointer-events: none">
+		<circle
+			r={ fmtFloat(props.Size / 2) }
+			fill={ props.Color }
+			if props.BorderWidth > 0 {
+				stroke={ props.BorderColor }
+				stroke-width={ fmtFloat(props.BorderWidth) }
+			}
+		></circle>
+		if props.Label != "" {
+			<text
+				text-anchor={ textAnchorOr(props.LabelTextAnchor, "middle") }
+				y={ fmtFloat(props.LabelYOffset) }
+				if props.LabelFill != "" {
+					fill={ props.LabelFill }
+				}
+				if props.LabelFontSize != 0 {
+					font-size={ fmtFloat(props.LabelFontSize) }
+				}
+				if props.LabelFontFamily != "" {
+					font-family={ props.LabelFontFamily }
+				}
+			>{ props.Label }</text>
+		}
+	</g>
+}
+
+// CartesianMarkers renders all cartesian markers (lines + optional legend
+// labels). Mirrors nivo's CartesianMarkers + CartesianMarkersItem.
+templ CartesianMarkers(props CartesianMarkersProps) {
+	if len(props.Markers) == 0 {
+		return
+	}
+	for _, m := range props.Markers {
+		@cartesianMarkersItem(m, props.Width, props.Height, props.XScale, props.YScale)
+	}
+}
+
+templ cartesianMarkersItem(m CartesianMarker, width, height float64, xScale, yScale func(any) float64) {
+	{{ line := computeMarkerLine(m, width, height, xScale, yScale) }}
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtFloat(line.X), fmtFloat(line.Y)) }>
+		<line
+			x1="0"
+			x2={ fmtFloat(line.X2) }
+			y1="0"
+			y2={ fmtFloat(line.Y2) }
+			if m.LineColor != "" {
+				stroke={ m.LineColor }
+			}
+			if m.LineStrokeWidth != 0 {
+				stroke-width={ fmtFloat(m.LineStrokeWidth) }
+			}
+		></line>
+		if m.Legend != "" {
+			@cartesianMarkerLegend(m, width, height)
+		}
+	</g>
+}
+
+templ cartesianMarkerLegend(m CartesianMarker, width, height float64) {
+	{{ l := computeMarkerLayout(m, width, height) }}
+	<text transform={ fmt.Sprintf("translate(%s,%s) rotate(%s)", fmtFloat(l.X), fmtFloat(l.Y), fmtFloat(l.Rotation)) } text-anchor={ l.TextAnchor } dominant-baseline="central">{ m.Legend }</text>
+}
