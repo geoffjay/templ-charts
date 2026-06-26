@@ -1,0 +1,27 @@
+package arcs
+
+import "fmt"
+
+// ArcLayerItem is one arc in an ArcsLayer: a computed arc + its rendering props.
+type ArcLayerItem struct {
+	Arc   Arc
+	Props ArcShapeProps
+}
+
+// ArcsLayerProps renders a <g> containing all arc shapes. The <g> is translated
+// to the pie center by (CenterX, CenterY). Mirrors @nivo/arcs ArcsLayer.
+type ArcsLayerProps struct {
+	Items   []ArcLayerItem
+	CenterX float64
+	CenterY float64
+}
+
+// ArcsLayer renders the arcs layer: a <g translate(center)> with one <path>
+// per arc.
+templ ArcsLayer(props ArcsLayerProps) {
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtF(props.CenterX), fmtF(props.CenterY)) }>
+		for _, item := range props.Items {
+			@ArcShape(item.Props)
+		}
+	</g>
+}

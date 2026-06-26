@@ -1,0 +1,43 @@
+package annotations
+
+import "fmt"
+
+// Annotation renders one bound annotation: a link line, an outline shape
+// (circle/dot/rect), a symbol, and a note text. Mirrors @nivo/annotations
+// Annotation.
+templ Annotation(inst AnnotationInstructions) {
+	<g style="pointer-events: none">
+		<line x1={ fmtN(inst.LinkX1) } y1={ fmtN(inst.LinkY1) } x2={ fmtN(inst.LinkX2) } y2={ fmtN(inst.LinkY2) } stroke="#000" stroke-width="1"></line>
+		switch inst.Bound.Type {
+			case AnnotationTypeCircle:
+				@CircleAnnotationOutline(inst)
+			case AnnotationTypeDot:
+				@DotAnnotationOutline(inst)
+			case AnnotationTypeRect:
+				@RectAnnotationOutline(inst)
+		}
+		if inst.Bound.Note != "" {
+			<text x={ fmtN(inst.NoteX) } y={ fmtN(inst.NoteY) } font-size="13">{ inst.Bound.Note }</text>
+		}
+	</g>
+}
+
+// CircleAnnotationOutline renders the outline of a circle annotation.
+templ CircleAnnotationOutline(inst AnnotationInstructions) {
+	<circle cx={ fmtN(inst.OutlineX) } cy={ fmtN(inst.OutlineY) } r={ fmtN(inst.OutlineR) } fill="none" stroke="#000" stroke-width="2"></circle>
+}
+
+// DotAnnotationOutline renders the outline of a dot annotation (a filled dot
+// plus a ring).
+templ DotAnnotationOutline(inst AnnotationInstructions) {
+	<circle cx={ fmtN(inst.SymbolX) } cy={ fmtN(inst.SymbolY) } r={ fmtN(inst.Bound.Size) } fill="#000"></circle>
+}
+
+// RectAnnotationOutline renders the outline of a rect annotation.
+templ RectAnnotationOutline(inst AnnotationInstructions) {
+	<rect x={ fmtN(inst.OutlineX) } y={ fmtN(inst.OutlineY) } width={ fmtN(inst.OutlineW) } height={ fmtN(inst.OutlineH) } rx={ fmtN(inst.OutlineR) } ry={ fmtN(inst.OutlineR) } fill="none" stroke="#000" stroke-width="2"></rect>
+}
+
+func fmtN(v float64) string {
+	return fmt.Sprintf("%.3g", v)
+}

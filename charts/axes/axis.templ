@@ -1,0 +1,141 @@
+package axes
+
+import (
+	"fmt"
+
+	"github.com/geoffjay/templ-charts/charts/theming"
+)
+
+// Axes renders the x and y axes (each optional) for a chart. Mirrors
+// @nivo/axes Axes.
+templ Axes(props AxesProps) {
+	if props.XAxis != nil && !props.XAxis.Hidden {
+		@Axis(*props.XAxis, props.Theme)
+	}
+	if props.YAxis != nil && !props.YAxis.Hidden {
+		@Axis(*props.YAxis, props.Theme)
+	}
+}
+
+// Axis renders a single axis: a <g translate(x,y)> containing the domain line,
+// tick lines + labels, and an optional legend. Mirrors @nivo/axes Axis.
+templ Axis(props AxisProps, theme *theming.Theme) {
+	{{ computed := ComputeCartesianTicks(props, theme) }}
+	{{ stroke, strokeWidth := domainLineStyle(props, theme) }}
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtN(props.X), fmtN(props.Y)) }>
+		if props.Axis == "x" {
+			<line
+				x1="0"
+				y1="0"
+				x2={ fmtN(props.Length) }
+				y2="0"
+				if stroke != "" {
+					stroke={ stroke }
+				}
+				if strokeWidth > 0 {
+					stroke-width={ fmtN(strokeWidth) }
+				}
+			></line>
+		} else {
+			<line
+				x1="0"
+				y1="0"
+				x2="0"
+				y2={ fmtN(props.Length) }
+				if stroke != "" {
+					stroke={ stroke }
+				}
+				if strokeWidth > 0 {
+					stroke-width={ fmtN(strokeWidth) }
+				}
+			></line>
+		}
+		@AxisTick(computed, props, theme)
+		if props.Legend != "" {
+			@AxisLegend(props, theme)
+		}
+	</g>
+}
+
+// AxisTick renders all tick lines + labels for an axis.
+templ AxisTick(computed ComputedTicks, props AxisProps, theme *theming.Theme) {
+	{{ tStroke, tStrokeWidth := tickLineStyle(props, theme) }}
+	{{ fill, fontSize, fontFamily := tickTextStyle(props, theme) }}
+	for _, tick := range computed.Ticks {
+		<g transform={ fmt.Sprintf("translate(%s,%s)", fmtN(tick.X1), fmtN(tick.Y1)) }>
+			<line
+				x1="0"
+				y1="0"
+				x2={ fmtN(tick.X2 - tick.X1) }
+				y2={ fmtN(tick.Y2 - tick.Y1) }
+				if tStroke != "" {
+					stroke={ tStroke }
+				}
+				if tStrokeWidth > 0 {
+					stroke-width={ fmtN(tStrokeWidth) }
+				}
+			></line>
+			if !props.DisableTickLabel && tick.Label != "" {
+				<text
+					transform={ tickTransform(props, tick) }
+					text-anchor={ tick.TextAnchor }
+					dominant-baseline={ tick.DominantBaseline }
+					if fill != "" {
+						fill={ fill }
+					}
+					if fontSize != nil {
+						font-size={ fontSizeAny(fontSize) }
+					}
+					if fontFamily != "" {
+						font-family={ fontFamily }
+					}
+				>{ tick.Label }</text>
+			}
+		</g>
+	}
+}
+
+// AxisLegend renders the axis legend label.
+templ AxisLegend(props AxisProps, theme *theming.Theme) {
+	{{ x, y, rotation, anchor := legendPosition(props) }}
+	{{ fill, fontSize, fontFamily := legendStyle(props, theme) }}
+	<text
+		transform={ fmt.Sprintf("translate(%s,%s) rotate(%s)", fmtN(x), fmtN(y), fmtN(rotation)) }
+		text-anchor={ anchor }
+		dominant-baseline="central"
+		if fill != "" {
+			fill={ fill }
+		}
+		if fontSize != nil {
+			font-size={ fontSizeAny(fontSize) }
+		}
+		if fontFamily != "" {
+			font-family={ fontFamily }
+		}
+	>{ props.Legend }</text>
+}
+
+// tickTransform emits the transform for a tick label (translate to label x/y +
+// optional rotation).
+func tickTransform(props AxisProps, tick Tick) string {
+	if props.TickRotation != 0 {
+		return fmt.Sprintf("translate(%s,%s) rotate(%s)", fmtN(tick.LabelX), fmtN(tick.LabelY), fmtN(props.TickRotation))
+	}
+	return fmt.Sprintf("translate(%s,%s)", fmtN(tick.LabelX), fmtN(tick.LabelY))
+}
+
+// fontSizeAny renders a font-size value that may be a number or a string.
+func fontSizeAny(v any) string {
+	if v == nil {
+		return ""
+	}
+	switch x := v.(type) {
+	case float64:
+		return fmtN(x)
+	case int:
+		return fmt.Sprintf("%d", x)
+	case string:
+		return x
+	}
+	return fmt.Sprintf("%v", v)
+}

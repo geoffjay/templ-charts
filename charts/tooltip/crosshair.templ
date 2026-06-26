@@ -1,0 +1,37 @@
+package tooltip
+
+import "fmt"
+
+// Crosshair renders the SVG crosshair lines for a chart. Mirrors
+// @nivo/tooltip Crosshair (SVG variant). The lines are computed via
+// ComputeCrosshairLines and styled from theme.crosshair.line.
+templ Crosshair(props CrosshairProps) {
+	{{ lines := ComputeCrosshairLines(props) }}
+	<g style="pointer-events: none">
+		for _, line := range lines {
+			<line
+				x1={ fmtN(line.X1) }
+				y1={ fmtN(line.Y1) }
+				x2={ fmtN(line.X2) }
+				y2={ fmtN(line.Y2) }
+				if props.Theme.Stroke != "" {
+					stroke={ props.Theme.Stroke }
+				}
+				if props.Theme.StrokeWidth > 0 {
+					stroke-width={ fmtN(props.Theme.StrokeWidth) }
+				}
+				if props.Theme.StrokeOpacity > 0 {
+					stroke-opacity={ fmtN(props.Theme.StrokeOpacity) }
+				}
+				if props.Theme.StrokeDasharray != "" {
+					stroke-dasharray={ props.Theme.StrokeDasharray }
+				}
+				fill="none"
+			></line>
+		}
+	</g>
+}
+
+func fmtN(v float64) string {
+	return fmt.Sprintf("%.3g", v)
+}

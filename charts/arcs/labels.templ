@@ -1,0 +1,123 @@
+package arcs
+
+import "fmt"
+
+// ArcLabelProps renders one arc label (text at the arc center).
+type ArcLabelProps struct {
+	// X, Y is the label position (already centered on the arc center via
+	// ComputeArcCenter, in the pie's local coordinate system).
+	X, Y       float64
+	Label      string
+	Fill       string
+	FontSize   float64
+	FontFamily string
+}
+
+// ArcLabel renders a single arc label as a <g translate(x,y)> with a centered
+// <text>. Mirrors @nivo/pie ArcLabel.
+templ ArcLabel(props ArcLabelProps) {
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtF(props.X), fmtF(props.Y)) } style="pointer-events: none">
+		<text
+			text-anchor="middle"
+			dominant-baseline="central"
+			if props.Fill != "" {
+				fill={ props.Fill }
+			}
+			if props.FontSize != 0 {
+				font-size={ fmtF(props.FontSize) }
+			}
+			if props.FontFamily != "" {
+				font-family={ props.FontFamily }
+			}
+		>{ props.Label }</text>
+	</g>
+}
+
+// ArcLabelItem is one entry in the ArcLabelsLayer.
+type ArcLabelItem struct {
+	Props ArcLabelProps
+}
+
+// ArcLabelsLayerProps renders the arc-labels layer.
+type ArcLabelsLayerProps struct {
+	Items   []ArcLabelItem
+	CenterX float64
+	CenterY float64
+}
+
+// ArcLabelsLayer renders all arc labels inside a <g translate(center)>.
+templ ArcLabelsLayer(props ArcLabelsLayerProps) {
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtF(props.CenterX), fmtF(props.CenterY)) } style="pointer-events: none">
+		for _, item := range props.Items {
+			@ArcLabel(item.Props)
+		}
+	</g>
+}
+
+// ArcLinkLabelProps renders one arc link label: a two-segment polyline plus a
+// text label.
+type ArcLinkLabelProps struct {
+	Link       ArcLink
+	Label      string
+	Thickness  float64
+	Color      string
+	TextOffset float64
+	Fill       string
+	FontSize   float64
+	FontFamily string
+}
+
+// ArcLinkLabel renders a single arc link label. Mirrors @nivo/pie ArcLinkLabel.
+templ ArcLinkLabel(props ArcLinkLabelProps) {
+	<path
+		d={ fmt.Sprintf("M%s,%s L%s,%s L%s,%s", fmtF(props.Link.P0x), fmtF(props.Link.P0y), fmtF(props.Link.P1x), fmtF(props.Link.P1y), fmtF(props.Link.P2x), fmtF(props.Link.P2y)) }
+		stroke={ props.Color }
+		stroke-width={ fmtF(props.Thickness) }
+		fill="none"
+	></path>
+	<text
+		x={ fmtF(textX(props.Link, props.TextOffset)) }
+		y={ fmtF(props.Link.P2y) }
+		text-anchor={ props.Link.TextAnchor }
+		dominant-baseline="central"
+		if props.Fill != "" {
+			fill={ props.Fill }
+		}
+		if props.FontSize != 0 {
+			font-size={ fmtF(props.FontSize) }
+		}
+		if props.FontFamily != "" {
+			font-family={ props.FontFamily }
+		}
+	>{ props.Label }</text>
+}
+
+// textX offsets the label from the link's straight-segment end by TextOffset,
+// in the direction of the side.
+func textX(link ArcLink, offset float64) float64 {
+	if link.Side == "left" {
+		return link.P2x - offset
+	}
+	return link.P2x + offset
+}
+
+// ArcLinkLabelItem is one entry in the ArcLinkLabelsLayer.
+type ArcLinkLabelItem struct {
+	Props ArcLinkLabelProps
+}
+
+// ArcLinkLabelsLayerProps renders the arc-link-labels layer.
+type ArcLinkLabelsLayerProps struct {
+	Items   []ArcLinkLabelItem
+	CenterX float64
+	CenterY float64
+}
+
+// ArcLinkLabelsLayer renders all arc link labels inside a <g translate(center)>.
+templ ArcLinkLabelsLayer(props ArcLinkLabelsLayerProps) {
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtF(props.CenterX), fmtF(props.CenterY)) } style="pointer-events: none">
+		for _, item := range props.Items {
+			@ArcLinkLabel(item.Props)
+		}
+	</g>
+}

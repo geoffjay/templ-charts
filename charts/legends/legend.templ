@@ -1,0 +1,197 @@
+package legends
+
+import "fmt"
+
+// BoxLegendSvgProps is the input to BoxLegendSvg: a legend box pinned to a
+// chart anchor with one or more items.
+type BoxLegendSvgProps struct {
+	Props       LegendProps
+	ChartWidth  float64
+	ChartHeight float64
+}
+
+// BoxLegendSvg renders a legend box (one <g> per item) pinned to a chart
+// anchor. Mirrors @nivo/legends BoxLegendSvg.
+templ BoxLegendSvg(props BoxLegendSvgProps) {
+	{{ legend := props.Props }}
+	{{ w, h := ComputeDimensions(legend) }}
+	{{ x, y := ComputePositionFromAnchor(legend.Anchor, props.ChartWidth, props.ChartHeight, w, h, legend.TranslateX, legend.TranslateY) }}
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtN(x), fmtN(y)) }>
+		@LegendSvg(legend)
+	</g>
+}
+
+// LegendSvg renders the legend items list (no outer translate — caller
+// positions the box). Mirrors @nivo/legends LegendSvg.
+templ LegendSvg(props LegendProps) {
+	{{ layouts := ComputeItemLayout(props) }}
+	for i, item := range props.Items {
+		@LegendSvgItem(LegendSvgItemProps{Props: props, Datum: item, Layout: layouts[i]})
+	}
+}
+
+// LegendSvgItemProps is one item in a LegendSvg.
+type LegendSvgItemProps struct {
+	Props  LegendProps
+	Datum  Datum
+	Layout ItemLayout
+}
+
+// LegendSvgItem renders one legend item: a symbol + a label. When
+// Props.Toggle is set, the item is wrapped in a <g> with hx-post for series
+// toggling via htmx.
+templ LegendSvgItem(props LegendSvgItemProps) {
+	{{ p := props.Props }}
+	{{ d := props.Datum }}
+	<g
+		transform={ fmt.Sprintf("translate(%s,%s)", fmtN(props.Layout.X), fmtN(props.Layout.Y)) }
+		if p.Toggle != "" && p.ChartID != "" && d.ID != "" {
+			hx-post={ fmt.Sprintf("/charts/%s/toggle?series=%s", p.ChartID, d.ID) }
+			hx-target={ fmt.Sprintf("#chart-%s", p.ChartID) }
+			hx-swap="innerHTML"
+			style="cursor: pointer"
+		}
+		if d.Hidden {
+			opacity="0.4"
+		}
+		else
+		if p.ItemOpacity > 0 && p.ItemOpacity < 1 {
+			opacity={ fmtN(p.ItemOpacity) }
+		}
+	>
+		@LegendSymbol(p, d)
+		<text
+			x={ fmtN(symbolLabelX(p)) }
+			y={ fmtN(symbolLabelY(p)) }
+			text-anchor={ itemTextAnchor(p) }
+			dominant-baseline="central"
+		>{ d.Label }</text>
+	</g>
+}
+
+// LegendSymbol renders the symbol shape for a legend item.
+templ LegendSymbol(p LegendProps, d Datum) {
+	{{ g := symbolGeometry(p) }}
+	switch g.Shape {
+		case SymbolShapeCircle:
+			<circle
+				cx={ fmtN(g.Size / 2) }
+				cy={ fmtN(g.Cy) }
+				r={ fmtN(g.Size / 2) }
+				fill={ d.Color }
+				if p.SymbolBorderWidth > 0 {
+					stroke={ p.SymbolBorderColor }
+					stroke-width={ fmtN(p.SymbolBorderWidth) }
+				}
+			></circle>
+		case SymbolShapeSquare:
+			<rect
+				x="0"
+				y={ fmtN(g.Cy - g.Size/2) }
+				width={ fmtN(g.Size) }
+				height={ fmtN(g.Size) }
+				fill={ d.Color }
+				if p.SymbolBorderWidth > 0 {
+					stroke={ p.SymbolBorderColor }
+					stroke-width={ fmtN(p.SymbolBorderWidth) }
+				}
+			></rect>
+		case SymbolShapeDiamond:
+			<polygon
+				points={ fmt.Sprintf("%s,%s %s,%s %s,%s %s,%s", fmtN(g.Size/2), fmtN(g.Cy-g.Size/2), fmtN(g.Size), fmtN(g.Cy), fmtN(g.Size/2), fmtN(g.Cy+g.Size/2), "0", fmtN(g.Cy)) }
+				fill={ d.Color }
+				if p.SymbolBorderWidth > 0 {
+					stroke={ p.SymbolBorderColor }
+					stroke-width={ fmtN(p.SymbolBorderWidth) }
+				}
+			></polygon>
+		case SymbolShapeTriangle:
+			<polygon
+				points={ fmt.Sprintf("%s,%s %s,%s %s,%s", fmtN(g.Size), fmtN(g.Cy+g.Size/2), "0", fmtN(g.Cy+g.Size/2), fmtN(g.Size/2), fmtN(g.Cy-g.Size/2)) }
+				fill={ d.Color }
+				if p.SymbolBorderWidth > 0 {
+					stroke={ p.SymbolBorderColor }
+					stroke-width={ fmtN(p.SymbolBorderWidth) }
+				}
+			></polygon>
+	}
+}
+
+// symbolGeometry holds the resolved symbol geometry for one legend item.
+type symbolGeom struct {
+	Size  float64
+	Cy    float64
+	Shape SymbolShape
+}
+
+// symbolGeometry resolves a legend item's symbol geometry using defaults when
+// the props fields are zero.
+func symbolGeometry(p LegendProps) symbolGeom {
+	g := symbolGeom{Size: p.SymbolSize, Cy: p.ItemHeight / 2, Shape: p.SymbolShape}
+	if g.Size == 0 {
+		g.Size = LegendDefaults.SymbolSize
+	}
+	if g.Cy == 0 {
+		g.Cy = LegendDefaults.ItemHeight / 2
+	}
+	if g.Shape == "" {
+		g.Shape = LegendDefaults.SymbolShape
+	}
+	return g
+}
+
+// symbolLabelX returns the label x offset given the item direction.
+func symbolLabelX(p LegendProps) float64 {
+	size := p.SymbolSize
+	if size == 0 {
+		size = LegendDefaults.SymbolSize
+	}
+	spacing := p.SymbolSpacing
+	if spacing == 0 {
+		spacing = LegendDefaults.SymbolSpacing
+	}
+	switch p.ItemDirection {
+	case LegendItemDirectionRightToLeft:
+		return -spacing
+	case LegendItemDirectionTopToBottom, LegendItemDirectionBottomToTop:
+		return size / 2
+	default: // left-to-right
+		return size + spacing
+	}
+}
+
+// symbolLabelY returns the label y offset given the item direction.
+func symbolLabelY(p LegendProps) float64 {
+	h := p.ItemHeight
+	if h == 0 {
+		h = LegendDefaults.ItemHeight
+	}
+	size := p.SymbolSize
+	if size == 0 {
+		size = LegendDefaults.SymbolSize
+	}
+	switch p.ItemDirection {
+	case LegendItemDirectionTopToBottom:
+		return size + (h-size)/2
+	case LegendItemDirectionBottomToTop:
+		return h - size - (h-size)/2
+	default:
+		return h / 2
+	}
+}
+
+// itemTextAnchor returns the text-anchor for a legend item label.
+func itemTextAnchor(p LegendProps) string {
+	switch p.ItemDirection {
+	case LegendItemDirectionRightToLeft:
+		return "end"
+	case LegendItemDirectionTopToBottom, LegendItemDirectionBottomToTop:
+		return "middle"
+	default:
+		return "start"
+	}
+}
+
+func fmtN(v float64) string {
+	return fmt.Sprintf("%.3g", v)
+}

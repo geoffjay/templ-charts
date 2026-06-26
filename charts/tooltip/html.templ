@@ -1,0 +1,119 @@
+package tooltip
+
+import "fmt"
+
+// BasicTooltipProps renders a one-line tooltip: a color chip + a label + a
+// value. Mirrors @nivo/tooltip BasicTooltip. Rendered as an HTML fragment
+// (float in a container div swapped in by HTMX).
+type BasicTooltipProps struct {
+	ID             string
+	Value          string
+	FormattedValue string
+	Color          string
+	EnableChip     bool
+	// Text/Container CSS style overrides (merged over theme.tooltip.basic).
+	ContainerStyle map[string]any
+	BasicStyle     map[string]any
+	ChipStyle      map[string]any
+}
+
+// BasicTooltip renders a basic tooltip HTML fragment.
+templ BasicTooltip(props BasicTooltipProps) {
+	<div class="nivo-tooltip-basic" style={ styleFromMap(props.ContainerStyle) }>
+		<div style={ styleFromMap(props.BasicStyle) }>
+			if props.EnableChip && props.Color != "" {
+				@Chip(ChipProps{Color: props.Color, Style: props.ChipStyle})
+			}
+			{ labelOrValue(props) }
+		</div>
+	</div>
+}
+
+// labelOrValue returns the displayed text: "id: formattedValue" if both
+// present, else whichever is non-empty (mirrors nivo's BasicTooltip body).
+func labelOrValue(p BasicTooltipProps) string {
+	if p.ID != "" && p.FormattedValue != "" {
+		return fmt.Sprintf("%s: %s", p.ID, p.FormattedValue)
+	}
+	if p.FormattedValue != "" {
+		return p.FormattedValue
+	}
+	if p.Value != "" {
+		return p.Value
+	}
+	return p.ID
+}
+
+// ChipProps renders a small color chip.
+type ChipProps struct {
+	Color string
+	Style map[string]any
+}
+
+// Chip renders a colored chip <span>.
+templ Chip(props ChipProps) {
+	<span class="nivo-tooltip-chip" style={ fmt.Sprintf("display: inline-block; width: 12px; height: 12px; background: %s; %s", props.Color, styleFromMap(props.Style)) }></span>
+}
+
+// TableTooltipRow is one row of a TableTooltip.
+type TableTooltipRow struct {
+	Label string
+	Value string
+	Color string // optional chip color (omitted when empty)
+}
+
+// TableTooltipProps renders a multi-row tooltip.
+type TableTooltipProps struct {
+	Rows           []TableTooltipRow
+	ContainerStyle map[string]any
+	TableStyle     map[string]any
+	CellStyle      map[string]any
+	ValueStyle     map[string]any
+}
+
+// TableTooltip renders a table tooltip HTML fragment.
+templ TableTooltip(props TableTooltipProps) {
+	<div class="nivo-tooltip-table" style={ styleFromMap(props.ContainerStyle) }>
+		<table style={ styleFromMap(props.TableStyle) }>
+			for _, row := range props.Rows {
+				<tr>
+					<td style={ styleFromMap(props.CellStyle) }>
+						if row.Color != "" {
+							@Chip(ChipProps{Color: row.Color})
+						}
+						{ row.Label }
+					</td>
+					<td style={ styleFromMap(props.ValueStyle) }>{ row.Value }</td>
+				</tr>
+			}
+		</table>
+	</div>
+}
+
+// styleFromMap renders a CSS style string from a map[string]any (key: value; …).
+// nil/empty maps render as "". Numeric values are rendered as-is (no "px"
+// suffix — callers add units where needed).
+func styleFromMap(m map[string]any) string {
+	if len(m) == 0 {
+		return ""
+	}
+	s := ""
+	for k, v := range m {
+		s += fmt.Sprintf("%s: %v; ", kebabCase(k), v)
+	}
+	return s
+}
+
+// kebabCase converts a camelCase key to kebab-case (CSS property names).
+func kebabCase(s string) string {
+	out := make([]byte, 0, len(s)+4)
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= 'A' && c <= 'Z' {
+			out = append(out, '-', c+32)
+		} else {
+			out = append(out, c)
+		}
+	}
+	return string(out)
+}

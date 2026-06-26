@@ -1,0 +1,61 @@
+package axes
+
+import (
+	"fmt"
+
+	"github.com/geoffjay/templ-charts/charts/scales"
+	"github.com/geoffjay/templ-charts/charts/theming"
+)
+
+// GridProps renders the grid lines for one axis.
+type GridProps struct {
+	Axis       string // "x" | "y"
+	Scale      scales.Scale
+	Width      float64
+	Height     float64
+	X          float64 // translate offset
+	Y          float64
+	TickValues []any
+	// Style overrides (filled from theme.Grid.Line when zero).
+	LineColor string
+	LineWidth float64
+	Theme     *theming.Theme
+}
+
+// Grid renders all grid lines for an axis as a <g> of <line> elements.
+// Mirrors @nivo/axes Grid.
+templ Grid(props GridProps) {
+	{{ lines := ComputeGridLines(AxisProps{Axis: props.Axis, Scale: props.Scale, TickValues: props.TickValues}, props.Width, props.Height) }}
+	{{ stroke, strokeWidth := gridLineStyle(props) }}
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtN(props.X), fmtN(props.Y)) }>
+		for _, line := range lines {
+			<line
+				x1={ fmtN(line.X1) }
+				y1={ fmtN(line.Y1) }
+				x2={ fmtN(line.X2) }
+				y2={ fmtN(line.Y2) }
+				if stroke != "" {
+					stroke={ stroke }
+				}
+				if strokeWidth > 0 {
+					stroke-width={ fmtN(strokeWidth) }
+				}
+				fill="none"
+			></line>
+		}
+	</g>
+}
+
+// gridLineStyle resolves the grid line stroke/width from props or theme.
+func gridLineStyle(props GridProps) (string, float64) {
+	if props.LineColor != "" || props.LineWidth != 0 {
+		return props.LineColor, props.LineWidth
+	}
+	if props.Theme == nil {
+		return "", 0
+	}
+	line := props.Theme.Grid.Line
+	stroke := stringFromExtra(line.Extra, "stroke")
+	strokeWidth := floatFromExtra(line.Extra, "strokeWidth")
+	return stroke, strokeWidth
+}

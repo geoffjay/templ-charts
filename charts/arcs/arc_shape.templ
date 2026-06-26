@@ -1,0 +1,50 @@
+package arcs
+
+// ArcShapeProps renders a single arc as an SVG <path>.
+type ArcShapeProps struct {
+	// Path is the pre-rendered SVG path-data string from ArcGenerator.
+	Path string
+	// Fill is the arc fill color.
+	Fill string
+	// Stroke/StrokeWidth for the arc outline (StrokeWidth=0 omits stroke).
+	Stroke      string
+	StrokeWidth float64
+	// Opacity, when in (0,1), emits an opacity attribute.
+	Opacity float64
+	// HTMX attributes for interactivity (emitted verbatim on the <path>).
+	// e.g. `hx-get="/charts/foo/hover?arc=bar" hx-trigger="mouseenter"`.
+	HTMXAttrs string
+	// AriaLabel, when non-empty, emits aria-label.
+	AriaLabel string
+	// Animate, when true, emits a SMIL <animate> on attributeName="d" growing
+	// the outer radius from innerRadius to outerRadius (transitionMode
+	// "innerRadius"). AnimateFromPath is the pre-animation path; AnimateToPath
+	// is the final path (== Path).
+	Animate         bool
+	AnimateFromPath string
+}
+
+// ArcShape renders one arc as an SVG <path>. Mirrors @nivo/arcs ArcShape.
+templ ArcShape(props ArcShapeProps) {
+	<path
+		d={ props.Path }
+		fill={ props.Fill }
+		if props.StrokeWidth > 0 && props.Stroke != "" {
+			stroke={ props.Stroke }
+			stroke-width={ fmtF(props.StrokeWidth) }
+		}
+		if props.Opacity > 0 && props.Opacity < 1 {
+			opacity={ fmtF(props.Opacity) }
+		}
+		if props.AriaLabel != "" {
+			aria-label={ props.AriaLabel }
+		}
+		if props.HTMXAttrs != "" {
+			{ props.HTMXAttrs }
+		}
+	>
+		if props.Animate && props.AnimateFromPath != "" {
+			<animate attributeName="d" from={ props.AnimateFromPath } to={ props.Path } begin="0s" dur="0.6s" fill="freeze"></animate>
+		}
+	</path>
+}

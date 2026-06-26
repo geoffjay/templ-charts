@@ -1,0 +1,13 @@
+package rects
+
+// RoundedRect renders a single rounded rect as an SVG <path>. When Animate is
+// true it emits SMIL <animate> elements growing the rect from zero width
+// (vertical) or zero height (horizontal) to its full size. Mirrors nivo's
+// bar enter animation (600ms ease, fill="freeze").
+//
+// Chart packages that compose their SVG layer pipeline as strings should
+// prefer the Render function; this component is for templ-based composition.
+templ RoundedRect(props RoundedRectProps) {
+	{{ raw := Render(props) }}
+	{ raw }
+}

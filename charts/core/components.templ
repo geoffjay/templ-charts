@@ -34,7 +34,7 @@ templ SvgWrapper(props SvgWrapperProps, inner string) {
 			<rect width={ fmtFloat(props.Width) } height={ fmtFloat(props.Height) } fill={ props.Background }></rect>
 		}
 		<g transform={ fmt.Sprintf("translate(%s,%s)", fmtFloat(props.Margin.Left), fmtFloat(props.Margin.Top)) }>
-			{ inner }
+			@templ.Raw(inner)
 		</g>
 	</svg>
 }
