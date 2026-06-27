@@ -1,0 +1,62 @@
+package line
+
+import "fmt"
+
+// AreasProps is the input to the Areas templ component. Mirrors @nivo/line
+// Areas.
+type AreasProps struct {
+	Series        []ComputedSeries
+	AreaGenerator AreaGenerator
+	AreaOpacity   float64
+	AreaBlendMode string
+	Animate       bool
+}
+
+// Areas renders all area paths (reversed). Mirrors @nivo/line Areas.
+templ Areas(props AreasProps) {
+	<g>
+		{{ reversed := reverseSeries(props.Series) }}
+		for _, s := range reversed {
+			{{ path := props.AreaGenerator(seriesPoints(s)) }}
+			<path
+				d={ path }
+				fill={ s.Color }
+				fill-opacity={ fmtA(props.AreaOpacity) }
+				stroke-width="0"
+				if props.AreaBlendMode != "" && props.AreaBlendMode != "normal" {
+					style={ fmt.Sprintf("mix-blend-mode: %s", props.AreaBlendMode) }
+				}
+			>
+				if props.Animate {
+					<animate attributeName="d" from="M0,0" to={ path } begin="0s" dur="0.6s" fill="freeze"></animate>
+				}
+			</path>
+		}
+	</g>
+}
+
+// fmtA formats an opacity float for SVG output.
+func fmtA(v float64) string {
+	return fmt.Sprintf("%.3g", v)
+}
+
+// reverseSeries returns a reversed copy of series (so lower series draw on
+// top of higher ones, matching nivo).
+func reverseSeries(s []ComputedSeries) []ComputedSeries {
+	out := make([]ComputedSeries, len(s))
+	copy(out, s)
+	for i, j := 0, len(out)-1; i < j; i, j = i+1, j-1 {
+		out[i], out[j] = out[j], out[i]
+	}
+	return out
+}
+
+// seriesPoints converts a ComputedSeries's data to []PointXY for the
+// line/area generators.
+func seriesPoints(s ComputedSeries) []PointXY {
+	out := make([]PointXY, len(s.Data))
+	for i, d := range s.Data {
+		out[i] = PointXY{X: d.Position.X, Y: d.Position.Y}
+	}
+	return out
+}

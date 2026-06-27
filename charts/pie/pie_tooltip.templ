@@ -1,0 +1,26 @@
+package pie
+
+import "fmt"
+
+// PieTooltipProps is the input to the PieTooltip templ component. Mirrors
+// @nivo/pie PieTooltipProps.
+type PieTooltipProps struct {
+	Datum ComputedDatum
+}
+
+// PieTooltip renders a basic tooltip for a hovered arc: id + formattedValue
+// with a color chip. Mirrors @nivo/pie PieTooltip.
+templ PieTooltip(props PieTooltipProps) {
+	<div class="nivo-tooltip-basic" style="display: flex; align-items: center; white-space: pre">
+		<span style={ fmt.Sprintf("display: inline-block; width: 12px; height: 12px; background: %s; margin-right: 7px", props.Datum.Color) }></span>
+		<span><strong>{ props.Datum.ID }</strong>: { props.Datum.FormattedValue }</span>
+	</div>
+}
+
+// fmtP formats a float for SVG output (3 dp, trimmed).
+func fmtP(v float64) string {
+	if v != v || v > 1e308 {
+		return "0"
+	}
+	return fmt.Sprintf("%.3g", v)
+}

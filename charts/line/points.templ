@@ -1,0 +1,73 @@
+package line
+
+import "fmt"
+
+// PointsProps is the input to the Points templ component. Mirrors @nivo/line
+// Points (SVG subset; uses core.DotsItem per point).
+type PointsProps struct {
+	Points       []Point
+	Size         float64
+	BorderWidth  float64
+	EnableLabel  bool
+	LabelYOffset float64
+	// HTMX attrs (emitted on each <g> when interactive).
+	HTMXAttrs string
+	ChartID   string
+}
+
+// Points renders all points as <g translate(x,y)> with a <circle> + optional
+// label <text>. Points are sorted by seriesIndex desc (nivo's sort), so lower
+// series draw on top.
+templ Points(props PointsProps) {
+	{{ sorted := sortPointsForRender(props.Points) }}
+	for _, p := range sorted {
+		<g transform={ fmt.Sprintf("translate(%s,%s)", fmtL(p.X), fmtL(p.Y)) } style="pointer-events: none">
+			<circle
+				r={ fmtL(props.Size / 2) }
+				fill={ p.Color }
+				if props.BorderWidth > 0 {
+					stroke={ p.BorderColor }
+					stroke-width={ fmtL(props.BorderWidth) }
+				}
+			></circle>
+			if props.EnableLabel && p.Data.YFormatted != "" {
+				<text
+					y={ fmtL(props.LabelYOffset) }
+					text-anchor="middle"
+					dominant-baseline="central"
+					if p.BorderColor != "" {
+						fill={ p.BorderColor }
+					}
+					style="pointer-events: none"
+				>{ p.Data.YFormatted }</text>
+			}
+		</g>
+	}
+}
+
+// sortPointsForRender sorts points by indexInSeries asc, then seriesIndex
+// desc (so lower series draw on top). Mirrors nivo's Points sort.
+func sortPointsForRender(ps []Point) []Point {
+	out := make([]Point, len(ps))
+	copy(out, ps)
+	// stable sort by indexInSeries, then reverse-stable by seriesIndex
+	for i := 1; i < len(out); i++ {
+		j := i
+		for j > 0 && (out[j].IndexInSeries < out[j-1].IndexInSeries) {
+			out[j], out[j-1] = out[j-1], out[j]
+			j--
+		}
+	}
+	// now stable-sort by seriesIndex desc
+	for i := 1; i < len(out); i++ {
+		j := i
+		for j > 0 && out[j].SeriesIndex > out[j-1].SeriesIndex {
+			out[j], out[j-1] = out[j-1], out[j]
+			j--
+		}
+	}
+	return out
+}
+
+// _ unused guard for fmt
+var _ = fmt.Sprintf

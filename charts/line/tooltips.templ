@@ -1,0 +1,62 @@
+package line
+
+import "fmt"
+
+// PointTooltipProps is the input to the PointTooltip templ component. Mirrors
+// @nivo/line PointTooltipProps.
+type PointTooltipProps struct {
+	Point Point
+}
+
+// PointTooltip renders a basic tooltip for a hovered point: "x: <strong>,
+// y: <strong>" with a color chip. Mirrors @nivo/line PointTooltip.
+templ PointTooltip(props PointTooltipProps) {
+	<div class="nivo-tooltip-basic" style="display: flex; align-items: center; white-space: pre">
+		<span style={ fmt.Sprintf("display: inline-block; width: 12px; height: 12px; background: %s; margin-right: 7px", props.Point.SeriesColor) }></span>
+		<span>x: <strong>{ props.Point.Data.XFormatted }</strong>, y: <strong>{ props.Point.Data.YFormatted }</strong></span>
+	</div>
+}
+
+// SliceTooltipProps is the input to the SliceTooltip templ component. Mirrors
+// @nivo/line SliceTooltipProps.
+type SliceTooltipProps struct {
+	Slice SliceData
+	Axis  EnableSlices
+}
+
+// SliceTooltip renders a table tooltip for a hovered slice: one row per
+// point (chip + seriesId + other-axis formatted value). Mirrors @nivo/line
+// SliceTooltip.
+templ SliceTooltip(props SliceTooltipProps) {
+	{{ otherAxis := otherAxisOf(props.Axis) }}
+	<div class="nivo-tooltip-table" style="background: white; color: inherit; font-size: inherit; border-radius: 2px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25); padding: 5px 9px">
+		<table>
+			for _, p := range props.Slice.Points {
+				<tr>
+					<td style="padding: 3px 5px">
+						<span style={ fmt.Sprintf("display: inline-block; width: 12px; height: 12px; background: %s; margin-right: 7px", p.SeriesColor) }></span>
+						{ p.SeriesID }
+					</td>
+					<td style="padding: 3px 5px; font-weight: bold">{ otherAxisValue(p, otherAxis) }</td>
+				</tr>
+			}
+		</table>
+	</div>
+}
+
+// otherAxisOf returns "y" for x-slices and "x" for y-slices.
+func otherAxisOf(axis EnableSlices) string {
+	if axis == "x" {
+		return "y"
+	}
+	return "x"
+}
+
+// otherAxisValue returns the formatted value of the non-slice axis for a point
+// (mirrors nivo's `point.data[${otherAxis}Formatted]`).
+func otherAxisValue(p Point, otherAxis string) string {
+	if otherAxis == "y" {
+		return p.Data.YFormatted
+	}
+	return p.Data.XFormatted
+}

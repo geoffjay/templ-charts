@@ -1,0 +1,26 @@
+package pie
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Pie renders a complete pie chart SVG: dimensions → UsePie → bound defs →
+// layer pipeline (arcs → arcLinkLabels → arcLabels → legends) → SvgWrapper.
+// Mirrors @nivo/pie Pie.
+templ Pie(props PieProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ result := UsePie(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	{{ bound := core.BindDefs(props.Defs, dataAsAny(result.DataWithArc), props.Fill, "", "color", "fill") }}
+	{{ layers := props.Layers }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Defs:            bound.Defs,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+	}, renderPieLayers(layers, props, result, dims, theme, bound))
+}

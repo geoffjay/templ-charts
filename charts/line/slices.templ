@@ -1,0 +1,43 @@
+package line
+
+import "fmt"
+
+// SlicesProps is the input to the Slices templ component. Mirrors @nivo/line
+// Slices (SVG subset; interactive handlers routed through HTMX).
+type SlicesProps struct {
+	Slices  []SliceData
+	Axis    EnableSlices
+	Debug   bool
+	ChartID string
+}
+
+// Slices renders one transparent <rect> per slice for hover capture. When
+// Debug is true, the rects get a red stroke + fill so the slice bounds are
+// visible. Mirrors @nivo/line Slices.
+templ Slices(props SlicesProps) {
+	for _, s := range props.Slices {
+		<rect
+			x={ fmtL(s.X0) }
+			y={ fmtL(s.Y0) }
+			width={ fmtL(s.Width) }
+			height={ fmtL(s.Height) }
+			if props.Debug {
+				stroke="red"
+				stroke-width="1"
+				stroke-opacity="0.75"
+				fill="red"
+				fill-opacity="0.35"
+			} else {
+				fill="black"
+				fill-opacity="0"
+			}
+			if props.ChartID != "" {
+				hx-get={ fmt.Sprintf("/charts/%s/slice?axis=%s&x=%g", props.ChartID, props.Axis, s.X) }
+				hx-trigger="mouseenter"
+				hx-swap="innerHTML"
+				hx-target={ fmt.Sprintf("#tooltip-%s", props.ChartID) }
+			}
+			data-ref={ s.ID }
+		></rect>
+	}
+}

@@ -1,0 +1,39 @@
+package line
+
+import "fmt"
+
+// MeshProps is the input to the Mesh templ component. v1 simplifies nivo's
+// voronoi-based mesh to a single transparent <rect> overlay that captures
+// mouse position via HTMX; the server-side handler resolves the nearest point
+// and returns the tooltip + crosshair. When Debug is true, the overlay gets a
+// red stroke so the mesh bounds are visible.
+type MeshProps struct {
+	Width   float64
+	Height  float64
+	Debug   bool
+	ChartID string
+}
+
+// Mesh renders a transparent overlay <rect> for hover capture. Mirrors
+// @nivo/line Mesh (voronoi-based in nivo; simplified to a single overlay in v1).
+templ Mesh(props MeshProps) {
+	<rect
+		x="0"
+		y="0"
+		width={ fmtL(props.Width) }
+		height={ fmtL(props.Height) }
+		fill="black"
+		fill-opacity="0"
+		if props.Debug {
+			stroke="red"
+			stroke-width="1"
+			stroke-opacity="0.5"
+		}
+		if props.ChartID != "" {
+			hx-get={ fmt.Sprintf("/charts/%s/hover?mesh=1", props.ChartID) }
+			hx-trigger="mouseenter, mousemove"
+			hx-swap="innerHTML"
+			hx-target={ fmt.Sprintf("#tooltip-%s", props.ChartID) }
+		}
+	></rect>
+}

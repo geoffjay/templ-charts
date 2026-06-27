@@ -1,0 +1,27 @@
+package line
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Line renders a complete line chart SVG: dimensions → UseLine → bound defs
+// → layer pipeline (grid → markers → axes → areas → crosshair → lines →
+// points → slices → mesh → legends) → SvgWrapper. Mirrors @nivo/line Line.
+templ Line(props LineProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ result := UseLine(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	{{ bound := core.BindDefs(props.Defs, seriesAsAny(result.Series), props.Fill, "", "color", "fill") }}
+	{{ layers := props.Layers }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Defs:            bound.Defs,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		IsFocusable:     props.IsFocusable,
+	}, renderLineLayers(layers, props, result, dims, theme, bound))
+}
