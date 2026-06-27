@@ -1,0 +1,18 @@
+package bar
+
+import "github.com/geoffjay/templ-charts/charts/annotations"
+
+// BarAnnotationsProps is the input to the BarAnnotations templ component.
+type BarAnnotationsProps struct {
+	Bars        []ComputedBarDatum
+	Annotations []annotations.AnnotationSpec[ComputedBarDatum]
+}
+
+// BarAnnotations binds annotation specs to bars and renders each via the
+// annotations.Annotation component. Mirrors @nivo/bar BarAnnotations.
+templ BarAnnotations(props BarAnnotationsProps) {
+	{{ bound := bindBarAnnotations(props.Bars, props.Annotations) }}
+	for _, inst := range bound {
+		@annotations.Annotation(inst)
+	}
+}

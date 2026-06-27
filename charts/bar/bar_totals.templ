@@ -1,0 +1,61 @@
+package bar
+
+import "fmt"
+
+// BarTotalsProps is the input to the BarTotals templ component.
+type BarTotalsProps struct {
+	Data   []BarTotalData
+	Layout string
+	Theme  BarTotalsTheme
+}
+
+// BarTotalsTheme is the label text style (filled from theme.labels.text by
+// the Bar component).
+type BarTotalsTheme struct {
+	FontSize   float64
+	FontFamily string
+	Fill       string
+}
+
+// BarTotals renders the totals labels above/beside the bars. Mirrors
+// @nivo/bar BarTotals (minus spring animation — v1 emits static <text>).
+templ BarTotals(props BarTotalsProps) {
+	for _, t := range props.Data {
+		<text
+			x={ fmtB(t.X) }
+			y={ fmtB(t.Y) }
+			font-weight="bold"
+			if props.Theme.FontSize != 0 {
+				font-size={ fmtB(props.Theme.FontSize) }
+			}
+			if props.Theme.FontFamily != "" {
+				font-family={ props.Theme.FontFamily }
+			}
+			if props.Theme.Fill != "" {
+				fill={ props.Theme.Fill }
+			}
+			text-anchor={ totalsAnchor(props.Layout) }
+			dominant-baseline={ totalsBaseline(props.Layout) }
+			style="pointer-events: none"
+		>{ t.FormattedValue }</text>
+	}
+}
+
+// totalsAnchor returns the text-anchor for a totals label given the layout.
+func totalsAnchor(layout string) string {
+	if layout == "horizontal" {
+		return "start"
+	}
+	return "middle"
+}
+
+// totalsBaseline returns the dominant-baseline for a totals label.
+func totalsBaseline(layout string) string {
+	if layout == "horizontal" {
+		return "middle"
+	}
+	return "alphabetic"
+}
+
+// fmtT formats a float for SVG output (reused by BarTotals).
+func fmtT(v float64) string { return fmt.Sprintf("%.3g", v) }

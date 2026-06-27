@@ -1,0 +1,114 @@
+package bar
+
+import (
+	"fmt"
+
+	"github.com/geoffjay/templ-charts/charts/bar/compute"
+)
+
+// BarItemProps is the input to the BarItem templ component. Mirrors nivo's
+// BarItemProps (the SVG subset — spring style values are replaced by the
+// precomputed geometry on ComputedBarDatum + label layout).
+type BarItemProps struct {
+	Bar               ComputedBarDatum
+	Label             string
+	ShouldRenderLabel bool
+	BorderRadius      float64
+	BorderWidth       float64
+	// BorderColor / Fill / LabelColor are pre-resolved colors.
+	BorderColor string
+	Fill        string
+	LabelColor  string
+	// LabelLayout is the resolved label position/anchor for this bar.
+	LabelLayout BarLabelLayout
+	// Animate gates the SMIL enter animation (grow from 0 height/width).
+	Animate    bool
+	Horizontal bool
+	// HTMX attrs emitted verbatim on the <g> (e.g. hover/click endpoints).
+	HTMXAttrs string
+	// A11y.
+	AriaLabel string
+}
+
+// BarLabelLayout is the label position/anchor for one bar. Re-exported from
+// compute so the templ component can use it without a direct compute import.
+type BarLabelLayout = compute.BarLabelLayout
+
+// fmtB formats a float for SVG output (3 dp, trimmed; matches the rest of the
+// codebase's fmtFloat style).
+func fmtB(v float64) string {
+	if v != v || v > 1e308 { // NaN / +Inf guard without importing math
+		return "0"
+	}
+	return fmt.Sprintf("%.3g", v)
+}
+
+// BarItem renders a single bar: a <g translate(x,y)> containing a <rect> (or
+// rounded-rect <path> when BorderRadius>0) plus an optional label <text>.
+// When Animate is true, emits SMIL <animate> on width/height growing from 0
+// (vertical) / 0 (horizontal) to the final size. Mirrors @nivo/bar BarItem.
+templ BarItem(props BarItemProps) {
+	{{ bar := props.Bar }}
+	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtB(bar.X), fmtB(bar.Y)) }>
+		if props.BorderRadius > 0 {
+			<path
+				d={ roundedRectPath(bar.Width, bar.Height, props.BorderRadius) }
+				fill={ props.Fill }
+				if props.BorderWidth > 0 && props.BorderColor != "" {
+					stroke={ props.BorderColor }
+					stroke-width={ fmtB(props.BorderWidth) }
+				}
+				if props.AriaLabel != "" {
+					aria-label={ props.AriaLabel }
+				}
+				if props.HTMXAttrs != "" {
+					{ props.HTMXAttrs }
+				}
+			>
+				if props.Animate {
+					@barEnterAnimate(props)
+				}
+			</path>
+		} else {
+			<rect
+				width={ fmtB(maxF(bar.Width, 0)) }
+				height={ fmtB(maxF(bar.Height, 0)) }
+				fill={ props.Fill }
+				if props.BorderWidth > 0 && props.BorderColor != "" {
+					stroke={ props.BorderColor }
+					stroke-width={ fmtB(props.BorderWidth) }
+				}
+				if props.AriaLabel != "" {
+					aria-label={ props.AriaLabel }
+				}
+				if props.HTMXAttrs != "" {
+					{ props.HTMXAttrs }
+				}
+			>
+				if props.Animate {
+					@barEnterAnimate(props)
+				}
+			</rect>
+		}
+		if props.ShouldRenderLabel && props.Label != "" {
+			<text
+				x={ fmtB(props.LabelLayout.LabelX) }
+				y={ fmtB(props.LabelLayout.LabelY) }
+				text-anchor={ props.LabelLayout.TextAnchor }
+				dominant-baseline="central"
+				fill={ props.LabelColor }
+				style="pointer-events: none"
+			>{ props.Label }</text>
+		}
+	</g>
+}
+
+// barEnterAnimate emits the SMIL <animate> elements for the bar enter
+// animation: grow height from 0 (vertical) or width from 0 (horizontal).
+templ barEnterAnimate(props BarItemProps) {
+	if props.Horizontal {
+		<animate attributeName="width" from="0" to={ fmtB(maxF(props.Bar.Width, 0)) } begin="0s" dur="0.6s" fill="freeze"></animate>
+	} else {
+		<animate attributeName="height" from="0" to={ fmtB(maxF(props.Bar.Height, 0)) } begin="0s" dur="0.6s" fill="freeze"></animate>
+	}
+}

@@ -1,0 +1,30 @@
+package bar
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Bar renders a complete bar chart SVG: dimensions → UseBar → bound defs →
+// layer pipeline (grid → axes → bars → totals → markers → legends →
+// annotations) → SvgWrapper. Mirrors @nivo/bar Bar.
+//
+// The inner SVG is composed by renderBarLayers (in render.go) and injected
+// into SvgWrapper as a pre-rendered string.
+templ Bar(props BarProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ result := UseBar(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	{{ bound := core.BindDefs(props.Defs, barsAsAny(result.Bars), props.Fill, "data", "color", "fill") }}
+	{{ layers := props.Layers }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Defs:            bound.Defs,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		IsFocusable:     props.IsFocusable,
+	}, renderBarLayers(layers, props, result, dims, theme, bound))
+}
