@@ -91,6 +91,9 @@ func renderComponent(c templ.Component) (string, error) {
 // of the supported chart kinds.
 var errUnknownKind = htmxError("htmx: unknown chart kind")
 
+// errUnknownInstance is returned when an instance id is not registered.
+var errUnknownInstance = htmxError("htmx: unknown instance")
+
 // htmxError is a simple string error type.
 type htmxError string
 

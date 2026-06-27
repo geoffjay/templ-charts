@@ -1,0 +1,161 @@
+// Package demos holds the demo chart props + data for the example app. Each
+// file (bar/line/pie/themes) exports a set of Demo structs describing one
+// chart instance: an ID, a title, a description, and the props to register
+// with the htmx.Registry.
+package demos
+
+import (
+	"github.com/geoffjay/templ-charts/charts/annotations"
+	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/htmx"
+	"github.com/geoffjay/templ-charts/charts/legends"
+)
+
+// Demo describes one chart instance on a page: the htmx instance id, a human
+// title, a short description, and the props to register. The page handlers
+// register the props with the registry and render the chart inline.
+type Demo struct {
+	ID          string
+	Title       string
+	Description string
+	Kind        htmx.ChartKind
+	Props       any
+}
+
+// commonChartSize is the default render size for demos (CSS scales the SVG to
+// the card width; the viewBox keeps the aspect ratio).
+const (
+	commonChartWidth  = 700.0
+	commonChartHeight = 400.0
+)
+
+func defaultMargin() core.Margin {
+	return core.Margin{Top: 40, Right: 50, Bottom: 60, Left: 60}
+}
+
+// --- Bar demos ---
+
+// BarDemos returns the set of bar chart demos for the /bar page.
+func BarDemos() []Demo {
+	return []Demo{
+		{
+			ID:          "bar-stacked",
+			Title:       "Stacked vertical",
+			Description: "Default stacked layout, multiple keys per index.",
+			Kind:        htmx.KindBar,
+			Props: bar.BarProps{
+				Width:   commonChartWidth,
+				Height:  commonChartHeight,
+				IndexBy: "country",
+				Keys:    []string{"hot dogs", "burgers", "sandwich", "kebab", "fries", "donut"},
+				Data:    barData(),
+				Margin:  defaultMargin(),
+			},
+		},
+		{
+			ID:          "bar-grouped",
+			Title:       "Grouped horizontal",
+			Description: "groupMode=grouped, layout=horizontal.",
+			Kind:        htmx.KindBar,
+			Props: bar.BarProps{
+				Width:     commonChartWidth,
+				Height:    commonChartHeight,
+				IndexBy:   "country",
+				Keys:      []string{"hot dogs", "burgers", "sandwich", "kebab"},
+				Data:      barData(),
+				Margin:    defaultMargin(),
+				GroupMode: bar.GroupModeGrouped,
+				Layout:    bar.LayoutHorizontal,
+			},
+		},
+		{
+			ID:          "bar-markers",
+			Title:       "Markers + annotations",
+			Description: "A value marker line plus a circle annotation on the top bar.",
+			Kind:        htmx.KindBar,
+			Props: bar.BarProps{
+				Width:   commonChartWidth,
+				Height:  commonChartHeight,
+				IndexBy: "country",
+				Keys:    []string{"hot dogs", "burgers", "sandwich"},
+				Data:    barData(),
+				Margin:  defaultMargin(),
+				Markers: []core.CartesianMarker{
+					{Axis: "y", Value: float64(150), Legend: "target", LineColor: "#e25c3b"},
+				},
+				Annotations: []annotations.AnnotationSpec[bar.ComputedBarDatum]{
+					{
+						Type: annotations.AnnotationTypeCircle,
+						Circle: &annotations.CircleAnnotationSpec[bar.ComputedBarDatum]{
+							Match:       func(b bar.ComputedBarDatum) bool { return b.Data.ID == "burgers" && b.Data.IndexValue == "USA" },
+							Radius:      6,
+							Note:        "USA burgers",
+							NoteOffsetX: 20, NoteOffsetY: -20,
+						},
+					},
+				},
+			},
+		},
+		{
+			ID:          "bar-legend-toggle",
+			Title:       "Legend + toggle (HTMX)",
+			Description: "Click a legend item to toggle its series on/off via htmx.",
+			Kind:        htmx.KindBar,
+			Props: bar.BarProps{
+				Width:   commonChartWidth,
+				Height:  commonChartHeight,
+				IndexBy: "country",
+				Keys:    []string{"hot dogs", "burgers", "sandwich", "kebab", "fries", "donut"},
+				Data:    barData(),
+				Margin:  defaultMargin(),
+				Colors:  colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
+				Legends: []bar.BarLegendProps{
+					{
+						LegendProps: legends.LegendProps{
+							Anchor:    legends.LegendAnchorTopRight,
+							Direction: legends.LegendDirectionColumn,
+							ItemWidth: 100, ItemHeight: 20,
+							SymbolShape: legends.SymbolShapeSquare,
+							TranslateX:  10,
+						},
+						DataFrom: "keys",
+					},
+				},
+			},
+		},
+		{
+			ID:          "bar-totals",
+			Title:       "Totals layer",
+			Description: "Stacked bars with the totals label layer enabled.",
+			Kind:        htmx.KindBar,
+			Props: bar.BarProps{
+				Width:        commonChartWidth,
+				Height:       commonChartHeight,
+				IndexBy:      "country",
+				Keys:         []string{"hot dogs", "burgers", "sandwich", "kebab"},
+				Data:         barData(),
+				Margin:       defaultMargin(),
+				EnableTotals: true,
+				TotalsOffset: 12,
+			},
+		},
+	}
+}
+
+// barData is the shared 7 countries × 6 keys dataset used by the bar demos.
+// Deterministic so the rendered SVG is stable.
+func barData() []bar.BarDatum {
+	countries := []string{"USA", "Germany", "France", "Japan", "Brazil", "India", "China"}
+	keys := []string{"hot dogs", "burgers", "sandwich", "kebab", "fries", "donut"}
+	data := make([]bar.BarDatum, len(countries))
+	for i, c := range countries {
+		row := map[string]any{"country": c}
+		for j, k := range keys {
+			row[k] = float64((i*7+j*13)%100 + 10)
+		}
+		data[i] = row
+	}
+	return data
+}

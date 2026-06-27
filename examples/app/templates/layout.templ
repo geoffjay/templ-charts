@@ -1,0 +1,74 @@
+package templates
+
+// Layout renders the HTML shell: doctype, head (title + inline CSS), the
+// htmx.org CDN script, the header nav, the main content, and a footer. The
+// page content is passed as a templ.Component so each page composes its own
+// body.
+//
+// The CSS is hand-written and minimal (~80 lines). The htmx script is loaded
+// from the CDN per docs/PLAN.md §7.
+templ Layout(props LayoutProps, content templ.Component) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ pageTitle(props) }</title>
+			<style>
+				{ templ.SafeString(css) }
+			</style>
+			<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+		</head>
+		<body>
+			<header>
+				<h1><a href="/">templ-charts demo</a></h1>
+				<nav>
+					<a
+						href="/"
+						if props.Nav == "home" {
+							class="active"
+						}
+					>home</a>
+					<a
+						href="/bar"
+						if props.Nav == "bar" {
+							class="active"
+						}
+					>bar</a>
+					<a
+						href="/line"
+						if props.Nav == "line" {
+							class="active"
+						}
+					>line</a>
+					<a
+						href="/pie"
+						if props.Nav == "pie" {
+							class="active"
+						}
+					>pie</a>
+					<a
+						href="/themes"
+						if props.Nav == "themes" {
+							class="active"
+						}
+					>themes</a>
+				</nav>
+			</header>
+			<main>
+				@content
+			</main>
+			<footer>
+				templ-charts v1 — server-rendered SVG charts via <code>templ</code> + HTMX
+			</footer>
+		</body>
+	</html>
+}
+
+// pageTitle returns "<nav> — templ-charts demo" or the bare title when no nav.
+func pageTitle(p LayoutProps) string {
+	if p.Nav == "" {
+		return p.Title
+	}
+	return p.Nav + " — templ-charts demo"
+}

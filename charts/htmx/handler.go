@@ -37,6 +37,17 @@ func NewHandler(r *Registry) *Handler {
 // that want to inspect or mutate state directly).
 func (h *Handler) Registry() *Registry { return h.registry }
 
+// RenderFull renders the complete SVG for the instance with the current state
+// applied. It is the in-process equivalent of GET /charts/{id}: the page
+// handlers use it to render the initial SVG inline without a round-trip.
+func (h *Handler) RenderFull(id string) (string, error) {
+	inst := h.registry.Get(id)
+	if inst == nil {
+		return "", errUnknownInstance
+	}
+	return renderFull(inst)
+}
+
 // ServeHTTP dispatches the request to the appropriate endpoint handler.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path

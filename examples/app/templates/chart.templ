@@ -1,0 +1,75 @@
+package templates
+
+// ChartCardProps is one demo card: title, description, the chart instance id,
+// and the pre-rendered SVG string to inject. The SVG is rendered server-side
+// by the htmx handler (full render) and injected as raw HTML.
+type ChartCardProps struct {
+	ID          string
+	Title       string
+	Description string
+	SVG         string
+	Interactive bool
+}
+
+// ChartCard renders one demo card: a heading, description, and the chart
+// mount. The chart mount is a <div class="chart" id="chart-<id>"> containing
+// the raw SVG, plus a sibling tooltip <div id="tooltip-<id>"> that htmx
+// swaps hover/slice fragments into. The tooltip container is positioned by
+// CSS (.tooltip) and only shown when swapped.
+templ ChartCard(props ChartCardProps) {
+	<div class="card">
+		<h2>{ props.Title }</h2>
+		<p>{ props.Description }</p>
+		<div class="chart" id={ "chart-" + props.ID }>
+			@templ.Raw(props.SVG)
+		</div>
+		if props.Interactive {
+			<div class="tooltip" id={ "tooltip-" + props.ID }></div>
+		}
+	</div>
+}
+
+// IndexPage renders the home page: an intro + a list of links to each demo
+// page.
+type IndexPageProps struct {
+	Pages []IndexLink
+}
+
+// IndexLink is one entry on the home page.
+type IndexLink struct {
+	Href        string
+	Title       string
+	Description string
+}
+
+templ IndexPage(props IndexPageProps) {
+	<p class="intro">
+		templ-charts is a Go library wrapping nivo's chart concepts as templ
+		components generating server-side SVG. This demo app shows the bar,
+		line, and pie chart types with HTMX-backed interactivity.
+	</p>
+	<ul class="list">
+		for _, p := range props.Pages {
+			<li>
+				<a href={ p.Href }>{ p.Title }</a>
+				<p>{ p.Description }</p>
+			</li>
+		}
+	</ul>
+}
+
+// DemosPage renders a demo page (bar/line/pie): an intro line + a responsive
+// grid of ChartCards.
+type DemosPageProps struct {
+	Intro string
+	Cards []ChartCardProps
+}
+
+templ DemosPage(props DemosPageProps) {
+	<p class="intro">{ props.Intro }</p>
+	<div class="grid">
+		for _, card := range props.Cards {
+			@ChartCard(card)
+		}
+	</div>
+}
