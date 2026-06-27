@@ -10,9 +10,7 @@ import (
 	templruntime "github.com/a-h/templ/runtime"
 )
 
-import (
-	"github.com/geoffjay/templ-charts/charts/core"
-)
+import "github.com/geoffjay/templ-charts/charts/core"
 
 // Bar renders a complete bar chart SVG: dimensions → UseBar → bound defs →
 // layer pipeline (grid → axes → bars → totals → markers → legends →

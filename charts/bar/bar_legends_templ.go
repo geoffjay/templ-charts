@@ -10,9 +10,7 @@ import (
 	templruntime "github.com/a-h/templ/runtime"
 )
 
-import (
-	"github.com/geoffjay/templ-charts/charts/legends"
-)
+import "github.com/geoffjay/templ-charts/charts/legends"
 
 // BarLegendsProps is the input to the BarLegends templ component.
 type BarLegendsProps struct {

@@ -10,9 +10,7 @@ import (
 	templruntime "github.com/a-h/templ/runtime"
 )
 
-import (
-	"github.com/geoffjay/templ-charts/charts/annotations"
-)
+import "github.com/geoffjay/templ-charts/charts/annotations"
 
 // BarAnnotationsProps is the input to the BarAnnotations templ component.
 type BarAnnotationsProps struct {
