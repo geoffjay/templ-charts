@@ -10,6 +10,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/scales"
+	"github.com/geoffjay/templ-charts/internal/golden"
 )
 
 func sampleData() []line.LineSeries {
@@ -277,6 +278,41 @@ func TestLine_YScaleMax(t *testing.T) {
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>")
 	}
+}
+
+// TestLine_Golden renders a multi-series line chart with monotoneX curve +
+// points and compares the full SVG against a committed golden snapshot.
+// Regenerate after an intentional render change with:
+//
+//	go test ./charts/line -run TestLine_Golden -update
+func TestLine_Golden(t *testing.T) {
+	props := line.LineProps{
+		Width: 500, Height: 300,
+		Curve:        core.CurveMonotoneX,
+		EnablePoints: true,
+		Data:         sampleData(),
+	}
+	out := render(t, props)
+	if !strings.HasPrefix(out, "<svg") {
+		t.Fatalf("expected <svg…>, got %q", out[:minLen(out)])
+	}
+	golden.Assert(t, "line-multi", out)
+}
+
+// TestLine_Golden_Area renders an area + points line chart and compares
+// against a committed golden snapshot.
+func TestLine_Golden_Area(t *testing.T) {
+	props := line.LineProps{
+		Width:        500,
+		Height:       300,
+		Curve:        core.CurveMonotoneX,
+		EnableArea:   true,
+		AreaOpacity:  0.2,
+		EnablePoints: true,
+		Data:         sampleData(),
+	}
+	out := render(t, props)
+	golden.Assert(t, "line-area", out)
 }
 
 func minLen(s string) int {

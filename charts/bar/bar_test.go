@@ -9,6 +9,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
+	"github.com/geoffjay/templ-charts/internal/golden"
 )
 
 // render renders a bar.Bar component to a string.
@@ -290,6 +291,47 @@ func TestBar_CustomColors(t *testing.T) {
 	if !strings.Contains(out, "#ff0000") {
 		t.Errorf("expected custom color #ff0000 in output")
 	}
+}
+
+// TestBar_Golden renders a representative stacked-vertical bar chart and
+// compares the full SVG against a committed golden snapshot. Regenerate
+// after an intentional render change with:
+//
+//	go test ./charts/bar -run TestBar_Golden -update
+func TestBar_Golden(t *testing.T) {
+	props := bar.BarProps{
+		Width: 500, Height: 300,
+		IndexBy: "id",
+		Keys:    []string{"value1", "value2"},
+		Data: []bar.BarDatum{
+			{"id": "one", "value1": float64(10), "value2": float64(20)},
+			{"id": "two", "value1": float64(20), "value2": float64(40)},
+			{"id": "three", "value1": float64(30), "value2": float64(60)},
+		},
+	}
+	out := render(t, props)
+	if !strings.HasPrefix(out, "<svg") {
+		t.Fatalf("expected <svg…>, got %q", out[:min(60, len(out))])
+	}
+	golden.Assert(t, "bar-stacked", out)
+}
+
+// TestBar_Golden_Grouped renders a grouped horizontal bar chart and compares
+// against a committed golden snapshot.
+func TestBar_Golden_Grouped(t *testing.T) {
+	props := bar.BarProps{
+		Width: 500, Height: 300,
+		IndexBy:   "id",
+		Keys:      []string{"value1", "value2"},
+		GroupMode: bar.GroupModeGrouped,
+		Layout:    bar.LayoutHorizontal,
+		Data: []bar.BarDatum{
+			{"id": "one", "value1": float64(10), "value2": float64(20)},
+			{"id": "two", "value1": float64(20), "value2": float64(40)},
+		},
+	}
+	out := render(t, props)
+	golden.Assert(t, "bar-grouped", out)
 }
 
 func min(a, b int) int {

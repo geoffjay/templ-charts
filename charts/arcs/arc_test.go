@@ -3,6 +3,8 @@ package arcs
 import (
 	"math"
 	"testing"
+
+	"github.com/geoffjay/templ-charts/internal/golden"
 )
 
 func TestDegToRad(t *testing.T) {
@@ -140,6 +142,36 @@ func TestFilterDataBySkipAngle(t *testing.T) {
 type arcDatum struct{ a Arc }
 
 func (d arcDatum) GetArc() Arc { return d.a }
+
+// TestGenerateSvgArc_Golden renders SVG arc paths for a set of representative
+// arc shapes (full circle, half, quarter, donut quarter, thin ring) and
+// compares each path-data string against a committed golden snapshot. The
+// reference paths were produced by the package's own d3-shape arc port;
+// regenerate after an intentional change with:
+//
+//	go test ./charts/arcs -run TestGenerateSvgArc_Golden -update
+func TestGenerateSvgArc_Golden(t *testing.T) {
+	g := CreateArcGenerator(0, 0)
+	cases := []struct {
+		name string
+		arc  Arc
+	}{
+		{"full-circle", Arc{StartAngle: 0, EndAngle: 2 * math.Pi, InnerRadius: 0, OuterRadius: 50}},
+		{"half-circle", Arc{StartAngle: 0, EndAngle: math.Pi, InnerRadius: 0, OuterRadius: 50}},
+		{"quarter", Arc{StartAngle: 0, EndAngle: math.Pi / 2, InnerRadius: 0, OuterRadius: 50}},
+		{"donut-quarter", Arc{StartAngle: 0, EndAngle: math.Pi / 2, InnerRadius: 20, OuterRadius: 50}},
+		{"thin-ring", Arc{StartAngle: math.Pi / 2, EndAngle: math.Pi, InnerRadius: 45, OuterRadius: 50}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got := g.GenerateSvgArc(c.arc)
+			if got == "" {
+				t.Fatalf("empty path for %s", c.name)
+			}
+			golden.Assert(t, "arc-"+c.name, got)
+		})
+	}
+}
 
 func containsStr(s, sub string) bool {
 	for i := 0; i+len(sub) <= len(s); i++ {

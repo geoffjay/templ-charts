@@ -1,7 +1,7 @@
-.PHONY: all templ build test lint vet fmt run-demo generate tidy clean
+.PHONY: all templ build test lint vet fmt run-demo generate tidy clean golden cover ci
 
 TEMPL_PKG := github.com/a-h/templ/cmd/templ
-TEMPL_VERSION := v0.3.857
+TEMPL_VERSION := v0.3.1020
 
 # Find all directories containing .templ files
 TEMPL_SOURCES := $(shell find . -type f -name '*.templ' -not -path './contrib/*' -not -path './.opencode/*' 2>/dev/null)
@@ -39,6 +39,26 @@ fmt:
 
 ## Run all linters
 lint: vet fmt
+
+## Regenerate golden snapshots (SVG + path strings) after an intentional
+## render change. Run this when you know the output should change; commit the
+## resulting testdata/golden/*.txt updates alongside the source change.
+##
+## Only packages that import internal/golden honor the -update flag; passing
+## it to other packages makes `go test` reject the unknown flag, so we scope
+## the regeneration to the packages that own golden snapshots.
+golden:
+	go test ./charts/bar ./charts/line ./charts/pie ./charts/arcs -update
+
+## Run tests with coverage, writing a coverage profile + HTML report.
+cover:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+	@ echo "coverage: coverage.out (text) + coverage.html (html)"
+
+## CI entry point: lint + test (golden snapshots compared, not regenerated).
+ci: lint test
+	@ echo "ci: ok"
 
 ## Run the demo app
 run-demo:

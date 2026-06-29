@@ -12,26 +12,48 @@ A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts a
 | Run go vet | `make vet` |
 | Check gofmt | `make fmt` |
 | Lint (vet + fmt) | `make lint` |
+| Run tests with coverage | `make cover` |
+| Regenerate golden snapshots | `make golden` |
+| CI (lint + test) | `make ci` |
 | Run the demo app | `make run-demo` |
 | Tidy modules | `make tidy` |
 
 **Always run `make lint` and `make test` after non-trivial Go/templ changes.**
 
+### Golden snapshots
+
+Golden SVG snapshots live under each chart package's `testdata/golden/`
+(`charts/{bar,line,pie}/testdata/golden/`) and arc path strings under
+`charts/arcs/testdata/golden/`. Tests compare rendered output against these
+committed files via `internal/golden.Assert`.
+
+When a render change is **intentional**, regenerate and commit the updated
+snapshots:
+
+```sh
+make golden          # regenerates all golden files
+```
+
+The `-update` flag is only honored by packages that import `internal/golden`;
+`make golden` scopes the run to those packages so unrelated test binaries
+don't reject the flag.
+
 ## Layout
 
 - `charts/` — library packages (mirrors nivo package names; see `docs/PLAN.md` §3)
 - `internal/d3/` — vendored pure-Go ports of d3-shape, d3-scale, d3-array, d3-format, d3-time-format, d3-color
+- `internal/golden/` — small snapshot-test helper (`Assert` + `-update` flag) used by the golden SVG/path tests
 - `examples/app/` — runnable demo app (stdlib `net/http`, run via `make run-demo` → http://localhost:8080)
 - `contrib/nivo/` — upstream nivo clone (gitignored, reference only; do NOT modify)
 
 ## Conventions
 
 - Go 1.26.4 (matches `go.mod`).
-- templ components live in `.templ` files; generated `templ_*.go` files are committed alongside sources.
+- templ components live in `.templ` files; generated `templ_*.go` files are committed alongside sources. The `make templ` target pins the CLI to the version in `go.mod` (currently v0.3.1020).
 - No Canvas rendering in v1 — SVG only.
 - Interactivity via [htmx.org](https://htmx.org) (loaded via CDN in the demo); see `charts/htmx`.
 - Animation via SMIL `<animate>` + CSS keyframes, gated by an `Animate bool` prop.
-- Tests are standard `go test`; golden SVG snapshots regenerate via `go test -update`.
+- Tests are standard `go test`; golden SVG snapshots regenerate via `make golden` (or `go test ./charts/{bar,line,pie,arcs} -update`).
 
 ## Dependencies
 

@@ -8,6 +8,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/internal/golden"
 )
 
 func sampleData() []any {
@@ -234,6 +235,42 @@ func TestPie_BorderWidth(t *testing.T) {
 	if !strings.Contains(out, `stroke-width="2"`) {
 		t.Errorf("expected stroke-width=2 for border, not found")
 	}
+}
+
+// TestPie_Golden renders a donut pie chart with arc + arc-link labels and
+// compares the full SVG against a committed golden snapshot. Regenerate
+// after an intentional render change with:
+//
+//	go test ./charts/pie -run TestPie_Golden -update
+func TestPie_Golden(t *testing.T) {
+	props := pie.PieProps{
+		Width:        500,
+		Height:       300,
+		InnerRadius:  0.5,
+		PadAngle:     0.5,
+		CornerRadius: 3,
+		Data:         sampleData(),
+	}
+	out := render(t, props)
+	if !strings.HasPrefix(out, "<svg") {
+		t.Fatalf("expected <svg…>, got %q", out[:minLen(out)])
+	}
+	golden.Assert(t, "pie-donut", out)
+}
+
+// TestPie_Golden_Half renders a half-pie (startAngle=0, endAngle=180, fit)
+// and compares against a committed golden snapshot.
+func TestPie_Golden_Half(t *testing.T) {
+	props := pie.PieProps{
+		Width:      500,
+		Height:     300,
+		StartAngle: 0,
+		EndAngle:   180,
+		Fit:        true,
+		Data:       sampleData(),
+	}
+	out := render(t, props)
+	golden.Assert(t, "pie-half", out)
 }
 
 func minLen(s string) int {
