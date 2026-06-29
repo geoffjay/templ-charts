@@ -175,12 +175,33 @@ func (h *Handler) handleClick(w http.ResponseWriter, r *http.Request, inst *Char
 	_, _ = w.Write([]byte(out))
 }
 
-// handleHover produces an HTML tooltip fragment for the bar or pie arc under
-// the cursor. For pie, it also sets ActiveID so subsequent full renders keep
-// the arc popped (radius offset). The fragment is swapped into #tooltip-<id>
-// by htmx.
+// handleHover produces an HTML tooltip fragment for the bar/pie/line element
+// under the cursor, plus an out-of-band swap of the full SVG (re-rendered with
+// hover/active state). For pie, it also sets ActiveID so the arc pops. For line
+// mesh, it sets HoverX/HoverY so the crosshair renders. The `?leave=1` query
+// clears all hover state and returns an empty tooltip + clean SVG.
+//
+// The response body is the tooltip HTML (swapped into #tooltip-<id>), followed
+// by an OOB <div hx-swap-oob="innerHTML:#chart-<id>"> containing the
+// re-rendered SVG so a single request updates both the tooltip and the chart.
 func (h *Handler) handleHover(w http.ResponseWriter, r *http.Request, inst *ChartInstance) {
 	q := r.URL.Query()
+
+	// leave=1: clear hover state, return empty tooltip + clean SVG OOB.
+	if q.Get("leave") != "" {
+		inst.clearHover()
+		if inst.Kind == KindPie {
+			inst.setActive("")
+		}
+		svg, err := renderFull(inst)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeHTML(w, oobWrapper(inst.ID, "", svg))
+		return
+	}
+
 	switch inst.Kind {
 	case KindBar:
 		key := q.Get("bar")
@@ -188,12 +209,18 @@ func (h *Handler) handleHover(w http.ResponseWriter, r *http.Request, inst *Char
 			http.Error(w, "missing bar", http.StatusBadRequest)
 			return
 		}
+		inst.setHovered(key)
 		html, ok := barHoverTooltip(inst, key)
 		if !ok {
 			http.NotFound(w, r)
 			return
 		}
-		writeHTML(w, html)
+		svg, err := renderFull(inst)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeHTML(w, oobWrapper(inst.ID, html, svg))
 	case KindPie:
 		arcID := q.Get("arc")
 		if arcID == "" {
@@ -205,14 +232,48 @@ func (h *Handler) handleHover(w http.ResponseWriter, r *http.Request, inst *Char
 			http.NotFound(w, r)
 			return
 		}
-		writeHTML(w, html)
+		svg, err := renderFull(inst)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeHTML(w, oobWrapper(inst.ID, html, svg))
+	case KindLine:
+		// Line mesh hover: cursor x/y passed via hx-vals JS.
+		x, y := q.Get("x"), q.Get("y")
+		if x == "" || y == "" {
+			http.Error(w, "missing cursor x/y", http.StatusBadRequest)
+			return
+		}
+		xf, err := strconv.ParseFloat(x, 64)
+		if err != nil {
+			http.Error(w, "invalid x", http.StatusBadRequest)
+			return
+		}
+		yf, err := strconv.ParseFloat(y, 64)
+		if err != nil {
+			http.Error(w, "invalid y", http.StatusBadRequest)
+			return
+		}
+		html, ok := lineMeshHover(inst, xf, yf)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		svg, err := renderFull(inst)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeHTML(w, oobWrapper(inst.ID, html, svg))
 	default:
 		http.Error(w, "hover not supported for this chart kind", http.StatusBadRequest)
 	}
 }
 
-// handleSlice produces an HTML table-tooltip fragment for a line slice. The
-// `axis` param is "x" or "y"; `x` (or `y`) is the slice coordinate (float).
+// handleSlice produces an HTML table-tooltip fragment for a line slice, plus an
+// OOB SVG swap with the crosshair rendered at the slice position. The `axis`
+// param is "x" or "y"; `x` (or `y`) is the slice coordinate (float).
 func (h *Handler) handleSlice(w http.ResponseWriter, r *http.Request, inst *ChartInstance) {
 	if inst.Kind != KindLine {
 		http.Error(w, "slice not supported for this chart kind", http.StatusBadRequest)
@@ -232,18 +293,38 @@ func (h *Handler) handleSlice(w http.ResponseWriter, r *http.Request, inst *Char
 		http.Error(w, "invalid coordinate", http.StatusBadRequest)
 		return
 	}
+	// Set hover coords so the crosshair renders at the slice position.
+	if axis == "y" {
+		inst.setHoverXY(0, coord)
+	} else {
+		inst.setHoverXY(coord, 0)
+	}
 	html, ok := lineSliceTooltip(inst, axis, coord)
 	if !ok {
 		http.NotFound(w, r)
 		return
 	}
-	writeHTML(w, html)
+	svg, err := renderFull(inst)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	writeHTML(w, oobWrapper(inst.ID, html, svg))
 }
 
 // writeHTML writes an HTML fragment with the right content type.
 func writeHTML(w http.ResponseWriter, html string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	_, _ = w.Write([]byte(html))
+}
+
+// oobWrapper bundles the tooltip HTML (swapped into #tooltip-<id>) with an
+// out-of-band swap of the full SVG (re-rendered with hover state) targeting
+// #chart-<id>. htmx processes the primary swap (tooltip) and the OOB swap
+// (chart) from a single response.
+func oobWrapper(id, tooltipHTML, svg string) string {
+	return tooltipHTML +
+		`<div hx-swap-oob="innerHTML:#chart-` + id + `">` + svg + `</div>`
 }
 
 // barHoverTooltip finds the bar with the given Key in the instance's computed
@@ -317,8 +398,6 @@ func lineSliceTooltip(inst *ChartInstance, axis string, coord float64) (string, 
 	props.Width = dims.InnerWidth
 	props.Height = dims.InnerHeight
 	result := line.UseLine(props)
-	// Slices are only computed when EnableSlices is set; otherwise we fall
-	// back to the nearest point along the axis.
 	slices := result.Slices
 	if len(slices) == 0 {
 		return "", false
@@ -349,6 +428,48 @@ func lineSliceTooltip(inst *ChartInstance, axis string, coord float64) (string, 
 		}
 	}
 	return "", false
+}
+
+// lineMeshHover finds the nearest point to (x, y) in chart units, sets the
+// hover coordinates (for crosshair rendering), and returns a BasicTooltip HTML
+// fragment. Returns ("", false) if no points exist.
+func lineMeshHover(inst *ChartInstance, x, y float64) (string, bool) {
+	inst.setHoverXY(x, y)
+	props := inst.Props.(line.LineProps)
+	applyLineState(&props, inst.ID, inst.State())
+	dims := core.UseDimensions(props.Width, props.Height, props.Margin)
+	props.Width = dims.InnerWidth
+	props.Height = dims.InnerHeight
+	result := line.UseLine(props)
+	if len(result.Points) == 0 {
+		return "", false
+	}
+	// Find nearest point by Euclidean distance.
+	best := result.Points[0]
+	bestDist := distSq(best.X, best.Y, x, y)
+	for _, p := range result.Points[1:] {
+		d := distSq(p.X, p.Y, x, y)
+		if d < bestDist {
+			bestDist = d
+			best = p
+		}
+	}
+	html, err := renderComponent(tooltip.BasicTooltip(tooltip.BasicTooltipProps{
+		ID:             best.SeriesID,
+		FormattedValue: best.Data.YFormatted,
+		Color:          best.SeriesColor,
+		EnableChip:     true,
+	}))
+	if err != nil {
+		return "", false
+	}
+	return html, true
+}
+
+func distSq(x1, y1, x2, y2 float64) float64 {
+	dx := x1 - x2
+	dy := y1 - y2
+	return dx*dx + dy*dy
 }
 
 // sameFloat compares two floats with a small tolerance (the slice coord is

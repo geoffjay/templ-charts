@@ -24,6 +24,11 @@ type BarItemProps struct {
 	// Animate gates the SMIL enter animation (grow from 0 height/width).
 	Animate    bool
 	Horizontal bool
+	// IsActive marks this bar as the hovered/active bar (htmx hover state);
+	// when true the bar gets full opacity while siblings dim slightly.
+	IsActive bool
+	// Dimmed is set on non-active bars when some other bar is active.
+	Dimmed bool
 	// HTMX attrs for interactivity. When non-empty, emitted as native hx-*
 	// attributes on the bar <g>/<rect>/<path>. Kept as structured fields so
 	// templ renders them without HTML-escaping the quotes.
@@ -59,6 +64,9 @@ templ BarItem(props BarItemProps) {
 			<path
 				d={ roundedRectPath(bar.Width, bar.Height, props.BorderRadius) }
 				fill={ props.Fill }
+				if props.Dimmed {
+					fill-opacity="0.5"
+				}
 				if props.BorderWidth > 0 && props.BorderColor != "" {
 					stroke={ props.BorderColor }
 					stroke-width={ fmtB(props.BorderWidth) }
@@ -88,6 +96,9 @@ templ BarItem(props BarItemProps) {
 				width={ fmtB(maxF(bar.Width, 0)) }
 				height={ fmtB(maxF(bar.Height, 0)) }
 				fill={ props.Fill }
+				if props.Dimmed {
+					fill-opacity="0.5"
+				}
 				if props.BorderWidth > 0 && props.BorderColor != "" {
 					stroke={ props.BorderColor }
 					stroke-width={ fmtB(props.BorderWidth) }

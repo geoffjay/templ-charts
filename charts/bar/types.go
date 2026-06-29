@@ -200,6 +200,11 @@ type BarProps struct {
 
 	// HTMX chart instance ID; when non-empty, bars/legends emit hx-* attrs.
 	ChartID string
+
+	// HoveredKey, when set by the htmx hover endpoint, marks the bar with this
+	// key as active (rendered with reduced opacity on siblings / highlighted
+	// border). Cleared on mouseleave.
+	HoveredKey string
 }
 
 // BarSvgProps is an alias of BarProps (nivo splits common/svg; v1 unifies).

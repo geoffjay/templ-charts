@@ -37,6 +37,7 @@ func applyBarState(props *bar.BarProps, id string, st State) {
 	props.ChartID = id
 	props.IsInteractive = true
 	props.InitialHiddenIDs = st.HiddenIDs
+	props.HoveredKey = st.HoveredKey
 	if props.Legends != nil {
 		for i := range props.Legends {
 			props.Legends[i].ChartID = id
@@ -52,6 +53,8 @@ func applyLineState(props *line.LineProps, id string, st State) {
 	props.ChartID = id
 	props.IsInteractive = true
 	props.InitialHiddenIDs = st.HiddenIDs
+	props.HoverX = st.HoverX
+	props.HoverY = st.HoverY
 	if props.Legends != nil {
 		for i := range props.Legends {
 			props.Legends[i].ChartID = id

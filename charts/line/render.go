@@ -234,16 +234,31 @@ func renderCrosshairLayer(props LineProps, result LineResult, dims core.Dimensio
 	if !props.EnableCrosshair {
 		return ""
 	}
-	// v1 renders a static crosshair only when the htmx handler supplies a
-	// current point/slice via props. Without state, we emit nothing (the
-	// htmx /hover endpoint swaps in the crosshair fragment on demand).
-	// When DebugMesh is on, emit a faint full-area crosshair guide.
-	if !props.DebugMesh {
+	// Render the crosshair when the htmx hover endpoint has set HoverX/HoverY
+	// (mesh mode) or when DebugMesh is on (faint full-area guide).
+	if props.HoverX == 0 && props.HoverY == 0 && !props.DebugMesh {
 		return ""
 	}
-	_ = result
-	_ = theme
-	return ""
+	x, y := props.HoverX, props.HoverY
+	if props.DebugMesh && x == 0 && y == 0 {
+		// Debug: draw a crosshair at the centre to visualise the layer.
+		x = dims.InnerWidth / 2
+		y = dims.InnerHeight / 2
+	}
+	cl := theme.Crosshair.Line
+	return renderCrosshair(tooltip.CrosshairProps{
+		Type:   props.CrosshairType,
+		Width:  dims.InnerWidth,
+		Height: dims.InnerHeight,
+		X:      x,
+		Y:      y,
+		Theme: tooltip.CrosshairTheme{
+			Stroke:          cl.Stroke,
+			StrokeWidth:     cl.StrokeWidth,
+			StrokeOpacity:   cl.StrokeOpacity,
+			StrokeDasharray: cl.StrokeDasharray,
+		},
+	})
 }
 
 func renderMarkersLayer(props LineProps, dims core.Dimensions, result LineResult) string {

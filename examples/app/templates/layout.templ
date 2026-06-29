@@ -18,6 +18,11 @@ templ Layout(props LayoutProps, content templ.Component) {
 				{ templ.SafeString(css) }
 			</style>
 			<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+			<script>
+				{
+					templ.SafeString(js);
+				}
+			</script>
 		</head>
 		<body>
 			<header>

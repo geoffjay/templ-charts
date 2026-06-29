@@ -16,6 +16,8 @@ type MeshProps struct {
 
 // Mesh renders a transparent overlay <rect> for hover capture. Mirrors
 // @nivo/line Mesh (voronoi-based in nivo; simplified to a single overlay in v1).
+// hx-vals passes the cursor x/y (relative to the <svg>) via a JS expression so
+// the server can resolve the nearest point + crosshair position.
 templ Mesh(props MeshProps) {
 	<rect
 		x="0"
@@ -34,6 +36,7 @@ templ Mesh(props MeshProps) {
 			hx-trigger="mouseenter, mousemove"
 			hx-swap="innerHTML"
 			hx-target={ fmt.Sprintf("#tooltip-%s", props.ChartID) }
+			hx-vals={ fmt.Sprintf("js:{x: Math.round(event.offsetX), y: Math.round(event.offsetY)}") }
 		}
 	></rect>
 }

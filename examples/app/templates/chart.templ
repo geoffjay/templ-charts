@@ -20,7 +20,16 @@ templ ChartCard(props ChartCardProps) {
 	<div class="card">
 		<h2>{ props.Title }</h2>
 		<p>{ props.Description }</p>
-		<div class="chart" id={ "chart-" + props.ID }>
+		<div
+			class="chart"
+			id={ "chart-" + props.ID }
+			if props.Interactive {
+				hx-get={ "/charts/" + props.ID + "/hover?leave=1" }
+				hx-trigger="mouseleave"
+				hx-target={ "#tooltip-" + props.ID }
+				hx-swap="innerHTML"
+			}
+		>
 			@templ.Raw(props.SVG)
 		</div>
 		if props.Interactive {

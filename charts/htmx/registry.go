@@ -47,16 +47,20 @@ type ChartInstance struct {
 
 	mu         sync.RWMutex
 	hiddenIDs  []string
-	hoveredKey string // bar/click activation focus (bar key)
-	activeID   string // pie active arc id (drives radius offset)
+	hoveredKey string  // bar/click activation focus (bar key)
+	activeID   string  // pie active arc id (drives radius offset)
+	hoverX     float64 // line mesh hover x (chart units)
+	hoverY     float64 // line mesh hover y (chart units)
 }
 
 // State is a snapshot of the mutable per-instance state. Returned by
 // Instance.State so callers (and tests) can inspect without holding the lock.
 type State struct {
 	HiddenIDs  []string
-	HoveredKey string
-	ActiveID   string
+	HoveredKey string  // bar hovered key (drives bar active highlight)
+	ActiveID   string  // pie active arc id (drives radius offset)
+	HoverX     float64 // line mesh hover x (chart units, drives crosshair)
+	HoverY     float64 // line mesh hover y (chart units, drives crosshair)
 }
 
 // State returns a copy of the instance's mutable state.
@@ -67,6 +71,8 @@ func (c *ChartInstance) State() State {
 		HiddenIDs:  append([]string(nil), c.hiddenIDs...),
 		HoveredKey: c.hoveredKey,
 		ActiveID:   c.activeID,
+		HoverX:     c.hoverX,
+		HoverY:     c.hoverY,
 	}
 }
 
@@ -104,6 +110,23 @@ func (c *ChartInstance) setHovered(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.hoveredKey = key
+}
+
+// setHoverXY sets the line mesh hover coordinates (chart units).
+func (c *ChartInstance) setHoverXY(x, y float64) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.hoverX = x
+	c.hoverY = y
+}
+
+// clearHover resets all hover state (bar hovered key + line hover coords).
+func (c *ChartInstance) clearHover() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.hoveredKey = ""
+	c.hoverX = 0
+	c.hoverY = 0
 }
 
 // Registry maps instance IDs to *ChartInstance. The zero value is not usable;
@@ -188,4 +211,6 @@ func (c *ChartInstance) SetStateForTest(s State) {
 	c.hiddenIDs = append([]string(nil), s.HiddenIDs...)
 	c.hoveredKey = s.HoveredKey
 	c.activeID = s.ActiveID
+	c.hoverX = s.HoverX
+	c.hoverY = s.HoverY
 }

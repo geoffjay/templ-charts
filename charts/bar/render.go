@@ -158,6 +158,8 @@ func renderBarsLayer(props BarProps, result BarResult, bound core.SvgDefsAndFill
 			LabelLayout:       ll,
 			Animate:           props.Animate,
 			Horizontal:        horizontal,
+			IsActive:          props.HoveredKey != "" && props.HoveredKey == barDatum.Key,
+			Dimmed:            props.HoveredKey != "" && props.HoveredKey != barDatum.Key,
 		}
 		if props.IsInteractive && props.ChartID != "" {
 			bip.HxGet = fmt.Sprintf("/charts/%s/hover?bar=%s", props.ChartID, barDatum.Key)

@@ -238,6 +238,11 @@ type LineProps struct {
 
 	// HTMX chart instance ID; when non-empty, points/slices emit hx-* attrs.
 	ChartID string
+
+	// HoverX/HoverY, when set by the htmx hover endpoint (mesh mode), position
+	// the crosshair lines. Zero values = no crosshair. Cleared on mouseleave.
+	HoverX float64
+	HoverY float64
 }
 
 // LineSvgProps is an alias of LineProps (nivo splits common/svg; v1 unifies).
