@@ -38,6 +38,8 @@ func Line(props LineProps) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		props = applyDefaults(props)
 		dims := core.UseDimensions(props.Width, props.Height, props.Margin)
+		props.Width = dims.InnerWidth
+		props.Height = dims.InnerHeight
 		result := UseLine(props)
 		theme := resolveTheme(props.Theme)
 		bound := core.BindDefs(props.Defs, seriesAsAny(result.Series), props.Fill, "", "color", "fill")

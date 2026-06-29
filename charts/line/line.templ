@@ -8,6 +8,8 @@ import "github.com/geoffjay/templ-charts/charts/core"
 templ Line(props LineProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
 	{{ result := UseLine(props) }}
 	{{ theme := resolveTheme(props.Theme) }}
 	{{ bound := core.BindDefs(props.Defs, seriesAsAny(result.Series), props.Fill, "", "color", "fill") }}

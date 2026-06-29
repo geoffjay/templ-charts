@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
 	"github.com/geoffjay/templ-charts/charts/tooltip"
@@ -251,6 +252,9 @@ func writeHTML(w http.ResponseWriter, html string) {
 func barHoverTooltip(inst *ChartInstance, key string) (string, bool) {
 	props := inst.Props.(bar.BarProps)
 	applyBarState(&props, inst.ID, inst.State())
+	dims := core.UseDimensions(props.Width, props.Height, props.Margin)
+	props.Width = dims.InnerWidth
+	props.Height = dims.InnerHeight
 	result := bar.UseBar(props)
 	for _, b := range result.BarsWithValue {
 		if b.Key == key {
@@ -309,6 +313,9 @@ func pieHoverTooltip(inst *ChartInstance, arcID string, setActive bool) (string,
 func lineSliceTooltip(inst *ChartInstance, axis string, coord float64) (string, bool) {
 	props := inst.Props.(line.LineProps)
 	applyLineState(&props, inst.ID, inst.State())
+	dims := core.UseDimensions(props.Width, props.Height, props.Margin)
+	props.Width = dims.InnerWidth
+	props.Height = dims.InnerHeight
 	result := line.UseLine(props)
 	// Slices are only computed when EnableSlices is set; otherwise we fall
 	// back to the nearest point along the axis.

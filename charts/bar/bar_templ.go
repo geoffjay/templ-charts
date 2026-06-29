@@ -41,6 +41,8 @@ func Bar(props BarProps) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		props = applyDefaults(props)
 		dims := core.UseDimensions(props.Width, props.Height, props.Margin)
+		props.Width = dims.InnerWidth
+		props.Height = dims.InnerHeight
 		result := UseBar(props)
 		theme := resolveTheme(props.Theme)
 		bound := core.BindDefs(props.Defs, barsAsAny(result.Bars), props.Fill, "data", "color", "fill")
