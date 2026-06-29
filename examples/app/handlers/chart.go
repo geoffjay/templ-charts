@@ -26,14 +26,26 @@ type App struct {
 	handler  *htmx.Handler
 }
 
-// NewApp returns an App with a fresh registry + handler. Call Register once
-// at startup (see main.go) to pre-register all interactive demos.
+// NewApp returns an App with a fresh registry + handler and pre-registers all
+// interactive demos (bar/line/pie) so the htmx endpoints work even if a
+// client hits /charts/<id>/... before visiting the page. The themes page is
+// static and not registered.
 func NewApp() *App {
 	r := htmx.NewRegistry()
-	return &App{
+	app := &App{
 		registry: r,
 		handler:  htmx.NewHandler(r),
 	}
+	for _, d := range demos.BarDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
+	for _, d := range demos.LineDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
+	for _, d := range demos.PieDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
+	return app
 }
 
 // Registry returns the underlying htmx registry (used by main.go to mount
