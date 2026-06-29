@@ -24,8 +24,13 @@ type BarItemProps struct {
 	// Animate gates the SMIL enter animation (grow from 0 height/width).
 	Animate    bool
 	Horizontal bool
-	// HTMX attrs emitted verbatim on the <g> (e.g. hover/click endpoints).
-	HTMXAttrs string
+	// HTMX attrs for interactivity. When non-empty, emitted as native hx-*
+	// attributes on the bar <g>/<rect>/<path>. Kept as structured fields so
+	// templ renders them without HTML-escaping the quotes.
+	HxGet     string
+	HxTrigger string
+	HxSwap    string
+	HxTarget  string
 	// A11y.
 	AriaLabel string
 }
@@ -61,8 +66,17 @@ templ BarItem(props BarItemProps) {
 				if props.AriaLabel != "" {
 					aria-label={ props.AriaLabel }
 				}
-				if props.HTMXAttrs != "" {
-					{ props.HTMXAttrs }
+				if props.HxGet != "" {
+					hx-get={ props.HxGet }
+				}
+				if props.HxTrigger != "" {
+					hx-trigger={ props.HxTrigger }
+				}
+				if props.HxSwap != "" {
+					hx-swap={ props.HxSwap }
+				}
+				if props.HxTarget != "" {
+					hx-target={ props.HxTarget }
 				}
 			>
 				if props.Animate {
@@ -81,8 +95,17 @@ templ BarItem(props BarItemProps) {
 				if props.AriaLabel != "" {
 					aria-label={ props.AriaLabel }
 				}
-				if props.HTMXAttrs != "" {
-					{ props.HTMXAttrs }
+				if props.HxGet != "" {
+					hx-get={ props.HxGet }
+				}
+				if props.HxTrigger != "" {
+					hx-trigger={ props.HxTrigger }
+				}
+				if props.HxSwap != "" {
+					hx-swap={ props.HxSwap }
+				}
+				if props.HxTarget != "" {
+					hx-target={ props.HxTarget }
 				}
 			>
 				if props.Animate {

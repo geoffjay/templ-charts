@@ -86,10 +86,12 @@ func buildArcLayerItems(props ArcsProps) []arcs.ArcLayerItem {
 		if props.BorderWidth > 0 && props.BorderColor != nil {
 			stroke = props.BorderColor(d)
 		}
-		htmxAttrs := ""
+		var htmxGet, htmxTrigger, htmxSwap, htmxTarget string
 		if props.IsInteractive && props.ChartID != "" {
-			htmxAttrs = fmt.Sprintf(`hx-get="/charts/%s/hover?arc=%s" hx-trigger="mouseenter" hx-swap="innerHTML" hx-target="#tooltip-%s"`,
-				props.ChartID, d.ID, props.ChartID)
+			htmxGet = fmt.Sprintf("/charts/%s/hover?arc=%s", props.ChartID, d.ID)
+			htmxTrigger = "mouseenter"
+			htmxSwap = "innerHTML"
+			htmxTarget = fmt.Sprintf("#tooltip-%s", props.ChartID)
 		}
 		items[i] = arcs.ArcLayerItem{
 			Arc: d.Arc.Arc,
@@ -98,7 +100,10 @@ func buildArcLayerItems(props ArcsProps) []arcs.ArcLayerItem {
 				Fill:            fill,
 				Stroke:          stroke,
 				StrokeWidth:     props.BorderWidth,
-				HTMXAttrs:       htmxAttrs,
+				HxGet:           htmxGet,
+				HxTrigger:       htmxTrigger,
+				HxSwap:          htmxSwap,
+				HxTarget:        htmxTarget,
 				Animate:         props.Animate,
 				AnimateFromPath: animateFrom,
 			},

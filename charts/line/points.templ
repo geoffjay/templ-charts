@@ -10,9 +10,7 @@ type PointsProps struct {
 	BorderWidth  float64
 	EnableLabel  bool
 	LabelYOffset float64
-	// HTMX attrs (emitted on each <g> when interactive).
-	HTMXAttrs string
-	ChartID   string
+	ChartID      string
 }
 
 // Points renders all points as <g translate(x,y)> with a <circle> + optional

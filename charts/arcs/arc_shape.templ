@@ -11,9 +11,12 @@ type ArcShapeProps struct {
 	StrokeWidth float64
 	// Opacity, when in (0,1), emits an opacity attribute.
 	Opacity float64
-	// HTMX attributes for interactivity (emitted verbatim on the <path>).
-	// e.g. `hx-get="/charts/foo/hover?arc=bar" hx-trigger="mouseenter"`.
-	HTMXAttrs string
+	// HTMX attributes for interactivity. When non-empty, emitted as native
+	// hx-* attributes on the <path>.
+	HxGet     string
+	HxTrigger string
+	HxSwap    string
+	HxTarget  string
 	// AriaLabel, when non-empty, emits aria-label.
 	AriaLabel string
 	// Animate, when true, emits a SMIL <animate> on attributeName="d" growing
@@ -39,8 +42,17 @@ templ ArcShape(props ArcShapeProps) {
 		if props.AriaLabel != "" {
 			aria-label={ props.AriaLabel }
 		}
-		if props.HTMXAttrs != "" {
-			{ props.HTMXAttrs }
+		if props.HxGet != "" {
+			hx-get={ props.HxGet }
+		}
+		if props.HxTrigger != "" {
+			hx-trigger={ props.HxTrigger }
+		}
+		if props.HxSwap != "" {
+			hx-swap={ props.HxSwap }
+		}
+		if props.HxTarget != "" {
+			hx-target={ props.HxTarget }
 		}
 	>
 		if props.Animate && props.AnimateFromPath != "" {

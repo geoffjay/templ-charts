@@ -160,8 +160,10 @@ func renderBarsLayer(props BarProps, result BarResult, bound core.SvgDefsAndFill
 			Horizontal:        horizontal,
 		}
 		if props.IsInteractive && props.ChartID != "" {
-			bip.HTMXAttrs = fmt.Sprintf(`hx-get="/charts/%s/hover?bar=%s" hx-trigger="mouseenter" hx-swap="innerHTML" hx-target="#tooltip-%s"`,
-				props.ChartID, barDatum.Key, props.ChartID)
+			bip.HxGet = fmt.Sprintf("/charts/%s/hover?bar=%s", props.ChartID, barDatum.Key)
+			bip.HxTrigger = "mouseenter"
+			bip.HxSwap = "innerHTML"
+			bip.HxTarget = fmt.Sprintf("#tooltip-%s", props.ChartID)
 		}
 		s.WriteString(renderBarItem(bip))
 	}
