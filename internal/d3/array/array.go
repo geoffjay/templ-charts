@@ -92,6 +92,44 @@ func Median(vs []float64) float64 {
 	return (sorted[n/2-1] + sorted[n/2]) / 2
 }
 
+// Quantile returns the p-quantile (p in [0,1]) of vs using linear
+// interpolation between the two closest ranks, matching d3-array's quantile.
+// NaNs are ignored. Returns NaN if vs is empty or p is NaN. Allocates a
+// sorted copy; for repeated quantiles over the same data sort once and use
+// QuantileSorted.
+func Quantile(vs []float64, p float64) float64 {
+	cleaned := filterNaNs(vs)
+	if len(cleaned) == 0 || math.IsNaN(p) {
+		return math.NaN()
+	}
+	sorted := make([]float64, len(cleaned))
+	copy(sorted, cleaned)
+	sort.Float64s(sorted)
+	return QuantileSorted(sorted, p)
+}
+
+// QuantileSorted returns the p-quantile (p in [0,1]) of an already
+// ascending-sorted, NaN-free slice, using linear interpolation between the two
+// closest ranks. Matches d3-array's quantileSorted. Returns NaN if sorted is
+// empty or p is NaN.
+func QuantileSorted(sorted []float64, p float64) float64 {
+	n := len(sorted)
+	if n == 0 || math.IsNaN(p) {
+		return math.NaN()
+	}
+	if p <= 0 || n < 2 {
+		return sorted[0]
+	}
+	if p >= 1 {
+		return sorted[n-1]
+	}
+	i := float64(n-1) * p
+	i0 := math.Floor(i)
+	value0 := sorted[int(i0)]
+	value1 := sorted[int(i0)+1]
+	return value0 + (value1-value0)*(i-i0)
+}
+
 // Range returns a slice [start, start+step, ..., stop) (half-open).
 // Step defaults to 1; if step is 0 returns an empty slice.
 // Matches d3-array's range semantics.

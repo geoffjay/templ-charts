@@ -7,6 +7,61 @@ import (
 
 func approx(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
 
+func TestQuantile(t *testing.T) {
+	// Values + expectations match d3-array's quantile (linear interpolation).
+	data := []float64{0, 10, 20, 30}
+	cases := []struct {
+		p, want float64
+	}{
+		{0, 0},
+		{0.25, 7.5},
+		{0.5, 15},
+		{0.75, 22.5},
+		{1, 30},
+	}
+	for _, c := range cases {
+		if got := Quantile(data, c.p); !approx(got, c.want) {
+			t.Errorf("Quantile(p=%v) = %v want %v", c.p, got, c.want)
+		}
+	}
+}
+
+func TestQuantileUnsortedAndNaN(t *testing.T) {
+	// Quantile sorts internally and ignores NaNs.
+	data := []float64{30, math.NaN(), 0, 20, 10}
+	if got := Quantile(data, 0.5); !approx(got, 15) {
+		t.Errorf("Quantile(0.5) on unsorted+NaN = %v want 15", got)
+	}
+}
+
+func TestQuantileMedianAgreement(t *testing.T) {
+	// The 0.5 quantile must equal Median for both odd and even counts.
+	for _, data := range [][]float64{
+		{3, 1, 4, 1, 5},
+		{3, 1, 4, 1, 5, 9},
+	} {
+		if got, want := Quantile(data, 0.5), Median(data); !approx(got, want) {
+			t.Errorf("Quantile(0.5)=%v vs Median=%v for %v", got, want, data)
+		}
+	}
+}
+
+func TestQuantileEdgeCases(t *testing.T) {
+	if got := Quantile(nil, 0.5); !math.IsNaN(got) {
+		t.Errorf("Quantile(nil) = %v want NaN", got)
+	}
+	if got := Quantile([]float64{42}, 0.9); !approx(got, 42) {
+		t.Errorf("Quantile(single) = %v want 42", got)
+	}
+	if got := Quantile([]float64{1, 2, 3}, math.NaN()); !math.IsNaN(got) {
+		t.Errorf("Quantile(p=NaN) = %v want NaN", got)
+	}
+	// QuantileSorted assumes pre-sorted input.
+	if got := QuantileSorted([]float64{0, 10, 20, 30}, 0.25); !approx(got, 7.5) {
+		t.Errorf("QuantileSorted(0.25) = %v want 7.5", got)
+	}
+}
+
 func TestExtentEmpty(t *testing.T) {
 	e := Extent(nil)
 	if !math.IsNaN(e[0]) || !math.IsNaN(e[1]) {

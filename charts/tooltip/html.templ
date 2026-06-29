@@ -1,6 +1,9 @@
 package tooltip
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // BasicTooltipProps renders a one-line tooltip: a color chip + a label + a
 // value. Mirrors @nivo/tooltip BasicTooltip. Rendered as an HTML fragment
@@ -97,9 +100,14 @@ func styleFromMap(m map[string]any) string {
 	if len(m) == 0 {
 		return ""
 	}
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
 	s := ""
-	for k, v := range m {
-		s += fmt.Sprintf("%s: %v; ", kebabCase(k), v)
+	for _, k := range keys {
+		s += fmt.Sprintf("%s: %v; ", kebabCase(k), m[k])
 	}
 	return s
 }

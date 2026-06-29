@@ -48,7 +48,7 @@ cited nivo package. All charts reuse the base packages (`core`, `theming`,
 | scatterplot | `axes`, `core.DotsItem`, annotations | node placement on x/y scales | existing | `@nivo/scatterplot` |
 | radar | `polar-axes`, `arcs` angle helpers, line/area generator | polar point projection, grid rings | existing | `@nivo/radar` |
 | radial-bar | `polar-axes`, `arcs` | angle/radius bands → arcs | existing | `@nivo/radial-bar` |
-| stream | `axes`, area generator, `d3.Stack` | stacked-area baseline w/ wiggle/silhouette offsets | existing (+stack offsets) | `@nivo/stream` |
+| stream | `axes`, area generator, `d3.Stack` | stacked-area baseline w/ wiggle/silhouette offsets | existing | `@nivo/stream` |
 | waffle | `grid`, `rects` | fill cells by value share | existing | `@nivo/waffle` |
 | calendar | `grid`-style layout, time scale, time-format | day/week/month cell geometry | existing | `@nivo/calendar` |
 | bullet | `axes`, `rects` | range/measure/marker rects | existing | `@nivo/bullet` |
@@ -155,6 +155,8 @@ cited nivo package. All charts reuse the base packages (`core`, `theming`,
   `enableBeforeSeparators/AfterSeparators:true`, `currentPartSizeExtension:0`.
 - **Compute**: trapezoid band paths between successive part widths; `smooth`
   uses the ported bezier curve, `linear` uses straight edges.
+- **Note**: the `d3.Stack` offsets stream needs (wiggle/silhouette/expand, plus
+  diverging) are **already ported** in `internal/d3/shape/stack.go`; reuse directly.
 
 ### 3.10 boxplot — *adds `d3/array.Quantile`*
 - **Data**: raw values grouped by `group`/`subGroup`; summarized to quantiles.
@@ -222,8 +224,9 @@ so non-interactive/static embedding still works with zero JS.
 - **`d3/array.Quantile`** (+ small helpers): linear-interpolation quantile over
   a sorted slice, matching d3-array semantics. Sole new d3 code in v2; gated by
   boxplot. Reuses existing `Ascending`/sort utilities.
-- **`d3/shape/stack.go`**: add the **wiggle / silhouette / expand** offsets (v1
-  has diverging) for stream.
+- **`d3/shape/stack.go`**: the **wiggle / silhouette / expand / diverging**
+  offsets stream needs are **already ported** — no work required (verified in
+  Phase 1).
 - `d3/color` remains RGB-only — sufficient for v2 (color modifiers/interpolators
   already work).
 
@@ -257,8 +260,9 @@ template/CSS:
 
 ## 10. Implementation order (topological)
 
-1. **Foundations**: fix `styleFromMap` determinism; add `d3/array.Quantile`;
-   add stream stack offsets to `d3/shape`.
+1. **Foundations** ✅ *(done)*: fixed `styleFromMap` determinism (sorted keys);
+   added `d3/array.Quantile`/`QuantileSorted`. (Stream stack offsets were already
+   ported — no work needed.)
 2. **Activate `grid`** → heatmap → waffle → calendar.
 3. **Activate `polar-axes`** → radar → radial-bar.
 4. **Cartesian batch**: scatterplot → stream → bullet → funnel → boxplot.
