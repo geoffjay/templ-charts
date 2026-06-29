@@ -47,6 +47,12 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>pie</a>
 					<a
+						href="/palettes"
+						if props.Nav == "palettes" {
+							class="active"
+						}
+					>palettes</a>
+					<a
 						href="/themes"
 						if props.Nav == "themes" {
 							class="active"

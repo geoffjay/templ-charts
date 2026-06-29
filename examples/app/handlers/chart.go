@@ -64,6 +64,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/bar", Title: "Bar charts", Description: "Stacked, grouped, markers + annotations, legend toggle, totals."},
 			{Href: "/line", Title: "Line charts", Description: "Single & multi-series, area + points, slices, mesh hover."},
 			{Href: "/pie", Title: "Pie charts", Description: "Plain, donut, half, sorted, active-arc hover, legend toggle."},
+			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
 	}
@@ -99,6 +100,34 @@ func (a *App) Pie(w http.ResponseWriter, r *http.Request) {
 	cards := a.demoCards(demos)
 	a.renderPage(w, templates.LayoutProps{Title: "Pie charts", Nav: "pie"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Pie chart demos. Hover an arc to pop it (active highlight); click a legend item to toggle a slice.",
+		Cards: cards,
+	}))
+}
+
+// Palettes handles GET /palettes: the palette gallery page. Each tile renders
+// a bar chart colored by one catalog palette plus a swatch strip. Static (no
+// HTMX) — like the themes page.
+func (a *App) Palettes(w http.ResponseWriter, r *http.Request) {
+	pd := demos.PaletteDemos()
+	cards := make([]templates.PaletteCardProps, 0, len(pd))
+	for _, d := range pd {
+		svg, err := renderStatic(d.Kind, d.Props)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.PaletteCardProps{
+			ID:             string(d.Palette.ID),
+			Name:           d.Palette.Name,
+			Kind:           d.Palette.Kind.String(),
+			Group:          d.Palette.Group,
+			ColorblindSafe: d.Palette.ColorblindSafe,
+			Swatch:         d.Swatch,
+			SVG:            svg,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Palettes", Nav: "palettes"}, templates.PaletteGalleryPage(templates.PaletteGalleryPageProps{
+		Intro: "Color palettes applied to a bar chart. Categorical palettes cycle discrete colors across series; sequential and diverging palettes are sampled into discrete steps. Set a palette via Colors: colors.Scheme(colors.PaletteTableau10).",
 		Cards: cards,
 	}))
 }

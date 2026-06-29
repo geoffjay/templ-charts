@@ -82,3 +82,55 @@ templ DemosPage(props DemosPageProps) {
 		}
 	</div>
 }
+
+// PaletteCardProps is one palette tile on the /palettes page: the palette
+// display metadata, a row of swatch hex colors, and the pre-rendered chart SVG
+// using that palette.
+type PaletteCardProps struct {
+	ID             string
+	Name           string
+	Kind           string
+	Group          string
+	ColorblindSafe bool
+	Swatch         []string
+	SVG            string
+}
+
+// PaletteCard renders one palette: a heading with kind/group tags, a swatch
+// strip, and a bar chart colored by the palette.
+templ PaletteCard(props PaletteCardProps) {
+	<div class="card">
+		<h2>
+			{ props.Name }
+			<span class="tag">{ props.Kind }</span>
+			<span class="tag">{ props.Group }</span>
+			if props.ColorblindSafe {
+				<span class="tag tag-cb">colorblind-safe</span>
+			}
+		</h2>
+		<p><code>{ props.ID }</code></p>
+		<div class="swatches">
+			for _, c := range props.Swatch {
+				<span class="swatch" style={ "background:" + c } title={ c }></span>
+			}
+		</div>
+		<div class="chart">
+			@templ.Raw(props.SVG)
+		</div>
+	</div>
+}
+
+// PaletteGalleryPageProps is the input to the palette gallery page.
+type PaletteGalleryPageProps struct {
+	Intro string
+	Cards []PaletteCardProps
+}
+
+templ PaletteGalleryPage(props PaletteGalleryPageProps) {
+	<p class="intro">{ props.Intro }</p>
+	<div class="grid">
+		for _, card := range props.Cards {
+			@PaletteCard(card)
+		}
+	</div>
+}

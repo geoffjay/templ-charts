@@ -25,6 +25,7 @@ func main() {
 	mux.HandleFunc("/bar", app.Bar)
 	mux.HandleFunc("/line", app.Line)
 	mux.HandleFunc("/pie", app.Pie)
+	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 
 	addr := ":8080"

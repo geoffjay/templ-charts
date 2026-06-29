@@ -20,8 +20,9 @@ See [`docs/PLAN.md`](docs/PLAN.md) for the full design.
 make run-demo    # → http://localhost:8080
 ```
 
-Browse `/bar`, `/line`, `/pie`, and `/themes`. Hover a bar/arc/line slice for
-a tooltip; click a legend item to toggle a series.
+Browse `/bar`, `/line`, `/pie`, `/palettes`, and `/themes`. Hover a
+bar/arc/line slice for a tooltip; click a legend item to toggle a series. The
+`/palettes` page is the full color-palette catalog applied to bars.
 
 ## Usage
 
@@ -46,6 +47,44 @@ func render() (string, error) {
 For interactivity, register chart instances with `charts/htmx.Registry` and
 mount `htmx.Handler` — see [`examples/app`](examples/app) for a complete
 wiring.
+
+## Color palettes
+
+Charts color series via the `Colors` field on each chart's props. The
+`charts/colors` package ships a broad catalog of named palettes —
+**categorical**, **sequential**, and **diverging** — including several
+colorblind-safe options. The ergonomic way to pick one is `colors.Scheme`:
+
+```go
+import "github.com/geoffjay/templ-charts/charts/colors"
+
+bar.BarProps{
+    // ...
+    Colors: colors.Scheme(colors.PaletteTableau10), // typed, autocomplete-friendly
+}
+```
+
+Other ways to set colors:
+
+```go
+colors.Scheme(colors.PaletteOkabeIto)        // a named palette (colorblind-safe)
+colors.PaletteColors("#4269d0", "#efb118")   // an explicit custom color list
+```
+
+Charts default to the `nivo` palette when `Colors` is left unset.
+
+Enumerate the catalog at runtime (for pickers, docs, galleries):
+
+```go
+colors.Palettes()                          // full ordered catalog with metadata
+colors.PalettesByKind(colors.KindSequential)
+colors.ColorblindSafePalettes()
+p, ok := colors.LookupPalette(colors.PaletteSunset)
+swatch := p.Swatch(8)                      // preview colors (samples gradients)
+```
+
+See [`docs/PALETTES.md`](docs/PALETTES.md) for the full list of palette ids,
+and the `/palettes` page in the demo app for a visual gallery.
 
 ## Repository layout
 

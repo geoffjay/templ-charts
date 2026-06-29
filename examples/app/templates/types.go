@@ -36,6 +36,10 @@ main { max-width:1200px; margin:0 auto; padding:24px; }
 .list li p { margin:4px 0 0; color:var(--muted); font-size:13px; }
 footer { text-align:center; color:var(--muted); font-size:12px; padding:30px; }
 code { background:#eef; padding:1px 4px; border-radius:3px; font-size:13px; }
+.tag { display:inline-block; font-size:11px; font-weight:500; color:var(--muted); background:#eef1f5; border-radius:10px; padding:1px 8px; margin-left:6px; vertical-align:middle; }
+.tag-cb { color:#0a7d4b; background:#e3f5ec; }
+.swatches { display:flex; flex-wrap:wrap; gap:0; border-radius:4px; overflow:hidden; margin:0 0 14px; border:1px solid var(--border); }
+.swatch { flex:1 1 0; min-width:14px; height:22px; }
 `
 
 // js is a small inline script that positions the hover tooltip at the cursor
