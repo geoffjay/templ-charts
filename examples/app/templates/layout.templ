@@ -14,15 +14,9 @@ templ Layout(props LayoutProps, content templ.Component) {
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ pageTitle(props) }</title>
-			<style>
-				{ templ.SafeString(css) }
-			</style>
+			@templ.Raw("<style>" + css + "</style>")
 			<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-			<script>
-				{
-					templ.SafeString(js);
-				}
-			</script>
+			@templ.Raw("<script>" + js + "</script>")
 		</head>
 		<body>
 			<header>

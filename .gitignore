@@ -3,3 +3,7 @@ contrib/nivo
 # coverage artifacts (make cover)
 coverage.out
 coverage.html
+
+docs/NOTES.md
+
+tmp/

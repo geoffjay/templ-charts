@@ -24,7 +24,7 @@ nav a.active { color:var(--fg); font-weight:600; }
 main { max-width:1200px; margin:0 auto; padding:24px; }
 .intro { color:var(--muted); margin:0 0 24px; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:20px; }
-.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:18px; }
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:18px; position:relative; }
 .card h2 { margin:0 0 4px; font-size:16px; }
 .card p { margin:0 0 14px; color:var(--muted); font-size:13px; }
 .chart { width:100%; height:auto; position:relative; }
@@ -51,14 +51,27 @@ const js = `
 function positionTooltip(t, chart) {
   if (!t || !chart) return;
   if (!t.innerHTML.trim()) { t.style.display = 'none'; return; }
-  var r = chart.getBoundingClientRect();
-  var mx = chart._mx == null ? r.width / 2 : chart._mx;
-  var my = chart._my == null ? r.height / 2 : chart._my;
-  var left = mx + 12, top = my + 12;
-  if (left + t.offsetWidth > r.width) left = mx - t.offsetWidth - 12;
-  if (top + t.offsetHeight > r.height) top = my - t.offsetHeight - 12;
-  t.style.left = Math.max(0, left) + 'px';
-  t.style.top = Math.max(0, top) + 'px';
+  // Cursor position in viewport coordinates (last seen over this chart).
+  var cx = chart._cx, cy = chart._cy;
+  if (cx == null) {
+    var c0 = chart.getBoundingClientRect();
+    cx = c0.left + c0.width / 2;
+    cy = c0.top + c0.height / 2;
+  }
+  // Position relative to the tooltip's actual offset parent (the nearest
+  // positioned ancestor), since the tooltip is a sibling of .chart, not a
+  // child. Using the offset parent's rect keeps this correct regardless of
+  // which ancestor is positioned and survives page scrolling.
+  var op = t.offsetParent || document.body;
+  var opr = op.getBoundingClientRect();
+  var chr = chart.getBoundingClientRect();
+  var left = cx - opr.left + 12;
+  var top = cy - opr.top + 12;
+  // Flip to the other side of the cursor if it would overflow the chart.
+  if (cx + 12 + t.offsetWidth > chr.right) left = cx - opr.left - t.offsetWidth - 12;
+  if (cy + 12 + t.offsetHeight > chr.bottom) top = cy - opr.top - t.offsetHeight - 12;
+  t.style.left = left + 'px';
+  t.style.top = top + 'px';
   t.style.display = 'block';
 }
 document.addEventListener('htmx:afterSwap', function(e) {
@@ -69,9 +82,8 @@ document.addEventListener('htmx:afterSwap', function(e) {
 document.addEventListener('mousemove', function(e) {
   var chart = e.target.closest ? e.target.closest('.chart') : null;
   if (!chart) return;
-  var r = chart.getBoundingClientRect();
-  chart._mx = e.clientX - r.left;
-  chart._my = e.clientY - r.top;
+  chart._cx = e.clientX;
+  chart._cy = e.clientY;
   var t = chart.nextElementSibling;
   if (t && t.classList && t.classList.contains('tooltip') &&
       t.style.display === 'block') {
