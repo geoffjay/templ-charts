@@ -55,6 +55,7 @@ func applyLineState(props *line.LineProps, id string, st State) {
 	props.InitialHiddenIDs = st.HiddenIDs
 	props.HoverX = st.HoverX
 	props.HoverY = st.HoverY
+	props.HasHover = st.HasHover
 	if props.Legends != nil {
 		for i := range props.Legends {
 			props.Legends[i].ChartID = id

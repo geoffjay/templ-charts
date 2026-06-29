@@ -41,22 +41,30 @@ code { background:#eef; padding:1px 4px; border-radius:3px; font-size:13px; }
 // js is a small inline script that positions the hover tooltip at the cursor
 // within each .chart container and hides it on mouseleave. htmx swaps the
 // tooltip HTML fragment into #tooltip-<id>; this script shows + positions it.
+//
+// positionTooltip is shared by two triggers: htmx:afterSwap (initial show when
+// new tooltip HTML arrives) and mousemove (live tracking). The mousemove path
+// matters for the bar/pie charts, whose hover fires only on mouseenter — without
+// it their tooltip would freeze at the entry point instead of following the
+// cursor the way the line chart's mesh (mousemove-driven) does.
 const js = `
-document.addEventListener('htmx:afterSwap', function(e) {
-  var t = e.detail.target;
-  if (!t || !t.classList || !t.classList.contains('tooltip')) return;
+function positionTooltip(t, chart) {
+  if (!t || !chart) return;
   if (!t.innerHTML.trim()) { t.style.display = 'none'; return; }
-  var chart = t.previousElementSibling;
-  if (!chart || !chart.classList.contains('chart')) return;
   var r = chart.getBoundingClientRect();
-  var mx = chart._mx || r.width / 2;
-  var my = chart._my || r.height / 2;
+  var mx = chart._mx == null ? r.width / 2 : chart._mx;
+  var my = chart._my == null ? r.height / 2 : chart._my;
   var left = mx + 12, top = my + 12;
   if (left + t.offsetWidth > r.width) left = mx - t.offsetWidth - 12;
   if (top + t.offsetHeight > r.height) top = my - t.offsetHeight - 12;
   t.style.left = Math.max(0, left) + 'px';
   t.style.top = Math.max(0, top) + 'px';
   t.style.display = 'block';
+}
+document.addEventListener('htmx:afterSwap', function(e) {
+  var t = e.detail.target;
+  if (!t || !t.classList || !t.classList.contains('tooltip')) return;
+  positionTooltip(t, t.previousElementSibling);
 });
 document.addEventListener('mousemove', function(e) {
   var chart = e.target.closest ? e.target.closest('.chart') : null;
@@ -64,5 +72,10 @@ document.addEventListener('mousemove', function(e) {
   var r = chart.getBoundingClientRect();
   chart._mx = e.clientX - r.left;
   chart._my = e.clientY - r.top;
+  var t = chart.nextElementSibling;
+  if (t && t.classList && t.classList.contains('tooltip') &&
+      t.style.display === 'block') {
+    positionTooltip(t, chart);
+  }
 });
 `

@@ -13,6 +13,7 @@ templ SvgWrapper(props SvgWrapperProps, inner string) {
 		xmlns="http://www.w3.org/2000/svg"
 		width={ fmtFloat(props.Width) }
 		height={ fmtFloat(props.Height) }
+		viewBox={ fmt.Sprintf("0 0 %s %s", fmtFloat(props.Width), fmtFloat(props.Height)) }
 		if props.Role != "" {
 			role={ props.Role }
 		}

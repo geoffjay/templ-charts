@@ -57,10 +57,17 @@ type BarLabelLayout = compute.BarLabelLayout
 // fmtB formats a float for SVG output (3 dp, trimmed; matches the rest of the
 // codebase's fmtFloat style).
 func fmtB(v float64) string {
-	if v != v || v > 1e308 { // NaN / +Inf guard without importing math
+	if v != v || v > 1e308 || v < -1e308 { // NaN / ±Inf guard without importing math
 		return "0"
 	}
-	return fmt.Sprintf("%.3g", v)
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 // BarItem renders a single bar: a <g translate(x,y)> containing a <rect> (or
@@ -96,7 +103,7 @@ func BarItem(props BarItemProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmt.Sprintf("translate(%s,%s)", fmtB(bar.X), fmtB(bar.Y)))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 62, Col: 73}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 69, Col: 73}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -114,7 +121,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(roundedRectPath(bar.Width, bar.Height, props.BorderRadius))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 65, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 72, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 			if templ_7745c5c3_Err != nil {
@@ -127,7 +134,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.Fill)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 66, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 73, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 			if templ_7745c5c3_Err != nil {
@@ -151,7 +158,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.BorderColor)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 71, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 78, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 				if templ_7745c5c3_Err != nil {
@@ -164,7 +171,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(props.BorderWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 72, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 79, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 				if templ_7745c5c3_Err != nil {
@@ -183,7 +190,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.AriaLabel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 75, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 82, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 				if templ_7745c5c3_Err != nil {
@@ -202,7 +209,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var8 string
 				templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 78, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 85, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
 				if templ_7745c5c3_Err != nil {
@@ -221,7 +228,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 81, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 88, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var9)
 				if templ_7745c5c3_Err != nil {
@@ -240,7 +247,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var10 string
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 84, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 91, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var10)
 				if templ_7745c5c3_Err != nil {
@@ -259,7 +266,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var11 string
 				templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 87, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 94, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
 				if templ_7745c5c3_Err != nil {
@@ -292,7 +299,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(maxF(bar.Width, 0)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 96, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 103, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
 			if templ_7745c5c3_Err != nil {
@@ -305,7 +312,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(maxF(bar.Height, 0)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 97, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 104, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
 			if templ_7745c5c3_Err != nil {
@@ -318,7 +325,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var14 string
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.Fill)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 98, Col: 21}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 105, Col: 21}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var14)
 			if templ_7745c5c3_Err != nil {
@@ -342,7 +349,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.BorderColor)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 103, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 110, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var15)
 				if templ_7745c5c3_Err != nil {
@@ -355,7 +362,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(props.BorderWidth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 104, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 111, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 				if templ_7745c5c3_Err != nil {
@@ -374,7 +381,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.AriaLabel)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 107, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 114, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
 				if templ_7745c5c3_Err != nil {
@@ -393,7 +400,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxGet)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 110, Col: 25}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 117, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var18)
 				if templ_7745c5c3_Err != nil {
@@ -412,7 +419,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxTrigger)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 113, Col: 33}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 120, Col: 33}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var19)
 				if templ_7745c5c3_Err != nil {
@@ -431,7 +438,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxSwap)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 116, Col: 27}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 123, Col: 27}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var20)
 				if templ_7745c5c3_Err != nil {
@@ -450,7 +457,7 @@ func BarItem(props BarItemProps) templ.Component {
 				var templ_7745c5c3_Var21 string
 				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.HxTarget)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 119, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 126, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var21)
 				if templ_7745c5c3_Err != nil {
@@ -484,7 +491,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var22 string
 			templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(props.LabelLayout.LabelX))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 129, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 136, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var22)
 			if templ_7745c5c3_Err != nil {
@@ -497,7 +504,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var23 string
 			templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(props.LabelLayout.LabelY))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 130, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 137, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var23)
 			if templ_7745c5c3_Err != nil {
@@ -510,7 +517,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var24 string
 			templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.LabelLayout.TextAnchor)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 131, Col: 46}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 138, Col: 46}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var24)
 			if templ_7745c5c3_Err != nil {
@@ -523,7 +530,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.LabelColor)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 133, Col: 27}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 140, Col: 27}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var25)
 			if templ_7745c5c3_Err != nil {
@@ -536,7 +543,7 @@ func BarItem(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var26 string
 			templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(props.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 135, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 142, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 			if templ_7745c5c3_Err != nil {
@@ -586,7 +593,7 @@ func barEnterAnimate(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var28 string
 			templ_7745c5c3_Var28, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(maxF(props.Bar.Width, 0)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 144, Col: 77}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 151, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var28)
 			if templ_7745c5c3_Err != nil {
@@ -604,7 +611,7 @@ func barEnterAnimate(props BarItemProps) templ.Component {
 			var templ_7745c5c3_Var29 string
 			templ_7745c5c3_Var29, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtB(maxF(props.Bar.Height, 0)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 146, Col: 79}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/bar/bar_item.templ`, Line: 153, Col: 79}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var29)
 			if templ_7745c5c3_Err != nil {

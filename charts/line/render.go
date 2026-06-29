@@ -234,13 +234,13 @@ func renderCrosshairLayer(props LineProps, result LineResult, dims core.Dimensio
 	if !props.EnableCrosshair {
 		return ""
 	}
-	// Render the crosshair when the htmx hover endpoint has set HoverX/HoverY
-	// (mesh mode) or when DebugMesh is on (faint full-area guide).
-	if props.HoverX == 0 && props.HoverY == 0 && !props.DebugMesh {
+	// Render the crosshair when the htmx hover endpoint has flagged an active
+	// hover (mesh mode) or when DebugMesh is on (faint full-area guide).
+	if !props.HasHover && !props.DebugMesh {
 		return ""
 	}
 	x, y := props.HoverX, props.HoverY
-	if props.DebugMesh && x == 0 && y == 0 {
+	if props.DebugMesh && !props.HasHover {
 		// Debug: draw a crosshair at the centre to visualise the layer.
 		x = dims.InnerWidth / 2
 		y = dims.InnerHeight / 2

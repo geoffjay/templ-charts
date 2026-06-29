@@ -461,12 +461,19 @@ func floatFromExtra(m map[string]any, key string) float64 {
 	return 0
 }
 
-// fmtN formats a number for SVG output (3 dp, matching d3-path rounding).
+// fmtN formats a number for SVG output (up to 3 decimal places, trailing
+// zeros trimmed).
 func fmtN(v float64) string {
 	if math.IsNaN(v) || math.IsInf(v, 0) {
 		return "0"
 	}
-	s := fmt.Sprintf("%.3g", v)
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
 	return s
 }
 

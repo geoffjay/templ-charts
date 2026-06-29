@@ -434,7 +434,6 @@ func lineSliceTooltip(inst *ChartInstance, axis string, coord float64) (string, 
 // hover coordinates (for crosshair rendering), and returns a BasicTooltip HTML
 // fragment. Returns ("", false) if no points exist.
 func lineMeshHover(inst *ChartInstance, x, y float64) (string, bool) {
-	inst.setHoverXY(x, y)
 	props := inst.Props.(line.LineProps)
 	applyLineState(&props, inst.ID, inst.State())
 	dims := core.UseDimensions(props.Width, props.Height, props.Margin)
@@ -454,6 +453,10 @@ func lineMeshHover(inst *ChartInstance, x, y float64) (string, bool) {
 			best = p
 		}
 	}
+	// Snap the crosshair to the resolved point (nivo's mesh behaviour) rather
+	// than leaving it at the raw cursor position, so the crosshair and the
+	// tooltip describe the same location.
+	inst.setHoverXY(best.X, best.Y)
 	html, err := renderComponent(tooltip.BasicTooltip(tooltip.BasicTooltipProps{
 		ID:             best.SeriesID,
 		FormattedValue: best.Data.YFormatted,

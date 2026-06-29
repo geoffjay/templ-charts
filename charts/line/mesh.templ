@@ -16,8 +16,14 @@ type MeshProps struct {
 
 // Mesh renders a transparent overlay <rect> for hover capture. Mirrors
 // @nivo/line Mesh (voronoi-based in nivo; simplified to a single overlay in v1).
-// hx-vals passes the cursor x/y (relative to the <svg>) via a JS expression so
-// the server can resolve the nearest point + crosshair position.
+//
+// hx-vals converts the cursor's screen position into the rect's local SVG user
+// coordinates via the rect's screen CTM. Because the rect lives inside the
+// margin-translated <g> and shares the chart's coordinate system, the result is
+// already in inner-chart units (0..innerWidth/Height) — matching the computed
+// point coordinates the server compares against. Using getScreenCTM (rather
+// than event.offsetX/offsetY) is correct under viewBox scaling and avoids the
+// cross-browser inconsistencies of offsetX/offsetY on SVG elements.
 templ Mesh(props MeshProps) {
 	<rect
 		x="0"
@@ -33,10 +39,25 @@ templ Mesh(props MeshProps) {
 		}
 		if props.ChartID != "" {
 			hx-get={ fmt.Sprintf("/charts/%s/hover?mesh=1", props.ChartID) }
-			hx-trigger="mouseenter, mousemove"
+			hx-trigger="mouseenter, mousemove throttle:40ms"
 			hx-swap="innerHTML"
 			hx-target={ fmt.Sprintf("#tooltip-%s", props.ChartID) }
-			hx-vals={ fmt.Sprintf("js:{x: Math.round(event.offsetX), y: Math.round(event.offsetY)}") }
+			hx-vals={ meshHoverVals }
 		}
 	></rect>
 }
+
+// meshHoverVals is the htmx hx-vals JS expression that resolves the cursor's
+// position in the mesh rect's local SVG user coordinates (inner-chart units).
+// It maps the screen point through the rect's inverse screen CTM, which is
+// correct under viewBox scaling; it falls back to offsetX/offsetY when the CTM
+// is unavailable. The point is cached on event._tcPt so the y expression
+// reuses the x expression's computation.
+const meshHoverVals = "js:{" +
+	"x: (event._tcPt = (function(e){" +
+	"var r=e.target,s=r.ownerSVGElement,m=r.getScreenCTM&&r.getScreenCTM();" +
+	"if(!s||!m){return {x:e.offsetX,y:e.offsetY};}" +
+	"var p=s.createSVGPoint();p.x=e.clientX;p.y=e.clientY;" +
+	"return p.matrixTransform(m.inverse());" +
+	"})(event), Math.round(event._tcPt.x)), " +
+	"y: Math.round(event._tcPt.y)}"

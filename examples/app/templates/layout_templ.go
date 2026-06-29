@@ -51,7 +51,7 @@ func Layout(props LayoutProps, content templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><style>\n\t\t\t\t{ templ.SafeString(css) }\n\t\t\t</style><script src=\"https://unpkg.com/htmx.org@1.9.12\" defer></script><script>\n\t\t\t\t{ templ.SafeString(js) }\n\t\t\t</script></head><body><header><h1><a href=\"/\">templ-charts demo</a></h1><nav><a href=\"/\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "</title><style>\n\t\t\t\t{ templ.SafeString(css) }\n\t\t\t</style><script src=\"https://unpkg.com/htmx.org@1.9.12\" defer></script><script>\n\t\t\t\t{\n\t\t\t\t\ttempl.SafeString(js);\n\t\t\t\t}\n\t\t\t</script></head><body><header><h1><a href=\"/\">templ-charts demo</a></h1><nav><a href=\"/\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

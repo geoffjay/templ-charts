@@ -51,6 +51,7 @@ type ChartInstance struct {
 	activeID   string  // pie active arc id (drives radius offset)
 	hoverX     float64 // line mesh hover x (chart units)
 	hoverY     float64 // line mesh hover y (chart units)
+	hasHover   bool    // line mesh: a hover is active (gates crosshair render)
 }
 
 // State is a snapshot of the mutable per-instance state. Returned by
@@ -61,6 +62,7 @@ type State struct {
 	ActiveID   string  // pie active arc id (drives radius offset)
 	HoverX     float64 // line mesh hover x (chart units, drives crosshair)
 	HoverY     float64 // line mesh hover y (chart units, drives crosshair)
+	HasHover   bool    // line mesh: a hover is active (gates crosshair render)
 }
 
 // State returns a copy of the instance's mutable state.
@@ -73,6 +75,7 @@ func (c *ChartInstance) State() State {
 		ActiveID:   c.activeID,
 		HoverX:     c.hoverX,
 		HoverY:     c.hoverY,
+		HasHover:   c.hasHover,
 	}
 }
 
@@ -118,6 +121,7 @@ func (c *ChartInstance) setHoverXY(x, y float64) {
 	defer c.mu.Unlock()
 	c.hoverX = x
 	c.hoverY = y
+	c.hasHover = true
 }
 
 // clearHover resets all hover state (bar hovered key + line hover coords).
@@ -127,6 +131,7 @@ func (c *ChartInstance) clearHover() {
 	c.hoveredKey = ""
 	c.hoverX = 0
 	c.hoverY = 0
+	c.hasHover = false
 }
 
 // Registry maps instance IDs to *ChartInstance. The zero value is not usable;
@@ -213,4 +218,5 @@ func (c *ChartInstance) SetStateForTest(s State) {
 	c.activeID = s.ActiveID
 	c.hoverX = s.HoverX
 	c.hoverY = s.HoverY
+	c.hasHover = s.HasHover
 }

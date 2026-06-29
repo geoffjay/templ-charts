@@ -410,7 +410,17 @@ func RectAnnotationOutline(inst AnnotationInstructions) templ.Component {
 }
 
 func fmtN(v float64) string {
-	return fmt.Sprintf("%.3g", v)
+	if v != v || v > 1e308 || v < -1e308 {
+		return "0"
+	}
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 var _ = templruntime.GeneratedTemplate

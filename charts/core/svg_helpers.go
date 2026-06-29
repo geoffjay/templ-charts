@@ -6,12 +6,16 @@ import (
 	"strings"
 )
 
-// fmtFloat formats a float for SVG output (matching d3-path rounding: 3 dp).
+// fmtFloat formats a float for SVG output (up to 3 decimal places, trailing
+// zeros trimmed).
 func fmtFloat(v float64) string {
 	if math.IsNaN(v) || math.IsInf(v, 0) {
 		return "0"
 	}
-	return fmt.Sprintf("%.3g", v)
+	s := fmt.Sprintf("%.3f", v)
+	s = strings.TrimRight(s, "0")
+	s = strings.TrimRight(s, ".")
+	return s
 }
 
 // attrFloat emits `name="value"` for a non-zero float, or empty string.

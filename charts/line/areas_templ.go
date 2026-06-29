@@ -151,7 +151,17 @@ func Areas(props AreasProps) templ.Component {
 
 // fmtA formats an opacity float for SVG output.
 func fmtA(v float64) string {
-	return fmt.Sprintf("%.3g", v)
+	if v != v || v > 1e308 || v < -1e308 {
+		return "0"
+	}
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 // reverseSeries returns a reversed copy of series (so lower series draw on

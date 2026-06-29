@@ -80,7 +80,7 @@ func ChartCard(props ChartCardProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue("chart-" + props.ID)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 23, Col: 45}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 25, Col: 27}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -98,7 +98,7 @@ func ChartCard(props ChartCardProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue("/charts/" + props.ID + "/hover?leave=1")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 25, Col: 53}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 27, Col: 53}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {
@@ -111,7 +111,7 @@ func ChartCard(props ChartCardProps) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.ResolveAttributeValue("#tooltip-" + props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 27, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 29, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 			if templ_7745c5c3_Err != nil {
@@ -142,7 +142,7 @@ func ChartCard(props ChartCardProps) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.ResolveAttributeValue("tooltip-" + props.ID)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 34, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 36, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var7)
 			if templ_7745c5c3_Err != nil {
@@ -207,7 +207,7 @@ func IndexPage(props IndexPageProps) templ.Component {
 			var templ_7745c5c3_Var9 templ.SafeURL
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(p.Href)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 61, Col: 20}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 63, Col: 20}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -220,7 +220,7 @@ func IndexPage(props IndexPageProps) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(p.Title)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 61, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 63, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -233,7 +233,7 @@ func IndexPage(props IndexPageProps) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(p.Description)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 62, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 64, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -287,7 +287,7 @@ func DemosPage(props DemosPageProps) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(props.Intro)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 76, Col: 31}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/chart.templ`, Line: 78, Col: 31}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {

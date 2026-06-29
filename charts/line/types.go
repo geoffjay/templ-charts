@@ -240,9 +240,12 @@ type LineProps struct {
 	ChartID string
 
 	// HoverX/HoverY, when set by the htmx hover endpoint (mesh mode), position
-	// the crosshair lines. Zero values = no crosshair. Cleared on mouseleave.
-	HoverX float64
-	HoverY float64
+	// the crosshair lines. HasHover gates whether the crosshair renders, so a
+	// legitimate hover at the origin (0,0) is not mistaken for "no hover".
+	// Cleared on mouseleave.
+	HoverX   float64
+	HoverY   float64
+	HasHover bool
 }
 
 // LineSvgProps is an alias of LineProps (nivo splits common/svg; v1 unifies).

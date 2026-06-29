@@ -24,12 +24,20 @@ type LinesItemProps struct {
 	Animate bool
 }
 
-// fmtL formats a float for SVG output (3 dp, trimmed).
+// fmtL formats a float for SVG output (up to 3 decimal places, trailing zeros
+// trimmed).
 func fmtL(v float64) string {
-	if v != v || v > 1e308 {
+	if v != v || v > 1e308 || v < -1e308 {
 		return "0"
 	}
-	return fmt.Sprintf("%.3g", v)
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 // LinesItem renders a single line as an SVG <path>. Mirrors @nivo/line
@@ -63,7 +71,7 @@ func LinesItem(props LinesItemProps) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.ResolveAttributeValue(path)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 29, Col: 15}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 37, Col: 15}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -76,7 +84,7 @@ func LinesItem(props LinesItemProps) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.ResolveAttributeValue(props.Color)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 29, Col: 50}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 37, Col: 50}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var3)
 		if templ_7745c5c3_Err != nil {
@@ -89,7 +97,7 @@ func LinesItem(props LinesItemProps) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.ResolveAttributeValue(fmtL(props.Thickness))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 29, Col: 89}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 37, Col: 89}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
@@ -107,7 +115,7 @@ func LinesItem(props LinesItemProps) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.ResolveAttributeValue(path)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 31, Col: 51}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `charts/line/lines.templ`, Line: 39, Col: 51}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var5)
 			if templ_7745c5c3_Err != nil {

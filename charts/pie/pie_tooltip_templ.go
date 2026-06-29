@@ -90,10 +90,17 @@ func PieTooltip(props PieTooltipProps) templ.Component {
 
 // fmtP formats a float for SVG output (3 dp, trimmed).
 func fmtP(v float64) string {
-	if v != v || v > 1e308 {
+	if v != v || v > 1e308 || v < -1e308 {
 		return "0"
 	}
-	return fmt.Sprintf("%.3g", v)
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
 }
 
 var _ = templruntime.GeneratedTemplate
