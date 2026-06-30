@@ -186,6 +186,8 @@ type PieProps struct {
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
+	Title           string
+	Desc            string
 
 	// Theme.
 	Theme *theming.Theme

@@ -36,6 +36,8 @@ func ScatterPlotDemos() []ScatterPlotDemo {
 				EnableGridX: true,
 				EnableGridY: true,
 				Interactive: true,
+				Title:       "Scatterplot: group A vs group B",
+				Desc:        "Two series of x/y points on linear scales; group A and group B each have six observations.",
 				Legends: []legends.LegendProps{
 					{Anchor: legends.LegendAnchorBottomRight, Direction: legends.LegendDirectionColumn, TranslateX: 0, TranslateY: 0},
 				},

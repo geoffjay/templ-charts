@@ -74,6 +74,22 @@ func TestScatterPlot_Golden(t *testing.T) {
 	golden.Assert(t, "scatterplot-basic", out)
 }
 
+func TestScatterPlot_A11yTitleDesc(t *testing.T) {
+	p := baseProps()
+	p.Title = "Groups A and B"
+	p.Desc = "Scatter of x/y values for two groups."
+	out := render(t, p)
+	if !strings.Contains(out, "<title>Groups A and B</title>") {
+		t.Errorf("expected <title> threaded through to SvgWrapper")
+	}
+	if !strings.Contains(out, "<desc>Scatter of x/y values for two groups.</desc>") {
+		t.Errorf("expected <desc> threaded through to SvgWrapper")
+	}
+	if !strings.Contains(out, `role="img"`) {
+		t.Errorf("expected default role=img")
+	}
+}
+
 func TestScatterPlot_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

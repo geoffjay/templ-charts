@@ -52,6 +52,8 @@ func Radar(props RadarProps) templ.Component {
 			AriaLabel:       props.AriaLabel,
 			AriaLabelledBy:  props.AriaLabelledBy,
 			AriaDescribedBy: props.AriaDescribedBy,
+			Title:           props.Title,
+			Desc:            props.Desc,
 			IsFocusable:     props.IsFocusable,
 			Responsive:      props.Responsive,
 		}, renderLayers(props, result, theme)).Render(ctx, templ_7745c5c3_Buffer)

@@ -198,6 +198,8 @@ type BarProps struct {
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
+	Title           string
+	Desc            string
 	IsFocusable     bool
 
 	// Theme.

@@ -52,6 +52,8 @@ func Pie(props PieProps) templ.Component {
 			AriaLabel:       props.AriaLabel,
 			AriaLabelledBy:  props.AriaLabelledBy,
 			AriaDescribedBy: props.AriaDescribedBy,
+			Title:           props.Title,
+			Desc:            props.Desc,
 			Responsive:      props.Responsive,
 		}, renderPieLayers(layers, props, result, dims, theme, bound)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {

@@ -33,6 +33,12 @@ templ SvgWrapper(props SvgWrapperProps, inner string) {
 			style="width:100%;height:auto;display:block"
 		}
 	>
+		if props.Title != "" {
+			<title>{ props.Title }</title>
+		}
+		if props.Desc != "" {
+			<desc>{ props.Desc }</desc>
+		}
 		@Defs(props.Defs)
 		if props.Background != "" {
 			<rect width={ fmtFloat(props.Width) } height={ fmtFloat(props.Height) } fill={ props.Background }></rect>

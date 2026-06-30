@@ -113,6 +113,8 @@ type ScatterPlotProps struct {
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
+	Title           string
+	Desc            string
 	IsFocusable     bool
 
 	core.MotionProps

@@ -102,9 +102,14 @@ type CalendarProps struct {
 	EnableMonthLegends *bool
 	EnableYearLegends  *bool
 
-	Theme       *theming.Theme
-	Role        string
-	IsFocusable bool
+	Theme           *theming.Theme
+	Role            string
+	AriaLabel       string
+	AriaLabelledBy  string
+	AriaDescribedBy string
+	Title           string
+	Desc            string
+	IsFocusable     bool
 
 	core.MotionProps
 }

@@ -25,6 +25,14 @@ type SvgWrapperProps struct {
 	AriaDescribedBy string
 	IsFocusable     bool
 	Responsive      bool
+	// Title / Desc, when non-empty, render <title>/<desc> as the first
+	// children of the <svg>. These are the SVG-native accessibility mechanism:
+	// for role="img", assistive tech derives the accessible name from <title>
+	// and the description from <desc>. They complement the aria-* attributes
+	// (an explicit aria-label still wins for the name) and double as the
+	// browser's native hover tooltip for <title>.
+	Title string
+	Desc  string
 }
 
 // DotsItemProps mirrors nivo's DotsItem props (minus spring animation, which

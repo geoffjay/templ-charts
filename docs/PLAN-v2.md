@@ -320,7 +320,16 @@ template/CSS:
    so static (zero-JS) embedding and all existing goldens are unchanged.
 6. **Responsive + a11y** pass across v1 + v2 charts. *Responsive done* (the
    `Responsive` prop on `SvgWrapper`/all charts + the `htmx.Mount` container —
-   see §6); the optional `ResizeObserver` re-fetch and the a11y pass remain.
+   see §6). *A11y done*: `core.SvgWrapper` gained `Title`/`Desc` that render
+   `<title>`/`<desc>` as the first `<svg>` children (the SVG-native accessible
+   name/description for `role="img"`), threaded uniformly through every v1 + v2
+   chart's props alongside the existing `Role`/`AriaLabel`/`AriaLabelledBy`/
+   `AriaDescribedBy`/`IsFocusable` (all charts default `role="img"`; the svg is
+   keyboard-focusable via `IsFocusable`). Defaults stay empty so static goldens
+   are unchanged. *Still deferred (optional/future, per §6)*: the client-side
+   `ResizeObserver` re-fetch for pixel-accurate re-render on axes-heavy charts —
+   cosmetic fluid scaling is already fully covered by `Responsive`, so this is
+   left for a later pass.
 7. **Demo pages**, `README`/`docs` updates, golden regeneration.
 
 ## 11. Explicitly deferred (v3+)
