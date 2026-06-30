@@ -44,7 +44,7 @@ cited nivo package. All charts reuse the base packages (`core`, `theming`,
 
 | Chart | Reuses (beyond base) | New compute | d3 needs | nivo source |
 |---|---|---|---|---|
-| heatmap | `grid`, `rects`, sequential/diverging colors, continuous legend | cell layout via `grid.GenerateGrid`, color-by-value | existing | `@nivo/heatmap` |
+| heatmap | `scales` (band x/y), `axes`, sequential/diverging colors, continuous legend | band-scale cell layout, color-by-value | existing | `@nivo/heatmap` |
 | scatterplot | `axes`, `core.DotsItem`, annotations | node placement on x/y scales | existing | `@nivo/scatterplot` |
 | radar | `polar-axes`, `arcs` angle helpers, line/area generator | polar point projection, grid rings | existing | `@nivo/radar` |
 | radial-bar | `polar-axes`, `arcs` | angle/radius bands → arcs | existing | `@nivo/radial-bar` |
@@ -65,8 +65,11 @@ cited nivo package. All charts reuse the base packages (`core`, `theming`,
   `enableLabels:true`, `label:'formattedValue'`, `labelTextColor:{from:color, modifiers:[[darker,2]]}`,
   `colors:{type:sequential, scheme:'brown_blueGreen'}`, `emptyColor:'#000000'`,
   `hoverTarget:'rowColumn'`, SVG extras: `borderRadius:0`, `cellComponent:'rect'`.
-- **Compute**: `grid.ComputeCellDimensions` + band scales on both axes; cell
-  fill via `colors` sequential scale; optional `sizeVariation`.
+- **Compute**: band scales on both axes (the x band over x-values, the y band
+  over serie ids — built with the non-reversed range so series run top→bottom
+  like nivo); cell fill via the `colors` sequential/diverging scale; optional
+  `forceSquare` layout centering. (`grid.GenerateGrid` is *not* used here — it's
+  waffle's path; heatmap is band-scale driven like nivo.)
 - **Layers**: grid → axes → cells → legends → annotations.
 
 ### 3.2 scatterplot
@@ -263,7 +266,11 @@ template/CSS:
 1. **Foundations** ✅ *(done)*: fixed `styleFromMap` determinism (sorted keys);
    added `d3/array.Quantile`/`QuantileSorted`. (Stream stack offsets were already
    ported — no work needed.)
-2. **Activate `grid`** → heatmap → waffle → calendar.
+2. **Grid-based charts** ✅ *(done)*: heatmap (band-scale driven + continuous
+   color/legend), waffle (built on `grid.GenerateGrid` — activates the scaffold),
+   calendar (ported date math, quantized colors, month/year legends). Each has a
+   full package, golden tests, and a demo page. *Deferred within this phase*:
+   calendar's month outline-path border, and waffle's polygon "areas" layer.
 3. **Activate `polar-axes`** → radar → radial-bar.
 4. **Cartesian batch**: scatterplot → stream → bullet → funnel → boxplot.
 5. **Interactivity layer**: ship the client-side hover script; migrate `line`

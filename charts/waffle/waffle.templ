@@ -1,0 +1,81 @@
+package waffle
+
+import (
+	"fmt"
+
+	"github.com/geoffjay/templ-charts/charts/core"
+)
+
+// Waffle renders a complete waffle chart SVG: dimensions → UseWaffle → layer
+// pipeline (cells → legends) → SvgWrapper. Mirrors @nivo/waffle Waffle. Static
+// render (interactivity arrives with the Phase 5 client layer).
+templ Waffle(props WaffleProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseWaffle(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		IsFocusable:     props.IsFocusable,
+	}, renderLayers(props, result, dims))
+}
+
+// WaffleCellShapeProps is the input to the WaffleCellShape templ component.
+type WaffleCellShapeProps struct {
+	Cell         WaffleCell
+	BorderWidth  float64
+	BorderRadius float64
+}
+
+// WaffleCellShape renders one cell as a <rect>. Mirrors @nivo/waffle WaffleCell.
+templ WaffleCellShape(props WaffleCellShapeProps) {
+	{{ c := props.Cell }}
+	<rect
+		x={ fmtW(c.X) }
+		y={ fmtW(c.Y) }
+		width={ fmtW(maxW(c.Width, 0)) }
+		height={ fmtW(maxW(c.Height, 0)) }
+		fill={ c.Color }
+		fill-opacity={ fmtW(c.Opacity) }
+		if props.BorderRadius > 0 {
+			rx={ fmtW(props.BorderRadius) }
+			ry={ fmtW(props.BorderRadius) }
+		}
+		if props.BorderWidth > 0 && c.BorderColor != "" {
+			stroke={ c.BorderColor }
+			stroke-width={ fmtW(props.BorderWidth) }
+		}
+	></rect>
+}
+
+// fmtW formats a float for SVG output (3 dp, trimmed).
+func fmtW(v float64) string {
+	if v != v || v > 1e308 || v < -1e308 {
+		return "0"
+	}
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
+// maxW returns the larger of a and b.
+func maxW(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}

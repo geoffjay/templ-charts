@@ -1,0 +1,96 @@
+package heatmap
+
+import (
+	"fmt"
+
+	"github.com/geoffjay/templ-charts/charts/core"
+)
+
+// HeatMap renders a complete heatmap SVG: dimensions → UseHeatMap → layer
+// pipeline (grid → axes → cells → legends) → SvgWrapper. Mirrors @nivo/heatmap
+// HeatMap. Static render (interactivity arrives with the Phase 5 client layer).
+templ HeatMap(props HeatMapProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseHeatMap(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		IsFocusable:     props.IsFocusable,
+	}, renderLayers(props, result, dims, theme))
+}
+
+// HeatMapCellProps is the input to the HeatMapCell templ component.
+type HeatMapCellProps struct {
+	Cell         ComputedCell
+	BorderWidth  float64
+	BorderRadius float64
+	EnableLabel  bool
+}
+
+// HeatMapCell renders one cell: a <rect> centered on the cell position plus an
+// optional value label. Mirrors @nivo/heatmap HeatMapCellRect.
+templ HeatMapCell(props HeatMapCellProps) {
+	{{ c := props.Cell }}
+	<g>
+		<rect
+			x={ fmtH(c.XPos - c.Width/2) }
+			y={ fmtH(c.YPos - c.Height/2) }
+			width={ fmtH(maxH(c.Width, 0)) }
+			height={ fmtH(maxH(c.Height, 0)) }
+			fill={ c.Color }
+			fill-opacity={ fmtH(c.Opacity) }
+			if props.BorderRadius > 0 {
+				rx={ fmtH(props.BorderRadius) }
+				ry={ fmtH(props.BorderRadius) }
+			}
+			if props.BorderWidth > 0 && c.BorderColor != "" {
+				stroke={ c.BorderColor }
+				stroke-width={ fmtH(props.BorderWidth) }
+			}
+		></rect>
+		if props.EnableLabel && c.Label != "" {
+			<text
+				x={ fmtH(c.XPos) }
+				y={ fmtH(c.YPos) }
+				text-anchor="middle"
+				dominant-baseline="central"
+				fill={ c.LabelTextColor }
+				style="pointer-events: none"
+			>{ c.Label }</text>
+		}
+	</g>
+}
+
+// fmtH formats a float for SVG output (3 dp, trimmed). Matches the codebase's
+// fmtFloat style.
+func fmtH(v float64) string {
+	if v != v || v > 1e308 || v < -1e308 {
+		return "0"
+	}
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
+// maxH returns the larger of a and b.
+func maxH(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}

@@ -25,6 +25,9 @@ func main() {
 	mux.HandleFunc("/bar", app.Bar)
 	mux.HandleFunc("/line", app.Line)
 	mux.HandleFunc("/pie", app.Pie)
+	mux.HandleFunc("/heatmap", app.Heatmap)
+	mux.HandleFunc("/waffle", app.Waffle)
+	mux.HandleFunc("/calendar", app.Calendar)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 

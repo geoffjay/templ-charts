@@ -11,9 +11,12 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/calendar"
+	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/waffle"
 	"github.com/geoffjay/templ-charts/examples/app/demos"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
 )
@@ -64,6 +67,9 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/bar", Title: "Bar charts", Description: "Stacked, grouped, markers + annotations, legend toggle, totals."},
 			{Href: "/line", Title: "Line charts", Description: "Single & multi-series, area + points, slices, mesh hover."},
 			{Href: "/pie", Title: "Pie charts", Description: "Plain, donut, half, sorted, active-arc hover, legend toggle."},
+			{Href: "/heatmap", Title: "Heatmap", Description: "2D value grid: sequential/diverging color scales, labels, borders, continuous legend."},
+			{Href: "/waffle", Title: "Waffle", Description: "Part-of-whole cell grid: fill direction, borders, legend (built on charts/grid)."},
+			{Href: "/calendar", Title: "Calendar", Description: "Day-grid heatmap over a date range: quantized colors, month/year legends, horizontal/vertical."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -128,6 +134,71 @@ func (a *App) Palettes(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Palettes", Nav: "palettes"}, templates.PaletteGalleryPage(templates.PaletteGalleryPageProps{
 		Intro: "Color palettes applied to a bar chart. Categorical palettes cycle discrete colors across series; sequential and diverging palettes are sampled into discrete steps. Set a palette via Colors: colors.Scheme(colors.PaletteTableau10).",
+		Cards: cards,
+	}))
+}
+
+// Heatmap handles GET /heatmap: the heatmap demos page. Heatmaps render
+// statically (no HTMX) in v2 — interactivity arrives with the Phase 5 client
+// layer.
+func (a *App) Heatmap(w http.ResponseWriter, r *http.Request) {
+	ds := demos.HeatmapDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := heatmap.HeatMap(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: b.String(), Interactive: false,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Heatmap", Nav: "heatmap"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Heatmap demos: sequential and diverging color scales, cell borders, value labels, a continuous legend, and squared cells. Static SVG (no HTMX yet).",
+		Cards: cards,
+	}))
+}
+
+// Waffle handles GET /waffle: the waffle demos page (static SVG).
+func (a *App) Waffle(w http.ResponseWriter, r *http.Request) {
+	ds := demos.WaffleDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := waffle.Waffle(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: b.String(), Interactive: false,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Waffle", Nav: "waffle"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Waffle demos: part-of-whole grids built on the charts/grid layout, with fill direction, cell borders, and a legend. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Calendar handles GET /calendar: the calendar demos page (static SVG).
+func (a *App) Calendar(w http.ResponseWriter, r *http.Request) {
+	ds := demos.CalendarDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := calendar.Calendar(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: b.String(), Interactive: false,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Calendar", Nav: "calendar"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Calendar heatmap demos: a day grid over a date range with quantized colors, month/year legends, horizontal and vertical layouts. Static SVG.",
 		Cards: cards,
 	}))
 }

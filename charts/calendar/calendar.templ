@@ -1,0 +1,98 @@
+package calendar
+
+import (
+	"fmt"
+
+	"github.com/geoffjay/templ-charts/charts/core"
+)
+
+// Calendar renders a complete calendar heatmap SVG: dimensions → UseCalendar →
+// day cells + month/year legends → SvgWrapper. Mirrors @nivo/calendar Calendar.
+// Static render (interactivity arrives with the Phase 5 client layer).
+templ Calendar(props CalendarProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseCalendar(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:       dims.OuterWidth,
+		Height:      dims.OuterHeight,
+		Margin:      dims.Margin,
+		Background:  themeBackground(theme),
+		Role:        props.Role,
+		IsFocusable: props.IsFocusable,
+	}, renderLayers(props, result, theme))
+}
+
+// CalendarDayProps is the input to the CalendarDay templ component.
+type CalendarDayProps struct {
+	Day         ComputedDay
+	BorderWidth float64
+	BorderColor string
+}
+
+// CalendarDay renders one day cell as a <rect>. Mirrors @nivo/calendar
+// CalendarDay.
+templ CalendarDay(props CalendarDayProps) {
+	{{ d := props.Day }}
+	<rect
+		x={ fmtC(d.X) }
+		y={ fmtC(d.Y) }
+		width={ fmtC(maxC(d.Size, 0)) }
+		height={ fmtC(maxC(d.Size, 0)) }
+		fill={ d.Color }
+		if props.BorderWidth > 0 && props.BorderColor != "" {
+			stroke={ props.BorderColor }
+			stroke-width={ fmtC(props.BorderWidth) }
+		}
+	></rect>
+}
+
+// CalendarLegendLabelProps is the input to the CalendarLegendLabel component.
+type CalendarLegendLabelProps struct {
+	X     float64
+	Y     float64
+	Label string
+	Fill  string
+	Bold  bool
+}
+
+// CalendarLegendLabel renders a month or year legend text label.
+templ CalendarLegendLabel(props CalendarLegendLabelProps) {
+	<text
+		x={ fmtC(props.X) }
+		y={ fmtC(props.Y) }
+		text-anchor="middle"
+		dominant-baseline="central"
+		fill={ props.Fill }
+		font-size="11"
+		if props.Bold {
+			font-weight="bold"
+		}
+	>{ props.Label }</text>
+}
+
+// fmtC formats a float for SVG output (3 dp, trimmed).
+func fmtC(v float64) string {
+	if v != v || v > 1e308 || v < -1e308 {
+		return "0"
+	}
+	s := fmt.Sprintf("%.3f", v)
+	for len(s) > 1 && s[len(s)-1] == '0' {
+		s = s[:len(s)-1]
+	}
+	if len(s) > 1 && s[len(s)-1] == '.' {
+		s = s[:len(s)-1]
+	}
+	return s
+}
+
+// maxC returns the larger of a and b.
+func maxC(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
+}

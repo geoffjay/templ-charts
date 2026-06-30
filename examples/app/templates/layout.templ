@@ -47,6 +47,24 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>pie</a>
 					<a
+						href="/heatmap"
+						if props.Nav == "heatmap" {
+							class="active"
+						}
+					>heatmap</a>
+					<a
+						href="/waffle"
+						if props.Nav == "waffle" {
+							class="active"
+						}
+					>waffle</a>
+					<a
+						href="/calendar"
+						if props.Nav == "calendar" {
+							class="active"
+						}
+					>calendar</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"
