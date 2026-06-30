@@ -80,7 +80,7 @@ type CanvasAxisProps = AxisProps
 // DefaultAxisProps mirrors @nivo/axes defaultProps.
 var DefaultAxisProps = AxisProps{
 	TickSize:       5,
-	TickPadding:    5,
+	TickPadding:    10,
 	TickRotation:   0,
 	TextAlign:      "center",
 	TextBaseline:   "middle",

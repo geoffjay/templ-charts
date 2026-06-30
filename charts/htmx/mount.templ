@@ -1,0 +1,44 @@
+package htmx
+
+// Mount renders the container plumbing that connects a server-rendered chart
+// SVG to the htmx interactivity layer, so consumers don't have to reverse-
+// engineer the id/route conventions from the demo app.
+//
+// It emits:
+//
+//   - <div class="tc-chart" id="chart-<ID>"> holding the SVG. This is the
+//     target the handler re-renders into via the out-of-band swap on every
+//     hover/toggle/click, so the id must be exactly "chart-<ID>".
+//   - when Interactive, a sibling <div class="tc-chart-tooltip"
+//     id="tooltip-<ID>"> that hover/slice tooltip fragments swap into, plus a
+//     "mouseleave" trigger on the container that clears hover state via
+//     GET /charts/<ID>/hover?leave=1.
+//
+// The per-element hover wiring (per bar, arc, slice, mesh point) is emitted
+// inside the SVG by the chart components themselves when IsInteractive is set;
+// Mount supplies only the outer container, the tooltip target, and the
+// leave-reset — matching the /charts/{id} routes and the chart-/tooltip- id
+// conventions used throughout the library.
+//
+// Mount ships no styling: visual chrome (borders, padding, titles, card
+// layout) and any container sizing are the caller's responsibility. Use the
+// "tc-chart"/"tc-chart-tooltip" hooks or pass Class to attach your own CSS.
+// For fluid sizing, set Responsive on the chart props instead of styling the
+// container.
+templ Mount(props MountProps) {
+	<div
+		class={ chartClass(props.Class) }
+		id={ "chart-" + props.ID }
+		if props.Interactive {
+			hx-get={ "/charts/" + props.ID + "/hover?leave=1" }
+			hx-trigger="mouseleave"
+			hx-target={ "#tooltip-" + props.ID }
+			hx-swap="innerHTML"
+		}
+	>
+		@templ.Raw(props.SVG)
+	</div>
+	if props.Interactive {
+		<div class="tc-chart-tooltip" id={ "tooltip-" + props.ID }></div>
+	}
+}

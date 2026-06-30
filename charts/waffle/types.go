@@ -86,7 +86,11 @@ type WaffleProps struct {
 	Width  float64
 	Height float64
 	Margin core.Margin
-	Data   []WaffleDatum
+	// Responsive makes the rendered svg scale fluidly to its container
+	// (viewBox preserved, width:100%;height:auto) instead of a fixed pixel
+	// size. See core.SvgWrapperProps.Responsive.
+	Responsive bool
+	Data       []WaffleDatum
 
 	// Total is the value representing the full grid (rows×columns cells).
 	Total         float64

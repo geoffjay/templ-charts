@@ -115,13 +115,19 @@ templ AxisLegend(props AxisProps, theme *theming.Theme) {
 	>{ props.Legend }</text>
 }
 
-// tickTransform emits the transform for a tick label (translate to label x/y +
-// optional rotation).
+// tickTransform emits the transform for a tick label. The label lives inside
+// the tick <g> already translated to (X1, Y1) and the tick <line> uses
+// relative deltas, so the label must also be positioned relative to the group
+// origin. LabelX/LabelY are absolute, so subtract X1/Y1 — otherwise the
+// position is double-counted, offsetting every label by the tick position
+// (e.g. half a band on a centered band axis).
 func tickTransform(props AxisProps, tick Tick) string {
+	x := tick.LabelX - tick.X1
+	y := tick.LabelY - tick.Y1
 	if props.TickRotation != 0 {
-		return fmt.Sprintf("translate(%s,%s) rotate(%s)", fmtN(tick.LabelX), fmtN(tick.LabelY), fmtN(props.TickRotation))
+		return fmt.Sprintf("translate(%s,%s) rotate(%s)", fmtN(x), fmtN(y), fmtN(props.TickRotation))
 	}
-	return fmt.Sprintf("translate(%s,%s)", fmtN(tick.LabelX), fmtN(tick.LabelY))
+	return fmt.Sprintf("translate(%s,%s)", fmtN(x), fmtN(y))
 }
 
 // fontSizeAny renders a font-size value that may be a number or a string.

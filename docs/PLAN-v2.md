@@ -212,11 +212,26 @@ so non-interactive/static embedding still works with zero JS.
 
 ## 6. Responsive + accessibility
 
-- **Responsive**: charts already emit a `viewBox`; pair it with `width:100%`
-  for fluid scaling (the demo CSS does this today). Add an optional
-  `Responsive` container that uses a client-side `ResizeObserver` to re-fetch a
-  pixel-accurate render only for charts where tick/label density matters
-  (axes-heavy charts); purely cosmetic scaling needs no JS.
+- **Responsive** ✅ *(done — CSS-native fluid scaling + a reusable mount)*:
+  - `core.SvgWrapperProps.Responsive` (threaded through a `Responsive bool` on
+    every chart's props) keeps the `viewBox` and intrinsic `width`/`height`
+    while emitting an inline `style="width:100%;height:auto;display:block"`, so
+    a chart scales fluidly to its container with **zero JS** and zero consumer
+    CSS. Defaults to `false`, so existing fixed-size renders (and goldens) are
+    unchanged.
+  - `htmx.Mount(MountProps{...})` is the library-provided container that wires a
+    rendered SVG into the interactivity layer: it emits the `#chart-<id>`
+    container (the OOB swap target), the `#tooltip-<id>` swap target, and the
+    `mouseleave` reset, matching the `/charts/{id}` routes and `chart-`/
+    `tooltip-` id conventions. It ships **no styling** (visual chrome stays the
+    consumer's concern via the `tc-chart`/`tc-chart-tooltip` class hooks or the
+    `Class` field). The demo's `ChartCard` now consumes `htmx.Mount` instead of
+    hand-rolling the markup, so the demo demonstrates the public API rather than
+    hiding it.
+  - *Still optional / future*: the client-side `ResizeObserver` re-fetch for a
+    pixel-accurate re-render on axes-heavy charts where tick/label density
+    matters. Purely cosmetic scaling is fully covered by `Responsive` above and
+    needs no JS.
 - **Accessibility**: build on `rects.NodeA11yProps` and pie's `Role` default.
   Add `<title>`/`<desc>` to the `SvgWrapper`, ARIA `role`/`aria-label`/
   `aria-describedby` on charts, and keyboard-focusable series/segments where
@@ -275,7 +290,9 @@ template/CSS:
 4. **Cartesian batch**: scatterplot → stream → bullet → funnel → boxplot.
 5. **Interactivity layer**: ship the client-side hover script; migrate `line`
    mesh/slice hover; wire all new charts' hover tooltips to it.
-6. **Responsive + a11y** pass across v1 + v2 charts.
+6. **Responsive + a11y** pass across v1 + v2 charts. *Responsive done* (the
+   `Responsive` prop on `SvgWrapper`/all charts + the `htmx.Mount` container —
+   see §6); the optional `ResizeObserver` re-fetch and the a11y pass remain.
 7. **Demo pages**, `README`/`docs` updates, golden regeneration.
 
 ## 11. Explicitly deferred (v3+)

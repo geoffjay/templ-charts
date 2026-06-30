@@ -118,6 +118,11 @@ type BarProps struct {
 	Height float64
 	Margin core.Margin
 
+	// Responsive makes the rendered svg scale fluidly to its container
+	// (viewBox preserved, width:100%;height:auto) instead of a fixed pixel
+	// size. See core.SvgWrapperProps.Responsive.
+	Responsive bool
+
 	GroupMode    GroupMode
 	Layout       Layout
 	Padding      float64

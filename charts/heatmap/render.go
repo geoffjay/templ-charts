@@ -147,6 +147,17 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 		out.TickSize = axes.DefaultAxisProps.TickSize
 		out.TickPadding = axes.DefaultAxisProps.TickPadding
 	}
+	// Orientation-aware label anchor: a vertical axis should anchor its labels
+	// toward the axis (end for a left axis, start for a right one) so they sit
+	// beside the grid instead of centering on the offset point and overlapping
+	// the cells. Top/bottom axes keep the centered default.
+	if out.TextAlign == "" && axis == "y" {
+		if out.TicksPosition == "before" {
+			out.TextAlign = "end"
+		} else {
+			out.TextAlign = "start"
+		}
+	}
 	return &out
 }
 

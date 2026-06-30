@@ -7,6 +7,12 @@ package core
 //
 // Aria attributes and Role match nivo's defaults (role="img", focusable=false
 // unless IsFocusable).
+//
+// Responsive, when true, makes the svg scale fluidly to its container: the
+// viewBox (and thus aspect ratio) is preserved while an inline
+// width:100%;height:auto style overrides the fixed pixel dimensions. The
+// Width/Height are still emitted as the intrinsic size so the aspect ratio is
+// well-defined and non-CSS contexts get a sensible fallback.
 type SvgWrapperProps struct {
 	Width           float64
 	Height          float64
@@ -18,6 +24,7 @@ type SvgWrapperProps struct {
 	AriaLabelledBy  string
 	AriaDescribedBy string
 	IsFocusable     bool
+	Responsive      bool
 }
 
 // DotsItemProps mirrors nivo's DotsItem props (minus spring animation, which

@@ -63,7 +63,11 @@ type CalendarProps struct {
 	Width  float64
 	Height float64
 	Margin core.Margin
-	Data   []CalendarDatum
+	// Responsive makes the rendered svg scale fluidly to its container
+	// (viewBox preserved, width:100%;height:auto) instead of a fixed pixel
+	// size. See core.SvgWrapperProps.Responsive.
+	Responsive bool
+	Data       []CalendarDatum
 
 	// From/To bound the rendered range. When zero, derived from the data days.
 	From time.Time

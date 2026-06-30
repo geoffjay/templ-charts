@@ -29,6 +29,9 @@ templ SvgWrapper(props SvgWrapperProps, inner string) {
 		if props.IsFocusable {
 			tabindex="0"
 		}
+		if props.Responsive {
+			style="width:100%;height:auto;display:block"
+		}
 	>
 		@Defs(props.Defs)
 		if props.Background != "" {

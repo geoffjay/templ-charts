@@ -29,7 +29,7 @@ main { max-width:1200px; margin:0 auto; padding:24px; }
 .card p { margin:0 0 14px; color:var(--muted); font-size:13px; }
 .chart { width:100%; height:auto; position:relative; }
 .chart svg { width:100%; height:auto; display:block; }
-.tooltip { position:absolute; display:none; pointer-events:none; z-index:10; background:rgba(255,255,255,0.97); border:1px solid var(--border); border-radius:4px; padding:5px 9px; font-size:12px; box-shadow:0 1px 3px rgba(0,0,0,0.12); }
+.tc-chart-tooltip { position:absolute; display:none; pointer-events:none; z-index:10; background:rgba(255,255,255,0.97); border:1px solid var(--border); border-radius:4px; padding:5px 9px; font-size:12px; box-shadow:0 1px 3px rgba(0,0,0,0.12); }
 .list { list-style:none; padding:0; margin:0; }
 .list li { padding:10px 14px; border:1px solid var(--border); border-radius:6px; margin-bottom:10px; background:var(--card); }
 .list li a { font-weight:600; }
@@ -80,7 +80,7 @@ function positionTooltip(t, chart) {
 }
 document.addEventListener('htmx:afterSwap', function(e) {
   var t = e.detail.target;
-  if (!t || !t.classList || !t.classList.contains('tooltip')) return;
+  if (!t || !t.classList || !t.classList.contains('tc-chart-tooltip')) return;
   positionTooltip(t, t.previousElementSibling);
 });
 document.addEventListener('mousemove', function(e) {
@@ -89,7 +89,7 @@ document.addEventListener('mousemove', function(e) {
   chart._cx = e.clientX;
   chart._cy = e.clientY;
   var t = chart.nextElementSibling;
-  if (t && t.classList && t.classList.contains('tooltip') &&
+  if (t && t.classList && t.classList.contains('tc-chart-tooltip') &&
       t.style.display === 'block') {
     positionTooltip(t, chart);
   }

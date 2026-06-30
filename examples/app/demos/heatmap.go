@@ -35,7 +35,7 @@ func HeatmapDemos() []Demo {
 				Colors:      heatmap.HeatMapColorConfig{Type: "diverging", Scheme: "red_yellow_blue"},
 				BorderWidth: 1,
 				Legends: []heatmap.HeatMapLegend{
-					{Anchor: legends.LegendAnchorBottom, TranslateY: 52, Length: 260, Thickness: 12, Title: "Value"},
+					{Anchor: legends.LegendAnchorBottom, TranslateY: 64, Length: 260, Thickness: 12, Title: "Value"},
 				},
 			},
 		},
