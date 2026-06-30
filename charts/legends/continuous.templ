@@ -43,7 +43,7 @@ func resolveContinuousGeometry(props ContinuousColorsLegendProps) continuousGeom
 	if h == 0 {
 		h = ContinuousColorsLegendDefaults.Height
 	}
-	x, y := ComputePositionFromAnchor(props.Anchor, 0, 0, w, h+30, props.TranslateX, props.TranslateY)
+	x, y := ComputePositionFromAnchor(props.Anchor, props.ChartWidth, props.ChartHeight, w, h+30, props.TranslateX, props.TranslateY)
 	return continuousGeometry{
 		Stops:  ComputeContinuousColorsLegend(props.Scale, props.Min, props.Max, samples),
 		Width:  w,

@@ -35,6 +35,11 @@ type HeatMapCellProps struct {
 	BorderWidth  float64
 	BorderRadius float64
 	EnableLabel  bool
+	// HTMX hover attrs (emitted on the cell <rect> when non-empty).
+	HxGet     string
+	HxTrigger string
+	HxSwap    string
+	HxTarget  string
 }
 
 // HeatMapCell renders one cell: a <rect> centered on the cell position plus an
@@ -56,6 +61,18 @@ templ HeatMapCell(props HeatMapCellProps) {
 			if props.BorderWidth > 0 && c.BorderColor != "" {
 				stroke={ c.BorderColor }
 				stroke-width={ fmtH(props.BorderWidth) }
+			}
+			if props.HxGet != "" {
+				hx-get={ props.HxGet }
+			}
+			if props.HxTrigger != "" {
+				hx-trigger={ props.HxTrigger }
+			}
+			if props.HxSwap != "" {
+				hx-swap={ props.HxSwap }
+			}
+			if props.HxTarget != "" {
+				hx-target={ props.HxTarget }
 			}
 		></rect>
 		if props.EnableLabel && c.Label != "" {

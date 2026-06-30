@@ -12,7 +12,6 @@ import (
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/bar"
 	"github.com/geoffjay/templ-charts/charts/calendar"
-	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
@@ -46,6 +45,9 @@ func NewApp() *App {
 		r.Register(d.ID, d.Kind, d.Props)
 	}
 	for _, d := range demos.PieDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
+	for _, d := range demos.HeatmapDemos() {
 		r.Register(d.ID, d.Kind, d.Props)
 	}
 	return app
@@ -142,21 +144,11 @@ func (a *App) Palettes(w http.ResponseWriter, r *http.Request) {
 // statically (no HTMX) in v2 — interactivity arrives with the Phase 5 client
 // layer.
 func (a *App) Heatmap(w http.ResponseWriter, r *http.Request) {
-	ds := demos.HeatmapDemos()
-	cards := make([]templates.ChartCardProps, 0, len(ds))
-	for _, d := range ds {
-		var b strings.Builder
-		if err := heatmap.HeatMap(d.Props).Render(context.Background(), &b); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		cards = append(cards, templates.ChartCardProps{
-			ID: d.ID, Title: d.Title, Description: d.Description,
-			SVG: b.String(), Interactive: false,
-		})
-	}
+	demos := demos.HeatmapDemos()
+	a.ensureRegistered(demos)
+	cards := a.demoCards(demos)
 	a.renderPage(w, templates.LayoutProps{Title: "Heatmap", Nav: "heatmap"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Heatmap demos: sequential and diverging color scales, cell borders, value labels, a continuous legend, and squared cells. Static SVG (no HTMX yet).",
+		Intro: "Heatmap demos: sequential and diverging color scales, cell borders, value labels, and a continuous legend. Hover a cell for a tooltip (the others dim), like the bar/pie demos.",
 		Cards: cards,
 	}))
 }

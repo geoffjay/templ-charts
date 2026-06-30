@@ -21,6 +21,7 @@ import (
 	"sync"
 
 	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
 )
@@ -29,9 +30,10 @@ import (
 type ChartKind string
 
 const (
-	KindBar  ChartKind = "bar"
-	KindLine ChartKind = "line"
-	KindPie  ChartKind = "pie"
+	KindBar     ChartKind = "bar"
+	KindLine    ChartKind = "line"
+	KindPie     ChartKind = "pie"
+	KindHeatmap ChartKind = "heatmap"
 )
 
 // ChartInstance is one registered chart: its kind, an immutable props
@@ -174,6 +176,11 @@ func (r *Registry) RegisterLine(id string, props line.LineProps) *ChartInstance 
 // RegisterPie is a convenience wrapper for Register(id, KindPie, props).
 func (r *Registry) RegisterPie(id string, props pie.PieProps) *ChartInstance {
 	return r.Register(id, KindPie, props)
+}
+
+// RegisterHeatmap is a convenience wrapper for Register(id, KindHeatmap, props).
+func (r *Registry) RegisterHeatmap(id string, props heatmap.HeatMapProps) *ChartInstance {
+	return r.Register(id, KindHeatmap, props)
 }
 
 // Get returns the instance for id, or nil if not registered.

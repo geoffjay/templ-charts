@@ -7,6 +7,7 @@ import (
 
 	"github.com/geoffjay/templ-charts/charts/bar"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
 	"github.com/geoffjay/templ-charts/charts/tooltip"
@@ -238,6 +239,24 @@ func (h *Handler) handleHover(w http.ResponseWriter, r *http.Request, inst *Char
 			return
 		}
 		writeHTML(w, oobWrapper(inst.ID, html, svg))
+	case KindHeatmap:
+		cellID := q.Get("cell")
+		if cellID == "" {
+			http.Error(w, "missing cell", http.StatusBadRequest)
+			return
+		}
+		inst.setHovered(cellID)
+		html, ok := heatmapHoverTooltip(inst, cellID)
+		if !ok {
+			http.NotFound(w, r)
+			return
+		}
+		svg, err := renderFull(inst)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		writeHTML(w, oobWrapper(inst.ID, html, svg))
 	case KindLine:
 		// Line mesh hover: cursor x/y passed via hx-vals JS.
 		x, y := q.Get("x"), q.Get("y")
@@ -376,6 +395,34 @@ func pieHoverTooltip(inst *ChartInstance, arcID string, setActive bool) (string,
 				ID:             d.Label,
 				FormattedValue: d.FormattedValue,
 				Color:          d.Color,
+				EnableChip:     true,
+			}))
+			if err != nil {
+				return "", false
+			}
+			return html, true
+		}
+	}
+	return "", false
+}
+
+// heatmapHoverTooltip finds the cell with the given id in the instance's
+// computed cells and renders a BasicTooltip HTML fragment ("serie - x" label,
+// the formatted value, and the cell color). Returns ("", false) if no cell
+// matches or the cell has no value.
+func heatmapHoverTooltip(inst *ChartInstance, cellID string) (string, bool) {
+	props := inst.Props.(heatmap.HeatMapProps)
+	applyHeatmapState(&props, inst.ID, inst.State())
+	dims := core.UseDimensions(props.Width, props.Height, props.Margin)
+	props.Width = dims.InnerWidth
+	props.Height = dims.InnerHeight
+	result := heatmap.UseHeatMap(props)
+	for _, c := range result.Cells {
+		if c.ID == cellID && c.Value != nil {
+			html, err := renderComponent(tooltip.BasicTooltip(tooltip.BasicTooltipProps{
+				ID:             c.SerieID + " - " + c.X,
+				FormattedValue: c.FormattedValue,
+				Color:          c.Color,
 				EnableChip:     true,
 			}))
 			if err != nil {

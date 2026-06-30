@@ -3,27 +3,21 @@ package demos
 import (
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
+	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
 )
 
-// HeatmapDemo is one heatmap tile on the /heatmap page. Heatmaps render
-// statically (no HTMX) in v2 — interactivity arrives with the Phase 5 client
-// layer.
-type HeatmapDemo struct {
-	ID          string
-	Title       string
-	Description string
-	Props       heatmap.HeatMapProps
-}
-
-// HeatmapDemos returns the heatmap demos for the /heatmap page.
-func HeatmapDemos() []HeatmapDemo {
+// HeatmapDemos returns the heatmap demos for the /heatmap page. They are
+// registered with the htmx registry so cell hover shows a tooltip + active
+// highlight, exactly like the bar/line/pie demos.
+func HeatmapDemos() []Demo {
 	margin := core.Margin{Top: 60, Right: 90, Bottom: 30, Left: 90}
-	return []HeatmapDemo{
+	return []Demo{
 		{
 			ID:          "heatmap-sequential",
-			Title:       "Sequential",
-			Description: "Default sequential color scale (brown→blue-green) with value labels.",
+			Title:       "Sequential (hover a cell)",
+			Description: "Default sequential color scale with value labels. Hover a cell for a tooltip; the rest dim.",
+			Kind:        htmx.KindHeatmap,
 			Props: heatmap.HeatMapProps{
 				Width: commonChartWidth, Height: commonChartHeight,
 				Margin: margin, Data: heatmapData(),
@@ -31,23 +25,25 @@ func HeatmapDemos() []HeatmapDemo {
 		},
 		{
 			ID:          "heatmap-diverging",
-			Title:       "Diverging + border",
-			Description: "Diverging red-yellow-blue scale, cell borders, and a continuous legend.",
+			Title:       "Diverging + border + legend",
+			Description: "Diverging red-yellow-blue scale, cell borders, and a bottom-anchored continuous legend.",
+			Kind:        htmx.KindHeatmap,
 			Props: heatmap.HeatMapProps{
 				Width: commonChartWidth, Height: commonChartHeight,
-				Margin:      margin,
+				Margin:      core.Margin{Top: 60, Right: 90, Bottom: 80, Left: 90},
 				Data:        heatmapData(),
 				Colors:      heatmap.HeatMapColorConfig{Type: "diverging", Scheme: "red_yellow_blue"},
 				BorderWidth: 1,
 				Legends: []heatmap.HeatMapLegend{
-					{Anchor: legends.LegendAnchorBottom, TranslateY: 30, Length: 240, Thickness: 12, Title: "Value"},
+					{Anchor: legends.LegendAnchorBottom, TranslateY: 52, Length: 260, Thickness: 12, Title: "Value"},
 				},
 			},
 		},
 		{
 			ID:          "heatmap-no-labels",
 			Title:       "Labels off, squared cells",
-			Description: "EnableLabels=false and ForceSquare=true for a compact square grid.",
+			Description: "EnableLabels=false and ForceSquare=true for a compact square grid. Hover still works.",
+			Kind:        htmx.KindHeatmap,
 			Props: heatmap.HeatMapProps{
 				Width: commonChartWidth, Height: commonChartHeight,
 				Margin:       margin,

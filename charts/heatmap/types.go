@@ -128,6 +128,13 @@ type HeatMapProps struct {
 	Theme  *theming.Theme
 	Layers []HeatMapLayerId
 
+	// Interactivity (htmx). When IsInteractive is true and ChartID is set,
+	// cells with data emit hx-* hover attributes. HoveredKey is the cell id
+	// (serieId.x) currently hovered, which drives the active/dim opacity.
+	IsInteractive bool
+	ChartID       string
+	HoveredKey    string
+
 	Role            string
 	AriaLabel       string
 	AriaLabelledBy  string

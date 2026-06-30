@@ -67,6 +67,8 @@ func UseHeatMap(props HeatMapProps) HeatMapResult {
 	format := valueFormatter(props.ValueFormat)
 	labelsEnabled := props.LabelsEnabled()
 
+	hovering := props.HoveredKey != ""
+
 	cells := make([]ComputedCell, 0, len(xValues)*len(serieIDs))
 	for _, serie := range props.Data {
 		yCenter := yScale.Call(serie.ID) + cellHeight/2 + offsetY
@@ -74,6 +76,7 @@ func UseHeatMap(props HeatMapProps) HeatMapResult {
 			color := props.EmptyColor
 			formatted := ""
 			label := ""
+			id := serie.ID + "." + d.X
 			if d.Y != nil {
 				color = colorScale(*d.Y)
 				formatted = format(*d.Y)
@@ -81,9 +84,18 @@ func UseHeatMap(props HeatMapProps) HeatMapResult {
 					label = formatted
 				}
 			}
+			// Opacity: dim non-hovered cells when a cell is hovered.
+			opacity := props.Opacity
+			if hovering {
+				if id == props.HoveredKey {
+					opacity = props.ActiveOpacity
+				} else {
+					opacity = props.InactiveOpacity
+				}
+			}
 			ctx := map[string]any{"color": color}
 			cells = append(cells, ComputedCell{
-				ID:             serie.ID + "." + d.X,
+				ID:             id,
 				SerieID:        serie.ID,
 				X:              d.X,
 				Value:          d.Y,
@@ -93,7 +105,7 @@ func UseHeatMap(props HeatMapProps) HeatMapResult {
 				Width:          cellWidth,
 				Height:         cellHeight,
 				Color:          color,
-				Opacity:        props.Opacity,
+				Opacity:        opacity,
 				BorderColor:    borderGen(ctx),
 				Label:          label,
 				LabelTextColor: labelGen(ctx),

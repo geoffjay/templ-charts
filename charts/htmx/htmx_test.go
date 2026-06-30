@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/line"
@@ -69,6 +70,21 @@ func newPieRegistry(t *testing.T) *htmx.Registry {
 			map[string]any{"id": "A", "value": float64(10)},
 			map[string]any{"id": "B", "value": float64(20)},
 			map[string]any{"id": "C", "value": float64(30)},
+		},
+	})
+	return r
+}
+
+func pf(v float64) *float64 { return &v }
+
+func newHeatmapRegistry(t *testing.T) *htmx.Registry {
+	t.Helper()
+	r := htmx.NewRegistry()
+	r.RegisterHeatmap("demo-heatmap", heatmap.HeatMapProps{
+		Width: 400, Height: 300,
+		Data: []heatmap.HeatMapSerie{
+			{ID: "Japan", Data: []heatmap.HeatMapDatum{{X: "Train", Y: pf(10)}, {X: "Car", Y: pf(20)}}},
+			{ID: "USA", Data: []heatmap.HeatMapDatum{{X: "Train", Y: pf(30)}, {X: "Car", Y: nil}}},
 		},
 	})
 	return r
@@ -397,4 +413,45 @@ func contains(xs []string, v string) bool {
 		}
 	}
 	return false
+}
+
+func TestHeatmapFullRenderEmitsHoverAttrs(t *testing.T) {
+	h := htmx.NewHandler(newHeatmapRegistry(t))
+	out, err := h.RenderFull("demo-heatmap")
+	if err != nil {
+		t.Fatalf("RenderFull: %v", err)
+	}
+	// Cells with data emit a hover hx-get; the nil cell (USA.Car) does not.
+	if !strings.Contains(out, `hx-get="/charts/demo-heatmap/hover?cell=Japan.Train"`) {
+		t.Errorf("expected hover hx-get on a data cell")
+	}
+	if strings.Contains(out, "cell=USA.Car") {
+		t.Errorf("the empty (nil) cell must not be hoverable")
+	}
+}
+
+func TestHeatmapHoverReturnsTooltipAndOOB(t *testing.T) {
+	h := htmx.NewHandler(newHeatmapRegistry(t))
+	rec := do(t, h, http.MethodGet, "/charts/demo-heatmap/hover?cell=Japan.Train")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "Japan - Train") {
+		t.Errorf("tooltip missing the cell label %q", "Japan - Train")
+	}
+	if !strings.Contains(body, `hx-swap-oob="innerHTML:#chart-demo-heatmap"`) {
+		t.Errorf("response missing the OOB chart swap")
+	}
+	if !strings.Contains(body, "<svg") {
+		t.Errorf("OOB swap missing the re-rendered svg")
+	}
+}
+
+func TestHeatmapHoverMissingCellIs400(t *testing.T) {
+	h := htmx.NewHandler(newHeatmapRegistry(t))
+	rec := do(t, h, http.MethodGet, "/charts/demo-heatmap/hover")
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("status = %d, want 400 for missing cell", rec.Code)
+	}
 }

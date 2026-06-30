@@ -6,6 +6,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
 )
@@ -28,6 +29,10 @@ func renderFull(inst *ChartInstance) (string, error) {
 		props := inst.Props.(pie.PieProps)
 		applyPieState(&props, inst.ID, st)
 		return renderComponent(pie.Pie(props))
+	case KindHeatmap:
+		props := inst.Props.(heatmap.HeatMapProps)
+		applyHeatmapState(&props, inst.ID, st)
+		return renderComponent(heatmap.HeatMap(props))
 	}
 	return "", errUnknownKind
 }
@@ -80,6 +85,14 @@ func applyPieState(props *pie.PieProps, id string, st State) {
 			}
 		}
 	}
+}
+
+// applyHeatmapState overlays the per-instance state onto a heatmap.HeatMapProps
+// clone (the hovered cell drives the active/dim opacity).
+func applyHeatmapState(props *heatmap.HeatMapProps, id string, st State) {
+	props.ChartID = id
+	props.IsInteractive = true
+	props.HoveredKey = st.HoveredKey
 }
 
 // renderComponent renders a templ.Component to a string.

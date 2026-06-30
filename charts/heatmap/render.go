@@ -2,6 +2,8 @@ package heatmap
 
 import (
 	"context"
+	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -79,7 +81,7 @@ func renderLayers(props HeatMapProps, result HeatMapResult, dims core.Dimensions
 		case HeatMapLayerCells:
 			b.WriteString(renderCellsLayer(props, result))
 		case HeatMapLayerLegends:
-			b.WriteString(renderLegendsLayer(props, result))
+			b.WriteString(renderLegendsLayer(props, result, dims))
 		case HeatMapLayerAnnotations:
 			// Annotations deferred (no heatmap annotation specs in v2).
 		}
@@ -124,7 +126,10 @@ func renderAxesLayer(props HeatMapProps, result HeatMapResult, theme *theming.Th
 	}))
 }
 
-// resolveAxis builds an axes.AxisProps positioned at (originX, originY).
+// resolveAxis builds an axes.AxisProps positioned at (originX, originY),
+// substituting the default tick size/padding so labels sit outside the grid
+// (an empty AxisProps{} otherwise leaves TickSize/TickPadding at 0, dropping
+// the labels onto the grid edge).
 func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length, originX, originY float64, ticksPos string) *axes.AxisProps {
 	if props == nil {
 		return nil
@@ -138,23 +143,36 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 	if out.TicksPosition == "" {
 		out.TicksPosition = ticksPos
 	}
+	if out.TickSize == 0 && out.TickPadding == 0 {
+		out.TickSize = axes.DefaultAxisProps.TickSize
+		out.TickPadding = axes.DefaultAxisProps.TickPadding
+	}
 	return &out
 }
 
 func renderCellsLayer(props HeatMapProps, result HeatMapResult) string {
 	var s strings.Builder
+	interactive := props.IsInteractive && props.ChartID != ""
 	for _, cell := range result.Cells {
-		s.WriteString(renderComponent(HeatMapCell(HeatMapCellProps{
+		cp := HeatMapCellProps{
 			Cell:         cell,
 			BorderWidth:  props.BorderWidth,
 			BorderRadius: props.BorderRadius,
 			EnableLabel:  props.LabelsEnabled(),
-		})))
+		}
+		// Only cells with data are hoverable.
+		if interactive && cell.Value != nil {
+			cp.HxGet = fmt.Sprintf("/charts/%s/hover?cell=%s", props.ChartID, url.QueryEscape(cell.ID))
+			cp.HxTrigger = "mouseenter"
+			cp.HxSwap = "innerHTML"
+			cp.HxTarget = fmt.Sprintf("#tooltip-%s", props.ChartID)
+		}
+		s.WriteString(renderComponent(HeatMapCell(cp)))
 	}
 	return s.String()
 }
 
-func renderLegendsLayer(props HeatMapProps, result HeatMapResult) string {
+func renderLegendsLayer(props HeatMapProps, result HeatMapResult, dims core.Dimensions) string {
 	if len(props.Legends) == 0 {
 		return ""
 	}
@@ -169,16 +187,18 @@ func renderLegendsLayer(props HeatMapProps, result HeatMapResult) string {
 			thickness = 16
 		}
 		s.WriteString(renderComponent(legends.ContinuousColorsLegendSvg(legends.ContinuousColorsLegendProps{
-			Scale:      result.ColorScale,
-			Min:        result.MinValue,
-			Max:        result.MaxValue,
-			Width:      length,
-			Height:     thickness,
-			Anchor:     lg.Anchor,
-			TranslateX: lg.TranslateX,
-			TranslateY: lg.TranslateY,
-			Title:      lg.Title,
-			Samples:    32,
+			Scale:       result.ColorScale,
+			Min:         result.MinValue,
+			Max:         result.MaxValue,
+			Width:       length,
+			Height:      thickness,
+			Anchor:      lg.Anchor,
+			TranslateX:  lg.TranslateX,
+			TranslateY:  lg.TranslateY,
+			Title:       lg.Title,
+			Samples:     32,
+			ChartWidth:  dims.InnerWidth,
+			ChartHeight: dims.InnerHeight,
 		})))
 	}
 	return s.String()

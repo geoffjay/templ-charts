@@ -108,6 +108,11 @@ type ContinuousColorsLegendProps struct {
 	Title      string
 	// Number of discrete color samples along the gradient bar.
 	Samples int
+	// ChartWidth/ChartHeight are the chart's inner dimensions, used to resolve
+	// the anchor position. When both are 0 the legend is placed at the origin
+	// (offset only by TranslateX/TranslateY).
+	ChartWidth  float64
+	ChartHeight float64
 }
 
 // ContinuousColorsLegendDefaults mirrors @nivo/legends
