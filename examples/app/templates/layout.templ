@@ -65,6 +65,18 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>calendar</a>
 					<a
+						href="/radar"
+						if props.Nav == "radar" {
+							class="active"
+						}
+					>radar</a>
+					<a
+						href="/radial-bar"
+						if props.Nav == "radial-bar" {
+							class="active"
+						}
+					>radial-bar</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"

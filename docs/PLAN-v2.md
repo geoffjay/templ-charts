@@ -286,7 +286,15 @@ template/CSS:
    calendar (ported date math, quantized colors, month/year legends). Each has a
    full package, golden tests, and a demo page. *Deferred within this phase*:
    calendar's month outline-path border, and waffle's polygon "areas" layer.
-3. **Activate `polar-axes`** → radar → radial-bar.
+3. **Activate `polar-axes`** ✅ *(done)*: radar (linear radius scale + projected
+   closed polygons via the `linearClosed` curve, circular/polygon grid levels,
+   index labels, dots, legend) and radial-bar (stacked arcs via `charts/arcs`,
+   background tracks, and `polar-axes` PolarGrid/RadialAxis/CircularAxis). Added
+   `scales.NewLinearScaleWithRange`/`NewBandScaleWithRange` so the polar charts
+   can map onto angle/radius ranges (the gap noted in `PolarGridProps`). Each has
+   a full package, golden tests, and a demo page. *Deferred within this phase*:
+   the interactive `slices` (radar) / hover-tooltip (radial-bar) layers, which
+   arrive with the Phase 5 client layer.
 4. **Cartesian batch**: scatterplot → stream → bullet → funnel → boxplot.
 5. **Interactivity layer**: ship the client-side hover script; migrate `line`
    mesh/slice hover; wire all new charts' hover tooltips to it.

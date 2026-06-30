@@ -15,6 +15,8 @@ import (
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/radar"
+	"github.com/geoffjay/templ-charts/charts/radialbar"
 	"github.com/geoffjay/templ-charts/charts/waffle"
 	"github.com/geoffjay/templ-charts/examples/app/demos"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
@@ -72,6 +74,8 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/heatmap", Title: "Heatmap", Description: "2D value grid: sequential/diverging color scales, labels, borders, continuous legend."},
 			{Href: "/waffle", Title: "Waffle", Description: "Part-of-whole cell grid: fill direction, borders, legend (built on charts/grid)."},
 			{Href: "/calendar", Title: "Calendar", Description: "Day-grid heatmap over a date range: quantized colors, month/year legends, horizontal/vertical."},
+			{Href: "/radar", Title: "Radar", Description: "Polar line/area chart: values per key around shared indices, circular/polygon grids, dots, legend."},
+			{Href: "/radial-bar", Title: "Radial bar", Description: "Stacked bars as polar arcs (charts/polar-axes + charts/arcs): tracks, radial/circular axes, labels."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -191,6 +195,48 @@ func (a *App) Calendar(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Calendar", Nav: "calendar"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Calendar heatmap demos: a day grid over a date range with quantized colors, month/year legends, horizontal and vertical layouts. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Radar handles GET /radar: the radar demos page (static SVG).
+func (a *App) Radar(w http.ResponseWriter, r *http.Request) {
+	ds := demos.RadarDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := radar.Radar(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: b.String(), Interactive: false,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Radar", Nav: "radar"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Radar demos: values per key plotted around shared indices, with circular or polygon grid levels, filled areas, dots, and an optional legend. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// RadialBar handles GET /radial-bar: the radial-bar demos page (static SVG).
+func (a *App) RadialBar(w http.ResponseWriter, r *http.Request) {
+	ds := demos.RadialBarDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := radialbar.RadialBar(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: b.String(), Interactive: false,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Radial bar", Nav: "radial-bar"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Radial-bar demos: stacked bars drawn as arcs in polar space (built on charts/polar-axes + charts/arcs), with background tracks, radial/circular axes, optional labels, and a legend. Static SVG.",
 		Cards: cards,
 	}))
 }

@@ -28,6 +28,8 @@ func main() {
 	mux.HandleFunc("/heatmap", app.Heatmap)
 	mux.HandleFunc("/waffle", app.Waffle)
 	mux.HandleFunc("/calendar", app.Calendar)
+	mux.HandleFunc("/radar", app.Radar)
+	mux.HandleFunc("/radial-bar", app.RadialBar)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 
