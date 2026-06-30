@@ -330,7 +330,13 @@ template/CSS:
    `ResizeObserver` re-fetch for pixel-accurate re-render on axes-heavy charts —
    cosmetic fluid scaling is already fully covered by `Responsive`, so this is
    left for a later pass.
-7. **Demo pages**, `README`/`docs` updates, golden regeneration.
+7. **Demo pages**, `README`/`docs` updates, golden regeneration ✅ *(done)*:
+   a demo page per chart family is wired (§9); the root `README`, the demo
+   `examples/app/README`, and the demo index intro are updated for the v2
+   catalog + hybrid interactivity + a11y; the `make golden` target now covers
+   every golden-owning package and all snapshots are regenerated/current
+   (including the previously stale `heatmap-basic` axis-tick offsets). `make
+   ci` is fully green.
 
 ## 11. Explicitly deferred (v3+)
 

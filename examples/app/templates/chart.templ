@@ -49,8 +49,12 @@ type IndexLink struct {
 templ IndexPage(props IndexPageProps) {
 	<p class="intro">
 		templ-charts is a Go library wrapping nivo's chart concepts as templ
-		components generating server-side SVG. This demo app shows the bar,
-		line, and pie chart types with HTMX-backed interactivity.
+		components generating server-side SVG. This demo app shows thirteen
+		chart families — bar, line, pie, heatmap, waffle, calendar, radar,
+		radial-bar, scatterplot, stream, bullet, funnel, and box plot — with a
+		hybrid interactivity model: ephemeral hover (tooltips, crosshair) runs
+		client-side from data attributes, while state changes (series toggle,
+		active arc) use HTMX.
 	</p>
 	<ul class="list">
 		for _, p := range props.Pages {

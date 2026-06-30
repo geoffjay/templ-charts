@@ -48,7 +48,11 @@ lint: vet fmt
 ## it to other packages makes `go test` reject the unknown flag, so we scope
 ## the regeneration to the packages that own golden snapshots.
 golden:
-	go test ./charts/bar ./charts/line ./charts/pie ./charts/arcs -update
+	go test ./charts/arcs ./charts/bar ./charts/line ./charts/pie \
+		./charts/heatmap ./charts/waffle ./charts/calendar \
+		./charts/radar ./charts/radialbar \
+		./charts/scatterplot ./charts/stream ./charts/bullet ./charts/funnel ./charts/boxplot \
+		-update
 
 ## Run tests with coverage, writing a coverage profile + HTML report.
 cover:

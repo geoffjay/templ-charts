@@ -2,17 +2,27 @@
 
 A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart
 concepts as [templ](https://github.com/a-h/templ) components generating
-**server-side SVG**. v1 ships **bar**, **line**, and **pie** charts plus an
-HTMX-backed interactivity layer and a runnable demo app.
+**server-side SVG**. It ships **thirteen** chart families — **bar**, **line**,
+**pie**, **heatmap**, **waffle**, **calendar**, **radar**, **radial-bar**,
+**scatterplot**, **stream**, **bullet**, **funnel**, and **box plot** — a
+hybrid interactivity layer, responsive + accessible output, and a runnable
+demo app.
 
 - **Render** charts as SVG strings from Go — no Canvas, no JS bundle.
-- **Interact** via [HTMX](https://htmx.org): hover tooltips, series toggle,
-  active-arc highlight, and slice crosshairs are server-rendered fragments.
+- **Interact** with a hybrid model: ephemeral hover (tooltips, crosshair,
+  nearest-point hit-testing) runs client-side from `data-*` attributes via a
+  tiny dependency-free script (`charts/interact`); state changes (series
+  toggle, active-arc) use [HTMX](https://htmx.org) server fragments.
+- **Scale** fluidly with the `Responsive` prop (viewBox + `width:100%`, zero
+  JS), and stay **accessible** with `role="img"`, `<title>`/`<desc>`, and
+  ARIA labels on every chart.
 - **Theme** with a nivo-faithful theme model (default, dark, custom).
 - **Port** d3-shape / d3-scale / d3-array / d3-format / d3-time-format /
   d3-color to pure Go under `internal/d3/` (golden-tested against d3 output).
 
-See [`docs/PLAN.md`](docs/PLAN.md) for the full design.
+See [`docs/PLAN.md`](docs/PLAN.md) for the v1 design and
+[`docs/PLAN-v2.md`](docs/PLAN-v2.md) for the v2 chart catalog + interactivity
+and accessibility work.
 
 ## Quickstart
 
@@ -20,9 +30,11 @@ See [`docs/PLAN.md`](docs/PLAN.md) for the full design.
 make run-demo    # → http://localhost:8080
 ```
 
-Browse `/bar`, `/line`, `/pie`, `/palettes`, and `/themes`. Hover a
-bar/arc/line slice for a tooltip; click a legend item to toggle a series. The
-`/palettes` page is the full color-palette catalog applied to bars.
+Browse a page per chart family — `/bar`, `/line`, `/pie`, `/heatmap`,
+`/waffle`, `/calendar`, `/radar`, `/radial-bar`, `/scatterplot`, `/stream`,
+`/bullet`, `/funnel`, `/boxplot` — plus `/palettes` and `/themes`. Hover any
+mark for a tooltip (client-side); click a legend item to toggle a series
+(HTMX). The `/palettes` page is the full color-palette catalog applied to bars.
 
 ## Usage
 
@@ -44,9 +56,30 @@ func render() (string, error) {
 }
 ```
 
-For interactivity, register chart instances with `charts/htmx.Registry` and
-mount `htmx.Handler` — see [`examples/app`](examples/app) for a complete
-wiring.
+### Interactivity
+
+Hover interactions are **client-side**: set `Interactive: true` on a chart's
+props (or `ClientHover: true` for `line` mesh/slice) so each mark emits a
+`data-tc-tooltip`, and load the script once per page:
+
+```go
+import "github.com/geoffjay/templ-charts/charts/interact"
+// in your layout <head> or before </body>:
+@interact.ScriptTag()
+```
+
+The script (no dependencies) shows tooltips, tracks the line crosshair, and
+does nearest-point hit-testing entirely in the browser. **State changes**
+(series toggle, active-arc) stay server-side: register chart instances with
+`charts/htmx.Registry` and mount `htmx.Handler` — see
+[`examples/app`](examples/app) for a complete wiring.
+
+### Accessibility & responsiveness
+
+Every chart accepts `Responsive bool` (fluid `viewBox` scaling, zero JS) and
+the a11y props `Role` (defaults to `img`), `Title`/`Desc` (rendered as
+`<title>`/`<desc>` for the accessible name + description), `AriaLabel`,
+`AriaLabelledBy`, `AriaDescribedBy`, and `IsFocusable`.
 
 ## Color palettes
 
@@ -91,12 +124,15 @@ and the `/palettes` page in the demo app for a visual gallery.
 ```
 charts/         library packages (mirror nivo names): core, theming, scales,
                 colors, axes, rects, arcs, text, tooltip, legends,
-                annotations, static, bar, line, pie, htmx, grid, polar-axes
+                annotations, interact, static, grid, polar-axes, htmx, and the
+                chart types: bar, line, pie, heatmap, waffle, calendar, radar,
+                radialbar, scatterplot, stream, bullet, funnel, boxplot
 internal/d3/    pure-Go ports of d3-shape, d3-scale, d3-array, d3-format,
                 d3-time-format, d3-color
 internal/golden small snapshot-test helper
 examples/app/   runnable demo app (stdlib net/http)
-docs/PLAN.md    full implementation plan
+docs/PLAN.md    v1 implementation plan
+docs/PLAN-v2.md v2 plan (chart catalog, interactivity, a11y)
 contrib/nivo/   upstream nivo clone (gitignored, reference only)
 ```
 
@@ -126,13 +162,13 @@ make golden
 
 - Unit tests per foundational package (scales, colors, theming, axes, arcs)
   assert geometry and color output against known d3 values.
-- Golden **SVG snapshot** tests for `Bar`, `Line`, `Pie`
-  (`charts/{bar,line,pie}/testdata/golden/`).
+- Golden **SVG snapshot** tests for every chart type
+  (`charts/{bar,line,pie,heatmap,waffle,calendar,radar,radialbar,scatterplot,stream,bullet,funnel,boxplot}/testdata/golden/`).
 - Golden **path-string** tests for `GenerateSvgArc`, `BuildRoundedRectPath`,
   and `d3.Shape.Arc` (the arc-with-cornerRadius port is validated against
   real d3-shape output).
-- `charts/htmx` and `examples/app/handlers` cover the HTMX endpoints and
-  page rendering.
+- `charts/interact` covers the client hover script; `charts/htmx` and
+  `examples/app/handlers` cover the HTMX endpoints and page rendering.
 
 Run everything:
 
@@ -149,5 +185,10 @@ make ci
 
 ## Status
 
-v1 complete. See `docs/PLAN.md` §9 for the scope summary (scaffold-only:
-`grid`, `polar-axes`; skipped: Canvas).
+v2 complete: thirteen chart families, the hybrid client/server interactivity
+layer, responsive scaling, and the accessibility pass. The v1 scaffolds
+(`grid`, `polar-axes`) are now activated by the heatmap/waffle/calendar and
+radar/radial-bar charts. Still SVG-only (Canvas remains out of scope). See
+[`docs/PLAN-v2.md`](docs/PLAN-v2.md) §11 for explicitly deferred charts
+(treemap, sunburst, sankey, chord, geo, voronoi-mesh hover, …) and the
+optional `ResizeObserver` re-fetch.
