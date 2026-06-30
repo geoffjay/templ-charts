@@ -30,6 +30,11 @@ func main() {
 	mux.HandleFunc("/calendar", app.Calendar)
 	mux.HandleFunc("/radar", app.Radar)
 	mux.HandleFunc("/radial-bar", app.RadialBar)
+	mux.HandleFunc("/scatterplot", app.ScatterPlot)
+	mux.HandleFunc("/stream", app.Stream)
+	mux.HandleFunc("/bullet", app.Bullet)
+	mux.HandleFunc("/funnel", app.Funnel)
+	mux.HandleFunc("/boxplot", app.BoxPlot)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 

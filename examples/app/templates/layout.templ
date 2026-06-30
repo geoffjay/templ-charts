@@ -77,6 +77,36 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>radial-bar</a>
 					<a
+						href="/scatterplot"
+						if props.Nav == "scatterplot" {
+							class="active"
+						}
+					>scatterplot</a>
+					<a
+						href="/stream"
+						if props.Nav == "stream" {
+							class="active"
+						}
+					>stream</a>
+					<a
+						href="/bullet"
+						if props.Nav == "bullet" {
+							class="active"
+						}
+					>bullet</a>
+					<a
+						href="/funnel"
+						if props.Nav == "funnel" {
+							class="active"
+						}
+					>funnel</a>
+					<a
+						href="/boxplot"
+						if props.Nav == "boxplot" {
+							class="active"
+						}
+					>boxplot</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"

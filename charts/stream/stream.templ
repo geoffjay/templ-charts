@@ -1,0 +1,28 @@
+package stream
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Stream renders a complete stream SVG: dimensions → UseStream → layer pipeline
+// (grid → axes → layers → legends) → SvgWrapper. Mirrors @nivo/stream Stream.
+// Static render (the interactive slices/dots layers arrive with the Phase 5
+// client layer).
+templ Stream(props StreamProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseStream(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderLayers(props, result, dims, theme))
+}

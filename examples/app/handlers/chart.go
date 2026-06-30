@@ -11,12 +11,17 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/bar"
+	"github.com/geoffjay/templ-charts/charts/boxplot"
+	"github.com/geoffjay/templ-charts/charts/bullet"
 	"github.com/geoffjay/templ-charts/charts/calendar"
+	"github.com/geoffjay/templ-charts/charts/funnel"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
 	"github.com/geoffjay/templ-charts/charts/radar"
 	"github.com/geoffjay/templ-charts/charts/radialbar"
+	"github.com/geoffjay/templ-charts/charts/scatterplot"
+	"github.com/geoffjay/templ-charts/charts/stream"
 	"github.com/geoffjay/templ-charts/charts/waffle"
 	"github.com/geoffjay/templ-charts/examples/app/demos"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
@@ -76,6 +81,11 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/calendar", Title: "Calendar", Description: "Day-grid heatmap over a date range: quantized colors, month/year legends, horizontal/vertical."},
 			{Href: "/radar", Title: "Radar", Description: "Polar line/area chart: values per key around shared indices, circular/polygon grids, dots, legend."},
 			{Href: "/radial-bar", Title: "Radial bar", Description: "Stacked bars as polar arcs (charts/polar-axes + charts/arcs): tracks, radial/circular axes, labels."},
+			{Href: "/scatterplot", Title: "Scatterplot", Description: "{x,y} nodes on linear/time scales: grid, axes, per-series colors, legend."},
+			{Href: "/stream", Title: "Stream", Description: "Stacked areas with wiggle/silhouette/expand offsets and a smooth curve."},
+			{Href: "/bullet", Title: "Bullet", Description: "KPI ranges + measure bars + markers on a shared value scale, per-row axis."},
+			{Href: "/funnel", Title: "Funnel", Description: "Ordered parts as smooth/linear trapezoids with separators and labels."},
+			{Href: "/boxplot", Title: "Box plot", Description: "Quantile box + whisker glyphs from raw observations (d3/array.Quantile)."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -237,6 +247,96 @@ func (a *App) RadialBar(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Radial bar", Nav: "radial-bar"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Radial-bar demos: stacked bars drawn as arcs in polar space (built on charts/polar-axes + charts/arcs), with background tracks, radial/circular axes, optional labels, and a legend. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// ScatterPlot handles GET /scatterplot: the scatterplot demos page (static SVG).
+func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
+	ds := demos.ScatterPlotDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := scatterplot.ScatterPlot(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Scatterplot", Nav: "scatterplot"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Scatterplot demos: series of {x,y} nodes on linear scales with grid, axes, and a legend. Static SVG (point hover arrives with the Phase 5 client layer).",
+		Cards: cards,
+	}))
+}
+
+// Stream handles GET /stream: the stream demos page (static SVG).
+func (a *App) Stream(w http.ResponseWriter, r *http.Request) {
+	ds := demos.StreamDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := stream.Stream(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Stream", Nav: "stream"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Stream demos: stacked areas with configurable offset (wiggle/silhouette/expand) and a smooth curve. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Bullet handles GET /bullet: the bullet demos page (static SVG).
+func (a *App) Bullet(w http.ResponseWriter, r *http.Request) {
+	ds := demos.BulletDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := bullet.Bullet(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Bullet", Nav: "bullet"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Bullet demos: stacked ranges, measure bars, and comparative markers on a shared value scale, with a per-row axis. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Funnel handles GET /funnel: the funnel demos page (static SVG).
+func (a *App) Funnel(w http.ResponseWriter, r *http.Request) {
+	ds := demos.FunnelDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := funnel.Funnel(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Funnel", Nav: "funnel"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Funnel demos: ordered parts with smooth or linear trapezoid bands, side borders, separators, and centered labels. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// BoxPlot handles GET /boxplot: the boxplot demos page (static SVG).
+func (a *App) BoxPlot(w http.ResponseWriter, r *http.Request) {
+	ds := demos.BoxPlotDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := boxplot.BoxPlot(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Box plot", Nav: "boxplot"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Box-plot demos: raw observations summarized to quantiles (q10/q25/median/q75/q90 via internal/d3/array.Quantile) and drawn as box + whisker glyphs. Static SVG.",
 		Cards: cards,
 	}))
 }

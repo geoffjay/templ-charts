@@ -295,7 +295,15 @@ template/CSS:
    a full package, golden tests, and a demo page. *Deferred within this phase*:
    the interactive `slices` (radar) / hover-tooltip (radial-bar) layers, which
    arrive with the Phase 5 client layer.
-4. **Cartesian batch**: scatterplot → stream → bullet → funnel → boxplot.
+4. **Cartesian batch** ✅ *(done)*: scatterplot (XY scales + `core.DotsItem`),
+   stream (stacked areas with wiggle/silhouette/expand offsets via `d3.Stack` +
+   the area generator), bullet (range/measure rects + marker lines on a per-row
+   value scale, sequential `seq:*` colors), funnel (smooth/linear trapezoid
+   bands via the transposed area generator + side borders + separators), and
+   boxplot (per-group quantile summaries via `d3/array.QuantileSorted` → box +
+   whisker glyphs). Each has a full package, golden tests, and a demo page.
+   *Deferred within this phase* (Phase 5 client layer): scatterplot point/mesh
+   hover, stream slices/dots, and the bullet/funnel/boxplot hover tooltips.
 5. **Interactivity layer**: ship the client-side hover script; migrate `line`
    mesh/slice hover; wire all new charts' hover tooltips to it.
 6. **Responsive + a11y** pass across v1 + v2 charts. *Responsive done* (the

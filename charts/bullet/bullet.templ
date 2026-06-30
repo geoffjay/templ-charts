@@ -1,0 +1,28 @@
+package bullet
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Bullet renders a complete bullet SVG: dimensions → UseBullet → one <g> per
+// row (ranges → measures → axis → markers → title) → SvgWrapper. Mirrors
+// @nivo/bullet Bullet. Static render (the interactive hover tooltip arrives
+// with the Phase 5 client layer).
+templ Bullet(props BulletProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseBullet(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderItems(props, result, theme))
+}
