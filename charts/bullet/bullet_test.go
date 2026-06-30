@@ -73,3 +73,14 @@ func TestBullet_Golden_Vertical(t *testing.T) {
 	out := render(t, p)
 	golden.Assert(t, "bullet-vertical", out)
 }
+
+func TestBullet_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive bullet should emit data-tc-tooltip")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive bullet must not emit data-tc-tooltip")
+	}
+}

@@ -44,6 +44,7 @@ func WaffleDemos() []WaffleDemo {
 				Rows:          10,
 				Columns:       10,
 				Data:          data,
+				Interactive:   true,
 				FillDirection: grid.GridFillBottom,
 				BorderWidth:   2,
 				Legends: []waffle.WaffleLegend{

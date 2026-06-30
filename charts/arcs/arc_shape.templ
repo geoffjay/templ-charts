@@ -19,6 +19,10 @@ type ArcShapeProps struct {
 	HxTarget  string
 	// AriaLabel, when non-empty, emits aria-label.
 	AriaLabel string
+	// DataTooltip, when non-empty, is the HTML shown by the client
+	// interactivity layer (charts/interact) on hover, emitted as a
+	// data-tc-tooltip attribute on the arc <path>.
+	DataTooltip string
 	// Animate, when true, emits a SMIL <animate> on attributeName="d" growing
 	// the outer radius from innerRadius to outerRadius (transitionMode
 	// "innerRadius"). AnimateFromPath is the pre-animation path; AnimateToPath
@@ -41,6 +45,9 @@ templ ArcShape(props ArcShapeProps) {
 		}
 		if props.AriaLabel != "" {
 			aria-label={ props.AriaLabel }
+		}
+		if props.DataTooltip != "" {
+			data-tc-tooltip={ props.DataTooltip }
 		}
 		if props.HxGet != "" {
 			hx-get={ props.HxGet }

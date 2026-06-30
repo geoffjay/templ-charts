@@ -2,14 +2,13 @@ package heatmap
 
 import (
 	"context"
-	"fmt"
-	"net/url"
 	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -171,12 +170,10 @@ func renderCellsLayer(props HeatMapProps, result HeatMapResult) string {
 			BorderRadius: props.BorderRadius,
 			EnableLabel:  props.LabelsEnabled(),
 		}
-		// Only cells with data are hoverable.
+		// Only cells with data are hoverable. v2 routes hover through the
+		// client interactivity layer (charts/interact) — no server round-trip.
 		if interactive && cell.Value != nil {
-			cp.HxGet = fmt.Sprintf("/charts/%s/hover?cell=%s", props.ChartID, url.QueryEscape(cell.ID))
-			cp.HxTrigger = "mouseenter"
-			cp.HxSwap = "innerHTML"
-			cp.HxTarget = fmt.Sprintf("#tooltip-%s", props.ChartID)
+			cp.Tooltip = interact.TooltipHTML(cell.Color, cell.SerieID+" - "+cell.X, cell.FormattedValue)
 		}
 		s.WriteString(renderComponent(HeatMapCell(cp)))
 	}

@@ -82,3 +82,14 @@ func TestStream_Golden_Expand(t *testing.T) {
 	out := render(t, p)
 	golden.Assert(t, "stream-expand", out)
 }
+
+func TestStream_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive stream should emit data-tc-tooltip")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive stream must not emit data-tc-tooltip")
+	}
+}

@@ -31,10 +31,11 @@ func RadarDemos() []RadarDemo {
 			Description: "Three wine varieties scored on five taste axes; default circular grid levels, filled areas, and per-point dots.",
 			Props: radar.RadarProps{
 				Width: commonChartHeight, Height: commonChartHeight,
-				Margin:  core.Margin{Top: 70, Right: 90, Bottom: 50, Left: 90},
-				Data:    data,
-				Keys:    keys,
-				IndexBy: "taste",
+				Margin:      core.Margin{Top: 70, Right: 90, Bottom: 50, Left: 90},
+				Data:        data,
+				Keys:        keys,
+				IndexBy:     "taste",
+				Interactive: true,
 			},
 		},
 		{

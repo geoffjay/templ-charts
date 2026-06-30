@@ -89,6 +89,10 @@ type FunnelProps struct {
 	// core.SvgWrapperProps.Responsive.
 	Responsive bool
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// part emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	Direction     FunnelDirection
 	Interpolation FunnelInterpolation
 	Spacing       float64

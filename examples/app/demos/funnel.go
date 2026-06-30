@@ -29,8 +29,9 @@ func FunnelDemos() []FunnelDemo {
 			Description: "Five funnel parts with smooth (curveBasis) edges, side borders, separators, and centered labels.",
 			Props: funnel.FunnelProps{
 				Width: commonChartWidth, Height: 460,
-				Margin: core.Margin{Top: 20, Right: 30, Bottom: 20, Left: 30},
-				Data:   data,
+				Margin:      core.Margin{Top: 20, Right: 30, Bottom: 20, Left: 30},
+				Data:        data,
+				Interactive: true,
 			},
 		},
 		{

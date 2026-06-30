@@ -2,12 +2,14 @@ package line
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -145,7 +147,7 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 			}
 		case LineLayerMesh:
 			if props.IsInteractive && props.UseMesh && props.EnableSlices == "" {
-				b.WriteString(renderMeshLayer(props, dims))
+				b.WriteString(renderMeshLayer(props, result, dims))
 			}
 		case LineLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
@@ -213,21 +215,69 @@ func renderPointsLayer(props LineProps, result LineResult) string {
 }
 
 func renderSlicesLayer(props LineProps, result LineResult) string {
-	return renderSlices(SlicesProps{
+	sp := SlicesProps{
 		Slices:  result.Slices,
 		Axis:    props.EnableSlices,
 		Debug:   props.DebugSlices,
 		ChartID: props.ChartID,
-	})
+	}
+	if props.ClientHover {
+		sp.ChartID = ""
+		sp.Tooltips = buildSliceTooltips(result.Slices)
+	}
+	return renderSlices(sp)
 }
 
-func renderMeshLayer(props LineProps, dims core.Dimensions) string {
-	return renderMesh(MeshProps{
+func renderMeshLayer(props LineProps, result LineResult, dims core.Dimensions) string {
+	mp := MeshProps{
 		Width:   dims.InnerWidth,
 		Height:  dims.InnerHeight,
 		Debug:   props.DebugMesh,
 		ChartID: props.ChartID,
-	})
+	}
+	if props.ClientHover {
+		mp.ChartID = ""
+		mp.DataMesh = buildMeshData(result.Points)
+	}
+	return renderMesh(mp)
+}
+
+// meshPointJSON is one nearest-point entry the client script consumes.
+type meshPointJSON struct {
+	X    float64 `json:"x"`
+	Y    float64 `json:"y"`
+	HTML string  `json:"html"`
+}
+
+// buildMeshData serializes the points into the data-tc-mesh JSON array.
+func buildMeshData(points []Point) string {
+	pts := make([]meshPointJSON, 0, len(points))
+	for _, p := range points {
+		pts = append(pts, meshPointJSON{
+			X:    p.X,
+			Y:    p.Y,
+			HTML: interact.TooltipHTML(p.Color, p.SeriesID, "x: "+p.Data.XFormatted+", y: "+p.Data.YFormatted),
+		})
+	}
+	b, err := json.Marshal(pts)
+	if err != nil {
+		return "[]"
+	}
+	return string(b)
+}
+
+// buildSliceTooltips maps each slice ID to a multi-row hover tooltip listing
+// its points' series + values.
+func buildSliceTooltips(slices []SliceData) map[string]string {
+	out := make(map[string]string, len(slices))
+	for _, s := range slices {
+		var b strings.Builder
+		for _, p := range s.Points {
+			b.WriteString(interact.TooltipHTML(p.Color, p.SeriesID, p.Data.YFormatted))
+		}
+		out[s.ID] = b.String()
+	}
+	return out
 }
 
 func renderCrosshairLayer(props LineProps, result LineResult, dims core.Dimensions, theme *theming.Theme) string {

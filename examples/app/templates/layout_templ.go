@@ -10,6 +10,8 @@ import (
 	templruntime "github.com/a-h/templ/runtime"
 )
 
+import "github.com/geoffjay/templ-charts/charts/interact"
+
 // Layout renders the HTML shell: doctype, head (title + inline CSS), the
 // htmx.org CDN script, the header nav, the main content, and a footer. The
 // page content is passed as a templ.Component so each page composes its own
@@ -45,7 +47,7 @@ func Layout(props LayoutProps, content templ.Component) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(pageTitle(props))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/layout.templ`, Line: 16, Col: 28}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/layout.templ`, Line: 18, Col: 28}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -64,6 +66,10 @@ func Layout(props LayoutProps, content templ.Component) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templ.Raw("<script>"+js+"</script>").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = interact.ScriptTag().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

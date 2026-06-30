@@ -67,6 +67,10 @@ type StreamProps struct {
 	Curve       core.CurveFactoryId
 	ValueFormat string
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// area layer emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	Colors      colors.OrdinalColorScaleConfig
 	FillOpacity float64
 	BorderWidth float64

@@ -8,6 +8,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 )
 
@@ -90,11 +91,15 @@ func renderCellsLayer(props WaffleProps, result WaffleResult) string {
 	// translate so each cell's X/Y stays in grid-local coordinates.
 	var inner strings.Builder
 	for _, cell := range result.Cells {
-		inner.WriteString(renderComponent(WaffleCellShape(WaffleCellShapeProps{
+		cp := WaffleCellShapeProps{
 			Cell:         cell,
 			BorderWidth:  props.BorderWidth,
 			BorderRadius: props.BorderRadius,
-		})))
+		}
+		if props.Interactive && cell.HasData {
+			cp.Tooltip = interact.TooltipHTML(cell.Color, cell.Label, "")
+		}
+		inner.WriteString(renderComponent(WaffleCellShape(cp)))
 	}
 	return fmt.Sprintf(`<g transform="translate(%s,%s)">%s</g>`, fmtW(result.GridX), fmtW(result.GridY), inner.String())
 }

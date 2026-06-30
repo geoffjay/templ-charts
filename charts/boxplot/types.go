@@ -106,6 +106,10 @@ type BoxPlotProps struct {
 
 	Layout BoxPlotLayout
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// box glyph emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	MinValue *float64
 	MaxValue *float64
 

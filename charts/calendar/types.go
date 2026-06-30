@@ -75,6 +75,10 @@ type CalendarProps struct {
 
 	Direction CalendarDirection
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// data day emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	// Colors is the quantize palette (value → bucket → color).
 	Colors     []string
 	EmptyColor string

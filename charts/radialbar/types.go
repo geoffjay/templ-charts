@@ -112,6 +112,10 @@ type RadialBarProps struct {
 	ShowCircularAxisInner *bool
 	ShowCircularAxisOuter *bool
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// bar arc emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	Colors      colors.OrdinalColorScaleConfig
 	BorderWidth float64
 	BorderColor colors.InheritedColorConfig

@@ -22,9 +22,10 @@ func BoxPlotDemos() []BoxPlotDemo {
 			Description: "Raw observations per group summarized to the five-number quantile summary (q10/q25/median/q75/q90) and drawn as box + whisker glyphs.",
 			Props: boxplot.BoxPlotProps{
 				Width: commonChartWidth, Height: commonChartHeight,
-				Margin:  core.Margin{Top: 30, Right: 30, Bottom: 40, Left: 60},
-				Data:    boxplotData(),
-				ColorBy: "group",
+				Margin:      core.Margin{Top: 30, Right: 30, Bottom: 40, Left: 60},
+				Data:        boxplotData(),
+				ColorBy:     "group",
+				Interactive: true,
 			},
 		},
 	}

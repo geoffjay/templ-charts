@@ -77,3 +77,17 @@ func TestWaffle_Golden(t *testing.T) {
 	})
 	golden.Assert(t, "waffle-basic", out)
 }
+
+func TestWaffle_InteractiveEmitsTooltip(t *testing.T) {
+	p := waffle.WaffleProps{
+		Width: 400, Height: 400, Total: 100, Rows: 10, Columns: 10, Data: sampleData(),
+		Interactive: true,
+	}
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive waffle should emit data-tc-tooltip")
+	}
+	p.Interactive = false
+	if strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("non-interactive waffle must not emit data-tc-tooltip")
+	}
+}

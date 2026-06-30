@@ -212,6 +212,38 @@ func TestLine_SlicesX(t *testing.T) {
 	}
 }
 
+func TestLine_ClientHoverMesh(t *testing.T) {
+	out := render(t, line.LineProps{
+		Width: 500, Height: 300,
+		Data:          sampleData(),
+		IsInteractive: true,
+		UseMesh:       true,
+		ClientHover:   true,
+	})
+	if !strings.Contains(out, "data-tc-mesh") {
+		t.Errorf("client-hover mesh should emit data-tc-mesh")
+	}
+	if strings.Contains(out, "hover?mesh=1") {
+		t.Errorf("client-hover mesh should not emit the htmx mesh round-trip")
+	}
+}
+
+func TestLine_ClientHoverSlices(t *testing.T) {
+	out := render(t, line.LineProps{
+		Width: 500, Height: 300,
+		Data:          sampleData(),
+		IsInteractive: true,
+		EnableSlices:  line.EnableSlicesX,
+		ClientHover:   true,
+	})
+	if !strings.Contains(out, "data-tc-tooltip") {
+		t.Errorf("client-hover slices should emit data-tc-tooltip")
+	}
+	if strings.Contains(out, "/slice?axis=") {
+		t.Errorf("client-hover slices should not emit the htmx slice round-trip")
+	}
+}
+
 func TestLine_SlicesDebug(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,

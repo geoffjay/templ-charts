@@ -94,6 +94,10 @@ type RadarProps struct {
 	Colors      colors.OrdinalColorScaleConfig
 	FillOpacity float64
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// dot emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	Legends []legends.LegendProps
 
 	Theme  *theming.Theme

@@ -32,6 +32,9 @@ type CalendarDayProps struct {
 	Day         ComputedDay
 	BorderWidth float64
 	BorderColor string
+	// Tooltip is the client-side hover HTML (charts/interact); emitted as
+	// data-tc-tooltip when non-empty.
+	Tooltip string
 }
 
 // CalendarDay renders one day cell as a <rect>. Mirrors @nivo/calendar
@@ -47,6 +50,10 @@ templ CalendarDay(props CalendarDayProps) {
 		if props.BorderWidth > 0 && props.BorderColor != "" {
 			stroke={ props.BorderColor }
 			stroke-width={ fmtC(props.BorderWidth) }
+		}
+		if props.Tooltip != "" {
+			data-tc-tooltip={ props.Tooltip }
+			style="cursor: pointer"
 		}
 	></rect>
 }

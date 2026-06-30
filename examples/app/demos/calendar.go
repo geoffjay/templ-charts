@@ -29,6 +29,7 @@ func CalendarDemos() []CalendarDemo {
 				Width: commonChartWidth, Height: 220,
 				Margin: core.Margin{Top: 40, Right: 20, Bottom: 10, Left: 40},
 				From:   from, To: to, Data: data,
+				Interactive: true,
 			},
 		},
 		{

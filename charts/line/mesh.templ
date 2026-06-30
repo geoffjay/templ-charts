@@ -12,6 +12,10 @@ type MeshProps struct {
 	Height  float64
 	Debug   bool
 	ChartID string
+	// DataMesh, when non-empty, is a JSON array of {x,y,html} points the client
+	// interactivity layer (charts/interact) uses for nearest-point hover +
+	// crosshair. When set, the htmx mesh round-trip is suppressed.
+	DataMesh string
 }
 
 // Mesh renders a transparent overlay <rect> for hover capture. Mirrors
@@ -37,6 +41,10 @@ templ Mesh(props MeshProps) {
 			stroke-width="1"
 			stroke-opacity="0.5"
 		}
+		if props.DataMesh != "" {
+			data-tc-mesh={ props.DataMesh }
+		}
+		else
 		if props.ChartID != "" {
 			hx-get={ fmt.Sprintf("/charts/%s/hover?mesh=1", props.ChartID) }
 			hx-trigger="mouseenter, mousemove throttle:40ms"

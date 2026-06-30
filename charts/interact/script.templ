@@ -1,0 +1,10 @@
+package interact
+
+// ScriptTag renders the client-side interactivity module inside a <script> tag,
+// to be included once per page (e.g. in the layout <head> or before </body>).
+// It has no dependencies and is safe to include even on pages with no
+// interactive charts — it only acts on .tc-chart containers whose elements
+// carry data-tc-* attributes.
+templ ScriptTag() {
+	@templ.Raw("<script>" + Script + "</script>")
+}

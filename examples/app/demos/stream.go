@@ -33,7 +33,7 @@ func StreamDemos() []StreamDemo {
 			Props: stream.StreamProps{
 				Width: commonChartWidth, Height: commonChartHeight,
 				Margin: core.Margin{Top: 30, Right: 30, Bottom: 40, Left: 50},
-				Data:   data, Keys: keys,
+				Data:   data, Keys: keys, Interactive: true,
 			},
 		},
 		{

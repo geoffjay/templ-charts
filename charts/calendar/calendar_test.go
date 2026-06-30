@@ -83,3 +83,14 @@ func TestCalendar_DerivesRangeFromData(t *testing.T) {
 func TestCalendar_Golden(t *testing.T) {
 	golden.Assert(t, "calendar-quarter", render(t, baseProps()))
 }
+
+func TestCalendar_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive calendar should emit data-tc-tooltip")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive calendar must not emit data-tc-tooltip")
+	}
+}

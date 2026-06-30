@@ -304,8 +304,20 @@ template/CSS:
    whisker glyphs). Each has a full package, golden tests, and a demo page.
    *Deferred within this phase* (Phase 5 client layer): scatterplot point/mesh
    hover, stream slices/dots, and the bullet/funnel/boxplot hover tooltips.
-5. **Interactivity layer**: ship the client-side hover script; migrate `line`
-   mesh/slice hover; wire all new charts' hover tooltips to it.
+5. **Interactivity layer** ✅ *(done)*: shipped `charts/interact` — a
+   dependency-free client-side module (`Script` / `ScriptTag`) that handles
+   ephemeral hover entirely in the browser off `data-tc-*` attributes:
+   element-delegation tooltips (any element with `data-tc-tooltip`) and
+   nearest-point **mesh** hover + crosshair (`data-tc-mesh`). It reuses the
+   `.tc-chart` / `.tc-chart-tooltip` conventions and lazily creates the tooltip
+   element for zero-markup static embeds. Shared components (`core.DotsItem`,
+   `arcs.ArcShape`) gained tooltip fields; all ten v2 charts gained an
+   `Interactive` flag that emits per-element tooltips (heatmap migrated off its
+   htmx hover); `line` gained `ClientHover` which routes mesh/slice through the
+   client layer (resolving the v1 NOTES.md per-mousemove round-trip) while
+   keeping legend toggle on the server. The demo loads the script once in
+   `layout.templ` and enables it across the new chart pages. Defaults are off,
+   so static (zero-JS) embedding and all existing goldens are unchanged.
 6. **Responsive + a11y** pass across v1 + v2 charts. *Responsive done* (the
    `Responsive` prop on `SvgWrapper`/all charts + the `htmx.Mount` container —
    see §6); the optional `ResizeObserver` re-fetch and the a11y pass remain.

@@ -9,6 +9,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	polaraxes "github.com/geoffjay/templ-charts/charts/polar-axes"
 	"github.com/geoffjay/templ-charts/charts/scales"
@@ -209,6 +210,9 @@ func renderBarsLayer(props RadialBarProps, result RadialBarResult, theme *themin
 		if props.BorderWidth > 0 {
 			sp.Stroke = getBorderColor(map[string]any{"color": bar.Color})
 			sp.StrokeWidth = props.BorderWidth
+		}
+		if props.Interactive {
+			sp.DataTooltip = interact.TooltipHTML(bar.Color, bar.GroupID+" - "+bar.Category, bar.FormattedValue)
 		}
 		items = append(items, arcs.ArcLayerItem{Arc: bar.Arc, Props: sp})
 	}

@@ -109,3 +109,14 @@ func TestRadar_Golden_Linear(t *testing.T) {
 	out := render(t, p)
 	golden.Assert(t, "radar-linear-rotated", out)
 }
+
+func TestRadar_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive radar should emit data-tc-tooltip")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive radar must not emit data-tc-tooltip")
+	}
+}

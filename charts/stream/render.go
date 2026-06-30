@@ -9,6 +9,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -169,6 +170,9 @@ func renderAreasLayer(props StreamProps, result StreamResult) string {
 		fmt.Fprintf(&b, `<path d="%s" fill="%s" fill-opacity="%s"`, layer.Path, layer.Color, fmtN(props.FillOpacity))
 		if props.BorderWidth > 0 && layer.BorderColor != "" {
 			fmt.Fprintf(&b, ` stroke="%s" stroke-width="%s"`, layer.BorderColor, fmtN(props.BorderWidth))
+		}
+		if props.Interactive {
+			fmt.Fprintf(&b, ` style="cursor:pointer" data-tc-tooltip="%s"`, interact.EscapeAttr(interact.TooltipHTML(layer.Color, layer.Label, "")))
 		}
 		b.WriteString("></path>")
 	}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/axes"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
@@ -66,11 +67,19 @@ func renderItems(props BulletProps, result BulletResult, theme *theming.Theme) s
 		fmt.Fprintf(&b, `<g transform="translate(%s,%s)">`, fmtN(item.OffsetX), fmtN(item.OffsetY))
 		// Ranges (full band).
 		for _, r := range item.Ranges {
-			writeRect(&b, r)
+			tip := ""
+			if props.Interactive {
+				tip = interact.TooltipHTML(r.Color, item.ID, fmtN(r.V0)+" – "+fmtN(r.V1))
+			}
+			writeRect(&b, r, tip)
 		}
 		// Measures (centered thin band).
 		for _, m := range item.Measures {
-			writeRect(&b, m)
+			tip := ""
+			if props.Interactive {
+				tip = interact.TooltipHTML(m.Color, item.ID, fmtN(m.V1))
+			}
+			writeRect(&b, m, tip)
 		}
 		// Axis.
 		axisName := "x"
@@ -118,9 +127,13 @@ func renderItems(props BulletProps, result BulletResult, theme *theming.Theme) s
 	return b.String()
 }
 
-func writeRect(b *strings.Builder, r ComputedRect) {
-	fmt.Fprintf(b, `<rect x="%s" y="%s" width="%s" height="%s" fill="%s"></rect>`,
+func writeRect(b *strings.Builder, r ComputedRect, tooltip string) {
+	fmt.Fprintf(b, `<rect x="%s" y="%s" width="%s" height="%s" fill="%s"`,
 		fmtN(r.X), fmtN(r.Y), fmtN(maxF(r.Width, 0)), fmtN(maxF(r.Height, 0)), r.Color)
+	if tooltip != "" {
+		fmt.Fprintf(b, ` style="cursor:pointer" data-tc-tooltip="%s"`, interact.EscapeAttr(tooltip))
+	}
+	b.WriteString("></rect>")
 }
 
 func textAnchor(align string) string {

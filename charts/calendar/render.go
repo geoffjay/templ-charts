@@ -2,9 +2,11 @@ package calendar
 
 import (
 	"context"
+	"strconv"
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
@@ -62,11 +64,15 @@ func renderLayers(props CalendarProps, result CalendarResult, theme *theming.The
 func renderDaysLayer(props CalendarProps, result CalendarResult) string {
 	var s strings.Builder
 	for _, day := range result.Days {
-		s.WriteString(renderComponent(CalendarDay(CalendarDayProps{
+		cp := CalendarDayProps{
 			Day:         day,
 			BorderWidth: props.DayBorderWidth,
 			BorderColor: props.DayBorderColor,
-		})))
+		}
+		if props.Interactive && day.HasData && day.Value != nil {
+			cp.Tooltip = interact.TooltipHTML(day.Color, day.Day, strconv.FormatFloat(*day.Value, 'g', -1, 64))
+		}
+		s.WriteString(renderComponent(CalendarDay(cp)))
 	}
 	return s.String()
 }

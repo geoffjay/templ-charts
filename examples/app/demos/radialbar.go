@@ -34,8 +34,9 @@ func RadialBarDemos() []RadialBarDemo {
 			Description: "Three sources, three categories each, stacked over a 0–270° angle scale with background tracks, a radial axis, and the outer circular axis.",
 			Props: radialbar.RadialBarProps{
 				Width: commonChartHeight, Height: commonChartHeight,
-				Margin: core.Margin{Top: 40, Right: 60, Bottom: 40, Left: 60},
-				Data:   data,
+				Margin:      core.Margin{Top: 40, Right: 60, Bottom: 40, Left: 60},
+				Data:        data,
+				Interactive: true,
 			},
 		},
 		{

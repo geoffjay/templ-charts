@@ -75,6 +75,11 @@ type BulletProps struct {
 	// core.SvgWrapperProps.Responsive.
 	Responsive bool
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// range/measure rect emits a data-tc-tooltip. Default false keeps the
+	// static render.
+	Interactive bool
+
 	Layout  BulletLayout
 	Reverse bool
 	Spacing float64

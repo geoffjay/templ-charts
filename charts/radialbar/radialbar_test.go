@@ -93,3 +93,14 @@ func TestRadialBar_Golden_Labels(t *testing.T) {
 	out := render(t, p)
 	golden.Assert(t, "radialbar-labels", out)
 }
+
+func TestRadialBar_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive radial-bar should emit data-tc-tooltip")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive radial-bar must not emit data-tc-tooltip")
+	}
+}

@@ -89,6 +89,11 @@ type ScatterPlotProps struct {
 	NodeSize float64
 	Colors   colors.OrdinalColorScaleConfig
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// node emits a data-tc-tooltip the script shows on hover. Default false
+	// keeps the static render (and goldens) unchanged.
+	Interactive bool
+
 	EnableGridX bool
 	EnableGridY bool
 	GridXValues []any

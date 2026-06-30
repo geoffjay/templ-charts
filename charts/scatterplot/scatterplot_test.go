@@ -73,3 +73,16 @@ func TestScatterPlot_Golden(t *testing.T) {
 	out := render(t, baseProps())
 	golden.Assert(t, "scatterplot-basic", out)
 }
+
+func TestScatterPlot_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	out := render(t, p)
+	if !strings.Contains(out, "data-tc-tooltip") {
+		t.Errorf("interactive scatterplot should emit data-tc-tooltip")
+	}
+	// default (non-interactive) must not.
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive scatterplot must not emit data-tc-tooltip")
+	}
+}

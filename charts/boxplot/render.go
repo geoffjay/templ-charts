@@ -9,6 +9,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -173,6 +174,15 @@ func renderBoxPlotsLayer(props BoxPlotProps, result BoxPlotResult) string {
 		fmt.Fprintf(&b, `<g transform="%s"`, box.Transform)
 		if box.Opacity > 0 && box.Opacity < 1 {
 			fmt.Fprintf(&b, ` opacity="%s"`, fmtN(box.Opacity))
+		}
+		if props.Interactive {
+			label := box.Group
+			if box.SubGroup != "" {
+				label = box.Group + " - " + box.SubGroup
+			}
+			s := box.Summary
+			val := fmt.Sprintf("median %s (n=%d)", fmtN(s.Values[2]), s.N)
+			fmt.Fprintf(&b, ` style="cursor:pointer" data-tc-tooltip="%s"`, interact.EscapeAttr(interact.TooltipHTML(box.Color, label, val)))
 		}
 		b.WriteString(">")
 		// Box rect.

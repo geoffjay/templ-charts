@@ -1,5 +1,7 @@
 package templates
 
+import "github.com/geoffjay/templ-charts/charts/interact"
+
 // Layout renders the HTML shell: doctype, head (title + inline CSS), the
 // htmx.org CDN script, the header nav, the main content, and a footer. The
 // page content is passed as a templ.Component so each page composes its own
@@ -17,6 +19,10 @@ templ Layout(props LayoutProps, content templ.Component) {
 			@templ.Raw("<style>" + css + "</style>")
 			<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
 			@templ.Raw("<script>" + js + "</script>")
+			// Client-side interactivity layer (charts/interact): element + nearest-
+			// point hover tooltips and the line crosshair, driven by data-tc-*
+			// attributes. Coexists with the htmx hover used by bar/pie.
+			@interact.ScriptTag()
 		</head>
 		<body>
 			<header>

@@ -35,6 +35,7 @@ func ScatterPlotDemos() []ScatterPlotDemo {
 				Data:        data,
 				EnableGridX: true,
 				EnableGridY: true,
+				Interactive: true,
 				Legends: []legends.LegendProps{
 					{Anchor: legends.LegendAnchorBottomRight, Direction: legends.LegendDirectionColumn, TranslateX: 0, TranslateY: 0},
 				},

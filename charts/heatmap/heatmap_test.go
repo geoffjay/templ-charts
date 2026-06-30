@@ -74,3 +74,17 @@ func TestHeatMap_Golden(t *testing.T) {
 	})
 	golden.Assert(t, "heatmap-basic", out)
 }
+
+func TestHeatMap_InteractiveEmitsTooltip(t *testing.T) {
+	out := render(t, heatmap.HeatMapProps{
+		Width: 500, Height: 360, Data: sampleData(),
+		IsInteractive: true, ChartID: "hm",
+	})
+	// 8 data cells (9 − 1 nil) emit a client tooltip; no server round-trip.
+	if got := strings.Count(out, "data-tc-tooltip"); got != 8 {
+		t.Errorf("data-tc-tooltip count = %d, want 8", got)
+	}
+	if strings.Contains(out, "hx-get") {
+		t.Errorf("heatmap hover is client-side now; should not emit hx-get")
+	}
+}

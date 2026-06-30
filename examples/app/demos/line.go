@@ -62,7 +62,7 @@ func LineDemos() []Demo {
 		{
 			ID:          "line-slices",
 			Title:       "Slices + slice tooltip",
-			Description: "Hover a vertical slice to see a per-series tooltip (HTMX).",
+			Description: "Hover a vertical slice for a per-series tooltip — resolved client-side (charts/interact), no server round-trip.",
 			Kind:        htmx.KindLine,
 			Props: line.LineProps{
 				Width:           commonChartWidth,
@@ -72,13 +72,14 @@ func LineDemos() []Demo {
 				EnablePoints:    true,
 				EnableSlices:    line.EnableSlicesX,
 				EnableCrosshair: true,
+				ClientHover:     true,
 				Data:            lineData(),
 			},
 		},
 		{
 			ID:          "line-mesh",
-			Title:       "Mesh hover",
-			Description: "useMesh=true captures hover across the full plot area.",
+			Title:       "Mesh hover + crosshair",
+			Description: "useMesh=true with the client interactivity layer: nearest-point tooltip + crosshair tracked in the browser (resolves the v1 per-mousemove round-trip).",
 			Kind:        htmx.KindLine,
 			Props: line.LineProps{
 				Width:           commonChartWidth,
@@ -87,6 +88,7 @@ func LineDemos() []Demo {
 				Curve:           core.CurveMonotoneX,
 				UseMesh:         true,
 				EnableCrosshair: true,
+				ClientHover:     true,
 				Data:            lineData(),
 			},
 		},

@@ -30,6 +30,7 @@ func BulletDemos() []BulletDemo {
 				Margin:       core.Margin{Top: 20, Right: 30, Bottom: 40, Left: 100},
 				Data:         data,
 				TitleOffsetX: -80,
+				Interactive:  true,
 			},
 		},
 	}

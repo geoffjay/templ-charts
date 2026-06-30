@@ -8,6 +8,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -66,7 +67,7 @@ func renderLayers(props ScatterPlotProps, result ScatterPlotResult, dims core.Di
 		case ScatterPlotLayerAxes:
 			b.WriteString(renderAxesLayer(props, result, dims, theme))
 		case ScatterPlotLayerNodes:
-			b.WriteString(renderNodesLayer(result))
+			b.WriteString(renderNodesLayer(props, result))
 		case ScatterPlotLayerMarkers:
 			b.WriteString(renderMarkersLayer(props, result, dims))
 		case ScatterPlotLayerLegends:
@@ -156,12 +157,14 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 	return &out
 }
 
-func renderNodesLayer(result ScatterPlotResult) string {
+func renderNodesLayer(props ScatterPlotProps, result ScatterPlotResult) string {
 	var b strings.Builder
 	for _, n := range result.Nodes {
-		b.WriteString(renderComponent(core.DotsItem(core.DotsItemProps{
-			X: n.X, Y: n.Y, Size: n.Size, Color: n.Color,
-		})))
+		dp := core.DotsItemProps{X: n.X, Y: n.Y, Size: n.Size, Color: n.Color}
+		if props.Interactive {
+			dp.Tooltip = interact.TooltipHTML(n.Color, n.SerieID, "x: "+n.FormattedX+", y: "+n.FormattedY)
+		}
+		b.WriteString(renderComponent(core.DotsItem(dp)))
 	}
 	return b.String()
 }

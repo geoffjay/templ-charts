@@ -421,12 +421,14 @@ func TestHeatmapFullRenderEmitsHoverAttrs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RenderFull: %v", err)
 	}
-	// Cells with data emit a hover hx-get; the nil cell (USA.Car) does not.
-	if !strings.Contains(out, `hx-get="/charts/demo-heatmap/hover?cell=Japan.Train"`) {
-		t.Errorf("expected hover hx-get on a data cell")
+	// v2 routes heatmap hover through the client interactivity layer
+	// (charts/interact): the 3 data cells emit a data-tc-tooltip, the nil cell
+	// (USA.Car) does not, and no per-cell server round-trip is emitted.
+	if got := strings.Count(out, "data-tc-tooltip"); got != 3 {
+		t.Errorf("expected 3 hoverable data cells (data-tc-tooltip), got %d", got)
 	}
-	if strings.Contains(out, "cell=USA.Car") {
-		t.Errorf("the empty (nil) cell must not be hoverable")
+	if strings.Contains(out, "hover?cell=") {
+		t.Errorf("heatmap hover should be client-side now, not a server round-trip")
 	}
 }
 

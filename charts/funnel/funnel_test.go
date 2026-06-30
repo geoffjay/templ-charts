@@ -86,3 +86,14 @@ func TestFunnel_Golden_Horizontal(t *testing.T) {
 	out := render(t, p)
 	golden.Assert(t, "funnel-horizontal", out)
 }
+
+func TestFunnel_InteractiveEmitsTooltip(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+		t.Errorf("interactive funnel should emit data-tc-tooltip")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+		t.Errorf("non-interactive funnel must not emit data-tc-tooltip")
+	}
+}

@@ -10,6 +10,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -233,7 +234,7 @@ func renderDotsLayer(props RadarProps, result RadarResult) string {
 		if props.EnableDotLabel {
 			label = p.FormattedValue
 		}
-		b.WriteString(renderComponent(core.DotsItem(core.DotsItemProps{
+		dp := core.DotsItemProps{
 			X:               p.X,
 			Y:               p.Y,
 			Size:            props.DotSize,
@@ -243,7 +244,11 @@ func renderDotsLayer(props RadarProps, result RadarResult) string {
 			Label:           label,
 			LabelTextAnchor: "middle",
 			LabelYOffset:    props.DotLabelYOffset,
-		})))
+		}
+		if props.Interactive {
+			dp.Tooltip = interact.TooltipHTML(p.Color, p.Index+" - "+p.Key, p.FormattedValue)
+		}
+		b.WriteString(renderComponent(core.DotsItem(dp)))
 	}
 	b.WriteString("</g>")
 	return b.String()

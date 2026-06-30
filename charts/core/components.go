@@ -41,6 +41,10 @@ type DotsItemProps struct {
 	LabelFill       string
 	LabelFontSize   float64
 	LabelFontFamily string
+	// Tooltip, when non-empty, is the HTML shown by the client interactivity
+	// layer (charts/interact) on hover: it is emitted as a data-tc-tooltip
+	// attribute and the dot becomes pointer-events:auto so it is hoverable.
+	Tooltip string
 }
 
 // CartesianMarker is a marker spec (axis x/y, value, optional legend).

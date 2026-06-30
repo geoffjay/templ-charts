@@ -111,7 +111,15 @@ templ patternLinesDef(d Def) {
 // (size = diameter) and an optional label <text>. Mirrors nivo's DotsItem
 // (minus spring animation).
 templ DotsItem(props DotsItemProps) {
-	<g transform={ fmt.Sprintf("translate(%s,%s)", fmtFloat(props.X), fmtFloat(props.Y)) } style="pointer-events: none">
+	<g
+		transform={ fmt.Sprintf("translate(%s,%s)", fmtFloat(props.X), fmtFloat(props.Y)) }
+		if props.Tooltip != "" {
+			data-tc-tooltip={ props.Tooltip }
+			style="pointer-events: auto; cursor: pointer"
+		} else {
+			style="pointer-events: none"
+		}
+	>
 		<circle
 			r={ fmtFloat(props.Size / 2) }
 			fill={ props.Color }

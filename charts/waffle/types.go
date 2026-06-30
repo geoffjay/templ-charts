@@ -109,6 +109,10 @@ type WaffleProps struct {
 	HiddenIDs   []string
 	ValueFormat string
 
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// data cell emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+
 	Legends []WaffleLegend
 
 	Theme  *theming.Theme

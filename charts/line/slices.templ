@@ -9,6 +9,10 @@ type SlicesProps struct {
 	Axis    EnableSlices
 	Debug   bool
 	ChartID string
+	// Tooltips maps a slice ID to its client-side hover HTML (charts/interact).
+	// When non-nil, slices emit data-tc-tooltip and the htmx round-trip is
+	// suppressed.
+	Tooltips map[string]string
 }
 
 // Slices renders one transparent <rect> per slice for hover capture. When
@@ -31,6 +35,10 @@ templ Slices(props SlicesProps) {
 				fill="black"
 				fill-opacity="0"
 			}
+			if props.Tooltips != nil {
+				data-tc-tooltip={ props.Tooltips[s.ID] }
+			}
+			else
 			if props.ChartID != "" {
 				hx-get={ fmt.Sprintf("/charts/%s/slice?axis=%s&x=%g", props.ChartID, props.Axis, s.X) }
 				hx-trigger="mouseenter"
