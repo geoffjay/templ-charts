@@ -19,6 +19,16 @@ func TestScript_NonEmpty(t *testing.T) {
 	}
 }
 
+// TestScript_LeavesHtmxChartsAlone guards the regression where the client
+// script's fall-through hide() clobbered the htmx-populated tooltip on bar/pie
+// charts: the script must gate on isClientChart so charts with no data-tc-*
+// elements are never touched.
+func TestScript_LeavesHtmxChartsAlone(t *testing.T) {
+	if !strings.Contains(interact.Script, "isClientChart") {
+		t.Errorf("Script must gate on isClientChart so it does not clobber htmx (bar/pie) tooltips")
+	}
+}
+
 func TestScriptTag_WrapsScript(t *testing.T) {
 	var b strings.Builder
 	if err := interact.ScriptTag().Render(context.Background(), &b); err != nil {

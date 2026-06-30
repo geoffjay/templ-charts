@@ -153,11 +153,23 @@ const Script = `(function () {
     }
   }
 
+  // isClientChart reports whether a chart participates in the client hover
+  // layer (it contains elements with data-tc-tooltip / data-tc-mesh). Charts
+  // that drive their tooltip through the server (htmx) hover path instead —
+  // e.g. bar and pie — have neither, so this script leaves them entirely alone
+  // and never clobbers their htmx-populated tooltip. Cached per container.
+  function isClientChart(chart) {
+    if (chart._tcClient === undefined) {
+      chart._tcClient = !!chart.querySelector('[data-tc-tooltip],[data-tc-mesh]');
+    }
+    return chart._tcClient;
+  }
+
   // --- delegation ----------------------------------------------------------
 
   document.addEventListener('mousemove', function (e) {
     var chart = e.target.closest ? e.target.closest('.tc-chart') : null;
-    if (!chart) return;
+    if (!chart || !isClientChart(chart)) return;
     var el = e.target.closest('[data-tc-tooltip]');
     if (el && chart.contains(el)) {
       hideCrosshair(chart);
@@ -169,10 +181,12 @@ const Script = `(function () {
     hide(chart);
   });
 
-  // Hide when leaving a chart entirely (capture phase: mouseleave doesn't bubble).
+  // Hide when leaving a chart entirely (capture phase: mouseleave doesn't
+  // bubble). Only for client-managed charts — htmx charts handle their own
+  // leave reset.
   document.addEventListener('mouseout', function (e) {
     var chart = e.target.closest ? e.target.closest('.tc-chart') : null;
-    if (!chart) return;
+    if (!chart || !isClientChart(chart)) return;
     var to = e.relatedTarget;
     if (!to || !chart.contains(to)) hide(chart);
   }, true);
