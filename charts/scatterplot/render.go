@@ -72,11 +72,32 @@ func renderLayers(props ScatterPlotProps, result ScatterPlotResult, dims core.Di
 			b.WriteString(renderMarkersLayer(props, result, dims))
 		case ScatterPlotLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
-		case ScatterPlotLayerMesh, ScatterPlotLayerAnnotations:
-			// mesh: interactive (Phase 5); annotations: deferred in v2.
+		case ScatterPlotLayerMesh:
+			b.WriteString(renderMeshLayer(props, result, dims))
+		case ScatterPlotLayerAnnotations:
+			// annotations: deferred in v2 (no scatterplot annotation specs).
 		}
 	}
 	return b.String()
+}
+
+// renderMeshLayer emits the accurate voronoi-mesh hover overlay over the nodes
+// (charts/interact, backed by internal/d3/delaunay). Active only when
+// Interactive && UseMesh; DebugMesh draws the cells; DetectionRadius bounds
+// hit-testing when > 0.
+func renderMeshLayer(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions) string {
+	if !props.Interactive || !props.UseMesh {
+		return ""
+	}
+	pts := make([]interact.MeshPoint, 0, len(result.Nodes))
+	for _, n := range result.Nodes {
+		pts = append(pts, interact.MeshPoint{
+			X:    n.X,
+			Y:    n.Y,
+			HTML: interact.TooltipHTML(n.Color, n.SerieID, "x: "+n.FormattedX+", y: "+n.FormattedY),
+		})
+	}
+	return interact.MeshOverlay(pts, dims.InnerWidth, dims.InnerHeight, props.DebugMesh, props.DetectionRadius)
 }
 
 func renderGridLayer(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {

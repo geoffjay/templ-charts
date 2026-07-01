@@ -75,7 +75,8 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. The mesh
-// layer is deferred to the Phase 3 d3-delaunay port.
+// layer emits an accurate voronoi-mesh hover overlay (charts/interact, backed
+// by internal/d3/delaunay) when Interactive && UseMesh.
 func renderLayers(props BumpProps, result BumpResult, dims core.Dimensions, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -91,12 +92,35 @@ func renderLayers(props BumpProps, result BumpResult, dims core.Dimensions, them
 		case BumpLayerLabels:
 			b.WriteString(renderLabelsLayer(props, result, theme))
 		case BumpLayerMesh:
-			// deferred: accurate voronoi-mesh hover lands with d3-delaunay (§4.3).
+			b.WriteString(renderMeshLayer(props, result, dims))
 		}
 	}
 	// Legends are a standalone prop (not a layer id) in nivo bump.
 	b.WriteString(renderLegendsLayer(props, result, dims))
 	return b.String()
+}
+
+// renderMeshLayer emits the voronoi-mesh hover overlay over the defined rank
+// points. Active only when Interactive && UseMesh; when DebugMesh is set, the
+// actual voronoi cells are drawn as a faint guide.
+func renderMeshLayer(props BumpProps, result BumpResult, dims core.Dimensions) string {
+	if !props.Interactive || !props.UseMesh {
+		return ""
+	}
+	var pts []interact.MeshPoint
+	for _, s := range result.Series {
+		for _, p := range s.Points {
+			if !p.Defined {
+				continue
+			}
+			pts = append(pts, interact.MeshPoint{
+				X:    p.X,
+				Y:    p.Y,
+				HTML: interact.TooltipHTML(p.Color, p.SerieID, p.FormattedY),
+			})
+		}
+	}
+	return interact.MeshOverlay(pts, dims.InnerWidth, dims.InnerHeight, props.DebugMesh, 0)
 }
 
 func renderGridLayer(props BumpProps, result BumpResult, dims core.Dimensions, theme *theming.Theme) string {

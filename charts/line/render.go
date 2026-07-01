@@ -238,8 +238,24 @@ func renderMeshLayer(props LineProps, result LineResult, dims core.Dimensions) s
 	if props.ClientHover {
 		mp.ChartID = ""
 		mp.DataMesh = buildMeshData(result.Points)
+		mp.DetectionRadius = props.DetectionRadius
+		if props.DebugMesh {
+			// Draw the actual voronoi cells (the exact detection partition the
+			// client hit-tests against) instead of a bare debug rectangle.
+			mp.DebugCells = buildMeshCells(result.Points, dims.InnerWidth, dims.InnerHeight)
+		}
 	}
 	return renderMesh(mp)
+}
+
+// buildMeshCells returns the voronoi cell path for the line's mesh points,
+// clipped to the inner area, via internal/d3/delaunay (charts/interact).
+func buildMeshCells(points []Point, width, height float64) string {
+	pts := make([]interact.MeshPoint, len(points))
+	for i, p := range points {
+		pts[i] = interact.MeshPoint{X: p.X, Y: p.Y}
+	}
+	return interact.MeshCellsPath(pts, width, height)
 }
 
 // meshPointJSON is one nearest-point entry the client script consumes.

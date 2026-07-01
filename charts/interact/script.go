@@ -128,6 +128,17 @@ const Script = `(function () {
     return mesh._tcPts;
   }
 
+  // meshRadius2 returns the squared detection radius for a mesh element, or
+  // Infinity when unset (unlimited). Points farther than this from the cursor
+  // are not detected — matching nivo's voronoi-mesh detectionRadius.
+  function meshRadius2(mesh) {
+    if (mesh._tcR2 === undefined) {
+      var r = parseFloat(mesh.getAttribute('data-tc-mesh-radius'));
+      mesh._tcR2 = (r > 0) ? r * r : Infinity;
+    }
+    return mesh._tcR2;
+  }
+
   function handleMesh(chart, mesh, e) {
     var pts = meshPoints(mesh);
     if (!pts.length) { hide(chart); return; }
@@ -137,7 +148,7 @@ const Script = `(function () {
       var dx = pts[i].x - lp.x, dy = pts[i].y - lp.y, d = dx * dx + dy * dy;
       if (d < bestD) { bestD = d; best = pts[i]; }
     }
-    if (!best) { hide(chart); return; }
+    if (!best || bestD > meshRadius2(mesh)) { hide(chart); return; }
     show(chart, best.html || '', e.clientX, e.clientY);
     if (mesh.getBBox) {
       var g = crosshairFor(mesh);

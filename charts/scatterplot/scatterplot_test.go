@@ -102,3 +102,20 @@ func TestScatterPlot_InteractiveEmitsTooltip(t *testing.T) {
 		t.Errorf("non-interactive scatterplot must not emit data-tc-tooltip")
 	}
 }
+
+func TestScatterPlot_VoronoiMesh(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	p.UseMesh = true
+	out := render(t, p)
+	if !strings.Contains(out, "data-tc-mesh") {
+		t.Errorf("Interactive+UseMesh scatterplot should emit a voronoi-mesh overlay")
+	}
+	if strings.Contains(render(t, baseProps()), "data-tc-mesh") {
+		t.Errorf("scatterplot without UseMesh must not emit data-tc-mesh")
+	}
+	p.DetectionRadius = 25
+	if !strings.Contains(render(t, p), "data-tc-mesh-radius") {
+		t.Errorf("DetectionRadius should emit data-tc-mesh-radius")
+	}
+}

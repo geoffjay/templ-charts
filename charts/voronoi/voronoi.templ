@@ -1,0 +1,30 @@
+package voronoi
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Voronoi renders a complete voronoi SVG: dimensions → UseVoronoi → layer
+// pipeline (links → cells → points → bounds) → SvgWrapper. Mirrors
+// @nivo/voronoi Voronoi. Static render; per-cell hover is available via
+// Interactive (charts/interact).
+templ Voronoi(props VoronoiProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseVoronoi(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderLayers(props, result))
+}

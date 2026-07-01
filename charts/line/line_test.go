@@ -275,6 +275,27 @@ func TestLine_Mesh(t *testing.T) {
 	}
 }
 
+func TestLine_MeshDetectionRadiusAndDebugCells(t *testing.T) {
+	props := line.LineProps{
+		Width: 500, Height: 300,
+		Data:            sampleData(),
+		IsInteractive:   true,
+		UseMesh:         true,
+		ClientHover:     true,
+		DetectionRadius: 40,
+		DebugMesh:       true,
+	}
+	out := render(t, props)
+	if !strings.Contains(out, `data-tc-mesh-radius="40"`) {
+		t.Errorf("expected data-tc-mesh-radius from DetectionRadius")
+	}
+	// Debug renders the actual voronoi cells (a closed faint path) rather than a
+	// bare debug rectangle.
+	if !strings.Contains(out, `stroke-opacity="0.35"`) || !strings.Contains(out, `d="M`) {
+		t.Errorf("expected voronoi debug cells path in client-hover debug mesh")
+	}
+}
+
 func TestLine_NilValues(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,

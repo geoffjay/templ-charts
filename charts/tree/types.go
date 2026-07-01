@@ -77,11 +77,17 @@ type TreeProps struct {
 	EnableLabel *bool // nil → true
 	LabelOffset float64
 
-	// Interactive enables per-node client-side hover tooltips (charts/interact).
+	// Interactive enables client-side hover (charts/interact). With UseMesh
+	// (the default), the whole area resolves to the nearest node via an accurate
+	// voronoi mesh (internal/d3/delaunay); with UseMesh off, each node carries
+	// its own hover tooltip.
 	Interactive bool
-	// UseMesh is accepted for API parity; the accurate voronoi-mesh layer is
-	// deferred to the Phase 3 d3-delaunay port.
+	// UseMesh selects the voronoi-mesh hover path over per-node tooltips.
 	UseMesh bool
+	// DebugMesh draws the voronoi cells as a faint guide when UseMesh is on.
+	DebugMesh bool
+	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
+	DetectionRadius float64
 
 	Theme *theming.Theme
 

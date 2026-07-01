@@ -38,10 +38,13 @@ func applyDefaults(p TreeProps) TreeProps {
 	return p
 }
 
-// renderTree draws the links, then the nodes, then optional labels. The mesh
-// layer is deferred to the Phase 3 d3-delaunay port.
+// renderTree draws the links, then the nodes, then optional labels, then —
+// when Interactive && UseMesh — an accurate voronoi-mesh hover overlay
+// (charts/interact, backed by internal/d3/delaunay). When Interactive without
+// UseMesh, each node carries its own hover tooltip instead.
 func renderTree(props TreeProps, result TreeResult, theme *theming.Theme) string {
 	var b strings.Builder
+	perNodeTooltip := props.Interactive && !props.UseMesh
 
 	// Links (behind nodes).
 	for _, l := range result.Links {
@@ -71,7 +74,7 @@ func renderTree(props TreeProps, result TreeResult, theme *theming.Theme) string
 		b.WriteString(`" fill="`)
 		b.WriteString(n.Color)
 		b.WriteString(`"`)
-		if props.Interactive {
+		if perNodeTooltip {
 			b.WriteString(` `)
 			b.WriteString(interact.TooltipAttrName)
 			b.WriteString(`="`)
@@ -95,6 +98,19 @@ func renderTree(props TreeProps, result TreeResult, theme *theming.Theme) string
 			}
 			b.WriteString(text(lx, ly, anchor, n.ID, fill, fontSize, fontFamily))
 		}
+	}
+
+	// Voronoi-mesh hover overlay (on top, so it captures the whole area).
+	if props.Interactive && props.UseMesh {
+		pts := make([]interact.MeshPoint, 0, len(result.Nodes))
+		for _, n := range result.Nodes {
+			pts = append(pts, interact.MeshPoint{
+				X:    n.X,
+				Y:    n.Y,
+				HTML: interact.TooltipHTML(n.Color, n.ID, ""),
+			})
+		}
+		b.WriteString(interact.MeshOverlay(pts, props.Width, props.Height, props.DebugMesh, props.DetectionRadius))
 	}
 	return b.String()
 }

@@ -103,3 +103,22 @@ func TestTree_Interactive(t *testing.T) {
 		t.Errorf("non-interactive tree must not emit data-tc-tooltip")
 	}
 }
+
+func TestTree_VoronoiMesh(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	p.UseMesh = true
+	out := render(t, p)
+	if !strings.Contains(out, "data-tc-mesh") {
+		t.Errorf("Interactive+UseMesh tree should emit a voronoi-mesh overlay")
+	}
+	// Interactive without mesh falls back to per-node tooltips.
+	p.UseMesh = false
+	perNode := render(t, p)
+	if strings.Contains(perNode, "data-tc-mesh") {
+		t.Errorf("tree without UseMesh must not emit a mesh overlay")
+	}
+	if !strings.Contains(perNode, "data-tc-tooltip") {
+		t.Errorf("Interactive tree without mesh should emit per-node tooltips")
+	}
+}

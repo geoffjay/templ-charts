@@ -339,7 +339,7 @@ Extend the stdlib `net/http` app with a page per new family, reusing
 2. [x] **`d3/hierarchy` port** → **treemap, sunburst, icicle, circle-packing, tree**
    (tree links use the Phase-1 bump curves; tree/icicle zoom deferred to a
    later pass — static first). Highest leverage: one port, five charts.
-3. [ ] **`d3/delaunay` port** → **voronoi** chart, then **retrofit voronoi-mesh
+3. [x] **`d3/delaunay` port** → **voronoi** chart, then **retrofit voronoi-mesh
    hover** into line, scatterplot, bump, swarmplot(after Phase 4), tree.
    Resolves the v2 §11 mesh-hover deferral.
 4. [ ] **`d3/force` port** (LCG + fixed ticks) → **network, swarmplot** (swarmplot

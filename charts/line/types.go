@@ -225,7 +225,10 @@ type LineProps struct {
 	CrosshairType        tooltip.CrosshairType
 	EnableTouchCrosshair bool
 	DebugMesh            bool
-	InitialHiddenIDs     []string
+	// DetectionRadius, when > 0, bounds voronoi-mesh hit-testing to this pixel
+	// distance from the cursor (nivo's mesh detectionRadius). Client-hover only.
+	DetectionRadius  float64
+	InitialHiddenIDs []string
 
 	// Defs / fill.
 	Defs []core.Def

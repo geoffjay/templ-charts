@@ -94,6 +94,15 @@ type ScatterPlotProps struct {
 	// keeps the static render (and goldens) unchanged.
 	Interactive bool
 
+	// UseMesh routes hover through an accurate voronoi mesh (charts/interact,
+	// backed by internal/d3/delaunay) rather than per-node tooltips: the whole
+	// plot area resolves to the nearest node. Active only when Interactive.
+	UseMesh bool
+	// DebugMesh draws the voronoi cells as a faint guide when UseMesh is on.
+	DebugMesh bool
+	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
+	DetectionRadius float64
+
 	EnableGridX bool
 	EnableGridY bool
 	GridXValues []any

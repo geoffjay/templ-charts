@@ -130,3 +130,22 @@ func TestBump_Legend(t *testing.T) {
 		t.Errorf("expected legend to include serie ids")
 	}
 }
+
+func TestBump_VoronoiMesh(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	p.UseMesh = true
+	out := render(t, p)
+	if !strings.Contains(out, "data-tc-mesh") {
+		t.Errorf("Interactive+UseMesh bump should emit a voronoi-mesh overlay")
+	}
+	// Default (no UseMesh) must not emit a mesh overlay.
+	if strings.Contains(render(t, baseProps()), "data-tc-mesh") {
+		t.Errorf("bump without UseMesh must not emit data-tc-mesh")
+	}
+	// Debug draws the voronoi cells (faint red).
+	p.DebugMesh = true
+	if !strings.Contains(render(t, p), `stroke="red"`) {
+		t.Errorf("DebugMesh should draw the voronoi cells")
+	}
+}

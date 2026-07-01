@@ -31,6 +31,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/sunburst"
 	"github.com/geoffjay/templ-charts/charts/tree"
 	"github.com/geoffjay/templ-charts/charts/treemap"
+	"github.com/geoffjay/templ-charts/charts/voronoi"
 	"github.com/geoffjay/templ-charts/charts/waffle"
 	"github.com/geoffjay/templ-charts/examples/app/demos"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
@@ -104,6 +105,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/icicle", Title: "Icicle", Description: "Depth-banded partition rectangles (d3-hierarchy), oriented four ways."},
 			{Href: "/circle-packing", Title: "Circle packing", Description: "Welzl enclosing-circle packing (d3-hierarchy), colored by depth."},
 			{Href: "/tree", Title: "Tree", Description: "Tidy-tree / dendrogram node-link diagrams (d3-hierarchy) with bump links."},
+			{Href: "/voronoi", Title: "Voronoi", Description: "Delaunay triangulation + Voronoi cells (d3-delaunay); links, cells, points, bounds."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -517,6 +519,24 @@ func (a *App) Tree(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Tree", Nav: "tree"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Tree demos: tidy-tree and dendrogram layouts with smooth bump links (curveBumpX/Y), in four orientations. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Voronoi handles GET /voronoi: the voronoi demos page (static SVG).
+func (a *App) Voronoi(w http.ResponseWriter, r *http.Request) {
+	ds := demos.VoronoiDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := voronoi.Voronoi(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Voronoi", Nav: "voronoi"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Voronoi demos: Delaunay triangulation and its Voronoi dual (d3-delaunay), clipped to the chart — links, cells, points, and bounds, with per-cell hover. Static SVG.",
 		Cards: cards,
 	}))
 }
