@@ -137,6 +137,36 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>polar-bar</a>
 					<a
+						href="/treemap"
+						if props.Nav == "treemap" {
+							class="active"
+						}
+					>treemap</a>
+					<a
+						href="/sunburst"
+						if props.Nav == "sunburst" {
+							class="active"
+						}
+					>sunburst</a>
+					<a
+						href="/icicle"
+						if props.Nav == "icicle" {
+							class="active"
+						}
+					>icicle</a>
+					<a
+						href="/circle-packing"
+						if props.Nav == "circle-packing" {
+							class="active"
+						}
+					>circle-packing</a>
+					<a
+						href="/tree"
+						if props.Nav == "tree" {
+							class="active"
+						}
+					>tree</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"

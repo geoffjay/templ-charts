@@ -39,6 +39,11 @@ func main() {
 	mux.HandleFunc("/marimekko", app.Marimekko)
 	mux.HandleFunc("/parallel-coordinates", app.ParallelCoordinates)
 	mux.HandleFunc("/polar-bar", app.PolarBar)
+	mux.HandleFunc("/treemap", app.Treemap)
+	mux.HandleFunc("/sunburst", app.Sunburst)
+	mux.HandleFunc("/icicle", app.Icicle)
+	mux.HandleFunc("/circle-packing", app.CirclePacking)
+	mux.HandleFunc("/tree", app.Tree)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 

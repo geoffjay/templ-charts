@@ -1,0 +1,29 @@
+package icicle
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Icicle renders a complete icicle SVG: dimensions → UseIcicle → rects (+
+// optional labels) → SvgWrapper. Mirrors @nivo/icicle. Static render; per-node
+// hover tooltips are available via Interactive (charts/interact).
+templ Icicle(props IcicleProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseIcicle(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderRects(props, result, theme))
+}

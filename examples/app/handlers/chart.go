@@ -15,8 +15,10 @@ import (
 	"github.com/geoffjay/templ-charts/charts/bullet"
 	"github.com/geoffjay/templ-charts/charts/bump"
 	"github.com/geoffjay/templ-charts/charts/calendar"
+	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/funnel"
 	"github.com/geoffjay/templ-charts/charts/htmx"
+	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/marimekko"
 	pc "github.com/geoffjay/templ-charts/charts/parallelcoordinates"
@@ -26,6 +28,9 @@ import (
 	"github.com/geoffjay/templ-charts/charts/radialbar"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
 	"github.com/geoffjay/templ-charts/charts/stream"
+	"github.com/geoffjay/templ-charts/charts/sunburst"
+	"github.com/geoffjay/templ-charts/charts/tree"
+	"github.com/geoffjay/templ-charts/charts/treemap"
 	"github.com/geoffjay/templ-charts/charts/waffle"
 	"github.com/geoffjay/templ-charts/examples/app/demos"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
@@ -94,6 +99,11 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/marimekko", Title: "Marimekko", Description: "Variable-width stacked bars: width by value, segments stacked via d3.Stack."},
 			{Href: "/parallel-coordinates", Title: "Parallel coordinates", Description: "One axis per variable; each record a polyline across linear/point scales."},
 			{Href: "/polar-bar", Title: "Polar bar", Description: "Stacked bars wrapped into a full circle: angle band per index, radius-stacked keys."},
+			{Href: "/treemap", Title: "Treemap", Description: "Nested rectangles (d3-hierarchy): squarify/binary tiling, leaf + parent labels."},
+			{Href: "/sunburst", Title: "Sunburst", Description: "Radial partition (d3-hierarchy): arcs by value, colors inherited down the tree."},
+			{Href: "/icicle", Title: "Icicle", Description: "Depth-banded partition rectangles (d3-hierarchy), oriented four ways."},
+			{Href: "/circle-packing", Title: "Circle packing", Description: "Welzl enclosing-circle packing (d3-hierarchy), colored by depth."},
+			{Href: "/tree", Title: "Tree", Description: "Tidy-tree / dendrogram node-link diagrams (d3-hierarchy) with bump links."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -417,6 +427,96 @@ func (a *App) PolarBar(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Polar bar", Nav: "polar-bar"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Polar-bar demos: stacked bars wrapped into a full circle — angle band per index, keys stacked along the radius, with radial/circular grids and index labels. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Treemap handles GET /treemap: the treemap demos page (static SVG).
+func (a *App) Treemap(w http.ResponseWriter, r *http.Request) {
+	ds := demos.TreemapDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := treemap.Treemap(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Treemap", Nav: "treemap"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Treemap demos: a hierarchy tiled as nested rectangles (squarify/binary), leaf + parent labels, colored by top-level ancestor. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Sunburst handles GET /sunburst: the sunburst demos page (static SVG).
+func (a *App) Sunburst(w http.ResponseWriter, r *http.Request) {
+	ds := demos.SunburstDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := sunburst.Sunburst(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Sunburst", Nav: "sunburst"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Sunburst demos: the partition layout mapped onto polar arcs ([2π, r²]), colors inheriting from the top-level ancestor. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Icicle handles GET /icicle: the icicle demos page (static SVG).
+func (a *App) Icicle(w http.ResponseWriter, r *http.Request) {
+	ds := demos.IcicleDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := icicle.Icicle(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Icicle", Nav: "icicle"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Icicle demos: the partition layout as depth-banded rectangles, oriented bottom/top/left/right. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// CirclePacking handles GET /circle-packing (static SVG).
+func (a *App) CirclePacking(w http.ResponseWriter, r *http.Request) {
+	ds := demos.CirclePackingDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := cp.CirclePacking(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Circle packing", Nav: "circle-packing"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Circle-packing demos: Welzl enclosing-circle packing (deterministic via the ported LCG), colored by depth. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Tree handles GET /tree: the tree demos page (static SVG).
+func (a *App) Tree(w http.ResponseWriter, r *http.Request) {
+	ds := demos.TreeDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := tree.Tree(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Tree", Nav: "tree"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Tree demos: tidy-tree and dendrogram layouts with smooth bump links (curveBumpX/Y), in four orientations. Static SVG.",
 		Cards: cards,
 	}))
 }

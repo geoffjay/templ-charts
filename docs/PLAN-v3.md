@@ -332,24 +332,24 @@ Extend the stdlib `net/http` app with a page per new family, reusing
 
 ## 8. Implementation order (topological, by leverage/risk)
 
-1. **Fast-follows (no new d3)** — `curveBumpX/Y` added to `d3/shape`, then
+1. [x] **Fast-follows (no new d3)** — `curveBumpX/Y` added to `d3/shape`, then
    **marimekko, parallel-coordinates, polar-bar, bump** (bump ships with direct
    hover; mesh layer added in Phase 3). Warms up the v3 chart pipeline with zero
    new-port risk.
-2. **`d3/hierarchy` port** → **treemap, sunburst, icicle, circle-packing, tree**
+2. [x] **`d3/hierarchy` port** → **treemap, sunburst, icicle, circle-packing, tree**
    (tree links use the Phase-1 bump curves; tree/icicle zoom deferred to a
    later pass — static first). Highest leverage: one port, five charts.
-3. **`d3/delaunay` port** → **voronoi** chart, then **retrofit voronoi-mesh
+3. [ ] **`d3/delaunay` port** → **voronoi** chart, then **retrofit voronoi-mesh
    hover** into line, scatterplot, bump, swarmplot(after Phase 4), tree.
    Resolves the v2 §11 mesh-hover deferral.
-4. **`d3/force` port** (LCG + fixed ticks) → **network, swarmplot** (swarmplot
+4. [ ] **`d3/force` port** (LCG + fixed ticks) → **network, swarmplot** (swarmplot
    picks up the Phase-3 mesh).
-5. **`d3/sankey` port** → **sankey**.
-6. **`d3/chord` port** → **chord**.
-7. **`d3/geo` port** → **geo** (GeoMap + Choropleth). Heaviest, lowest
+5. [ ] **`d3/sankey` port** → **sankey**.
+6. [ ] **`d3/chord` port** → **chord**.
+7. [ ] **`d3/geo` port** → **geo** (GeoMap + Choropleth). Heaviest, lowest
    chart-count — **may split to v3.1**. Ship minimal-viable (Mercator +
    equirectangular + `GeoPath` + graticule) first, add projections incrementally.
-8. **Polish**: demo pages, `README`/`docs` updates for the full catalog, golden
+8. [ ] **Polish**: demo pages, `README`/`docs` updates for the full catalog, golden
    regeneration, `make ci` green.
 
 ## 9. Scope summary for v3

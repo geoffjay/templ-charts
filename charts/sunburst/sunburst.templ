@@ -1,0 +1,29 @@
+package sunburst
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Sunburst renders a complete sunburst SVG: dimensions → UseSunburst → arcs
+// (+ optional arc labels) → SvgWrapper. Mirrors @nivo/sunburst. Static render;
+// per-arc hover tooltips are available via Interactive (charts/interact).
+templ Sunburst(props SunburstProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseSunburst(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderArcs(props, result, theme))
+}
