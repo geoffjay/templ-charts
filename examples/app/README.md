@@ -19,7 +19,7 @@ or
 go run ./examples/app
 ```
 
-Then open <http://localhost:8080>.
+Then open <http://localhost:8000>.
 
 ## Pages
 

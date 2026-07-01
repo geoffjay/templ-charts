@@ -36,3 +36,21 @@ func NewBandScaleWithRange(domain []string, rangeMin, rangeMax, padding float64,
 	}
 	return &scaleImpl{typ: ScaleTypeBand, band: s}
 }
+
+// NewPointScaleWithRange builds a point Scale over `domain` mapped onto the
+// explicit output range [rangeMin, rangeMax] with the given outer padding.
+//
+// Like the linear/band range constructors, this exists because the range is
+// not derivable from a size + axis alone: charts that place one axis per
+// variable (parallel-coordinates) map each variable's categories onto an
+// arbitrary pixel span. The returned value is a full scaleImpl with
+// Bandwidth/Step, so it composes with the axes tick machinery.
+func NewPointScaleWithRange(domain []string, rangeMin, rangeMax, padding float64, round bool) Scale {
+	s := d3scale.NewPoint().SetDomain(domain)
+	s.SetRange(rangeMin, rangeMax)
+	s.SetPadding(padding)
+	if round {
+		s.SetRound(true)
+	}
+	return &scaleImpl{typ: ScaleTypePoint, point: s}
+}

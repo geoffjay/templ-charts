@@ -325,7 +325,7 @@ examples/app/
   README.md                – how to run
 ```
 
-Run: `go run ./examples/app` → http://localhost:8080
+Run: `go run ./examples/app` → http://localhost:8000
 
 Added to root `go.mod`: `github.com/a-h/templ`. HTMX via CDN (no Go dep).
 

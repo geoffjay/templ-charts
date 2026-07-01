@@ -13,11 +13,15 @@ import (
 	"github.com/geoffjay/templ-charts/charts/bar"
 	"github.com/geoffjay/templ-charts/charts/boxplot"
 	"github.com/geoffjay/templ-charts/charts/bullet"
+	"github.com/geoffjay/templ-charts/charts/bump"
 	"github.com/geoffjay/templ-charts/charts/calendar"
 	"github.com/geoffjay/templ-charts/charts/funnel"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/line"
+	"github.com/geoffjay/templ-charts/charts/marimekko"
+	pc "github.com/geoffjay/templ-charts/charts/parallelcoordinates"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/polarbar"
 	"github.com/geoffjay/templ-charts/charts/radar"
 	"github.com/geoffjay/templ-charts/charts/radialbar"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
@@ -86,6 +90,10 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/bullet", Title: "Bullet", Description: "KPI ranges + measure bars + markers on a shared value scale, per-row axis."},
 			{Href: "/funnel", Title: "Funnel", Description: "Ordered parts as smooth/linear trapezoids with separators and labels."},
 			{Href: "/boxplot", Title: "Box plot", Description: "Quantile box + whisker glyphs from raw observations (d3/array.Quantile)."},
+			{Href: "/bump", Title: "Bump", Description: "Ranking over time: smooth (curveBumpX) or linear lines with end labels and point hover."},
+			{Href: "/marimekko", Title: "Marimekko", Description: "Variable-width stacked bars: width by value, segments stacked via d3.Stack."},
+			{Href: "/parallel-coordinates", Title: "Parallel coordinates", Description: "One axis per variable; each record a polyline across linear/point scales."},
+			{Href: "/polar-bar", Title: "Polar bar", Description: "Stacked bars wrapped into a full circle: angle band per index, radius-stacked keys."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -337,6 +345,78 @@ func (a *App) BoxPlot(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Box plot", Nav: "boxplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Box-plot demos: raw observations summarized to quantiles (q10/q25/median/q75/q90 via internal/d3/array.Quantile) and drawn as box + whisker glyphs. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Bump handles GET /bump: the bump demos page (static SVG).
+func (a *App) Bump(w http.ResponseWriter, r *http.Request) {
+	ds := demos.BumpDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := bump.Bump(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Bump", Nav: "bump"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Bump demos: ranking over time as smooth (curveBumpX) or linear lines, with end labels and per-point hover. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Marimekko handles GET /marimekko: the marimekko demos page (static SVG).
+func (a *App) Marimekko(w http.ResponseWriter, r *http.Request) {
+	ds := demos.MarimekkoDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := marimekko.Marimekko(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Marimekko", Nav: "marimekko"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Marimekko demos: variable-width stacked bars — bar width by value, segments stacked via d3.Stack (offset none/expand). Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// ParallelCoordinates handles GET /parallel-coordinates (static SVG).
+func (a *App) ParallelCoordinates(w http.ResponseWriter, r *http.Request) {
+	ds := demos.ParallelCoordinatesDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := pc.ParallelCoordinates(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Parallel coordinates", Nav: "parallel-coordinates"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Parallel-coordinates demos: one axis per variable (linear or point), each record a polyline across them, horizontal and vertical layouts. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// PolarBar handles GET /polar-bar: the polar-bar demos page (static SVG).
+func (a *App) PolarBar(w http.ResponseWriter, r *http.Request) {
+	ds := demos.PolarBarDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := polarbar.PolarBar(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Polar bar", Nav: "polar-bar"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Polar-bar demos: stacked bars wrapped into a full circle — angle band per index, keys stacked along the radius, with radial/circular grids and index labels. Static SVG.",
 		Cards: cards,
 	}))
 }

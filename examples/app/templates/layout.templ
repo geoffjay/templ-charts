@@ -113,6 +113,30 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>boxplot</a>
 					<a
+						href="/bump"
+						if props.Nav == "bump" {
+							class="active"
+						}
+					>bump</a>
+					<a
+						href="/marimekko"
+						if props.Nav == "marimekko" {
+							class="active"
+						}
+					>marimekko</a>
+					<a
+						href="/parallel-coordinates"
+						if props.Nav == "parallel-coordinates" {
+							class="active"
+						}
+					>parallel-coordinates</a>
+					<a
+						href="/polar-bar"
+						if props.Nav == "polar-bar" {
+							class="active"
+						}
+					>polar-bar</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"

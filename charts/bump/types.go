@@ -1,0 +1,178 @@
+// Package bump mirrors @nivo/bump: a ranking-over-time chart. Each serie holds
+// one {x, y} point per column; x is a category placed on a point scale and y is
+// the serie's rank there, placed on a linear ranking scale (rank 1 at the top).
+// The series are drawn as smooth "bump" lines (curveBumpX) connecting their
+// ranks across columns, with a point per rank and optional start/end labels.
+//
+// It reuses charts/scales (point x scale + linear y scale via
+// ComputeXYScalesForSeries), charts/axes (grid + axes), charts/colors (ordinal
+// color per serie), charts/core (SvgWrapper, DotsItem), charts/legends,
+// charts/theming, and internal/d3/shape (the line generator + curveBumpX/Y).
+//
+// v3 scope: SVG only. Direct point hover is available via Interactive (the
+// charts/interact client layer); the accurate voronoi-mesh layer arrives with
+// the Phase 3 d3-delaunay port (see docs/PLAN-v3.md §4.3).
+package bump
+
+import (
+	"github.com/geoffjay/templ-charts/charts/axes"
+	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/legends"
+	"github.com/geoffjay/templ-charts/charts/scales"
+	"github.com/geoffjay/templ-charts/charts/theming"
+)
+
+// BumpDatum is one column's rank for a serie: x (the column, number | string |
+// time) and y (the rank; nil marks a missing rank so the line breaks). Mirrors
+// @nivo/bump's serie datum.
+type BumpDatum struct {
+	X any
+	Y any
+}
+
+// BumpSerie is one ranked serie: an id plus its per-column ranks. Mirrors
+// @nivo/bump BumpSerie.
+type BumpSerie struct {
+	ID   string
+	Data []BumpDatum
+}
+
+// BumpPoint is one positioned rank dot. Mirrors @nivo/bump BumpPoint.
+type BumpPoint struct {
+	ID           string
+	SerieID      string
+	IndexInSerie int
+	X            float64
+	Y            float64
+	XValue       any
+	YValue       any
+	FormattedX   string
+	FormattedY   string
+	Color        string
+	Size         float64
+	// Defined is false when the rank was nil (the point is not drawn but the
+	// line still breaks around it).
+	Defined bool
+}
+
+// ComputedSerie is one positioned, colored serie ready to render: its line path
+// plus its drawn points. Mirrors @nivo/bump ComputedSerie.
+type ComputedSerie struct {
+	ID        string
+	Color     string
+	LineWidth float64
+	Opacity   float64
+	LinePath  string
+	Points    []BumpPoint
+}
+
+// BumpLayerId enumerates the render layers. Mirrors @nivo/bump BumpLayerId.
+type BumpLayerId string
+
+const (
+	BumpLayerGrid   BumpLayerId = "grid"
+	BumpLayerAxes   BumpLayerId = "axes"
+	BumpLayerLabels BumpLayerId = "labels"
+	BumpLayerLines  BumpLayerId = "lines"
+	BumpLayerPoints BumpLayerId = "points"
+	BumpLayerMesh   BumpLayerId = "mesh"
+)
+
+// DefaultLayers mirrors @nivo/bump svgDefaultProps.layers.
+var DefaultLayers = []BumpLayerId{
+	BumpLayerGrid, BumpLayerAxes, BumpLayerLabels, BumpLayerLines, BumpLayerPoints, BumpLayerMesh,
+}
+
+// Interpolation selects the line interpolation: "smooth" (curveBumpX) or
+// "linear". Mirrors @nivo/bump interpolation.
+type Interpolation string
+
+const (
+	InterpolationSmooth Interpolation = "smooth"
+	InterpolationLinear Interpolation = "linear"
+)
+
+// BumpProps mirrors @nivo/bump BumpSvgProps (the supported subset). Fields left
+// zero fall back to Defaults via applyDefaults.
+type BumpProps struct {
+	Data []BumpSerie
+
+	Width  float64
+	Height float64
+	Margin core.Margin
+	// Responsive makes the svg scale fluidly to its container; see
+	// core.SvgWrapperProps.Responsive.
+	Responsive bool
+
+	Interpolation Interpolation
+	XPadding      float64
+	XOuterPadding float64
+	YOuterPadding float64
+
+	LineWidth         float64
+	ActiveLineWidth   float64
+	InactiveLineWidth float64
+	Opacity           float64
+	ActiveOpacity     float64
+	InactiveOpacity   float64
+
+	// StartLabel / EndLabel toggle the serie-id labels at the first / last
+	// column. nil → Defaults (start off, end on).
+	StartLabel *bool
+	EndLabel   *bool
+
+	PointSize         float64
+	ActivePointSize   float64
+	InactivePointSize float64
+
+	Colors colors.OrdinalColorScaleConfig
+
+	XFormat string // d3-format spec; empty → %g
+	YFormat string
+
+	// Interactive enables the client-side hover layer (charts/interact): each
+	// point emits a data-tc-tooltip. Default false keeps the static render.
+	Interactive bool
+	UseMesh     bool
+	DebugMesh   bool
+
+	EnableGridX bool
+	EnableGridY bool
+	AxisTop     *axes.AxisProps
+	AxisRight   *axes.AxisProps
+	AxisBottom  *axes.AxisProps
+	AxisLeft    *axes.AxisProps
+
+	Legends []legends.LegendProps
+
+	Theme  *theming.Theme
+	Layers []BumpLayerId
+
+	Role            string
+	AriaLabel       string
+	AriaLabelledBy  string
+	AriaDescribedBy string
+	Title           string
+	Desc            string
+	IsFocusable     bool
+
+	core.MotionProps
+}
+
+// BumpResult is the computed model produced by UseBump.
+type BumpResult struct {
+	Series     []ComputedSerie
+	XScale     scales.Scale
+	YScale     scales.Scale
+	LegendData []legends.Datum
+}
+
+// BoolPtr returns a pointer to b — a helper for the *bool label props.
+func BoolPtr(b bool) *bool { return &b }
+
+// StartLabelEnabled resolves StartLabel (nil → false).
+func (p BumpProps) StartLabelEnabled() bool { return p.StartLabel != nil && *p.StartLabel }
+
+// EndLabelEnabled resolves EndLabel (nil → true).
+func (p BumpProps) EndLabelEnabled() bool { return p.EndLabel == nil || *p.EndLabel }

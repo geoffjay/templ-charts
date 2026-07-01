@@ -1,0 +1,30 @@
+package marimekko
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Marimekko renders a complete marimekko SVG: dimensions → UseMarimekko → layer
+// pipeline (grid → axes → bars → legends) → SvgWrapper. Mirrors
+// @nivo/marimekko. Static render; per-segment hover tooltips are available via
+// Interactive (charts/interact).
+templ Marimekko(props MarimekkoProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseMarimekko(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderLayers(props, result, dims, theme))
+}

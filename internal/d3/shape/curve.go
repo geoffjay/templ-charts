@@ -733,3 +733,62 @@ func naturalControlPoints(x []float64) [2][]float64 {
 
 // CurveNatural is the natural curve factory.
 func CurveNatural(ctx *Path) Curve { return &naturalCurve{ctx: ctx, line: math.NaN()} }
+
+// --- bump (X and Y) -------------------------------------------------------
+
+// bumpCurve implements d3-shape's curve/bump.js — cubic beziers whose control
+// points share the endpoints' cross-axis coordinate, producing the smooth
+// "bump" step used by @nivo/bump and tree links. bumpX (x=true) keeps the
+// bezier flat along y across the segment midpoint in x; bumpY (x=false) is the
+// transpose.
+type bumpCurve struct {
+	ctx    *Path
+	line   float64
+	point  int
+	x0, y0 float64
+	x      bool // true = bumpX, false = bumpY
+}
+
+func (c *bumpCurve) AreaStart() { c.line = 0 }
+func (c *bumpCurve) AreaEnd()   { c.line = math.NaN() }
+func (c *bumpCurve) LineStart() { c.point = 0 }
+
+func (c *bumpCurve) LineEnd() {
+	if jsTruthy(c.line) || (!math.IsNaN(c.line) && c.line != 0 && c.point == 1) {
+		c.ctx.closePath()
+	}
+	c.line = 1 - c.line
+}
+
+func (c *bumpCurve) Point(x, y float64) {
+	switch c.point {
+	case 0:
+		c.point = 1
+		if jsTruthy(c.line) {
+			c.ctx.lineTo(x, y)
+		} else {
+			c.ctx.moveTo(x, y)
+		}
+	case 1:
+		c.point = 2
+		fallthrough
+	default:
+		if c.x {
+			// d3: bezierCurveTo(this._x0 = (this._x0 + x) / 2, this._y0, this._x0, y, x, y)
+			c.x0 = (c.x0 + x) / 2
+			c.ctx.bezierCurveTo(c.x0, c.y0, c.x0, y, x, y)
+		} else {
+			// d3: bezierCurveTo(this._x0, this._y0 = (this._y0 + y) / 2, x, this._y0, x, y)
+			c.y0 = (c.y0 + y) / 2
+			c.ctx.bezierCurveTo(c.x0, c.y0, x, c.y0, x, y)
+		}
+	}
+	c.x0 = x
+	c.y0 = y
+}
+
+// CurveBumpX is the bumpX curve factory (d3-shape curve/bump.js).
+func CurveBumpX(ctx *Path) Curve { return &bumpCurve{ctx: ctx, line: math.NaN(), x: true} }
+
+// CurveBumpY is the bumpY curve factory (d3-shape curve/bump.js).
+func CurveBumpY(ctx *Path) Curve { return &bumpCurve{ctx: ctx, line: math.NaN(), x: false} }

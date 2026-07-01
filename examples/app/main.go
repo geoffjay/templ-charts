@@ -2,7 +2,7 @@
 // net/http app serving the bar/line/pie/themes pages plus the htmx chart
 // endpoints under /charts/.
 //
-// Run via `make run-demo` (or `go run ./examples/app`) → http://localhost:8080
+// Run via `make run-demo` (or `go run ./examples/app`) → http://localhost:8000
 package main
 
 import (
@@ -35,10 +35,14 @@ func main() {
 	mux.HandleFunc("/bullet", app.Bullet)
 	mux.HandleFunc("/funnel", app.Funnel)
 	mux.HandleFunc("/boxplot", app.BoxPlot)
+	mux.HandleFunc("/bump", app.Bump)
+	mux.HandleFunc("/marimekko", app.Marimekko)
+	mux.HandleFunc("/parallel-coordinates", app.ParallelCoordinates)
+	mux.HandleFunc("/polar-bar", app.PolarBar)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 
-	addr := ":8080"
+	addr := ":8000"
 	log.Printf("templ-charts demo listening on http://localhost%s", addr)
 	if err := http.ListenAndServe(addr, mux); err != nil {
 		log.Fatalf("server error: %v", err)

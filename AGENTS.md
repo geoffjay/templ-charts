@@ -43,7 +43,7 @@ don't reject the flag.
 - `charts/` — library packages (mirrors nivo package names; see `docs/PLAN.md` §3)
 - `internal/d3/` — vendored pure-Go ports of d3-shape, d3-scale, d3-array, d3-format, d3-time-format, d3-color
 - `internal/golden/` — small snapshot-test helper (`Assert` + `-update` flag) used by the golden SVG/path tests
-- `examples/app/` — runnable demo app (stdlib `net/http`, run via `make run-demo` → http://localhost:8080)
+- `examples/app/` — runnable demo app (stdlib `net/http`, run via `make run-demo` → http://localhost:8000)
 - `contrib/nivo/` — upstream nivo clone (gitignored, reference only; do NOT modify)
 
 ## Conventions

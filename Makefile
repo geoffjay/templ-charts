@@ -52,6 +52,7 @@ golden:
 		./charts/heatmap ./charts/waffle ./charts/calendar \
 		./charts/radar ./charts/radialbar \
 		./charts/scatterplot ./charts/stream ./charts/bullet ./charts/funnel ./charts/boxplot \
+		./charts/bump ./charts/marimekko ./charts/parallelcoordinates ./charts/polarbar \
 		-update
 
 ## Run tests with coverage, writing a coverage profile + HTML report.

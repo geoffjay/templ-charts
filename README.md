@@ -27,7 +27,7 @@ and accessibility work.
 ## Quickstart
 
 ```sh
-make run-demo    # → http://localhost:8080
+make run-demo    # → http://localhost:8000
 ```
 
 Browse a page per chart family — `/bar`, `/line`, `/pie`, `/heatmap`,
