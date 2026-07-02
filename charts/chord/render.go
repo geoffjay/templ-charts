@@ -2,6 +2,7 @@ package chord
 
 import (
 	"context"
+	"hash/fnv"
 	"math"
 	"strconv"
 	"strings"
@@ -32,6 +33,12 @@ func applyDefaults(p ChordProps) ChordProps {
 	if p.ArcOpacity == 0 {
 		p.ArcOpacity = Defaults.ArcOpacity
 	}
+	if p.ActiveArcOpacity == 0 {
+		p.ActiveArcOpacity = Defaults.ActiveArcOpacity
+	}
+	if p.InactiveArcOpacity == 0 {
+		p.InactiveArcOpacity = Defaults.InactiveArcOpacity
+	}
 	if p.ArcBorderWidth == 0 {
 		p.ArcBorderWidth = Defaults.ArcBorderWidth
 	}
@@ -40,6 +47,12 @@ func applyDefaults(p ChordProps) ChordProps {
 	}
 	if p.RibbonOpacity == 0 {
 		p.RibbonOpacity = Defaults.RibbonOpacity
+	}
+	if p.ActiveRibbonOpacity == 0 {
+		p.ActiveRibbonOpacity = Defaults.ActiveRibbonOpacity
+	}
+	if p.InactiveRibbonOpacity == 0 {
+		p.InactiveRibbonOpacity = Defaults.InactiveRibbonOpacity
 	}
 	if p.RibbonBorderWidth == 0 {
 		p.RibbonBorderWidth = Defaults.RibbonBorderWidth
@@ -83,13 +96,20 @@ func isZeroInherited(c colors.InheritedColorConfig) bool {
 // renderLayers renders the enabled layers as an inner SVG string. width/height
 // are the inner dimensions (used for legends).
 func renderLayers(props ChordProps, result ChordResult, width, height float64, theme *theming.Theme) string {
+	// When interactive, a scoped <style> block drives the hover-highlight:
+	// hovering an arc (or ribbon) re-lights its entity's arc + connected
+	// ribbons and dims everything else, using the Active/Inactive opacities.
+	cid := chartID(props.Keys)
 	var b strings.Builder
+	if props.Interactive {
+		b.WriteString(hoverStyleBlock(props, cid))
+	}
 	for _, layer := range props.Layers {
 		switch layer {
 		case ChordLayerRibbons:
-			b.WriteString(centered(result.Center, renderRibbonsLayer(props, result, theme)))
+			b.WriteString(centered(result.Center, renderRibbonsLayer(props, result, theme, cid)))
 		case ChordLayerArcs:
-			b.WriteString(centered(result.Center, renderArcsLayer(props, result, theme)))
+			b.WriteString(centered(result.Center, renderArcsLayer(props, result, theme, cid)))
 		case ChordLayerLabels:
 			if props.LabelEnabled() {
 				b.WriteString(centered(result.Center, renderLabelsLayer(props, result, theme)))
@@ -98,6 +118,46 @@ func renderLayers(props ChordProps, result ChordResult, width, height float64, t
 			b.WriteString(renderLegendsLayer(props, result, width, height))
 		}
 	}
+	return b.String()
+}
+
+// chartID derives a stable, CSS-safe token from the entity keys so the
+// hover-highlight <style> rules only affect this chart instance (multiple
+// interactive chords can coexist on a page). Identical inputs yield identical
+// ids, which is harmless (their rules are identical too).
+func chartID(keys []string) string {
+	h := fnv.New32a()
+	for _, k := range keys {
+		_, _ = h.Write([]byte(k))
+		_, _ = h.Write([]byte{0})
+	}
+	return strconv.FormatUint(uint64(h.Sum32()), 16)
+}
+
+// entityClass is the CSS class marking an element as belonging to entity i.
+func entityClass(i int) string { return "tc-e" + strconv.Itoa(i) }
+
+// hoverStyleBlock builds the scoped CSS that implements the hover-highlight.
+// Base rules set the resting opacity; :has(...:hover) rules dim all cells and
+// then re-light the hovered entity's arc and connected ribbons. Selector
+// specificity guarantees highlight > dim > base.
+func hoverStyleBlock(props ChordProps, cid string) string {
+	scope := ".tc-c" + cid
+	var b strings.Builder
+	b.WriteString(`<style>`)
+	// Resting opacity (also the graceful fallback where :has is unsupported).
+	b.WriteString(scope + `.tc-arc{opacity:` + fmtF(props.ArcOpacity) + `}`)
+	b.WriteString(scope + `.tc-ribbon{opacity:` + fmtF(props.RibbonOpacity) + `}`)
+	for i := 0; i < len(props.Keys); i++ {
+		hov := `svg:has(` + scope + `.` + entityClass(i) + `:hover) `
+		// Dim every cell…
+		b.WriteString(hov + scope + `.tc-arc{opacity:` + fmtF(props.InactiveArcOpacity) + `}`)
+		b.WriteString(hov + scope + `.tc-ribbon{opacity:` + fmtF(props.InactiveRibbonOpacity) + `}`)
+		// …then re-light the ones belonging to the hovered entity.
+		b.WriteString(hov + scope + `.tc-arc.` + entityClass(i) + `{opacity:` + fmtF(props.ActiveArcOpacity) + `}`)
+		b.WriteString(hov + scope + `.tc-ribbon.` + entityClass(i) + `{opacity:` + fmtF(props.ActiveRibbonOpacity) + `}`)
+	}
+	b.WriteString(`</style>`)
 	return b.String()
 }
 
@@ -110,7 +170,7 @@ func centered(center [2]float64, inner string) string {
 	return `<g transform="translate(` + fmtF(center[0]) + `,` + fmtF(center[1]) + `)">` + inner + `</g>`
 }
 
-func renderRibbonsLayer(props ChordProps, result ChordResult, theme *theming.Theme) string {
+func renderRibbonsLayer(props ChordProps, result ChordResult, theme *theming.Theme, cid string) string {
 	getBorderColor := colors.GetInheritedColorGenerator(props.RibbonBorderColor, theme)
 	var b strings.Builder
 	for _, r := range result.Ribbons {
@@ -118,9 +178,16 @@ func renderRibbonsLayer(props ChordProps, result ChordResult, theme *theming.The
 		b.WriteString(r.Path)
 		b.WriteString(`" fill="`)
 		b.WriteString(r.Color)
-		b.WriteString(`" fill-opacity="`)
-		b.WriteString(fmtF(props.RibbonOpacity))
 		b.WriteString(`"`)
+		if props.Interactive {
+			// Opacity is driven by the hover-highlight <style> block; the class
+			// marks this ribbon as belonging to both of its endpoints.
+			b.WriteString(` class="tc-c` + cid + ` tc-ribbon ` + entityClass(r.Source.Index) + ` ` + entityClass(r.Target.Index) + `"`)
+		} else {
+			b.WriteString(` fill-opacity="`)
+			b.WriteString(fmtF(props.RibbonOpacity))
+			b.WriteString(`"`)
+		}
 		if props.RibbonBorderWidth > 0 {
 			b.WriteString(` stroke="`)
 			b.WriteString(getBorderColor(map[string]any{"color": r.Color}))
@@ -148,7 +215,7 @@ func renderRibbonsLayer(props ChordProps, result ChordResult, theme *theming.The
 	return b.String()
 }
 
-func renderArcsLayer(props ChordProps, result ChordResult, theme *theming.Theme) string {
+func renderArcsLayer(props ChordProps, result ChordResult, theme *theming.Theme, cid string) string {
 	getBorderColor := colors.GetInheritedColorGenerator(props.ArcBorderColor, theme)
 	var b strings.Builder
 	for _, a := range result.Arcs {
@@ -156,9 +223,15 @@ func renderArcsLayer(props ChordProps, result ChordResult, theme *theming.Theme)
 		b.WriteString(a.Path)
 		b.WriteString(`" fill="`)
 		b.WriteString(a.Color)
-		b.WriteString(`" fill-opacity="`)
-		b.WriteString(fmtF(props.ArcOpacity))
 		b.WriteString(`"`)
+		if props.Interactive {
+			// Opacity is driven by the hover-highlight <style> block.
+			b.WriteString(` class="tc-c` + cid + ` tc-arc ` + entityClass(a.Index) + `"`)
+		} else {
+			b.WriteString(` fill-opacity="`)
+			b.WriteString(fmtF(props.ArcOpacity))
+			b.WriteString(`"`)
+		}
 		if props.ArcBorderWidth > 0 {
 			b.WriteString(` stroke="`)
 			b.WriteString(getBorderColor(map[string]any{"color": a.Color}))

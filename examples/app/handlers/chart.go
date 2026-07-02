@@ -113,7 +113,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/network", Title: "Network", Description: "Force-directed node/link graph (d3-force): link + many-body + centering forces, deterministic fixed-tick layout."},
 			{Href: "/swarmplot", Title: "Swarmplot", Description: "Grouped value distribution relaxed with d3-force (ForceX/Y + collide); voronoi-mesh hover."},
 			{Href: "/sankey", Title: "Sankey", Description: "Flow diagram (d3-sankey): node breadths + relaxation, variable-thickness monotone-curve ribbons."},
-			{Href: "/chord", Title: "Chord", Description: "Radial flow diagram (d3-chord): entity arcs sized by total flow, ribbons spanning each directed sub-flow."},
+			{Href: "/chord", Title: "Chord", Description: "Radial flow diagram (d3-chord): entity arcs sized by total flow, ribbons spanning each directed sub-flow; hover an entity to highlight it."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -619,7 +619,7 @@ func (a *App) Chord(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Chord", Nav: "chord"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Chord demos: entity-to-entity flows laid out with internal/d3/chord (a faithful d3-chord port — group arcs sized by total flow, ribbons spanning each directed sub-flow). Arcs render via charts/arcs (d3-shape Arc) and ribbons via internal/d3/chord's Ribbon generator, exactly as nivo does. The default diagram, a padded/inset-ribbon variant, and an interactive tile with a legend.",
+		Intro: "Chord demos: entity-to-entity flows laid out with internal/d3/chord (a faithful d3-chord port — group arcs sized by total flow, ribbons spanning each directed sub-flow). Arcs render via charts/arcs (d3-shape Arc) and ribbons via internal/d3/chord's Ribbon generator, exactly as nivo does. The default diagram, a padded/inset-ribbon variant, and an interactive tile where hovering an entity highlights it (and its ribbons) while the rest fade back.",
 		Cards: cards,
 	}))
 }

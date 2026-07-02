@@ -107,6 +107,30 @@ func TestChord_Interactive(t *testing.T) {
 	}
 }
 
+func TestChord_HoverHighlight(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	out := render(t, p)
+	// Interactive charts emit a scoped <style> block driving the highlight, and
+	// tag arcs/ribbons with entity classes; non-interactive charts do not.
+	if !strings.Contains(out, "<style>") {
+		t.Errorf("interactive chord should emit a hover-highlight <style> block")
+	}
+	if !strings.Contains(out, ":has(") || !strings.Contains(out, ":hover") {
+		t.Errorf("hover-highlight should use :has(...:hover) rules")
+	}
+	if !strings.Contains(out, "tc-arc") || !strings.Contains(out, "tc-ribbon") {
+		t.Errorf("interactive cells should carry tc-arc / tc-ribbon classes")
+	}
+	// The inactive opacity (default 0.15) must appear in the emitted rules.
+	if !strings.Contains(out, "opacity:0.15") {
+		t.Errorf("hover style should reference the inactive opacity (0.15)")
+	}
+	if strings.Contains(render(t, baseProps()), "<style>") {
+		t.Errorf("non-interactive chord must not emit a hover-highlight <style> block")
+	}
+}
+
 func TestChord_LabelsDisabled(t *testing.T) {
 	p := baseProps()
 	disabled := false

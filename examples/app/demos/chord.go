@@ -51,6 +51,9 @@ func ChordDemos() []ChordDemo {
 
 	interactive := base()
 	interactive.Interactive = true
+	// A slightly thicker ring + inset ribbons make arcs easy to hover.
+	interactive.InnerRadiusRatio = 0.8
+	interactive.InnerRadiusOffset = 0.02
 	interactive.Legends = []legends.LegendProps{{
 		Anchor:     legends.LegendAnchorBottom,
 		Direction:  legends.LegendDirectionRow,
@@ -76,8 +79,8 @@ func ChordDemos() []ChordDemo {
 		},
 		{
 			ID:          "chord-interactive",
-			Title:       "Interactive + legend",
-			Description: "Hover an arc or ribbon for a client-side tooltip (charts/interact), with a box legend of the entity ids beneath.",
+			Title:       "Hover to highlight",
+			Description: "Hover an entity's arc (or a ribbon) and it stays lit while every other arc and ribbon fades back — the hovered entity reads as the only selection. Pure CSS (:has hover) driven by the active/inactive opacity props, plus a client-side tooltip (charts/interact) and a box legend.",
 			Props:       interactive,
 		},
 	}
