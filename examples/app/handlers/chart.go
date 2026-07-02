@@ -27,6 +27,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/polarbar"
 	"github.com/geoffjay/templ-charts/charts/radar"
 	"github.com/geoffjay/templ-charts/charts/radialbar"
+	"github.com/geoffjay/templ-charts/charts/sankey"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
 	"github.com/geoffjay/templ-charts/charts/stream"
 	"github.com/geoffjay/templ-charts/charts/sunburst"
@@ -110,6 +111,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/voronoi", Title: "Voronoi", Description: "Delaunay triangulation + Voronoi cells (d3-delaunay); links, cells, points, bounds."},
 			{Href: "/network", Title: "Network", Description: "Force-directed node/link graph (d3-force): link + many-body + centering forces, deterministic fixed-tick layout."},
 			{Href: "/swarmplot", Title: "Swarmplot", Description: "Grouped value distribution relaxed with d3-force (ForceX/Y + collide); voronoi-mesh hover."},
+			{Href: "/sankey", Title: "Sankey", Description: "Flow diagram (d3-sankey): node breadths + relaxation, variable-thickness monotone-curve ribbons."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -578,6 +580,25 @@ func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Swarmplot", Nav: "swarmplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Swarmplot demos: points grouped along one axis, positioned by value along the other, then relaxed with internal/d3/force (ForceX/ForceY + ForceCollide, deterministic fixed-tick). Vertical, horizontal, and voronoi-mesh hover.",
+		Cards: cards,
+	}))
+}
+
+// Sankey handles GET /sankey: the sankey demos page (static SVG; hover a node
+// or ribbon for a client-side tooltip).
+func (a *App) Sankey(w http.ResponseWriter, r *http.Request) {
+	ds := demos.SankeyDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := sankey.Sankey(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Sankey", Nav: "sankey"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Sankey demos: flow diagrams laid out with internal/d3/sankey (a faithful d3-sankey port — node breadths, relaxation, collision resolution) and rendered as variable-thickness ribbons via internal/d3/shape's line generator + curveMonotoneX/Y, exactly as nivo does. Horizontal and vertical layouts, an alignment variant, and an interactive tile with a legend.",
 		Cards: cards,
 	}))
 }

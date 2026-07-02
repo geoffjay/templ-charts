@@ -1,0 +1,29 @@
+package sankey
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Sankey renders a complete sankey flow diagram SVG: dimensions → UseSankey
+// (d3-sankey layout) → links + nodes + labels + legends → SvgWrapper. Mirrors
+// @nivo/sankey. Static render; per-node/link hover tooltips via Interactive.
+templ Sankey(props SankeyProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseSankey(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderLayers(props, result, dims.InnerWidth, dims.InnerHeight, theme))
+}
