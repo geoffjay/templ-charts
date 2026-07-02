@@ -21,9 +21,9 @@ header h1 a { color:var(--fg); }
 nav { display:inline-block; margin-left:24px; }
 nav a { margin-right:16px; color:var(--muted); }
 nav a.active { color:var(--fg); font-weight:600; }
-main { max-width:1200px; margin:0 auto; padding:24px; }
+main { max-width:1920px; margin:0 auto; padding:24px; }
 .intro { color:var(--muted); margin:0 0 24px; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:20px; }
+.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(480px,1fr)); gap:20px; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:18px; position:relative; }
 .card h2 { margin:0 0 4px; font-size:16px; }
 .card p { margin:0 0 14px; color:var(--muted); font-size:13px; }
