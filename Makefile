@@ -54,7 +54,7 @@ golden:
 		./charts/scatterplot ./charts/stream ./charts/bullet ./charts/funnel ./charts/boxplot \
 		./charts/bump ./charts/marimekko ./charts/parallelcoordinates ./charts/polarbar \
 		./charts/treemap ./charts/sunburst ./charts/icicle ./charts/circlepacking ./charts/tree \
-		./charts/voronoi \
+		./charts/voronoi ./charts/network ./charts/swarmplot \
 		-update
 
 ## Run tests with coverage, writing a coverage profile + HTML report.

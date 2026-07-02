@@ -21,6 +21,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/marimekko"
+	"github.com/geoffjay/templ-charts/charts/network"
 	pc "github.com/geoffjay/templ-charts/charts/parallelcoordinates"
 	"github.com/geoffjay/templ-charts/charts/pie"
 	"github.com/geoffjay/templ-charts/charts/polarbar"
@@ -29,6 +30,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
 	"github.com/geoffjay/templ-charts/charts/stream"
 	"github.com/geoffjay/templ-charts/charts/sunburst"
+	"github.com/geoffjay/templ-charts/charts/swarmplot"
 	"github.com/geoffjay/templ-charts/charts/tree"
 	"github.com/geoffjay/templ-charts/charts/treemap"
 	"github.com/geoffjay/templ-charts/charts/voronoi"
@@ -106,6 +108,8 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/circle-packing", Title: "Circle packing", Description: "Welzl enclosing-circle packing (d3-hierarchy), colored by depth."},
 			{Href: "/tree", Title: "Tree", Description: "Tidy-tree / dendrogram node-link diagrams (d3-hierarchy) with bump links."},
 			{Href: "/voronoi", Title: "Voronoi", Description: "Delaunay triangulation + Voronoi cells (d3-delaunay); links, cells, points, bounds."},
+			{Href: "/network", Title: "Network", Description: "Force-directed node/link graph (d3-force): link + many-body + centering forces, deterministic fixed-tick layout."},
+			{Href: "/swarmplot", Title: "Swarmplot", Description: "Grouped value distribution relaxed with d3-force (ForceX/Y + collide); voronoi-mesh hover."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},
@@ -537,6 +541,43 @@ func (a *App) Voronoi(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Voronoi", Nav: "voronoi"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Voronoi demos: Delaunay triangulation and its Voronoi dual (d3-delaunay), clipped to the chart — links, cells, points, and bounds, with per-cell hover. Static SVG.",
+		Cards: cards,
+	}))
+}
+
+// Network handles GET /network: the network demos page (static SVG; hover a
+// node for a client-side tooltip).
+func (a *App) Network(w http.ResponseWriter, r *http.Request) {
+	ds := demos.NetworkDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := network.Network(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Network", Nav: "network"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Network demos: a force-directed graph laid out with internal/d3/force (link + many-body + centering forces, a fixed 120-iteration tick). The three tiles share one graph and vary only repulsivity — stronger charge spreads the nodes to fill more of the frame. The layout is deterministic; hover a node for its id.",
+		Cards: cards,
+	}))
+}
+
+// SwarmPlot handles GET /swarmplot: the swarmplot demos page (static SVG).
+func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
+	ds := demos.SwarmPlotDemos()
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		var b strings.Builder
+		if err := swarmplot.SwarmPlot(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Swarmplot", Nav: "swarmplot"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Swarmplot demos: points grouped along one axis, positioned by value along the other, then relaxed with internal/d3/force (ForceX/ForceY + ForceCollide, deterministic fixed-tick). Vertical, horizontal, and voronoi-mesh hover.",
 		Cards: cards,
 	}))
 }

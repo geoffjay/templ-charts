@@ -342,7 +342,7 @@ Extend the stdlib `net/http` app with a page per new family, reusing
 3. [x] **`d3/delaunay` port** → **voronoi** chart, then **retrofit voronoi-mesh
    hover** into line, scatterplot, bump, swarmplot(after Phase 4), tree.
    Resolves the v2 §11 mesh-hover deferral.
-4. [ ] **`d3/force` port** (LCG + fixed ticks) → **network, swarmplot** (swarmplot
+4. [x] **`d3/force` port** (LCG + fixed ticks) → **network, swarmplot** (swarmplot
    picks up the Phase-3 mesh).
 5. [ ] **`d3/sankey` port** → **sankey**.
 6. [ ] **`d3/chord` port** → **chord**.

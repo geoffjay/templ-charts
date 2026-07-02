@@ -173,6 +173,18 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>voronoi</a>
 					<a
+						href="/network"
+						if props.Nav == "network" {
+							class="active"
+						}
+					>network</a>
+					<a
+						href="/swarmplot"
+						if props.Nav == "swarmplot" {
+							class="active"
+						}
+					>swarmplot</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"

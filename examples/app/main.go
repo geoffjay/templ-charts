@@ -45,6 +45,8 @@ func main() {
 	mux.HandleFunc("/circle-packing", app.CirclePacking)
 	mux.HandleFunc("/tree", app.Tree)
 	mux.HandleFunc("/voronoi", app.Voronoi)
+	mux.HandleFunc("/network", app.Network)
+	mux.HandleFunc("/swarmplot", app.SwarmPlot)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 

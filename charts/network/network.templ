@@ -1,0 +1,29 @@
+package network
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// Network renders a complete force-directed network SVG: dimensions →
+// UseNetwork (force simulation) → links + nodes → SvgWrapper. Mirrors
+// @nivo/network. Static render; per-node hover tooltips via Interactive.
+templ Network(props NetworkProps) {
+	{{ props = applyDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ props.Width = dims.InnerWidth }}
+	{{ props.Height = dims.InnerHeight }}
+	{{ result := UseNetwork(props) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderLayers(props, result))
+}
