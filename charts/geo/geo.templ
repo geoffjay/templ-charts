@@ -1,0 +1,51 @@
+package geo
+
+import "github.com/geoffjay/templ-charts/charts/core"
+
+// GeoMap renders a complete GeoMap SVG: dimensions → UseGeoMap (projection +
+// GeoJSON→path) → graticule + features → SvgWrapper. Mirrors @nivo/geo GeoMap.
+// Static render; per-feature hover tooltips via Interactive.
+templ GeoMap(props GeoMapProps) {
+	{{ props = applyGeoMapDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ result := UseGeoMap(props, dims.InnerWidth, dims.InnerHeight) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderGeoMapLayers(props, result))
+}
+
+// Choropleth renders a complete Choropleth SVG: dimensions → UseChoropleth
+// (projection + quantize colors bound by feature id) → graticule + features +
+// continuous-color legend → SvgWrapper. Mirrors @nivo/geo Choropleth.
+templ Choropleth(props ChoroplethProps) {
+	{{ props = applyChoroplethDefaults(props) }}
+	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
+	{{ result := UseChoropleth(props, dims.InnerWidth, dims.InnerHeight) }}
+	{{ theme := resolveTheme(props.Theme) }}
+	@core.SvgWrapper(core.SvgWrapperProps{
+		Width:           dims.OuterWidth,
+		Height:          dims.OuterHeight,
+		Margin:          dims.Margin,
+		Background:      themeBackground(theme),
+		Role:            props.Role,
+		AriaLabel:       props.AriaLabel,
+		AriaLabelledBy:  props.AriaLabelledBy,
+		AriaDescribedBy: props.AriaDescribedBy,
+		Title:           props.Title,
+		Desc:            props.Desc,
+		IsFocusable:     props.IsFocusable,
+		Responsive:      props.Responsive,
+	}, renderChoroplethLayers(props, result, dims.InnerWidth, dims.InnerHeight))
+}

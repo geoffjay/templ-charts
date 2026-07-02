@@ -18,6 +18,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/chord"
 	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/funnel"
+	"github.com/geoffjay/templ-charts/charts/geo"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/line"
@@ -620,6 +621,34 @@ func (a *App) Chord(w http.ResponseWriter, r *http.Request) {
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Chord", Nav: "chord"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Chord demos: entity-to-entity flows laid out with internal/d3/chord (a faithful d3-chord port — group arcs sized by total flow, ribbons spanning each directed sub-flow). Arcs render via charts/arcs (d3-shape Arc) and ribbons via internal/d3/chord's Ribbon generator, exactly as nivo does. The default diagram, a padded/inset-ribbon variant, and an interactive tile where hovering an entity highlights it (and its ribbons) while the rest fade back.",
+		Cards: cards,
+	}))
+}
+
+// Geo handles GET /geo: the geo page with GeoMap and Choropleth demos (static
+// SVG; hover a feature for a client-side tooltip on the interactive tiles).
+func (a *App) Geo(w http.ResponseWriter, r *http.Request) {
+	maps := demos.GeoMapDemos()
+	choros := demos.ChoroplethDemos()
+	cards := make([]templates.ChartCardProps, 0, len(maps)+len(choros))
+	for _, d := range maps {
+		var b strings.Builder
+		if err := geo.GeoMap(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	for _, d := range choros {
+		var b strings.Builder
+		if err := geo.Choropleth(d.Props).Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Geo", Nav: "geo"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Geo demos: GeoJSON features projected server-side with internal/d3/geo (a faithful d3-geo subset — projection machinery, three-axis rotation, adaptive resampling, antimeridian clipping, GeoPath→SVG, and a graticule generator). GeoMap fills every feature one color; Choropleth binds a {id,value} dataset onto the features by id and colors each by a quantize scale (nivo's 'PuBuGn' → purple_blue_green) with a continuous-color legend. The bundled world sample is coarsely simplified so the page stays self-contained.",
 		Cards: cards,
 	}))
 }

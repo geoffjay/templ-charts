@@ -346,9 +346,12 @@ Extend the stdlib `net/http` app with a page per new family, reusing
    picks up the Phase-3 mesh).
 5. [x] **`d3/sankey` port** → **sankey**.
 6. [x] **`d3/chord` port** → **chord**.
-7. [ ] **`d3/geo` port** → **geo** (GeoMap + Choropleth). Heaviest, lowest
-   chart-count — **may split to v3.1**. Ship minimal-viable (Mercator +
-   equirectangular + `GeoPath` + graticule) first, add projections incrementally.
+7. [x] **`d3/geo` port** → **geo** (GeoMap + Choropleth). Shipped: the full
+   projection machinery (rotate/scale/translate/resample), antimeridian
+   clipping, `GeoPath`→SVG, `Graticule`, and all ten nivo projection types.
+   Deferred to a follow-up (see `docs/NOTES.md`): `clipCircle` (azimuthal
+   back-face hiding) and `clipExtent` — so cylindrical/pseudocylindrical
+   projections are fully correct, azimuthal-family render the whole sphere.
 8. [ ] **Polish**: demo pages, `README`/`docs` updates for the full catalog, golden
    regeneration, `make ci` green.
 

@@ -55,6 +55,8 @@ golden:
 		./charts/bump ./charts/marimekko ./charts/parallelcoordinates ./charts/polarbar \
 		./charts/treemap ./charts/sunburst ./charts/icicle ./charts/circlepacking ./charts/tree \
 		./charts/voronoi ./charts/network ./charts/swarmplot \
+		./charts/sankey ./charts/chord ./charts/geo \
+		./internal/d3/geo \
 		-update
 
 ## Run tests with coverage, writing a coverage profile + HTML report.

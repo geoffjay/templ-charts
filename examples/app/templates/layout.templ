@@ -197,6 +197,12 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>chord</a>
 					<a
+						href="/geo"
+						if props.Nav == "geo" {
+							class="active"
+						}
+					>geo</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"
