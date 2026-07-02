@@ -1,7 +1,7 @@
 # templ-charts demo app
 
 A runnable demo of the `templ-charts` library: a stdlib `net/http` server
-serving demos for all thirteen chart families with a hybrid interactivity
+serving demos for all twenty-eight chart families with a hybrid interactivity
 model — client-side hover (tooltips + crosshair) plus HTMX-backed state
 changes (series toggle, active arc).
 
@@ -39,6 +39,21 @@ Then open <http://localhost:8000>.
 | `/bullet`      | KPI ranges + measures + markers on a shared scale            |
 | `/funnel`      | Smooth/linear trapezoid parts, separators, labels            |
 | `/boxplot`     | Quantile box + whisker glyphs from raw observations          |
+| `/bump`        | Ranking over time: bump curves, end labels, point hover      |
+| `/marimekko`   | Variable-width stacked bars (width by value, `d3.Stack`)     |
+| `/parallel-coordinates` | One axis per variable; a polyline per record        |
+| `/polar-bar`   | Stacked bars wrapped into a full circle                      |
+| `/treemap`     | Nested rectangles (d3-hierarchy), squarify/binary tiling     |
+| `/sunburst`    | Radial partition (d3-hierarchy), colors inherited down tree  |
+| `/icicle`      | Depth-banded partition rectangles (d3-hierarchy)             |
+| `/circle-packing` | Welzl enclosing-circle packing (d3-hierarchy)             |
+| `/tree`        | Tidy-tree / dendrogram node-link diagrams, bump links        |
+| `/voronoi`     | Delaunay triangulation + Voronoi cells (d3-delaunay)         |
+| `/network`     | Force-directed graph (d3-force), deterministic fixed ticks   |
+| `/swarmplot`   | Grouped distribution relaxed with d3-force, mesh hover       |
+| `/sankey`      | Flow diagram (d3-sankey), monotone-curve ribbons             |
+| `/chord`       | Radial flow diagram (d3-chord), entity arcs + ribbons        |
+| `/geo`         | GeoMap + Choropleth (d3-geo), projections, graticule, legend |
 | `/palettes`    | The full color-palette catalog applied to bars               |
 | `/themes`      | bar / line / pie under default, dark, and custom themes      |
 
@@ -49,7 +64,9 @@ The interactivity is **hybrid** (see `docs/PLAN-v2.md` §5):
 - **Client-side** (`charts/interact`, loaded once in the layout): ephemeral
   hover — tooltips, the line crosshair, and nearest-point hit-testing — runs
   entirely in the browser off `data-tc-*` attributes, with no server
-  round-trip. The ten v2 charts and `line`'s mesh/slice hover use this path.
+  round-trip. Most charts and `line`'s mesh/slice hover use this path; v3's
+  d3-delaunay port backs true voronoi-mesh hover on
+  line/scatterplot/bump/swarmplot/tree.
 - **Server-side** (HTMX): *state changes* that alter what is rendered. Bar and
   pie demos register a chart instance with `charts/htmx.Registry` and mount the
   `htmx.Handler` at `/charts/`; their components emit `hx-*` attributes
@@ -77,7 +94,11 @@ examples/app/
   demos/                   – one *.go per family with demo props + data
                              (bar, line, pie, heatmap, waffle, calendar, radar,
                              radialbar, scatterplot, stream, bullet, funnel,
-                             boxplot, palettes, themes)
+                             boxplot, bump, marimekko, parallelcoordinates,
+                             polarbar, treemap, sunburst, icicle, circlepacking,
+                             tree, voronoi, network, swarmplot, sankey, chord,
+                             geo, palettes, themes; geo bundles a sample
+                             world-countries GeoJSON)
   handlers/chart.go        – page handlers + htmx wiring
   templates/               – layout + chart-card templ components
     layout.templ           – loads htmx + the charts/interact client script

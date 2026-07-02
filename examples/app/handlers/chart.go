@@ -115,6 +115,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/swarmplot", Title: "Swarmplot", Description: "Grouped value distribution relaxed with d3-force (ForceX/Y + collide); voronoi-mesh hover."},
 			{Href: "/sankey", Title: "Sankey", Description: "Flow diagram (d3-sankey): node breadths + relaxation, variable-thickness monotone-curve ribbons."},
 			{Href: "/chord", Title: "Chord", Description: "Radial flow diagram (d3-chord): entity arcs sized by total flow, ribbons spanning each directed sub-flow; hover an entity to highlight it."},
+			{Href: "/geo", Title: "Geo", Description: "GeoJSON maps (d3-geo): GeoMap + value-bound Choropleth, ten projections, optional graticule and continuous legend."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 		},

@@ -352,8 +352,9 @@ Extend the stdlib `net/http` app with a page per new family, reusing
    Deferred to a follow-up (see `docs/NOTES.md`): `clipCircle` (azimuthal
    back-face hiding) and `clipExtent` — so cylindrical/pseudocylindrical
    projections are fully correct, azimuthal-family render the whole sphere.
-8. [ ] **Polish**: demo pages, `README`/`docs` updates for the full catalog, golden
-   regeneration, `make ci` green.
+8. [x] **Polish**: demo pages (a page + nav entry per new family, geo added to the
+   index), `README`/`docs` updates for the full catalog (root + demo README, this
+   plan, `NOTES.md`), golden regeneration (idempotent — no diffs), `make ci` green.
 
 ## 9. Scope summary for v3
 
