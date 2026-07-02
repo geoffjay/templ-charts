@@ -54,6 +54,8 @@ func renderLayers(props NetworkProps, result NetworkResult) string {
 			b.WriteString(renderLinksLayer(result))
 		case NetworkLayerNodes:
 			b.WriteString(renderNodesLayer(props, result))
+		case NetworkLayerMesh:
+			b.WriteString(renderMeshLayer(props, result))
 		case NetworkLayerAnnotations:
 			// annotations: deferred in v3.
 		}
@@ -100,7 +102,8 @@ func renderNodesLayer(props NetworkProps, result NetworkResult) string {
 			b.WriteString(fmtF(node.BorderWidth))
 			b.WriteString(`"`)
 		}
-		if props.Interactive {
+		// With UseMesh, the mesh overlay handles hover; skip per-node tooltips.
+		if props.Interactive && !props.UseMesh {
 			b.WriteString(` `)
 			b.WriteString(interact.TooltipAttrName)
 			b.WriteString(`="`)
@@ -110,6 +113,26 @@ func renderNodesLayer(props NetworkProps, result NetworkResult) string {
 		b.WriteString(`></circle>`)
 	}
 	return b.String()
+}
+
+// renderMeshLayer emits the accurate voronoi-mesh hover overlay over the node
+// centers (charts/interact, backed by internal/d3/delaunay). Active only when
+// Interactive && UseMesh; DebugMesh draws the cells; DetectionRadius bounds
+// hit-testing when > 0. props.Width/Height are the inner dimensions (set by the
+// Network templ before renderLayers runs).
+func renderMeshLayer(props NetworkProps, result NetworkResult) string {
+	if !props.Interactive || !props.UseMesh {
+		return ""
+	}
+	pts := make([]interact.MeshPoint, 0, len(result.Nodes))
+	for _, n := range result.Nodes {
+		pts = append(pts, interact.MeshPoint{
+			X:    n.X,
+			Y:    n.Y,
+			HTML: interact.TooltipHTML(n.Color, n.ID, ""),
+		})
+	}
+	return interact.MeshOverlay(pts, props.Width, props.Height, props.DebugMesh, props.DetectionRadius)
 }
 
 func fmtF(v float64) string {

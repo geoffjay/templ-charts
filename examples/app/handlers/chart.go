@@ -378,7 +378,7 @@ func (a *App) Bump(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Bump", Nav: "bump"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Bump demos: ranking over time as smooth (curveBumpX) or linear lines, with end labels and per-point hover. Static SVG.",
+		Intro: "Bump demos: ranking over time as smooth (curveBumpX) or linear lines, with end labels and per-point hover, plus a Voronoi-mesh hover tile (nearest-point detection via internal/d3/delaunay). Static SVG.",
 		Cards: cards,
 	}))
 }
@@ -414,7 +414,7 @@ func (a *App) ParallelCoordinates(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Parallel coordinates", Nav: "parallel-coordinates"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Parallel-coordinates demos: one axis per variable (linear or point), each record a polyline across them, horizontal and vertical layouts. Static SVG.",
+		Intro: "Parallel-coordinates demos: one axis per variable (linear or point), each record a polyline across them, horizontal and vertical layouts, plus a Voronoi-mesh hover tile that resolves to the nearest datum via its per-axis vertices (internal/d3/delaunay). Static SVG.",
 		Cards: cards,
 	}))
 }
@@ -522,7 +522,7 @@ func (a *App) Tree(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Tree", Nav: "tree"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Tree demos: tidy-tree and dendrogram layouts with smooth bump links (curveBumpX/Y), in four orientations. Static SVG.",
+		Intro: "Tree demos: tidy-tree and dendrogram layouts with smooth bump links (curveBumpX/Y), in four orientations, plus a Voronoi-mesh hover tile (nearest-node detection via internal/d3/delaunay). Static SVG.",
 		Cards: cards,
 	}))
 }
@@ -559,7 +559,7 @@ func (a *App) Network(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Network", Nav: "network"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Network demos: a force-directed graph laid out with internal/d3/force (link + many-body + centering forces, a fixed 120-iteration tick). The three tiles share one graph and vary only repulsivity — stronger charge spreads the nodes to fill more of the frame. The layout is deterministic; hover a node for its id.",
+		Intro: "Network demos: a force-directed graph laid out with internal/d3/force (link + many-body + centering forces, a fixed 120-iteration tick). The three tiles share one graph and vary only repulsivity — stronger charge spreads the nodes to fill more of the frame. The layout is deterministic; hover a node for its id. A fourth tile adds Voronoi-mesh hover (nearest-node detection via internal/d3/delaunay), so hovering anywhere resolves to the closest node.",
 		Cards: cards,
 	}))
 }

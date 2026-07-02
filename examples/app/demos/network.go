@@ -93,5 +93,18 @@ func NetworkDemos() []NetworkDemo {
 				Interactive:  true,
 			},
 		},
+		{
+			ID:          "network-mesh",
+			Title:       "Voronoi-mesh hover",
+			Description: "useMesh: hover anywhere resolves to the nearest node via an accurate Voronoi mesh (internal/d3/delaunay) built over the settled node centers, rather than needing to land on a node.",
+			Props: network.NetworkProps{
+				Width: side, Height: side, Margin: margin,
+				Nodes: nodes, Links: links,
+				LinkDistance: linkDistance,
+				Repulsivity:  120,
+				Interactive:  true,
+				UseMesh:      true,
+			},
+		},
 	}
 }

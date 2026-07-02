@@ -60,11 +60,12 @@ type NetworkLayerId string
 const (
 	NetworkLayerLinks       NetworkLayerId = "links"
 	NetworkLayerNodes       NetworkLayerId = "nodes"
+	NetworkLayerMesh        NetworkLayerId = "mesh"
 	NetworkLayerAnnotations NetworkLayerId = "annotations"
 )
 
 // DefaultLayers mirrors @nivo/network svgDefaultProps.layers.
-var DefaultLayers = []NetworkLayerId{NetworkLayerLinks, NetworkLayerNodes, NetworkLayerAnnotations}
+var DefaultLayers = []NetworkLayerId{NetworkLayerLinks, NetworkLayerNodes, NetworkLayerMesh, NetworkLayerAnnotations}
 
 // NetworkProps mirrors @nivo/network NetworkSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
@@ -104,6 +105,16 @@ type NetworkProps struct {
 
 	// Interactive enables per-node client-side hover tooltips (charts/interact).
 	Interactive bool
+
+	// UseMesh routes hover through an accurate voronoi mesh (charts/interact,
+	// backed by internal/d3/delaunay) built over the node centers rather than
+	// per-node tooltips: hovering anywhere resolves to the nearest node. Active
+	// only when Interactive.
+	UseMesh bool
+	// DebugMesh draws the voronoi cells as a faint guide when UseMesh is on.
+	DebugMesh bool
+	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
+	DetectionRadius float64
 
 	Theme  *theming.Theme
 	Layers []NetworkLayerId

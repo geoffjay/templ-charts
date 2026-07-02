@@ -53,5 +53,18 @@ func ParallelCoordinatesDemos() []ParallelCoordinatesDemo {
 				Layout:    pc.PCLayoutVertical,
 			},
 		},
+		{
+			ID:          "parallelcoordinates-mesh",
+			Title:       "Voronoi-mesh hover",
+			Description: "useMesh: hover anywhere resolves to the nearest datum via an accurate Voronoi mesh (internal/d3/delaunay) built over each line's per-axis vertices, rather than needing to land on a thin polyline.",
+			Props: pc.PCProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:      core.Margin{Top: 50, Right: 60, Bottom: 50, Left: 60},
+				Data:        data,
+				Variables:   vars,
+				Interactive: true,
+				UseMesh:     true,
+			},
+		},
 	}
 }

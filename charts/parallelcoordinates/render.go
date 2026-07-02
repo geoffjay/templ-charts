@@ -64,6 +64,8 @@ func renderLayers(props PCProps, result PCResult, dims core.Dimensions, theme *t
 			b.WriteString(renderLinesLayer(props, result))
 		case PCLayerAxes:
 			b.WriteString(renderAxesLayer(props, result, dims, theme))
+		case PCLayerMesh:
+			b.WriteString(renderMeshLayer(props, result, dims))
 		case PCLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
 		}
@@ -87,7 +89,8 @@ func renderLinesLayer(props PCProps, result PCResult) string {
 		b.WriteString(`" stroke-linecap="round" style="opacity:`)
 		b.WriteString(fmtF(props.LineOpacity))
 		b.WriteString(`"`)
-		if props.Interactive && ln.Tooltip != "" {
+		// With UseMesh, the mesh overlay handles hover; skip per-line tooltips.
+		if props.Interactive && !props.UseMesh && ln.Tooltip != "" {
 			b.WriteString(` `)
 			b.WriteString(interact.TooltipAttrName)
 			b.WriteString(`="`)
@@ -99,6 +102,28 @@ func renderLinesLayer(props PCProps, result PCResult) string {
 		b.WriteString(`></path>`)
 	}
 	return b.String()
+}
+
+// renderMeshLayer emits the accurate voronoi-mesh hover overlay over the
+// per-axis line vertices (charts/interact, backed by internal/d3/delaunay):
+// each datum contributes one mesh point per variable axis it crosses, so
+// hovering anywhere resolves to the nearest datum. Active only when
+// Interactive && UseMesh; DebugMesh draws the cells; DetectionRadius bounds
+// hit-testing when > 0.
+func renderMeshLayer(props PCProps, result PCResult, dims core.Dimensions) string {
+	if !props.Interactive || !props.UseMesh {
+		return ""
+	}
+	var pts []interact.MeshPoint
+	for _, ln := range result.Lines {
+		if ln.Tooltip == "" {
+			continue
+		}
+		for _, p := range ln.Points {
+			pts = append(pts, interact.MeshPoint{X: p[0], Y: p[1], HTML: ln.Tooltip})
+		}
+	}
+	return interact.MeshOverlay(pts, dims.InnerWidth, dims.InnerHeight, props.DebugMesh, props.DetectionRadius)
 }
 
 // renderAxesLayer emits one axes.Axis per variable, oriented per the layout.

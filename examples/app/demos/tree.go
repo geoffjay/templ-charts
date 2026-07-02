@@ -50,5 +50,17 @@ func TreeDemos() []TreeDemo {
 				Layout: tree.LayoutLeftToRight,
 			},
 		},
+		{
+			ID:          "tree-mesh",
+			Title:       "Voronoi-mesh hover",
+			Description: "useMesh: hover anywhere resolves to the nearest node via an accurate Voronoi mesh (internal/d3/delaunay), instead of per-node targets.",
+			Props: tree.TreeProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:      core.Margin{Top: 30, Right: 40, Bottom: 40, Left: 40},
+				Data:        treeSample(),
+				Interactive: true,
+				UseMesh:     true,
+			},
+		},
 	}
 }

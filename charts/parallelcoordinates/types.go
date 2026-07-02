@@ -70,11 +70,12 @@ type PCLayerId string
 const (
 	PCLayerAxes    PCLayerId = "axes"
 	PCLayerLines   PCLayerId = "lines"
+	PCLayerMesh    PCLayerId = "mesh"
 	PCLayerLegends PCLayerId = "legends"
 )
 
 // DefaultLayers mirrors @nivo/parallel-coordinates defaultProps.layers.
-var DefaultLayers = []PCLayerId{PCLayerLines, PCLayerAxes, PCLayerLegends}
+var DefaultLayers = []PCLayerId{PCLayerLines, PCLayerAxes, PCLayerMesh, PCLayerLegends}
 
 // ComputedVariable is a positioned variable with its resolved scale.
 type ComputedVariable struct {
@@ -92,6 +93,10 @@ type ComputedLine struct {
 	ID    string
 	Color string
 	Path  string
+	// Points are the datum's pixel vertices where the line crosses each
+	// variable axis (skipping undefined values). These are the mesh hover
+	// targets when UseMesh is on.
+	Points [][2]float64
 	// Tooltip HTML (emitted only when Interactive).
 	Tooltip string
 }
@@ -118,6 +123,16 @@ type PCProps struct {
 
 	// Interactive enables per-line client-side hover tooltips (charts/interact).
 	Interactive bool
+
+	// UseMesh routes hover through an accurate voronoi mesh (charts/interact,
+	// backed by internal/d3/delaunay) built over the per-axis line vertices
+	// rather than per-line tooltips: hovering anywhere resolves to the nearest
+	// datum vertex. Active only when Interactive.
+	UseMesh bool
+	// DebugMesh draws the voronoi cells as a faint guide when UseMesh is on.
+	DebugMesh bool
+	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
+	DetectionRadius float64
 
 	Legends []legends.LegendProps
 

@@ -79,6 +79,12 @@ func UseParallelCoordinates(props PCProps) PCResult {
 			}
 		}
 		line := ComputedLine{ID: id, Color: color, Path: gen.Call(pts)}
+		for _, p := range pts {
+			if math.IsNaN(p[0]) || math.IsNaN(p[1]) {
+				continue
+			}
+			line.Points = append(line.Points, [2]float64{p[0], p[1]})
+		}
 		if props.Interactive {
 			line.Tooltip = interact.TooltipHTML(color, id, "")
 		}

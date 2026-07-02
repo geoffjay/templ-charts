@@ -58,5 +58,17 @@ func BumpDemos() []BumpDemo {
 				},
 			},
 		},
+		{
+			ID:          "bump-mesh",
+			Title:       "Voronoi-mesh hover",
+			Description: "useMesh: hover anywhere resolves to the nearest rank point via an accurate Voronoi mesh (internal/d3/delaunay), rather than needing to land on a point.",
+			Props: bump.BumpProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:      core.Margin{Top: 30, Right: 100, Bottom: 40, Left: 100},
+				Data:        data,
+				Interactive: true,
+				UseMesh:     true,
+			},
+		},
 	}
 }
