@@ -48,6 +48,7 @@ func main() {
 	mux.HandleFunc("/network", app.Network)
 	mux.HandleFunc("/swarmplot", app.SwarmPlot)
 	mux.HandleFunc("/sankey", app.Sankey)
+	mux.HandleFunc("/chord", app.Chord)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
 

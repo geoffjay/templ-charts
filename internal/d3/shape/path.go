@@ -212,6 +212,24 @@ func (p *Path) rect(x, y, w, h float64) {
 	p.buf += "M" + p.fmtNum(x) + "," + p.fmtNum(y) + "h" + p.fmtNum(w) + "v" + p.fmtNum(h) + "h" + p.fmtNum(-w) + "Z"
 }
 
+// MoveTo emits "Mx,y" and starts a new subpath. Exported wrapper around moveTo
+// so generators outside this package (e.g. the d3-chord ribbon generator) can
+// build paths with byte-identical serialization.
+func (p *Path) MoveTo(x, y float64) { p.moveTo(x, y) }
+
+// LineTo emits "Lx,y". Exported wrapper around lineTo.
+func (p *Path) LineTo(x, y float64) { p.lineTo(x, y) }
+
+// QuadraticCurveTo emits "Qx1,y1,x,y". Exported wrapper around quadraticCurveTo.
+func (p *Path) QuadraticCurveTo(x1, y1, x, y float64) { p.quadraticCurveTo(x1, y1, x, y) }
+
+// Arc draws a circular arc centered at (x,y) with radius r from angle a0 to a1.
+// ccw reverses direction. Exported wrapper around arc.
+func (p *Path) Arc(x, y, r, a0, a1 float64, ccw bool) { p.arc(x, y, r, a0, a1, ccw) }
+
+// ClosePath emits "Z". Exported wrapper around closePath.
+func (p *Path) ClosePath() { p.closePath() }
+
 // String returns the accumulated SVG path-data string.
 func (p *Path) String() string { return p.buf }
 

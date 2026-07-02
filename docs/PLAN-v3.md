@@ -345,7 +345,7 @@ Extend the stdlib `net/http` app with a page per new family, reusing
 4. [x] **`d3/force` port** (LCG + fixed ticks) → **network, swarmplot** (swarmplot
    picks up the Phase-3 mesh).
 5. [x] **`d3/sankey` port** → **sankey**.
-6. [ ] **`d3/chord` port** → **chord**.
+6. [x] **`d3/chord` port** → **chord**.
 7. [ ] **`d3/geo` port** → **geo** (GeoMap + Choropleth). Heaviest, lowest
    chart-count — **may split to v3.1**. Ship minimal-viable (Mercator +
    equirectangular + `GeoPath` + graticule) first, add projections incrementally.
