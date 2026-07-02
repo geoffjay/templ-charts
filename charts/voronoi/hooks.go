@@ -1,6 +1,9 @@
 package voronoi
 
 import (
+	"strconv"
+
+	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
 	"github.com/geoffjay/templ-charts/internal/d3/delaunay"
@@ -15,12 +18,18 @@ func UseVoronoi(props VoronoiProps) VoronoiResult {
 	xScale := scales.NewLinearScaleWithRange(props.XDomain[0], props.XDomain[1], 0, props.Width)
 	yScale := scales.NewLinearScaleWithRange(props.YDomain[0], props.YDomain[1], 0, props.Height)
 
+	getColor := colors.GetOrdinalColorScale[string](props.Colors, func(id string) string { return id })
+
 	points := make([]ComputedPoint, len(props.Data))
 	pts := make([][2]float64, len(props.Data))
 	for i, d := range props.Data {
 		x := xScale.Call(d.X)
 		y := yScale.Call(d.Y)
-		points[i] = ComputedPoint{ID: d.ID, X: x, Y: y, Data: d}
+		key := d.ID
+		if key == "" {
+			key = strconv.Itoa(i)
+		}
+		points[i] = ComputedPoint{ID: d.ID, X: x, Y: y, Color: getColor(key), Data: d}
 		pts[i] = [2]float64{x, y}
 	}
 

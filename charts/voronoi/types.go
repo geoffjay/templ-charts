@@ -11,6 +11,7 @@
 package voronoi
 
 import (
+	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/theming"
 	"github.com/geoffjay/templ-charts/internal/d3/delaunay"
@@ -38,9 +39,10 @@ var DefaultLayers = []LayerId{LayerLinks, LayerCells, LayerPoints, LayerBounds}
 
 // ComputedPoint is one input datum positioned in pixel space.
 type ComputedPoint struct {
-	ID   string
-	X, Y float64 // pixel coordinates within the inner chart area
-	Data VoronoiDatum
+	ID    string
+	X, Y  float64 // pixel coordinates within the inner chart area
+	Color string  // resolved cell/point color (from Colors, keyed by ID)
+	Data  VoronoiDatum
 }
 
 // VoronoiProps mirrors @nivo/voronoi VoronoiProps (the supported subset).
@@ -67,6 +69,16 @@ type VoronoiProps struct {
 	EnableCells   *bool // nil → true
 	CellLineWidth float64
 	CellLineColor string
+
+	// EnableCellFill fills each Voronoi cell with its site's color (from Colors)
+	// rather than leaving it hollow. nil → false. When on, cells are rendered as
+	// one path per cell (needed for per-cell fills).
+	EnableCellFill  *bool
+	CellFillOpacity float64 // 0 → default (Defaults.CellFillOpacity)
+
+	// Colors assigns a color per site, keyed by datum ID (index when ID is
+	// empty). Used for cell fills and available on ComputedPoint.Color.
+	Colors colors.OrdinalColorScaleConfig
 
 	EnablePoints *bool // nil → true
 	PointSize    float64
@@ -106,3 +118,6 @@ func (p VoronoiProps) CellsEnabled() bool { return p.EnableCells == nil || *p.En
 
 // PointsEnabled resolves EnablePoints (nil → true).
 func (p VoronoiProps) PointsEnabled() bool { return p.EnablePoints == nil || *p.EnablePoints }
+
+// CellFillEnabled resolves EnableCellFill (nil → false).
+func (p VoronoiProps) CellFillEnabled() bool { return p.EnableCellFill != nil && *p.EnableCellFill }

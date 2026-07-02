@@ -1,6 +1,9 @@
 package voronoi
 
-import "github.com/geoffjay/templ-charts/charts/core"
+import (
+	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
+)
 
 // Defaults mirrors @nivo/voronoi defaultVoronoiProps. Fields left zero in a
 // VoronoiProps fall back to these via applyDefaults.
@@ -14,9 +17,12 @@ var Defaults = VoronoiProps{
 	LinkLineWidth: 1,
 	LinkLineColor: "#bbbbbb",
 
-	EnableCells:   BoolPtr(true),
-	CellLineWidth: 2,
-	CellLineColor: "#000000",
+	EnableCells:     BoolPtr(true),
+	CellLineWidth:   2,
+	CellLineColor:   "#000000",
+	EnableCellFill:  BoolPtr(false),
+	CellFillOpacity: 0.85,
+	Colors:          colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 
 	EnablePoints: BoolPtr(true),
 	PointSize:    4,

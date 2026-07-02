@@ -540,7 +540,7 @@ func (a *App) Voronoi(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Voronoi", Nav: "voronoi"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Voronoi demos: Delaunay triangulation and its Voronoi dual (d3-delaunay), clipped to the chart — links, cells, points, and bounds, with per-cell hover. Static SVG.",
+		Intro: "Voronoi demos: Delaunay triangulation and its Voronoi dual (d3-delaunay), clipped to the chart — links, cells, points, and bounds, with per-cell hover and optional colored (ordinal-filled) cells. Static SVG.",
 		Cards: cards,
 	}))
 }

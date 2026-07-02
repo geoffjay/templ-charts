@@ -8,6 +8,7 @@ import (
 
 	"github.com/a-h/templ"
 
+	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/interact"
 )
 
@@ -49,6 +50,15 @@ func applyDefaults(p VoronoiProps) VoronoiProps {
 	if p.CellLineColor == "" {
 		p.CellLineColor = Defaults.CellLineColor
 	}
+	if p.EnableCellFill == nil {
+		p.EnableCellFill = Defaults.EnableCellFill
+	}
+	if p.CellFillOpacity == 0 {
+		p.CellFillOpacity = Defaults.CellFillOpacity
+	}
+	if isZeroOrdinal(p.Colors) {
+		p.Colors = Defaults.Colors
+	}
 	if p.EnablePoints == nil {
 		p.EnablePoints = Defaults.EnablePoints
 	}
@@ -62,6 +72,10 @@ func applyDefaults(p VoronoiProps) VoronoiProps {
 		p.Role = Defaults.Role
 	}
 	return p
+}
+
+func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
+	return c.Type == 0 && c.Scheme == "" && c.Static == "" && len(c.Colors) == 0 && c.Func == nil && c.DatumPath == ""
 }
 
 // renderLayers renders the enabled layers as an inner SVG string, in the
@@ -106,12 +120,13 @@ func renderLinksLayer(props VoronoiProps, result VoronoiResult) string {
 	return b.String()
 }
 
-// renderCellsLayer draws the Voronoi cells. When Interactive, each cell is a
-// separate path carrying its datum's tooltip; otherwise all cells are a single
-// path for a compact static render.
+// renderCellsLayer draws the Voronoi cells. When Interactive or cell fill is on,
+// each cell is a separate path (so it can carry a tooltip and/or its own fill);
+// otherwise all cells are a single hollow path for a compact static render.
 func renderCellsLayer(props VoronoiProps, result VoronoiResult) string {
 	var b strings.Builder
-	if props.Interactive {
+	fill := props.CellFillEnabled()
+	if props.Interactive || fill {
 		for i, p := range result.Points {
 			cell := result.Voronoi.RenderCell(i)
 			if cell == "" {
@@ -119,14 +134,24 @@ func renderCellsLayer(props VoronoiProps, result VoronoiResult) string {
 			}
 			b.WriteString(`<path d="`)
 			b.WriteString(cell)
-			b.WriteString(`" fill="none" stroke="`)
+			b.WriteString(`" fill="`)
+			if fill {
+				b.WriteString(p.Color)
+				b.WriteString(`" fill-opacity="`)
+				b.WriteString(fmtF(props.CellFillOpacity))
+			} else {
+				b.WriteString(`none`)
+			}
+			b.WriteString(`" stroke="`)
 			b.WriteString(props.CellLineColor)
 			b.WriteString(`" stroke-width="`)
 			b.WriteString(fmtF(props.CellLineWidth))
-			// pointer-events:all makes the whole (unfilled) cell area hoverable,
-			// not just its stroke, so the tooltip shows anywhere inside the cell.
-			b.WriteString(`" pointer-events="all" data-tc-tooltip="`)
-			b.WriteString(interact.EscapeAttr(interact.TooltipHTML(props.PointColor, p.ID, pointValue(p))))
+			if props.Interactive {
+				// pointer-events:all makes the whole cell area hoverable (not just
+				// its stroke) so the tooltip shows anywhere inside the cell.
+				b.WriteString(`" pointer-events="all" data-tc-tooltip="`)
+				b.WriteString(interact.EscapeAttr(interact.TooltipHTML(cellTooltipColor(props, p), p.ID, pointValue(p))))
+			}
 			b.WriteString(`"></path>`)
 		}
 		return b.String()
@@ -143,6 +168,15 @@ func renderCellsLayer(props VoronoiProps, result VoronoiResult) string {
 	b.WriteString(fmtF(props.CellLineWidth))
 	b.WriteString(`"></path>`)
 	return b.String()
+}
+
+// cellTooltipColor picks the swatch color for a cell's tooltip: its fill color
+// when cells are filled, else the shared point color (prior behavior).
+func cellTooltipColor(props VoronoiProps, p ComputedPoint) string {
+	if props.CellFillEnabled() {
+		return p.Color
+	}
+	return props.PointColor
 }
 
 // renderPointsLayer draws each input point as a small circle.
