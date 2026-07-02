@@ -288,7 +288,7 @@ func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Scatterplot", Nav: "scatterplot"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Scatterplot demos: series of {x,y} nodes on linear scales with grid, axes, and a legend. Static SVG (point hover arrives with the Phase 5 client layer).",
+		Intro: "Scatterplot demos: series of {x,y} nodes on linear scales with grid, axes, and a legend, plus a Voronoi-mesh hover tile (nearest-node detection via internal/d3/delaunay).",
 		Cards: cards,
 	}))
 }

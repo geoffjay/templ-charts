@@ -43,5 +43,24 @@ func ScatterPlotDemos() []ScatterPlotDemo {
 				},
 			},
 		},
+		{
+			ID:          "scatter-mesh",
+			Title:       "Voronoi-mesh hover",
+			Description: "useMesh: hover resolves to the nearest node via an accurate Voronoi mesh (internal/d3/delaunay), matching nivo's detection.",
+			Props: scatterplot.ScatterPlotProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
+				Data:        data,
+				EnableGridX: true,
+				EnableGridY: true,
+				Interactive: true,
+				UseMesh:     true,
+				Title:       "Scatterplot: Voronoi-mesh hover",
+				Desc:        "Two series of x/y points; hover anywhere resolves to the nearest node via a Voronoi mesh.",
+				Legends: []legends.LegendProps{
+					{Anchor: legends.LegendAnchorBottomRight, Direction: legends.LegendDirectionColumn, TranslateX: 0, TranslateY: 0},
+				},
+			},
+		},
 	}
 }
