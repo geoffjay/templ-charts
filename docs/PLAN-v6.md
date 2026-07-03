@@ -1,0 +1,266 @@
+# templ-charts — Implementation Plan (v6)
+
+## 1. Vision
+
+v1–v3 built the framework and reached **full nivo SVG chart parity** (28 chart
+families). v4 made the library **consumable** (render helpers, examples, honest
+props, benchmarks, per-chart detail pages). v5 was **fidelity & finish** —
+correct azimuthal geo, animation across every chart, hierarchy zoom, unified
+hover-highlight, and the partial-chart completions — closing the last mile of
+the *SVG* story.
+
+**v6 is the "scale" release.** It adds the **Canvas rendering path** and the
+**large-N performance** work that makes Canvas worth having. These are the two
+largest remaining nivo capabilities, they *pair together* (Canvas only pays off
+once the layout math scales to the point counts Canvas is for), and PLAN-v5 §12
+already named them the v6 theme. Everything v5 produced — the deterministic
+`Use{Chart}` layout hooks, animation geometry, hover/zoom state — is **reused**
+by a Canvas backend, which is why finishing SVG first was the right order.
+
+v6 adds **no new chart *types***. It adds two *foundational* things the SVG path
+never needed: (a) sub-quadratic layout algorithms (a `d3-quadtree` port driving
+Barnes–Hut many-body + collision, and a Delaunator sweep-hull replacing the
+Bowyer–Watson triangulation), and (b) a Canvas rendering backend that replays
+the same server-computed geometry into a `<canvas>`. It follows the same
+per-package anatomy, verbatim-defaults, and golden-test discipline as v1–v5.
+
+See [`docs/PLAN.md`](PLAN.md), [`docs/PLAN-v2.md`](PLAN-v2.md),
+[`docs/PLAN-v3.md`](PLAN-v3.md), [`docs/PLAN-v4.md`](PLAN-v4.md), and
+[`docs/PLAN-v5.md`](PLAN-v5.md) for the prior structure this document mirrors,
+and [`docs/PLAN-deferred.md`](PLAN-deferred.md) §1–§2 for the backlog it draws
+from.
+
+## 2. Confirmed decisions
+
+| Concern | Decision |
+|---|---|
+| Theme | **Scale.** The Canvas rendering path + the large-N performance work that justifies it. No new chart types. |
+| Order within v6 | **Performance foundations first, Canvas second.** The quadtree/Delaunator ports are self-contained, lower-risk, and golden-testable against d3; Canvas is the larger architectural lift and consumes their output. |
+| Canvas backend | **Client draw-list is the primary backend** (a compact, deterministic, server-emitted list of draw ops replayed into a `<canvas>` by a small dependency-free JS renderer), because it reuses every `Use{Chart}` hook verbatim, keeps the server pure-Go/dependency-light, and mirrors nivo's model. A **server-side pure-Go PNG raster** backend is a documented *secondary* option (§4.4), not the default. |
+| New d3 modules | **`internal/d3/quadtree`** (Barnes–Hut prerequisite) is the one genuinely new port. `internal/d3/delaunay` gets a **Delaunator sweep-hull** rewrite (same package, new algorithm). |
+| Determinism / goldens | The draw-list is a **data structure**, so it is golden-tested as JSON exactly like SVG is today — no pixel diffing in CI. Optional headless-browser pixel checks stay out of CI. All existing SVG goldens stay **byte-stable** (Canvas is an opt-in alternate path, never the default). |
+| Interactivity on Canvas | Reuse the existing hybrid model. Ephemeral hover on Canvas uses the **already-built** `charts/interact` mesh/nearest-point layer (a transparent hit-test surface over the canvas); state changes stay on HTMX. No pixel hit-testing. |
+| Color spaces, consumption surface, geo-beyond-correctness | **Deferred to v7** (opportunistic — see §11). |
+
+## 3. Large-N performance foundations
+
+These are correctness-preserving speedups: same outputs (within d3's documented
+approximation tolerance), dramatically better asymptotics. Each is
+golden/parity-tested against the existing exact implementation and against d3.
+
+### 3.1 `internal/d3/quadtree` (new port)
+Port d3-quadtree: `add`/`addAll`, `remove`, `cover`, `extent`, `visit`/
+`visitAfter`, `find`, and the internal-node aggregation hooks Barnes–Hut needs.
+This is the shared spatial index for both force accelerations below. It is a
+clean, well-specified, deterministic port with its own unit + golden tests
+(node structure, `find` results) validated against d3-quadtree.
+
+### 3.2 Barnes–Hut many-body + quadtree collision
+`internal/d3/force/manybody.go` is today an **exact all-pairs O(n²)** charge sum
+(its own header comment: "equivalent to θ=0", the `for _, node := range nodes`
+at `:65`). Add the d3 Barnes–Hut path over the §3.1 quadtree with the standard
+`theta` (θ, default 0.9) accuracy parameter and per-cell accumulated charge /
+centroid, bringing many-body to **O(n log n)**. Keep the exact path available
+(θ=0) so the existing force goldens stay byte-stable and small graphs stay
+maximally accurate.
+`internal/d3/force/collide.go` (`:44` pairwise loop; its header already notes
+"d3 uses a quadtree purely to prune") gets the same quadtree pruning →
+**O(n log n)** collision resolution.
+- **Risk**: the quadtree accumulation + θ acceptance test is the fiddly part
+  (same class of care as the v3 force determinism work). Parity-test Barnes–Hut
+  positions after a fixed `Tick(120)` against the exact path within tolerance,
+  and keep the phyllotaxis seeding + LCG jiggle so runs stay deterministic.
+
+### 3.3 Delaunator sweep-hull for `internal/d3/delaunay`
+`internal/d3/delaunay/delaunay.go` is the **classic Bowyer–Watson** incremental
+algorithm with a bounding super-triangle — **O(n²) worst case** (its header at
+`:7-8`). Replace the triangulation core with a **Delaunator** sweep-hull port
+(**O(n log n)**), preserving the public surface (`Triangles`, `Halfedges`,
+`Find`, voronoi cells) so `charts/voronoi`, the line/network mesh, and swarmplot
+are unaffected in output. Golden-test the triangulation + voronoi cells against
+the current exact output and against d3-delaunay.
+- **Risk**: Delaunator's halfedge bookkeeping and its `Find` walk are subtle;
+  the existing golden suite (cells + `Find`) is the safety net — outputs must
+  match the Bowyer–Watson results the current goldens encode.
+
+### 3.4 Render / allocation cost
+The SVG string-builder path is ~900 `WriteString` calls across
+`charts/*/render.go`; fine at chart scale, wasteful at large-N. v6 does **not**
+rewrite the SVG path, but the new Canvas draw-list emitter (§4) is designed
+allocation-consciously from the start (pre-sized buffers, no per-mark
+`fmt.Sprintf`), and §6 benchmarks both paths so large-N regressions are visible.
+
+## 4. Canvas rendering path
+
+**This is the headline v6 workstream and the largest single lift.** nivo ships
+`*Canvas` variants (bar, line, scatterplot, heatmap, network, swarmplot, geo,
+voronoi, …) for datasets too large for one SVG node per datum. templ-charts is
+SVG-only today; the only canvas presence is latent scaffolding: `EngineCanvas` +
+`CanvasStyleAttributesMapping` in `charts/theming/bridge.go`, and
+`CanvasAxisProps` (a `= AxisProps` alias) in `charts/axes/compute.go`. No
+`<canvas>`, `getContext`, or `toDataURL` anywhere.
+
+### 4.1 The core decision — client draw-list (primary)
+A Go library cannot draw pixels in the browser, but it already *computes* every
+mark's geometry server-side. The v6 Canvas backend **emits a compact,
+deterministic draw-list** — an ordered sequence of primitive ops (`rect`,
+`arc`, `circle`, `path`, `text`, `line`, `fillStyle`, `transform`, …) produced
+from the *same* `Use{Chart}` hooks the SVG path uses — and ships a small
+dependency-free JS renderer (a sibling of `charts/interact`'s script) that
+replays it into a `<canvas>` via the 2D context.
+
+Why this over server-side raster:
+- **Reuses the layout hooks verbatim.** The draw-list emitter is a second
+  *renderer* over the existing computed model; no layout code is duplicated.
+- **Keeps the server pure-Go and dependency-light** (no cgo/raster lib, no
+  server CPU spent rasterizing per request).
+- **Mirrors nivo** (its Canvas charts draw the same computed shapes into a 2D
+  context) — parity reasoning transfers directly.
+- **Deterministic and diffable** — the draw-list is data, so it golden-tests as
+  JSON like SVG does (§6), with no image comparison in CI.
+
+### 4.2 Shape of the backend
+- A `charts/canvas` package: the draw-op types (`Op`, an enum + payload), a
+  `Recorder` that charts' render layers write ops into (the Canvas analogue of
+  the SVG string-builder), a JSON/compact encoder, and the JS `CanvasScript` /
+  `CanvasScriptTag` (matching `interact.ScriptTag`) that decodes + replays.
+- A chart opts into Canvas via a `Render RenderEngine` prop (`EngineSVG`
+  default, `EngineCanvas` opt-in) — reusing the existing `theming.Engine` enum
+  so the theme's canvas style-attribute mapping already applies. Default stays
+  SVG, so **all existing goldens are byte-stable**.
+- The emitted markup is a `<canvas>` sized to the chart plus a `data-tc-canvas`
+  attribute carrying (or referencing) the draw-list; the script initializes it
+  on load and on resize (reusing v5's `data-tc-observe` observer for HiDPI /
+  resize re-scale).
+
+### 4.3 Interactivity on Canvas
+No pixel hit-testing. Reuse the built machinery: a transparent SVG (or DOM)
+hit-surface over the canvas carrying the existing `data-tc-mesh` /
+`data-tc-tooltip` attributes, so hover/nearest-point works identically to the
+SVG path (`charts/interact`), and HTMX still drives state changes. This is why
+§3.3 (fast Delaunay) matters for Canvas too — the mesh is the hover layer.
+
+### 4.4 Secondary option — server-side PNG (documented, not built by default)
+A pure-Go rasterizer (`golang.org/x/image/vector`, no cgo) drawing the same
+draw-list to an `image.Image` and emitting a `data:`/endpoint PNG. Keeps
+rendering fully server-side (no client JS) at the cost of bitmap output and
+per-request CPU. v6 keeps the draw-list emitter **backend-agnostic** so this can
+be added later without touching chart code; it is not on the v6 critical path.
+
+## 5. Canvas chart coverage
+
+Not every chart needs Canvas — only the large-N ones nivo ships a `*Canvas` for.
+Prioritise by point-count leverage:
+
+| Tranche | Charts | Rationale |
+|---|---|---|
+| **1 (highest leverage)** | scatterplot, heatmap | thousands of points/cells; the canonical Canvas wins, and each is a single primitive family (circles / rects). |
+| **2** | network, swarmplot, voronoi | large node/point clouds; depend on §3.2/§3.3 perf and the mesh hover layer. |
+| **3** | line, bar, geo | line/area with dense points, big categorical bars, dense geo feature sets. |
+
+Each Canvas variant is validated to produce a draw-list whose ops correspond to
+the SVG output (§6), and gets a demo tile. Charts outside these tranches stay
+SVG-only (as nivo does).
+
+## 6. Determinism & testing strategy
+
+- **Draw-list goldens.** Each Canvas-enabled chart golden-tests its emitted
+  draw-list (canonical JSON, 3-decimal rounding like the SVG path) via
+  `internal/golden.Assert` — deterministic, readable, diffable, no pixels in CI.
+- **SVG↔Canvas correspondence test.** A per-chart test asserting the draw-list
+  contains one draw op per mark the SVG path emits (same count, same
+  colors/coordinates within rounding) — catches drift between the two renderers.
+- **Perf ports** (§3): unit + golden parity vs the exact/Bowyer–Watson results
+  the current goldens encode, plus vs d3 output (quadtree structure, Barnes–Hut
+  positions within θ tolerance, Delaunator triangles/cells/`Find`).
+- **Byte-stability.** SVG is the default everywhere, so **no existing golden
+  moves**; Canvas/perf behaviour is asserted only by *new* goldens and the
+  θ=0 / exact paths stay the default for force/delaunay goldens.
+- **Optional (excluded from CI)**: a headless-browser pixel snapshot for a
+  couple of Canvas charts, run under `make bench`-style opt-in, not in `make ci`.
+
+## 7. Build / test
+
+- **`make ci`** (`make lint` + `make test`) stays green; SVG defaults unchanged.
+- **`make bench`** (from v4) gains large-N cases: force `Tick` at 10k/50k nodes
+  (exact vs Barnes–Hut), Delaunay at 10k/50k points (Bowyer–Watson vs
+  Delaunator), and SVG vs Canvas draw-list emit for scatterplot/heatmap at scale
+  — quantifying the asymptotic wins. Still excluded from CI.
+- **`make golden`** extended to the new draw-list-owning packages.
+- New JS lives in `charts/canvas` as an embedded string with its own
+  `*Script`/`*ScriptTag` (mirroring `charts/interact`); no bundler, no Go deps.
+- Any `.templ` touched is regenerated **per-file** (`templ generate -f`), never
+  globally (see `docs/NOTES.md`).
+
+## 8. Demo app — `examples/app`
+
+Extend the existing app and the v4 detail-page registry rather than adding
+plumbing:
+- An **engine toggle** (`?engine=canvas`) on the detail pages of the
+  Canvas-enabled charts, flipping the `Render` prop through the existing Render
+  closure — SVG vs Canvas side by side.
+- A **large-N showcase** page (building on v4's `/benchmark`) rendering
+  scatterplot/heatmap/network at 10k–50k points in Canvas, to make the scale
+  story tangible.
+- Load `canvas.CanvasScriptTag()` alongside `interact.ScriptTag()` in the
+  layout.
+
+## 9. Implementation order (topological, by leverage/risk)
+
+1. **`internal/d3/quadtree` port** (§3.1) — self-contained foundation; unblocks
+   Barnes–Hut + quadtree collision.
+2. **Barnes–Hut many-body + quadtree collide** (§3.2) — θ path added, exact
+   (θ=0) path kept as default so force goldens stay byte-stable.
+3. **Delaunator sweep-hull** (§3.3) — rewrite the triangulation core behind the
+   existing `internal/d3/delaunay` surface; goldens must match.
+4. **`charts/canvas` backend** (§4) — draw-op types, `Recorder`, encoder, and
+   the JS replay script; the backend-agnostic core (so the §4.4 PNG option stays
+   open).
+5. **Canvas chart variants** (§5), tranche by tranche (scatterplot + heatmap
+   first), each with draw-list + correspondence goldens and a demo tile.
+6. **Benchmarks + large-N demo + docs** (§7–§8): `make bench` large-N cases,
+   the showcase page, `README`/`USAGE`/`NOTES` updates, `make golden` idempotent,
+   `make ci` green.
+
+## 10. Scope summary for v6
+
+**Performance**: a new `internal/d3/quadtree` port; Barnes–Hut O(n log n)
+many-body + quadtree O(n log n) collision (exact θ=0 path retained as default);
+a Delaunator sweep-hull O(n log n) triangulation behind the existing delaunay
+surface.
+
+**Canvas**: a `charts/canvas` client draw-list backend (draw-op recorder +
+compact encoder + dependency-free JS replay), opt-in per chart via a `Render`
+engine prop (SVG stays default), reusing every `Use{Chart}` layout hook and the
+existing mesh/HTMX interactivity; Canvas variants for the large-N charts nivo
+ships (scatterplot, heatmap, network, swarmplot, voronoi, line, bar, geo).
+
+**Tests/demo**: draw-list + SVG-correspondence goldens, perf parity tests vs the
+exact/Bowyer–Watson + d3 outputs, large-N benchmarks, an engine toggle + a
+large-N showcase page. All existing SVG goldens stay byte-stable.
+
+**Explicitly out of scope** (→ §11 / [`PLAN-deferred.md`](PLAN-deferred.md)):
+HSL/Lab/Lch color spaces, public sample-data export + `charts/static` extension
+to all 28 + a unified color-setting API, and geo beyond correctness (`GeoPath`
+bounds/area/centroid, `fitExtent`/`fitSize`, projections beyond the ~10 nivo
+exposes, TopoJSON).
+
+## 11. Explicitly deferred (v7+)
+
+After v6, the nivo gap is essentially closed; what remains is opportunistic,
+demand-driven polish:
+
+- **Color spaces** — `internal/d3/color` stays RGB-only; add HSL/Lab/Lch only
+  when a chart needs perceptually-uniform interpolation or lightness modifiers.
+- **Consumption surface** — public typed sample-data export, extending the
+  `charts/static` registry from bar/line/pie to all 28 charts, and a single
+  unifying color-setting API over the five current color-config shapes.
+- **geo completeness beyond correctness** — `GeoPath` bounds/area/centroid,
+  `fitExtent`/`fitSize`, the full projection catalog beyond the ~10 nivo
+  exposes, and TopoJSON decoding (still out of scope by design — callers supply
+  GeoJSON — unless a consumer needs it).
+
+The consolidated backlog remains [`docs/PLAN-deferred.md`](PLAN-deferred.md);
+v6 removes from it the Canvas rendering path (§1) and the large-N performance
+work (§2), leaving color spaces (§7) and the consumption surface (§8) as the
+standing remainder.
