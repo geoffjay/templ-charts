@@ -111,9 +111,10 @@ off, so static embeds are zero-JS and byte-stable):
 
 - **Client-side hover (ephemeral)** — set `Interactive: true` on a chart's props
   and each mark emits `data-tc-*` attributes; a tiny dependency-free script shows
-  tooltips and does nearest-point hit-testing entirely in the browser. `line`
-  additionally exposes `ClientHover bool` for its mesh/slice hover + crosshair.
-  Load the script once per page:
+  tooltips and does nearest-point hit-testing entirely in the browser. For
+  `line`, the client mesh/slice path is the **default** (the legacy per-mousemove
+  server round-trip is opt-in via `ServerHover`; `ClientHover` is a retained
+  no-op). Load the script once per page:
 
   ```go
   import "github.com/geoffjay/templ-charts/charts/interact"
@@ -121,11 +122,24 @@ off, so static embeds are zero-JS and byte-stable):
   @interact.ScriptTag()
   ```
 
+- **Client-side hover-highlight (CSS)** — `chord`, `sankey` and `network` (with
+  `Interactive: true`) dim the other marks and re-light the hovered one plus its
+  connected elements, using a scoped CSS `:has()` block — no JS, no round-trip.
+  The `*HoverOpacity` / `*HoverOthersOpacity` props tune the lit/dimmed values.
+
+- **Client-side animation (SMIL)** — set `Animate: true` (default off) plus an
+  optional `MotionStagger` for a native SMIL enter transition; no JS.
+
 - **Server-side state changes (HTMX)** — actions that change *what is rendered*
-  (series toggle, active-arc, hover-others). Register a chart instance with
+  (series toggle, active-arc, and hierarchy **zoom** for icicle/treemap/
+  circle-packing/sunburst via `EnableZooming`). Register a chart instance with
   `charts/htmx.Registry` and mount `htmx.Handler`; the components emit `hx-*`
   attributes pointing at its endpoints. See [`examples/app`](../examples/app) for
   a complete wiring, and `htmx.Mount` for the container plumbing.
+
+- **Resize re-fetch (opt-in)** — add `data-tc-observe="<url>"` to a container for
+  a debounced re-fetch (with the new `?w=&h=`) on resize, for pixel-accurate
+  re-render of axis-dense charts. Cosmetic scaling stays handled by `Responsive`.
 
 For a fully static, zero-JS embed, leave `Interactive` off and simply place the
 rendered SVG string in your page.

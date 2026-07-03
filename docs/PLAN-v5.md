@@ -272,9 +272,16 @@ Extend the existing app and the v4 detail-page registry
      re-fetch with the new `?w=&h=` on resize, via htmx when present else
      `fetch`. Costs nothing unless opted in.
    See `docs/NOTES.md` (v5 Phase 4).
-5. **Test depth + polish** (§7): network second golden, remaining variant
-   goldens, `README`/`docs`/`NOTES.md` updates for the v5 surface, `make golden`
-   idempotent, `make ci` green.
+5. [x] **Test depth + polish** (§7) — **done**. Network's second golden
+   (`network-highlight`, added in Phase 4) closes the last single-golden chart —
+   every chart now has ≥2 goldens; the animated (6), on-variant completion, and
+   azimuthal-geo goldens landed with their respective phases, and the
+   `internal/d3/geo` port tests carry `clipCircle` far-side-drop /
+   straddling-ring-cut / `clipExtent` crop assertions. `make golden` is
+   idempotent (regenerating drifts nothing) and `README`/`docs/USAGE.md`/
+   `docs/NOTES.md` were updated for the v5 surface (animation, hover-highlight,
+   hierarchy zoom, retired line fallback, `ResizeObserver`, corrected geo).
+   `make ci` green.
 
 ## 11. Scope summary for v5
 

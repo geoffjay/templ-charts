@@ -23,7 +23,7 @@ them in `PLAN-v5.md` and strike them here as they land:
 - **§5 Feature completions** → v5 §5 (waffle `areas`, calendar month outline,
   sankey link gradients)
 - **§6 d3-geo `clipCircle`/`clipExtent`** → v5 §3 (the one *correctness* fix)
-- **§9 Test depth** → v5 §7 (network's second golden + the new variant goldens)
+- ~~**§9 Test depth** → v5 §7 (network's second golden + the new variant goldens)~~ — **done**
 
 **The standing remainder after v5** — the active backlog a future release should
 scope from — is:
@@ -161,12 +161,13 @@ v4 ships `charts/render` helpers only. Deferred by explicit v4 scope decision:
 - **Unified color-setting API.** Five distinct color-config shapes exist across
   families; v4 documents them, but a single unifying interface is deferred.
 
-## 9. Test depth — **scoped into v5 (§7)**
+## 9. Test depth — **done in v5 (§7)**
 
-Every chart has a test and at least one golden. v4 polish lifted 14 of the 15
-single-golden charts to two snapshots; **`network` is the last chart still at a
-single golden**. v5 adds network's second golden plus the new animated/on-
-variant/azimuthal-geo goldens its other workstreams introduce.
+Every chart now has ≥2 goldens: v4 lifted 14 of the 15 single-golden charts to
+two snapshots, and v5 added `network`'s second golden (`network-highlight`) —
+the last one — plus the animated (6), on-variant completion, and azimuthal-geo
+goldens from its other workstreams, and the `internal/d3/geo` `clipCircle` /
+`clipExtent` port tests. `make golden` is idempotent.
 
 ## 10. Priority sketch (non-binding)
 

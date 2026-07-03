@@ -32,8 +32,10 @@ and accessibility work, [`docs/PLAN-v3.md`](docs/PLAN-v3.md) for the v3 push to
 full nivo SVG parity (the five deferred d3 ports and the fifteen charts they
 unblock), and [`docs/PLAN-v4.md`](docs/PLAN-v4.md) for the v4 consumability &
 showcase work (render helpers, docs/examples, benchmarks, and the per-chart
-detail pages). The remaining backlog lives in
-[`docs/PLAN-deferred.md`](docs/PLAN-deferred.md).
+detail pages), and [`docs/PLAN-v5.md`](docs/PLAN-v5.md) for the v5 fidelity &
+finish work (correct azimuthal geo, animation across every chart, hierarchy
+zoom, unified hover-highlight, and the partial-chart completions). The remaining
+backlog lives in [`docs/PLAN-deferred.md`](docs/PLAN-deferred.md).
 
 ## Quickstart
 
@@ -95,10 +97,35 @@ import "github.com/geoffjay/templ-charts/charts/interact"
 ```
 
 The script (no dependencies) shows tooltips, tracks the line crosshair, and
-does nearest-point hit-testing entirely in the browser. **State changes**
-(series toggle, active-arc) stay server-side: register chart instances with
+does nearest-point hit-testing entirely in the browser. For `line`, the client
+mesh/slice path is now the **default** (the legacy per-mousemove server
+round-trip is opt-in via `ServerHover`). **State changes** (series toggle,
+active-arc, hierarchy zoom) stay server-side: register chart instances with
 `charts/htmx.Registry` and mount `htmx.Handler` — see
 [`examples/app`](examples/app) for a complete wiring.
+
+**Hover-highlight** (`chord`, `sankey`, `network`): with `Interactive: true`,
+hovering a node/arc dims the rest and re-lights it plus its connected
+elements — pure scoped CSS (`:has()`), no JS or server round-trip. The
+`*HoverOpacity` / `*HoverOthersOpacity` props tune the lit/dimmed opacities.
+
+**Hierarchy zoom** (`icicle`, `treemap`, `circle-packing`, `sunburst`): set
+`EnableZooming: true` and register the chart with the `htmx.Registry`; clicking
+a node re-renders focused on its subtree (with a breadcrumb back to the root),
+via an HTMX full-SVG swap.
+
+**Resize re-fetch** (opt-in): add `data-tc-observe="<url>"` to a container and
+the script re-fetches it (with the new `?w=&h=`) on resize for a pixel-accurate
+re-render of axis-dense charts. Cosmetic fluid scaling stays handled by
+`Responsive`.
+
+### Animation
+
+Every chart accepts `Animate bool` (default off, so static output is
+byte-stable) plus `MotionStagger float64`. When on, marks play a SMIL enter
+transition — fade-in for rects/arcs/lines/cells, radius-scale for circles —
+staggered by `MotionStagger` seconds. No JS: the animation is native SMIL
+`<animate>` in the SVG.
 
 ### Accessibility & responsiveness
 
@@ -168,6 +195,7 @@ docs/PLAN.md    v1 implementation plan
 docs/PLAN-v2.md v2 plan (chart catalog, interactivity, a11y)
 docs/PLAN-v3.md v3 plan (five d3 ports, fifteen charts, full SVG parity)
 docs/PLAN-v4.md v4 plan (consumability & showcase)
+docs/PLAN-v5.md v5 plan (fidelity & finish: geo clip, animation, zoom, hover)
 docs/PLAN-deferred.md consolidated backlog of deferred work
 docs/NOTES.md   port-by-port implementation notes
 contrib/nivo/   upstream nivo clone (gitignored, reference only)
@@ -227,20 +255,29 @@ make ci
 
 ## Status
 
-v4 complete: **consumability & showcase**. On top of v3's full nivo SVG chart
-parity (v1's three charts + v2's ten + v3's fifteen), v4 makes the library
-comfortable to consume and shows it off: the `charts/render` helpers, a runnable
-`ExampleXxx` per chart family, [`docs/USAGE.md`](docs/USAGE.md), the first
-benchmarks (`make bench`) with a `/benchmark` load-demo page, and per-chart
-**detail pages** in the demo app (full-width chart + live theme/palette switchers
-+ copy-pasteable Go snippet). v4 also made the API honest — animation is v1-only,
-so the dead `MotionProps` defaults were removed from the 25 non-animating charts,
-along with other unwired props — and standardized the interactivity flag on
-`Interactive`.
+v5 complete: **fidelity & finish**. On top of v3's full nivo SVG chart parity
+and v4's consumability work, v5 closes the last mile of the SVG story so every
+chart is *correct*, *complete*, and *animated*:
 
-Still SVG-only — **Canvas rendering remains the largest deferred capability**.
-Other documented deferrals: geo's `clipCircle` / `clipExtent` (azimuthal-family
-projections render the whole sphere), interactive zoom for
-icicle/treemap/circle-packing/sunburst, and full v2/v3 animation. See
+- **Correct azimuthal geo** — ported d3-geo's `clipCircle` + `clipExtent`, so
+  orthographic/gnomonic/stereographic/azimuthal projections now render only the
+  visible hemisphere (they previously drew the whole sphere).
+- **Animation across every chart** — a wired `Animate` (default off,
+  byte-stable) threaded through all ~25 v2/v3 charts via shared SMIL primitives.
+- **Partial charts finished** — waffle `areas` layer, calendar month-outline
+  border, sankey link gradients (each opt-in / default-off).
+- **Interactivity** — unified hover-highlight (chord/sankey/network), client
+  hierarchy zoom (icicle/treemap/circle-packing/sunburst), the line
+  per-mousemove server fallback retired in favour of the client path, and an
+  opt-in `ResizeObserver` re-fetch.
+
+Every new behaviour defaults off/opt-in, so all pre-existing goldens stayed
+byte-stable; new on-variant goldens lock the new markup.
+
+Still SVG-only — **the Canvas rendering path + large-N performance (Barnes–Hut,
+delaunator, streaming render) are the largest remaining nivo gap and the natural
+v6 theme.** Other deferrals: HSL/Lab/Lch color spaces, the public sample-data
+export / `charts/static` extension, and geo beyond correctness (`GeoPath`
+bounds/centroid, `fitExtent`, the full projection catalog, TopoJSON). See
 [`docs/PLAN-deferred.md`](docs/PLAN-deferred.md) for the consolidated backlog and
 [`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.
