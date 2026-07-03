@@ -1,0 +1,9 @@
+package canvas
+
+// CanvasScriptTag renders the Canvas replay module inside a <script> tag, to be
+// included once per page (alongside interact.ScriptTag). It has no dependencies
+// and is safe to include on pages with no canvases — it only acts on
+// canvas.tc-canvas elements paired with a draw-list.
+templ CanvasScriptTag() {
+	@templ.Raw("<script>" + Script + "</script>")
+}

@@ -241,9 +241,21 @@ plumbing:
    voronoi partition coverage) passes on the new triangulation. Scaling is now
    near-linear: 10× points → ~10.6× time (n=100→1000), vs the ~100× a quadratic
    pass would show. `make ci` green. See `docs/NOTES.md` (v6 Phase 3).
-4. **`charts/canvas` backend** (§4) — draw-op types, `Recorder`, encoder, and
-   the JS replay script; the backend-agnostic core (so the §4.4 PNG option stays
-   open).
+4. [x] **`charts/canvas` backend** (§4) — done. New `charts/canvas` package: the
+   draw-op model (`Op` = flat `{Kind, A,B,C,D, Str}`, 18 `OpKind`s covering
+   state/rect/circle/text/line/path), a `Recorder` (the Canvas analogue of the
+   SVG string-builder, methods `FillStyle`/`FillRect`/`FillCircle`/`FillText`/
+   `Line`/`FillPath`/…), a deterministic 3-decimal-rounded JSON encoder
+   (`EncodeJSON` → `[opcode,args…]` array, one op per line, HTML-safe string
+   escaping), a `Markup` helper (a `<canvas>` paired by id with a
+   `<script type=application/json>` ops list), and the dependency-free replay
+   module (`Script` / `CanvasScriptTag`) that HiDPI-scales the backing store and
+   replays ops into the 2D context (paths via `Path2D`, so existing SVG "d"
+   strings render unchanged). Backend-agnostic: the JS replay is one consumer of
+   `[]Op`; the §4.4 PNG rasterizer would be another. No chart wired yet (that's
+   item 5), so no existing golden moved; the package's own `canvas-drawlist`
+   golden pins the encoding. `make ci` green, `make golden` idempotent. See
+   `docs/NOTES.md` (v6 Phase 4).
 5. **Canvas chart variants** (§5), tranche by tranche (scatterplot + heatmap
    first), each with draw-list + correspondence goldens and a demo tile.
 6. **Benchmarks + large-N demo + docs** (§7–§8): `make bench` large-N cases,

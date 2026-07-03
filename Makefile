@@ -55,7 +55,7 @@ golden:
 		./charts/bump ./charts/marimekko ./charts/parallelcoordinates ./charts/polarbar \
 		./charts/treemap ./charts/sunburst ./charts/icicle ./charts/circlepacking ./charts/tree \
 		./charts/voronoi ./charts/network ./charts/swarmplot \
-		./charts/sankey ./charts/chord ./charts/geo \
+		./charts/sankey ./charts/chord ./charts/geo ./charts/canvas \
 		./internal/d3/geo ./internal/d3/quadtree \
 		-update
 
