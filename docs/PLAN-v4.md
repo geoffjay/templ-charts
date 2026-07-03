@@ -226,8 +226,15 @@ A plain query-param full-page render is the no-JS fallback. No new dependency.
    N-parameterized; `make bench` target (excluded from CI); and a `/benchmark`
    demo page (nav + index card) that reports live server-side render time + SVG
    size across dataset sizes.
-5. **Per-chart detail page** (§7): the family registry, the `/chart/{slug}`
-   endpoint + switchers, the full-width layout + snippet panel, index → cards.
+5. [x] **Per-chart detail page** (§7): a demo-app-internal chart registry
+   (`handlers/entries` package — one file per chart, `bar.go`/`line.go`/…, each
+   registering a Render closure that owns its props + injects theme/palette, plus
+   a copy-pasteable snippet), the `/chart/{slug}`
+   handler with theme + palette switchers (query-param full-page render for
+   correct active-states), a full-width layout + snippet panel (page-scoped CSS,
+   `templ.Raw` — no new `.templ`), and the index links repointed to
+   `/chart/{slug}`. Covered by `TestDetailPage`, `TestAllChartEntriesRender`
+   (renders every entry), and `TestIndexLinksHaveEntries`.
 6. **Polish**: deepen the shallowest goldens where cheap, docs/README pass for the
    full v4 surface, `make ci` green.
 

@@ -23,9 +23,11 @@ Then open <http://localhost:8000>.
 
 ## Pages
 
-| Route          | Contents                                                     |
-|----------------|--------------------------------------------------------------|
-| `/`            | Index listing all demos                                      |
+| Route            | Contents                                                     |
+|------------------|--------------------------------------------------------------|
+| `/`              | Index listing all charts; each card links to its detail page |
+| `/chart/{slug}`  | Per-chart detail page: full-width chart + live theme & palette switchers + the Go snippet to reproduce it (e.g. `/chart/bar`, `/chart/sankey`) |
+| `/benchmark`     | Live server-side render time + SVG size for a bar chart across dataset sizes (load/scaling showcase) |
 | `/bar`         | Stacked, grouped, markers+annotations, legend toggle, totals |
 | `/line`        | Single, multi+legend, area+points, slices, mesh+crosshair    |
 | `/pie`         | Plain, donut, half, sorted, active-arc hover, legend toggle  |

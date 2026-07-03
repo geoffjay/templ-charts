@@ -22,7 +22,35 @@ func newServer(t *testing.T) (http.Handler, *handlers.App) {
 	mux.HandleFunc("/pie", app.Pie)
 	mux.HandleFunc("/themes", app.Themes)
 	mux.HandleFunc("/benchmark", app.Benchmark)
+	mux.HandleFunc("/chart/", app.Detail)
 	return mux, app
+}
+
+func TestDetailPage(t *testing.T) {
+	h, _ := newServer(t)
+	// Base render + theme + palette query params should all render an SVG.
+	for _, target := range []string{
+		"/chart/bar",
+		"/chart/line?theme=dark",
+		"/chart/pie?theme=custom&palette=tableau10",
+	} {
+		rec := do(t, h, http.MethodGet, target)
+		if rec.Code != http.StatusOK {
+			t.Errorf("%s: status = %d, want 200", target, rec.Code)
+			continue
+		}
+		body := rec.Body.String()
+		if !strings.Contains(body, "<svg") {
+			t.Errorf("%s: body missing <svg", target)
+		}
+		if !strings.Contains(body, "tc-snippet") {
+			t.Errorf("%s: body missing code snippet panel", target)
+		}
+	}
+	// Unknown slug → 404.
+	if rec := do(t, h, http.MethodGet, "/chart/nope"); rec.Code != http.StatusNotFound {
+		t.Errorf("/chart/nope: status = %d, want 404", rec.Code)
+	}
 }
 
 func TestBenchmarkPage(t *testing.T) {

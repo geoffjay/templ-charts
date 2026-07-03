@@ -20,6 +20,9 @@ func main() {
 	// HTMX chart endpoints (full render, hover, slice, click, toggle).
 	mux.Handle("/charts/", app.Handler())
 
+	// Per-chart detail pages (/chart/{slug}) with theme + palette switchers.
+	mux.HandleFunc("/chart/", app.Detail)
+
 	// Page routes. Using exact-match guards so /bar doesn't shadow /bar/foo.
 	mux.HandleFunc("/", app.Index)
 	mux.HandleFunc("/bar", app.Bar)
