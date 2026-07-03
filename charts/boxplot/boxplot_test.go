@@ -33,7 +33,7 @@ func baseProps() boxplot.BoxPlotProps {
 	}
 }
 
-func render(t *testing.T, props boxplot.BoxPlotProps) string {
+func renderChart(t *testing.T, props boxplot.BoxPlotProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := boxplot.BoxPlot(props).Render(context.Background(), &b); err != nil {
@@ -43,7 +43,7 @@ func render(t *testing.T, props boxplot.BoxPlotProps) string {
 }
 
 func TestBoxPlot_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -55,7 +55,7 @@ func TestBoxPlot_RendersSVG(t *testing.T) {
 func TestBoxPlot_BoxCount(t *testing.T) {
 	// 3 groups → 3 box rects (one <rect> each). Plus the SvgWrapper background
 	// rect = 4 total.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<rect"); got != 4 {
 		t.Errorf("rect count = %d, want 4 (3 boxes + 1 background)", got)
 	}
@@ -86,24 +86,24 @@ func TestBoxPlot_QuantileSummary(t *testing.T) {
 }
 
 func TestBoxPlot_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "boxplot-basic", out)
 }
 
 func TestBoxPlot_Golden_Horizontal(t *testing.T) {
 	p := baseProps()
 	p.Layout = boxplot.BoxPlotLayoutHorizontal
-	out := render(t, p)
+	out := renderChart(t, p)
 	golden.Assert(t, "boxplot-horizontal", out)
 }
 
 func TestBoxPlot_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive boxplot should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive boxplot must not emit data-tc-tooltip")
 	}
 }

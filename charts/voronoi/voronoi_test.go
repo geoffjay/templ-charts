@@ -31,7 +31,7 @@ func baseProps() voronoi.VoronoiProps {
 	}
 }
 
-func render(t *testing.T, props voronoi.VoronoiProps) string {
+func renderChart(t *testing.T, props voronoi.VoronoiProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := voronoi.Voronoi(props).Render(context.Background(), &b); err != nil {
@@ -41,7 +41,7 @@ func render(t *testing.T, props voronoi.VoronoiProps) string {
 }
 
 func TestVoronoi_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -52,7 +52,7 @@ func TestVoronoi_RendersSVG(t *testing.T) {
 
 func TestVoronoi_PointCount(t *testing.T) {
 	// One <circle> per input datum (points layer, enabled by default).
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 8 {
 		t.Errorf("circle count = %d, want 8", got)
 	}
@@ -60,7 +60,7 @@ func TestVoronoi_PointCount(t *testing.T) {
 
 func TestVoronoi_CellsRenderedByDefault(t *testing.T) {
 	// Default: cells on (single path), links off.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.Contains(out, `stroke="#000000"`) {
 		t.Errorf("expected cell paths with default cell color")
 	}
@@ -72,7 +72,7 @@ func TestVoronoi_CellsRenderedByDefault(t *testing.T) {
 func TestVoronoi_LinksToggle(t *testing.T) {
 	p := baseProps()
 	p.EnableLinks = voronoi.BoolPtr(true)
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, `stroke="#bbbbbb"`) {
 		t.Errorf("expected delaunay links when enabled")
 	}
@@ -81,7 +81,7 @@ func TestVoronoi_LinksToggle(t *testing.T) {
 func TestVoronoi_PointsToggle(t *testing.T) {
 	p := baseProps()
 	p.EnablePoints = voronoi.BoolPtr(false)
-	out := render(t, p)
+	out := renderChart(t, p)
 	if strings.Contains(out, "<circle") {
 		t.Errorf("points disabled but circles rendered")
 	}
@@ -89,14 +89,14 @@ func TestVoronoi_PointsToggle(t *testing.T) {
 
 func TestVoronoi_Bounds(t *testing.T) {
 	// Inner area is 500-40 = 460 square; bounds path closes the rectangle.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.Contains(out, "M0,0L460,0L460,460L0,460Z") {
 		t.Errorf("expected bounds rectangle path for the inner area")
 	}
 }
 
 func TestVoronoi_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "voronoi-basic", out)
 }
 
@@ -104,7 +104,7 @@ func TestVoronoi_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Voronoi diagram"
 	p.Desc = "Eight sites partitioned into cells."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Voronoi diagram</title>") {
 		t.Errorf("expected <title> threaded to SvgWrapper")
 	}
@@ -119,7 +119,7 @@ func TestVoronoi_A11yTitleDesc(t *testing.T) {
 func TestVoronoi_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "data-tc-tooltip") {
 		t.Errorf("interactive voronoi should emit per-cell data-tc-tooltip")
 	}
@@ -128,7 +128,7 @@ func TestVoronoi_InteractiveEmitsTooltip(t *testing.T) {
 	if !strings.Contains(out, `pointer-events="all"`) {
 		t.Errorf("interactive cells need pointer-events=all so the interior is hoverable")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive voronoi must not emit data-tc-tooltip")
 	}
 }

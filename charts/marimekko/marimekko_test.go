@@ -36,7 +36,7 @@ func baseProps() marimekko.MarimekkoProps {
 	}
 }
 
-func render(t *testing.T, props marimekko.MarimekkoProps) string {
+func renderChart(t *testing.T, props marimekko.MarimekkoProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := marimekko.Marimekko(props).Render(context.Background(), &b); err != nil {
@@ -46,7 +46,7 @@ func render(t *testing.T, props marimekko.MarimekkoProps) string {
 }
 
 func TestMarimekko_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -57,7 +57,7 @@ func TestMarimekko_RendersSVG(t *testing.T) {
 
 func TestMarimekko_SegmentCount(t *testing.T) {
 	// 3 columns × 3 dimensions = 9 segment rects.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, `<rect x=`); got != 9 {
 		t.Errorf("segment rect count = %d, want 9", got)
 	}
@@ -90,7 +90,7 @@ func TestMarimekko_VariableWidths(t *testing.T) {
 func TestMarimekko_ExpandOffset(t *testing.T) {
 	p := baseProps()
 	p.Offset = marimekko.OffsetExpand
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<rect x=") {
 		t.Errorf("expand offset should still render segments")
 	}
@@ -99,14 +99,14 @@ func TestMarimekko_ExpandOffset(t *testing.T) {
 func TestMarimekko_HorizontalLayout(t *testing.T) {
 	p := baseProps()
 	p.Layout = marimekko.MarimekkoLayoutHorizontal
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("horizontal layout did not render")
 	}
 }
 
 func TestMarimekko_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "marimekko-basic", out)
 }
 
@@ -114,7 +114,7 @@ func TestMarimekko_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Survey by country"
 	p.Desc = "Agree/disagree/neutral split, bar width by sample size."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Survey by country</title>") {
 		t.Errorf("expected <title>")
 	}
@@ -126,10 +126,10 @@ func TestMarimekko_A11yTitleDesc(t *testing.T) {
 func TestMarimekko_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive marimekko should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive marimekko must not emit data-tc-tooltip")
 	}
 }
@@ -139,7 +139,7 @@ func TestMarimekko_Legend(t *testing.T) {
 	p.Legends = []legends.LegendProps{
 		{Anchor: legends.LegendAnchorTop, Direction: legends.LegendDirectionRow},
 	}
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "agree") {
 		t.Errorf("expected legend to include dimension ids")
 	}

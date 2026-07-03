@@ -41,7 +41,7 @@ func baseProps() network.NetworkProps {
 	}
 }
 
-func render(t *testing.T, props network.NetworkProps) string {
+func renderChart(t *testing.T, props network.NetworkProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := network.Network(props).Render(context.Background(), &b); err != nil {
@@ -51,14 +51,14 @@ func render(t *testing.T, props network.NetworkProps) string {
 }
 
 func TestNetwork_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
 }
 
 func TestNetwork_NodeAndLinkCount(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 6 {
 		t.Errorf("circle count = %d, want 6", got)
 	}
@@ -68,7 +68,7 @@ func TestNetwork_NodeAndLinkCount(t *testing.T) {
 }
 
 func TestNetwork_Golden(t *testing.T) {
-	golden.Assert(t, "network-basic", render(t, baseProps()))
+	golden.Assert(t, "network-basic", renderChart(t, baseProps()))
 }
 
 func TestNetwork_FitViewFillsArea(t *testing.T) {
@@ -123,7 +123,7 @@ func mustInner(p network.NetworkProps) network.NetworkProps {
 }
 
 func TestNetwork_Deterministic(t *testing.T) {
-	if render(t, baseProps()) != render(t, baseProps()) {
+	if renderChart(t, baseProps()) != renderChart(t, baseProps()) {
 		t.Errorf("network render is not deterministic")
 	}
 }
@@ -132,7 +132,7 @@ func TestNetwork_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Graph"
 	p.Desc = "A small force-directed graph."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Graph</title>") || !strings.Contains(out, "<desc>A small force-directed graph.</desc>") {
 		t.Errorf("expected title/desc threaded to SvgWrapper")
 	}
@@ -144,10 +144,10 @@ func TestNetwork_A11yTitleDesc(t *testing.T) {
 func TestNetwork_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive network should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive network must not emit data-tc-tooltip")
 	}
 }

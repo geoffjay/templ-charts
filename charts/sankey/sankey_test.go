@@ -36,7 +36,7 @@ func baseProps() sankey.SankeyProps {
 	}
 }
 
-func render(t *testing.T, props sankey.SankeyProps) string {
+func renderChart(t *testing.T, props sankey.SankeyProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := sankey.Sankey(props).Render(context.Background(), &b); err != nil {
@@ -46,14 +46,14 @@ func render(t *testing.T, props sankey.SankeyProps) string {
 }
 
 func TestSankey_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
 }
 
 func TestSankey_NodeAndLinkCount(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	// Node rects carry an x attribute; the SvgWrapper background rect does not.
 	if got := strings.Count(out, "<rect x="); got != 5 {
 		t.Errorf("rect (node) count = %d, want 5", got)
@@ -68,17 +68,17 @@ func TestSankey_NodeAndLinkCount(t *testing.T) {
 }
 
 func TestSankey_Golden(t *testing.T) {
-	golden.Assert(t, "sankey-basic", render(t, baseProps()))
+	golden.Assert(t, "sankey-basic", renderChart(t, baseProps()))
 }
 
 func TestSankey_VerticalGolden(t *testing.T) {
 	p := baseProps()
 	p.Layout = sankey.SankeyLayoutVertical
-	golden.Assert(t, "sankey-vertical", render(t, p))
+	golden.Assert(t, "sankey-vertical", renderChart(t, p))
 }
 
 func TestSankey_Deterministic(t *testing.T) {
-	if render(t, baseProps()) != render(t, baseProps()) {
+	if renderChart(t, baseProps()) != renderChart(t, baseProps()) {
 		t.Errorf("sankey render is not deterministic")
 	}
 }
@@ -87,7 +87,7 @@ func TestSankey_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Flow"
 	p.Desc = "A small sankey flow diagram."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Flow</title>") || !strings.Contains(out, "<desc>A small sankey flow diagram.</desc>") {
 		t.Errorf("expected title/desc threaded to SvgWrapper")
 	}
@@ -99,10 +99,10 @@ func TestSankey_A11yTitleDesc(t *testing.T) {
 func TestSankey_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive sankey should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive sankey must not emit data-tc-tooltip")
 	}
 }
@@ -111,7 +111,7 @@ func TestSankey_LabelsDisabled(t *testing.T) {
 	p := baseProps()
 	disabled := false
 	p.EnableLabels = &disabled
-	if strings.Count(render(t, p), "<text") != 0 {
+	if strings.Count(renderChart(t, p), "<text") != 0 {
 		t.Errorf("disabled labels should emit no <text> elements")
 	}
 }
@@ -123,7 +123,7 @@ func TestSankey_Legends(t *testing.T) {
 		Direction: legends.LegendDirectionRow,
 		ItemWidth: 80, ItemHeight: 20,
 	}}
-	out := render(t, p)
+	out := renderChart(t, p)
 	// Legend renders one label per node id.
 	for _, id := range []string{"A", "B", "C", "D", "E"} {
 		if !strings.Contains(out, ">"+id+"<") {

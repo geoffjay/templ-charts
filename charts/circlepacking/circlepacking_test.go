@@ -26,7 +26,7 @@ func baseProps() cp.CirclePackingProps {
 	}
 }
 
-func render(t *testing.T, props cp.CirclePackingProps) string {
+func renderChart(t *testing.T, props cp.CirclePackingProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := cp.CirclePacking(props).Render(context.Background(), &b); err != nil {
@@ -36,7 +36,7 @@ func render(t *testing.T, props cp.CirclePackingProps) string {
 }
 
 func TestCirclePacking_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
@@ -44,21 +44,21 @@ func TestCirclePacking_RendersSVG(t *testing.T) {
 
 func TestCirclePacking_CircleCount(t *testing.T) {
 	// root + A,B,C + a1,a2,b1 = 7 circles.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 7 {
 		t.Errorf("circle count = %d, want 7", got)
 	}
 }
 
 func TestCirclePacking_Golden(t *testing.T) {
-	golden.Assert(t, "circlepacking-basic", render(t, baseProps()))
+	golden.Assert(t, "circlepacking-basic", renderChart(t, baseProps()))
 }
 
 func TestCirclePacking_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Packed"
 	p.Desc = "Nested packed circles."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Packed</title>") || !strings.Contains(out, "<desc>Nested packed circles.</desc>") {
 		t.Errorf("expected title/desc")
 	}
@@ -67,10 +67,10 @@ func TestCirclePacking_A11yTitleDesc(t *testing.T) {
 func TestCirclePacking_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive circle-packing should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive circle-packing must not emit data-tc-tooltip")
 	}
 }

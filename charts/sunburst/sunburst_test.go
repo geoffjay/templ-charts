@@ -26,7 +26,7 @@ func baseProps() sunburst.SunburstProps {
 	}
 }
 
-func render(t *testing.T, props sunburst.SunburstProps) string {
+func renderChart(t *testing.T, props sunburst.SunburstProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := sunburst.Sunburst(props).Render(context.Background(), &b); err != nil {
@@ -36,7 +36,7 @@ func render(t *testing.T, props sunburst.SunburstProps) string {
 }
 
 func TestSunburst_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
@@ -44,21 +44,21 @@ func TestSunburst_RendersSVG(t *testing.T) {
 
 func TestSunburst_ArcCount(t *testing.T) {
 	// depth>=1 nodes: A,B,C + a1,a2,b1 = 6 arcs.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<path"); got != 6 {
 		t.Errorf("arc path count = %d, want 6", got)
 	}
 }
 
 func TestSunburst_Golden(t *testing.T) {
-	golden.Assert(t, "sunburst-basic", render(t, baseProps()))
+	golden.Assert(t, "sunburst-basic", renderChart(t, baseProps()))
 }
 
 func TestSunburst_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Breakdown"
 	p.Desc = "Nested value breakdown."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Breakdown</title>") || !strings.Contains(out, "<desc>Nested value breakdown.</desc>") {
 		t.Errorf("expected title/desc")
 	}
@@ -67,10 +67,10 @@ func TestSunburst_A11yTitleDesc(t *testing.T) {
 func TestSunburst_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive sunburst should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive sunburst must not emit data-tc-tooltip")
 	}
 }

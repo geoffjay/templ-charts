@@ -28,7 +28,7 @@ func baseProps() funnel.FunnelProps {
 	}
 }
 
-func render(t *testing.T, props funnel.FunnelProps) string {
+func renderChart(t *testing.T, props funnel.FunnelProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := funnel.Funnel(props).Render(context.Background(), &b); err != nil {
@@ -38,7 +38,7 @@ func render(t *testing.T, props funnel.FunnelProps) string {
 }
 
 func TestFunnel_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -50,14 +50,14 @@ func TestFunnel_RendersSVG(t *testing.T) {
 func TestFunnel_PartCount(t *testing.T) {
 	// 5 parts → 5 filled <path> + 2 border paths each (10) = 15 area/border
 	// paths. Assert at least 5 fill-opacity paths (one per part).
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "fill-opacity"); got != 5 {
 		t.Errorf("part fill count = %d, want 5", got)
 	}
 }
 
 func TestFunnel_LabelsPresent(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, l := range []string{"Sent", "Viewed", "Purchased"} {
 		if !strings.Contains(out, ">"+l+"<") {
 			t.Errorf("missing label %q", l)
@@ -68,14 +68,14 @@ func TestFunnel_LabelsPresent(t *testing.T) {
 func TestFunnel_LinearInterpolation(t *testing.T) {
 	p := baseProps()
 	p.Interpolation = funnel.FunnelInterpolationLinear
-	out := render(t, p)
+	out := renderChart(t, p)
 	if got := strings.Count(out, "fill-opacity"); got != 5 {
 		t.Errorf("linear: part fill count = %d, want 5", got)
 	}
 }
 
 func TestFunnel_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "funnel-smooth", out)
 }
 
@@ -83,17 +83,17 @@ func TestFunnel_Golden_Horizontal(t *testing.T) {
 	p := baseProps()
 	p.Width, p.Height = 700, 300
 	p.Direction = funnel.FunnelDirectionHorizontal
-	out := render(t, p)
+	out := renderChart(t, p)
 	golden.Assert(t, "funnel-horizontal", out)
 }
 
 func TestFunnel_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive funnel should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive funnel must not emit data-tc-tooltip")
 	}
 }

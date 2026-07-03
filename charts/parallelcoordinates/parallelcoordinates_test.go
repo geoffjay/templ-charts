@@ -36,7 +36,7 @@ func baseProps() pc.PCProps {
 	}
 }
 
-func render(t *testing.T, props pc.PCProps) string {
+func renderChart(t *testing.T, props pc.PCProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := pc.ParallelCoordinates(props).Render(context.Background(), &b); err != nil {
@@ -46,7 +46,7 @@ func render(t *testing.T, props pc.PCProps) string {
 }
 
 func TestPC_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -57,14 +57,14 @@ func TestPC_RendersSVG(t *testing.T) {
 
 func TestPC_LineCount(t *testing.T) {
 	// One <path> polyline per datum (three).
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, `fill="none" stroke=`); got != 3 {
 		t.Errorf("line path count = %d, want 3", got)
 	}
 }
 
 func TestPC_AxisLegends(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, want := range []string{"temperature", "cost", "weight", "volume"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected axis legend %q", want)
@@ -78,7 +78,7 @@ func TestPC_PointVariable(t *testing.T) {
 	for i := range p.Data {
 		p.Data[i].Values["grade"] = []string{"low", "mid", "high"}[i]
 	}
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "grade") {
 		t.Errorf("expected the point variable axis")
 	}
@@ -87,14 +87,14 @@ func TestPC_PointVariable(t *testing.T) {
 func TestPC_VerticalLayout(t *testing.T) {
 	p := baseProps()
 	p.Layout = pc.PCLayoutVertical
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("vertical layout did not render")
 	}
 }
 
 func TestPC_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "parallelcoordinates-basic", out)
 }
 
@@ -102,7 +102,7 @@ func TestPC_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Four variables"
 	p.Desc = "Three records across four variables."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Four variables</title>") {
 		t.Errorf("expected <title>")
 	}
@@ -114,10 +114,10 @@ func TestPC_A11yTitleDesc(t *testing.T) {
 func TestPC_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive PC should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive PC must not emit data-tc-tooltip")
 	}
 }

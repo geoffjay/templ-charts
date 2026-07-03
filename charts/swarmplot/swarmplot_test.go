@@ -32,7 +32,7 @@ func baseProps() swarmplot.SwarmPlotProps {
 	}
 }
 
-func render(t *testing.T, props swarmplot.SwarmPlotProps) string {
+func renderChart(t *testing.T, props swarmplot.SwarmPlotProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := swarmplot.SwarmPlot(props).Render(context.Background(), &b); err != nil {
@@ -42,31 +42,31 @@ func render(t *testing.T, props swarmplot.SwarmPlotProps) string {
 }
 
 func TestSwarmPlot_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
 }
 
 func TestSwarmPlot_CircleCount(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 12 {
 		t.Errorf("circle count = %d, want 12", got)
 	}
 }
 
 func TestSwarmPlot_Golden(t *testing.T) {
-	golden.Assert(t, "swarmplot-basic", render(t, baseProps()))
+	golden.Assert(t, "swarmplot-basic", renderChart(t, baseProps()))
 }
 
 func TestSwarmPlot_HorizontalGolden(t *testing.T) {
 	p := baseProps()
 	p.Layout = "horizontal"
-	golden.Assert(t, "swarmplot-horizontal", render(t, p))
+	golden.Assert(t, "swarmplot-horizontal", renderChart(t, p))
 }
 
 func TestSwarmPlot_Deterministic(t *testing.T) {
-	if render(t, baseProps()) != render(t, baseProps()) {
+	if renderChart(t, baseProps()) != renderChart(t, baseProps()) {
 		t.Errorf("swarmplot render is not deterministic")
 	}
 }
@@ -75,7 +75,7 @@ func TestSwarmPlot_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Swarm"
 	p.Desc = "Grouped value distribution."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Swarm</title>") || !strings.Contains(out, "<desc>Grouped value distribution.</desc>") {
 		t.Errorf("expected title/desc threaded to SvgWrapper")
 	}
@@ -87,10 +87,10 @@ func TestSwarmPlot_A11yTitleDesc(t *testing.T) {
 func TestSwarmPlot_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive swarmplot should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive swarmplot must not emit data-tc-tooltip")
 	}
 }
@@ -99,7 +99,7 @@ func TestSwarmPlot_VoronoiMesh(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
 	p.UseMesh = true
-	if !strings.Contains(render(t, p), "data-tc-mesh") {
+	if !strings.Contains(renderChart(t, p), "data-tc-mesh") {
 		t.Errorf("Interactive+UseMesh should emit a voronoi mesh")
 	}
 }

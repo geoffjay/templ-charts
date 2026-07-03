@@ -75,6 +75,10 @@ func chart() (string, error) {
 render it yourself with `component.Render(ctx, w)` and embed it in a larger
 templ page.
 
+See [`docs/USAGE.md`](docs/USAGE.md) for the full consumer guide (props anatomy,
+the color-config shapes, interactivity, responsive + a11y, theming), and the
+runnable `ExampleXxx` in every `charts/<chart>` package.
+
 ### Interactivity
 
 Hover interactions are **client-side**: set `Interactive: true` on a chart's

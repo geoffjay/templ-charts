@@ -26,7 +26,7 @@ func baseProps() icicle.IcicleProps {
 	}
 }
 
-func render(t *testing.T, props icicle.IcicleProps) string {
+func renderChart(t *testing.T, props icicle.IcicleProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := icicle.Icicle(props).Render(context.Background(), &b); err != nil {
@@ -36,7 +36,7 @@ func render(t *testing.T, props icicle.IcicleProps) string {
 }
 
 func TestIcicle_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
@@ -44,7 +44,7 @@ func TestIcicle_RendersSVG(t *testing.T) {
 
 func TestIcicle_RectCount(t *testing.T) {
 	// root + A,B,C + a1,a2,b1 = 7 node rects (plus the SvgWrapper background).
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<rect x="); got != 7 {
 		t.Errorf("node rect count = %d, want 7", got)
 	}
@@ -54,7 +54,7 @@ func TestIcicle_Orientations(t *testing.T) {
 	for _, o := range []icicle.Orientation{icicle.OrientationBottom, icicle.OrientationTop, icicle.OrientationLeft, icicle.OrientationRight} {
 		p := baseProps()
 		p.Orientation = o
-		out := render(t, p)
+		out := renderChart(t, p)
 		if !strings.HasPrefix(out, "<svg") {
 			t.Errorf("orientation %q failed to render", o)
 		}
@@ -62,14 +62,14 @@ func TestIcicle_Orientations(t *testing.T) {
 }
 
 func TestIcicle_Golden(t *testing.T) {
-	golden.Assert(t, "icicle-basic", render(t, baseProps()))
+	golden.Assert(t, "icicle-basic", renderChart(t, baseProps()))
 }
 
 func TestIcicle_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Icicle"
 	p.Desc = "Depth-banded hierarchy."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Icicle</title>") || !strings.Contains(out, "<desc>Depth-banded hierarchy.</desc>") {
 		t.Errorf("expected title/desc")
 	}
@@ -78,10 +78,10 @@ func TestIcicle_A11yTitleDesc(t *testing.T) {
 func TestIcicle_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive icicle should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive icicle must not emit data-tc-tooltip")
 	}
 }

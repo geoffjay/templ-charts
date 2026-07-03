@@ -18,7 +18,7 @@ func sampleData() []waffle.WaffleDatum {
 	}
 }
 
-func render(t *testing.T, props waffle.WaffleProps) string {
+func renderChart(t *testing.T, props waffle.WaffleProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := waffle.Waffle(props).Render(context.Background(), &b); err != nil {
@@ -28,7 +28,7 @@ func render(t *testing.T, props waffle.WaffleProps) string {
 }
 
 func TestWaffle_RendersSVG(t *testing.T) {
-	out := render(t, waffle.WaffleProps{
+	out := renderChart(t, waffle.WaffleProps{
 		Width: 400, Height: 400,
 		Margin: core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
 		Total:  100, Rows: 10, Columns: 10,
@@ -41,7 +41,7 @@ func TestWaffle_RendersSVG(t *testing.T) {
 
 func TestWaffle_CellCount(t *testing.T) {
 	// 10×10 grid → 100 cells, each a <rect>, plus the background rect = 101.
-	out := render(t, waffle.WaffleProps{
+	out := renderChart(t, waffle.WaffleProps{
 		Width: 400, Height: 400, Total: 100, Rows: 10, Columns: 10, Data: sampleData(),
 	})
 	if got := strings.Count(out, "<rect"); got != 101 {
@@ -52,7 +52,7 @@ func TestWaffle_CellCount(t *testing.T) {
 func TestWaffle_FilledCellCount(t *testing.T) {
 	// total=100, 100 cells → unit=1. Values 30/45/25 fill 30+45+25=100 cells,
 	// none empty. The empty color (#cccccc) should therefore be absent.
-	out := render(t, waffle.WaffleProps{
+	out := renderChart(t, waffle.WaffleProps{
 		Width: 400, Height: 400, Total: 100, Rows: 10, Columns: 10, Data: sampleData(),
 	})
 	if strings.Contains(out, "#cccccc") {
@@ -60,7 +60,7 @@ func TestWaffle_FilledCellCount(t *testing.T) {
 	}
 
 	// total=200 → unit=2 → 15+23+13 = 51 filled, 49 empty → empty color present.
-	out2 := render(t, waffle.WaffleProps{
+	out2 := renderChart(t, waffle.WaffleProps{
 		Width: 400, Height: 400, Total: 200, Rows: 10, Columns: 10, Data: sampleData(),
 	})
 	if !strings.Contains(out2, "#cccccc") {
@@ -69,7 +69,7 @@ func TestWaffle_FilledCellCount(t *testing.T) {
 }
 
 func TestWaffle_Golden(t *testing.T) {
-	out := render(t, waffle.WaffleProps{
+	out := renderChart(t, waffle.WaffleProps{
 		Width: 400, Height: 400,
 		Margin: core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
 		Total:  100, Rows: 10, Columns: 10,
@@ -83,11 +83,11 @@ func TestWaffle_InteractiveEmitsTooltip(t *testing.T) {
 		Width: 400, Height: 400, Total: 100, Rows: 10, Columns: 10, Data: sampleData(),
 		Interactive: true,
 	}
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive waffle should emit data-tc-tooltip")
 	}
 	p.Interactive = false
-	if strings.Contains(render(t, p), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("non-interactive waffle must not emit data-tc-tooltip")
 	}
 }

@@ -19,7 +19,7 @@ func sampleData() []any {
 	}
 }
 
-func render(t *testing.T, props pie.PieProps) string {
+func renderChart(t *testing.T, props pie.PieProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := pie.Pie(props).Render(context.Background(), &b); err != nil {
@@ -33,7 +33,7 @@ func TestPie_RendersSVG(t *testing.T) {
 		Width: 500, Height: 300,
 		Data: sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got: %q", out[:minLen(out)])
 	}
@@ -47,7 +47,7 @@ func TestPie_ArcCount(t *testing.T) {
 		Width: 500, Height: 300,
 		Data: sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// 3 arcs → 3 <path> elements in the arcs layer.
 	pathCount := strings.Count(out, "<path")
 	if pathCount < 3 {
@@ -61,7 +61,7 @@ func TestPie_Donut(t *testing.T) {
 		Data:        sampleData(),
 		InnerRadius: 0.5,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Donut should still produce 3 arc paths.
 	pathCount := strings.Count(out, "<path")
 	if pathCount < 3 {
@@ -76,7 +76,7 @@ func TestPie_HalfPie(t *testing.T) {
 		StartAngle: 0,
 		EndAngle:   180,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>")
 	}
@@ -93,7 +93,7 @@ func TestPie_ArcLinkLabels(t *testing.T) {
 		Data:                sampleData(),
 		EnableArcLinkLabels: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Arc link labels emit <path> (link) + <text> (label) per arc.
 	// Check for link label text content ("A", "B", "C").
 	if !strings.Contains(out, ">A<") {
@@ -107,7 +107,7 @@ func TestPie_ArcLabels(t *testing.T) {
 		Data:            sampleData(),
 		EnableArcLabels: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Arc labels emit <text> with the formatted value. Default arcLabel is
 	// "formattedValue" which formats the numeric value.
 	if !strings.Contains(out, "<text") {
@@ -121,7 +121,7 @@ func TestPie_DisableArcLinkLabels(t *testing.T) {
 		Data:                sampleData(),
 		EnableArcLinkLabels: false,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Without arc link labels, the "A"/"B"/"C" text labels should not appear
 	// (arc labels use formatted values, not ids). We check the link paths are
 	// absent: link labels emit a second <path d="M…L…L…"> per arc.
@@ -138,12 +138,12 @@ func TestPie_AnimationsEmitSMIL(t *testing.T) {
 		Width: 500, Height: 300,
 		Data: sampleData(),
 	}
-	outOff := render(t, props)
+	outOff := renderChart(t, props)
 	if strings.Contains(outOff, "<animate") {
 		t.Errorf("expected no <animate> when Animate=false, found one")
 	}
 	props.Animate = true
-	outOn := render(t, props)
+	outOn := renderChart(t, props)
 	animateCount := strings.Count(outOn, "<animate")
 	if animateCount == 0 {
 		t.Errorf("expected <animate> elements when Animate=true, found 0")
@@ -160,7 +160,7 @@ func TestPie_SortByValue(t *testing.T) {
 		},
 		SortByValue: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>")
 	}
@@ -177,7 +177,7 @@ func TestPie_Legends(t *testing.T) {
 			},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Legend emits a <g> with a symbol + <text>.
 	if !strings.Contains(out, "<text") {
 		t.Errorf("expected legend <text>, not found")
@@ -190,7 +190,7 @@ func TestPie_PadAngle(t *testing.T) {
 		Data:     sampleData(),
 		PadAngle: 2,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	pathCount := strings.Count(out, "<path")
 	if pathCount < 3 {
 		t.Errorf("expected at least 3 <path> arcs with padAngle, got %d", pathCount)
@@ -203,7 +203,7 @@ func TestPie_CornerRadius(t *testing.T) {
 		Data:         sampleData(),
 		CornerRadius: 5,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	pathCount := strings.Count(out, "<path")
 	if pathCount < 3 {
 		t.Errorf("expected at least 3 <path> arcs with cornerRadius, got %d", pathCount)
@@ -219,7 +219,7 @@ func TestPie_CustomColors(t *testing.T) {
 			Colors: []string{"#ff0000", "#00ff00", "#0000ff"},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.Contains(out, "#ff0000") {
 		t.Errorf("expected custom color #ff0000 in output")
 	}
@@ -231,7 +231,7 @@ func TestPie_BorderWidth(t *testing.T) {
 		Data:        sampleData(),
 		BorderWidth: 2,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.Contains(out, `stroke-width="2"`) {
 		t.Errorf("expected stroke-width=2 for border, not found")
 	}
@@ -251,7 +251,7 @@ func TestPie_Golden(t *testing.T) {
 		CornerRadius: 3,
 		Data:         sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:minLen(out)])
 	}
@@ -269,7 +269,7 @@ func TestPie_Golden_Half(t *testing.T) {
 		Fit:        true,
 		Data:       sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	golden.Assert(t, "pie-half", out)
 }
 

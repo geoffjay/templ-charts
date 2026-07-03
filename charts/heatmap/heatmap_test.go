@@ -21,7 +21,7 @@ func sampleData() []heatmap.HeatMapSerie {
 	}
 }
 
-func render(t *testing.T, props heatmap.HeatMapProps) string {
+func renderChart(t *testing.T, props heatmap.HeatMapProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := heatmap.HeatMap(props).Render(context.Background(), &b); err != nil {
@@ -31,7 +31,7 @@ func render(t *testing.T, props heatmap.HeatMapProps) string {
 }
 
 func TestHeatMap_RendersSVG(t *testing.T) {
-	out := render(t, heatmap.HeatMapProps{
+	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360,
 		Margin: core.Margin{Top: 40, Right: 40, Bottom: 40, Left: 60},
 		Data:   sampleData(),
@@ -47,7 +47,7 @@ func TestHeatMap_RendersSVG(t *testing.T) {
 func TestHeatMap_CellCount(t *testing.T) {
 	// 3 series × 3 columns = 9 cells; each cell emits one <rect>. Plus the
 	// SvgWrapper background rect = 10 total <rect>.
-	out := render(t, heatmap.HeatMapProps{
+	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360, Data: sampleData(),
 	})
 	if got := strings.Count(out, "<rect"); got != 10 {
@@ -57,7 +57,7 @@ func TestHeatMap_CellCount(t *testing.T) {
 
 func TestHeatMap_EmptyCellUsesEmptyColor(t *testing.T) {
 	// The nil value (USA/Car) must render with the empty color, not a scale color.
-	out := render(t, heatmap.HeatMapProps{
+	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360, Data: sampleData(),
 		EmptyColor: "#123456",
 	})
@@ -67,7 +67,7 @@ func TestHeatMap_EmptyCellUsesEmptyColor(t *testing.T) {
 }
 
 func TestHeatMap_Golden(t *testing.T) {
-	out := render(t, heatmap.HeatMapProps{
+	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360,
 		Margin: core.Margin{Top: 40, Right: 40, Bottom: 40, Left: 60},
 		Data:   sampleData(),
@@ -76,7 +76,7 @@ func TestHeatMap_Golden(t *testing.T) {
 }
 
 func TestHeatMap_InteractiveEmitsTooltip(t *testing.T) {
-	out := render(t, heatmap.HeatMapProps{
+	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360, Data: sampleData(),
 		Interactive: true, ChartID: "hm",
 	})

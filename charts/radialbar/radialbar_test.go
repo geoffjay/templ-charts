@@ -30,7 +30,7 @@ func baseProps() radialbar.RadialBarProps {
 	}
 }
 
-func render(t *testing.T, props radialbar.RadialBarProps) string {
+func renderChart(t *testing.T, props radialbar.RadialBarProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := radialbar.RadialBar(props).Render(context.Background(), &b); err != nil {
@@ -40,7 +40,7 @@ func render(t *testing.T, props radialbar.RadialBarProps) string {
 }
 
 func TestRadialBar_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -55,17 +55,17 @@ func TestRadialBar_BarArcCount(t *testing.T) {
 	// just assert the bar arcs are present (>= 4 <path with fill that isn't
 	// "none"). Simpler: count the bars+tracks group paths by checking the
 	// number of arc <path d="M ...">. Assert at least 6 paths total.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<path"); got < 6 {
 		t.Errorf("path count = %d, want >= 6 (4 bars + 2 tracks + grid)", got)
 	}
 }
 
 func TestRadialBar_NoTracksWhenDisabled(t *testing.T) {
-	withTracks := strings.Count(render(t, baseProps()), "<path")
+	withTracks := strings.Count(renderChart(t, baseProps()), "<path")
 	p := baseProps()
 	p.EnableTracks = radialbar.BoolPtr(false)
-	withoutTracks := strings.Count(render(t, p), "<path")
+	withoutTracks := strings.Count(renderChart(t, p), "<path")
 	if withoutTracks >= withTracks {
 		t.Errorf("disabling tracks should reduce path count: with=%d without=%d", withTracks, withoutTracks)
 	}
@@ -74,7 +74,7 @@ func TestRadialBar_NoTracksWhenDisabled(t *testing.T) {
 func TestRadialBar_LabelsWhenEnabled(t *testing.T) {
 	p := baseProps()
 	p.EnableLabels = radialbar.BoolPtr(true)
-	out := render(t, p)
+	out := renderChart(t, p)
 	// formattedValue labels for the 4 bars (all spans > 10° skip angle here).
 	if !strings.Contains(out, ">25<") {
 		t.Errorf("expected a value label (25) when labels enabled")
@@ -82,7 +82,7 @@ func TestRadialBar_LabelsWhenEnabled(t *testing.T) {
 }
 
 func TestRadialBar_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "radialbar-basic", out)
 }
 
@@ -90,17 +90,17 @@ func TestRadialBar_Golden_Labels(t *testing.T) {
 	p := baseProps()
 	p.EnableLabels = radialbar.BoolPtr(true)
 	p.CornerRadius = 4
-	out := render(t, p)
+	out := renderChart(t, p)
 	golden.Assert(t, "radialbar-labels", out)
 }
 
 func TestRadialBar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive radial-bar should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive radial-bar must not emit data-tc-tooltip")
 	}
 }

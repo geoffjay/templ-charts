@@ -31,7 +31,7 @@ func baseProps() scatterplot.ScatterPlotProps {
 	}
 }
 
-func render(t *testing.T, props scatterplot.ScatterPlotProps) string {
+func renderChart(t *testing.T, props scatterplot.ScatterPlotProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := scatterplot.ScatterPlot(props).Render(context.Background(), &b); err != nil {
@@ -41,7 +41,7 @@ func render(t *testing.T, props scatterplot.ScatterPlotProps) string {
 }
 
 func TestScatterPlot_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -52,7 +52,7 @@ func TestScatterPlot_RendersSVG(t *testing.T) {
 
 func TestScatterPlot_NodeCount(t *testing.T) {
 	// 2 series × 3 nodes = 6 dots, each a <circle>.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 6 {
 		t.Errorf("circle count = %d, want 6", got)
 	}
@@ -62,15 +62,15 @@ func TestScatterPlot_GridDisabled(t *testing.T) {
 	p := baseProps()
 	p.EnableGridX = false
 	p.EnableGridY = false
-	withGrid := strings.Count(render(t, baseProps()), "<line")
-	noGrid := strings.Count(render(t, p), "<line")
+	withGrid := strings.Count(renderChart(t, baseProps()), "<line")
+	noGrid := strings.Count(renderChart(t, p), "<line")
 	if noGrid >= withGrid {
 		t.Errorf("disabling grid should reduce line count: with=%d without=%d", withGrid, noGrid)
 	}
 }
 
 func TestScatterPlot_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "scatterplot-basic", out)
 }
 
@@ -78,7 +78,7 @@ func TestScatterPlot_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Groups A and B"
 	p.Desc = "Scatter of x/y values for two groups."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Groups A and B</title>") {
 		t.Errorf("expected <title> threaded through to SvgWrapper")
 	}
@@ -93,12 +93,12 @@ func TestScatterPlot_A11yTitleDesc(t *testing.T) {
 func TestScatterPlot_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "data-tc-tooltip") {
 		t.Errorf("interactive scatterplot should emit data-tc-tooltip")
 	}
 	// default (non-interactive) must not.
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive scatterplot must not emit data-tc-tooltip")
 	}
 }
@@ -107,15 +107,15 @@ func TestScatterPlot_VoronoiMesh(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
 	p.UseMesh = true
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "data-tc-mesh") {
 		t.Errorf("Interactive+UseMesh scatterplot should emit a voronoi-mesh overlay")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-mesh") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-mesh") {
 		t.Errorf("scatterplot without UseMesh must not emit data-tc-mesh")
 	}
 	p.DetectionRadius = 25
-	if !strings.Contains(render(t, p), "data-tc-mesh-radius") {
+	if !strings.Contains(renderChart(t, p), "data-tc-mesh-radius") {
 		t.Errorf("DetectionRadius should emit data-tc-mesh-radius")
 	}
 }

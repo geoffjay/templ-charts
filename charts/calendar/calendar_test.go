@@ -26,7 +26,7 @@ func sampleData() []calendar.CalendarDatum {
 	}
 }
 
-func render(t *testing.T, props calendar.CalendarProps) string {
+func renderChart(t *testing.T, props calendar.CalendarProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := calendar.Calendar(props).Render(context.Background(), &b); err != nil {
@@ -45,7 +45,7 @@ func baseProps() calendar.CalendarProps {
 }
 
 func TestCalendar_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("expected a full <svg>…</svg>")
 	}
@@ -54,14 +54,14 @@ func TestCalendar_RendersSVG(t *testing.T) {
 func TestCalendar_DayCellCount(t *testing.T) {
 	// 2024-01-01 .. 2024-03-31 inclusive = 91 days → 91 day <rect> + 1
 	// background rect = 92.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<rect"); got != 92 {
 		t.Errorf("rect count = %d, want 92 (91 days + 1 background)", got)
 	}
 }
 
 func TestCalendar_MonthLegends(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, m := range []string{">Jan<", ">Feb<", ">Mar<"} {
 		if !strings.Contains(out, m) {
 			t.Errorf("missing month legend %q", m)
@@ -73,7 +73,7 @@ func TestCalendar_DerivesRangeFromData(t *testing.T) {
 	// Without explicit From/To, the range comes from the data days.
 	p := baseProps()
 	p.From, p.To = time.Time{}, time.Time{}
-	out := render(t, p)
+	out := renderChart(t, p)
 	// Data spans 2024-01-05 .. 2024-03-28 = 84 days → 84 + 1 background.
 	if got := strings.Count(out, "<rect"); got != 85 {
 		t.Errorf("derived-range rect count = %d, want 85", got)
@@ -81,16 +81,16 @@ func TestCalendar_DerivesRangeFromData(t *testing.T) {
 }
 
 func TestCalendar_Golden(t *testing.T) {
-	golden.Assert(t, "calendar-quarter", render(t, baseProps()))
+	golden.Assert(t, "calendar-quarter", renderChart(t, baseProps()))
 }
 
 func TestCalendar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive calendar should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive calendar must not emit data-tc-tooltip")
 	}
 }

@@ -33,7 +33,7 @@ func baseProps() bump.BumpProps {
 	}
 }
 
-func render(t *testing.T, props bump.BumpProps) string {
+func renderChart(t *testing.T, props bump.BumpProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := bump.Bump(props).Render(context.Background(), &b); err != nil {
@@ -43,7 +43,7 @@ func render(t *testing.T, props bump.BumpProps) string {
 }
 
 func TestBump_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -54,7 +54,7 @@ func TestBump_RendersSVG(t *testing.T) {
 
 func TestBump_PointCount(t *testing.T) {
 	// 3 series × 4 columns = 12 rank dots, each a <circle>.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 12 {
 		t.Errorf("circle count = %d, want 12", got)
 	}
@@ -62,7 +62,7 @@ func TestBump_PointCount(t *testing.T) {
 
 func TestBump_LineCount(t *testing.T) {
 	// One <path> line per serie (three) plus grid <line>s; assert the paths.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, `fill="none" stroke=`); got != 3 {
 		t.Errorf("serie line path count = %d, want 3", got)
 	}
@@ -71,7 +71,7 @@ func TestBump_LineCount(t *testing.T) {
 func TestBump_MissingRankBreaksLine(t *testing.T) {
 	p := baseProps()
 	p.Data[0].Data[1].Y = nil // drop a rank
-	out := render(t, p)
+	out := renderChart(t, p)
 	// One fewer drawn point (11 instead of 12).
 	if got := strings.Count(out, "<circle"); got != 11 {
 		t.Errorf("circle count with a gap = %d, want 11", got)
@@ -81,7 +81,7 @@ func TestBump_MissingRankBreaksLine(t *testing.T) {
 func TestBump_LinearInterpolation(t *testing.T) {
 	p := baseProps()
 	p.Interpolation = bump.InterpolationLinear
-	out := render(t, p)
+	out := renderChart(t, p)
 	// Linear paths use L commands, not the C (cubic) of the smooth default.
 	if !strings.Contains(out, `d="M`) {
 		t.Errorf("expected a line path")
@@ -89,7 +89,7 @@ func TestBump_LinearInterpolation(t *testing.T) {
 }
 
 func TestBump_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "bump-basic", out)
 }
 
@@ -97,7 +97,7 @@ func TestBump_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Ranking over time"
 	p.Desc = "Three series ranked across four years."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Ranking over time</title>") {
 		t.Errorf("expected <title> threaded through to SvgWrapper")
 	}
@@ -112,10 +112,10 @@ func TestBump_A11yTitleDesc(t *testing.T) {
 func TestBump_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive bump should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive bump must not emit data-tc-tooltip")
 	}
 }
@@ -125,7 +125,7 @@ func TestBump_Legend(t *testing.T) {
 	p.Legends = []legends.LegendProps{
 		{Anchor: legends.LegendAnchorRight, Direction: legends.LegendDirectionColumn, TranslateX: 90},
 	}
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "Serie 1") {
 		t.Errorf("expected legend to include serie ids")
 	}
@@ -135,17 +135,17 @@ func TestBump_VoronoiMesh(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
 	p.UseMesh = true
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "data-tc-mesh") {
 		t.Errorf("Interactive+UseMesh bump should emit a voronoi-mesh overlay")
 	}
 	// Default (no UseMesh) must not emit a mesh overlay.
-	if strings.Contains(render(t, baseProps()), "data-tc-mesh") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-mesh") {
 		t.Errorf("bump without UseMesh must not emit data-tc-mesh")
 	}
 	// Debug draws the voronoi cells (faint red).
 	p.DebugMesh = true
-	if !strings.Contains(render(t, p), `stroke="red"`) {
+	if !strings.Contains(renderChart(t, p), `stroke="red"`) {
 		t.Errorf("DebugMesh should draw the voronoi cells")
 	}
 }

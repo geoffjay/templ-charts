@@ -31,7 +31,7 @@ func baseProps() chord.ChordProps {
 	}
 }
 
-func render(t *testing.T, props chord.ChordProps) string {
+func renderChart(t *testing.T, props chord.ChordProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := chord.Chord(props).Render(context.Background(), &b); err != nil {
@@ -41,14 +41,14 @@ func render(t *testing.T, props chord.ChordProps) string {
 }
 
 func TestChord_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
 }
 
 func TestChord_ArcAndRibbonCount(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	// 4 arcs + ribbons are all <path>; ribbons carry mix-blend-mode.
 	if got := strings.Count(out, "mix-blend-mode"); got == 0 {
 		t.Errorf("expected ribbon paths with mix-blend-mode, got %d", got)
@@ -66,7 +66,7 @@ func TestChord_ArcAndRibbonCount(t *testing.T) {
 }
 
 func TestChord_Golden(t *testing.T) {
-	golden.Assert(t, "chord-basic", render(t, baseProps()))
+	golden.Assert(t, "chord-basic", renderChart(t, baseProps()))
 }
 
 func TestChord_PadAngleGolden(t *testing.T) {
@@ -74,11 +74,11 @@ func TestChord_PadAngleGolden(t *testing.T) {
 	p.PadAngle = 0.04
 	p.InnerRadiusRatio = 0.86
 	p.InnerRadiusOffset = 0.04
-	golden.Assert(t, "chord-padded", render(t, p))
+	golden.Assert(t, "chord-padded", renderChart(t, p))
 }
 
 func TestChord_Deterministic(t *testing.T) {
-	if render(t, baseProps()) != render(t, baseProps()) {
+	if renderChart(t, baseProps()) != renderChart(t, baseProps()) {
 		t.Errorf("chord render is not deterministic")
 	}
 }
@@ -87,7 +87,7 @@ func TestChord_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Flows"
 	p.Desc = "A small chord diagram."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Flows</title>") || !strings.Contains(out, "<desc>A small chord diagram.</desc>") {
 		t.Errorf("expected title/desc threaded to SvgWrapper")
 	}
@@ -99,10 +99,10 @@ func TestChord_A11yTitleDesc(t *testing.T) {
 func TestChord_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive chord should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive chord must not emit data-tc-tooltip")
 	}
 }
@@ -110,7 +110,7 @@ func TestChord_Interactive(t *testing.T) {
 func TestChord_HoverHighlight(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	out := render(t, p)
+	out := renderChart(t, p)
 	// Interactive charts emit a scoped <style> block driving the highlight, and
 	// tag arcs/ribbons with entity classes; non-interactive charts do not.
 	if !strings.Contains(out, "<style>") {
@@ -126,7 +126,7 @@ func TestChord_HoverHighlight(t *testing.T) {
 	if !strings.Contains(out, "opacity:0.15") {
 		t.Errorf("hover style should reference the inactive opacity (0.15)")
 	}
-	if strings.Contains(render(t, baseProps()), "<style>") {
+	if strings.Contains(renderChart(t, baseProps()), "<style>") {
 		t.Errorf("non-interactive chord must not emit a hover-highlight <style> block")
 	}
 }
@@ -135,7 +135,7 @@ func TestChord_LabelsDisabled(t *testing.T) {
 	p := baseProps()
 	disabled := false
 	p.EnableLabel = &disabled
-	if strings.Count(render(t, p), "<text") != 0 {
+	if strings.Count(renderChart(t, p), "<text") != 0 {
 		t.Errorf("disabled labels should emit no <text> elements")
 	}
 }
@@ -147,7 +147,7 @@ func TestChord_Legends(t *testing.T) {
 		Direction: legends.LegendDirectionRow,
 		ItemWidth: 80, ItemHeight: 20,
 	}}
-	out := render(t, p)
+	out := renderChart(t, p)
 	for _, id := range sampleKeys() {
 		if !strings.Contains(out, ">"+id+"<") {
 			t.Errorf("legend missing entry for %q", id)

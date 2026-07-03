@@ -29,7 +29,7 @@ func baseProps() polarbar.PolarBarProps {
 	}
 }
 
-func render(t *testing.T, props polarbar.PolarBarProps) string {
+func renderChart(t *testing.T, props polarbar.PolarBarProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := polarbar.PolarBar(props).Render(context.Background(), &b); err != nil {
@@ -39,7 +39,7 @@ func render(t *testing.T, props polarbar.PolarBarProps) string {
 }
 
 func TestPolarBar_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -50,7 +50,7 @@ func TestPolarBar_RendersSVG(t *testing.T) {
 
 func TestPolarBar_ArcCount(t *testing.T) {
 	// 4 indices × 2 keys = 8 stacked arcs, each a <path> in the arcs layer.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, `<path class="tc-arc"`); got != 8 {
 		// fall back: arcs may not carry a class; assert at least 8 arc paths via the generator.
 		if got2 := strings.Count(out, "<path"); got2 < 8 {
@@ -60,7 +60,7 @@ func TestPolarBar_ArcCount(t *testing.T) {
 }
 
 func TestPolarBar_IndexLabels(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, want := range []string{">A<", ">B<", ">C<", ">D<"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected circular-axis index label %q", want)
@@ -69,7 +69,7 @@ func TestPolarBar_IndexLabels(t *testing.T) {
 }
 
 func TestPolarBar_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "polarbar-basic", out)
 }
 
@@ -77,7 +77,7 @@ func TestPolarBar_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Temperatures"
 	p.Desc = "Hot/cold split across four indices."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Temperatures</title>") {
 		t.Errorf("expected <title>")
 	}
@@ -92,10 +92,10 @@ func TestPolarBar_A11yTitleDesc(t *testing.T) {
 func TestPolarBar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive polar-bar should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive polar-bar must not emit data-tc-tooltip")
 	}
 }
@@ -105,7 +105,7 @@ func TestPolarBar_Legend(t *testing.T) {
 	p.Legends = []legends.LegendProps{
 		{Anchor: legends.LegendAnchorRight, Direction: legends.LegendDirectionColumn, TranslateX: 50},
 	}
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "hot") || !strings.Contains(out, "cold") {
 		t.Errorf("expected legend to include keys")
 	}

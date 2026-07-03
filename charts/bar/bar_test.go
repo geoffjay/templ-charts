@@ -12,8 +12,8 @@ import (
 	"github.com/geoffjay/templ-charts/internal/golden"
 )
 
-// render renders a bar.Bar component to a string.
-func render(t *testing.T, props bar.BarProps) string {
+// renderChart renders a bar.Bar component to a string.
+func renderChart(t *testing.T, props bar.BarProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := bar.Bar(props).Render(context.Background(), &b); err != nil {
@@ -46,7 +46,7 @@ func TestBar_RendersSVG(t *testing.T) {
 			{"id": "three", "value": float64(30)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got: %q", out[:min(50, len(out))])
 	}
@@ -65,7 +65,7 @@ func TestBar_BarCount_StackedVertical(t *testing.T) {
 			{"id": "three", "value": float64(30)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Default keys = ["value"], so 3 bars (one per index).
 	rectCount := barRectCount(out)
 	if rectCount != 3 {
@@ -85,7 +85,7 @@ func TestBar_BarCount_GroupedVertical(t *testing.T) {
 			{"id": "three", "value1": float64(30), "value2": float64(300)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	rectCount := barRectCount(out)
 	if rectCount != 6 {
 		t.Errorf("expected 6 <rect> bars, got %d", rectCount)
@@ -104,7 +104,7 @@ func TestBar_BarCount_StackedMultiKey(t *testing.T) {
 			{"id": "three", "value1": float64(30), "value2": float64(300)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	rectCount := barRectCount(out)
 	if rectCount != 6 {
 		t.Errorf("expected 6 <rect> bars, got %d", rectCount)
@@ -121,8 +121,8 @@ func TestBar_DisableLabelDropsText(t *testing.T) {
 	}
 	without := with
 	without.EnableLabel = true
-	outWith := render(t, with)
-	outWithout := render(t, without)
+	outWith := renderChart(t, with)
+	outWithout := renderChart(t, without)
 	textWith := strings.Count(outWith, "<text")
 	textWithout := strings.Count(outWithout, "<text")
 	// EnableLabel defaults true via applyDefaults; both should have labels.
@@ -144,7 +144,7 @@ func TestBar_HorizontalLayout(t *testing.T) {
 			{"id": "two", "value": float64(20)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	rectCount := barRectCount(out)
 	if rectCount != 2 {
 		t.Errorf("expected 2 <rect> bars, got %d", rectCount)
@@ -160,12 +160,12 @@ func TestBar_AnimationsEmitSMIL(t *testing.T) {
 		},
 	}
 	// Animations off by default (Animate=false zero value).
-	outOff := render(t, props)
+	outOff := renderChart(t, props)
 	if strings.Contains(outOff, "<animate") {
 		t.Errorf("expected no <animate> when Animate=false, found one")
 	}
 	props.Animate = true
-	outOn := render(t, props)
+	outOn := renderChart(t, props)
 	animateCount := strings.Count(outOn, "<animate")
 	if animateCount == 0 {
 		t.Errorf("expected <animate> elements when Animate=true, found 0")
@@ -180,7 +180,7 @@ func TestBar_BorderRadiusUsesPath(t *testing.T) {
 			{"id": "one", "value": float64(10)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// BorderRadius>0 switches from <rect> to <path d="M…">.
 	pathCount := strings.Count(out, `<path d="M`)
 	if pathCount == 0 {
@@ -197,7 +197,7 @@ func TestBar_TotalsLayer(t *testing.T) {
 			{"id": "two", "value": float64(20)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Totals render bold <text> with font-weight="bold".
 	if !strings.Contains(out, `font-weight="bold"`) {
 		t.Errorf("expected totals <text font-weight=bold>, not found")
@@ -213,7 +213,7 @@ func TestBar_GridLines(t *testing.T) {
 			{"id": "one", "value": float64(10)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Grid emits <line> elements for each tick.
 	lineCount := strings.Count(out, "<line")
 	if lineCount == 0 {
@@ -239,7 +239,7 @@ func TestBar_Legends(t *testing.T) {
 			},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Legend emits a <g> with <circle>/<rect>/<polygon> symbol + <text>.
 	if !strings.Contains(out, "<text") {
 		t.Errorf("expected legend <text>, not found")
@@ -254,7 +254,7 @@ func TestBar_ValueScale(t *testing.T) {
 			{"id": "one", "value": float64(10)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>")
 	}
@@ -268,7 +268,7 @@ func TestBar_NegativeValues(t *testing.T) {
 			{"id": "pos", "value": float64(30)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	rectCount := barRectCount(out)
 	if rectCount != 2 {
 		t.Errorf("expected 2 <rect> bars, got %d", rectCount)
@@ -287,7 +287,7 @@ func TestBar_CustomColors(t *testing.T) {
 			{"id": "two", "value": float64(20)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.Contains(out, "#ff0000") {
 		t.Errorf("expected custom color #ff0000 in output")
 	}
@@ -309,7 +309,7 @@ func TestBar_Golden(t *testing.T) {
 			{"id": "three", "value1": float64(30), "value2": float64(60)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(60, len(out))])
 	}
@@ -330,7 +330,7 @@ func TestBar_Golden_Grouped(t *testing.T) {
 			{"id": "two", "value1": float64(20), "value2": float64(40)},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	golden.Assert(t, "bar-grouped", out)
 }
 

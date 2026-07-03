@@ -25,7 +25,7 @@ func baseProps() tree.TreeProps {
 	}
 }
 
-func render(t *testing.T, props tree.TreeProps) string {
+func renderChart(t *testing.T, props tree.TreeProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := tree.Tree(props).Render(context.Background(), &b); err != nil {
@@ -35,7 +35,7 @@ func render(t *testing.T, props tree.TreeProps) string {
 }
 
 func TestTree_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
@@ -43,7 +43,7 @@ func TestTree_RendersSVG(t *testing.T) {
 
 func TestTree_NodeAndLinkCount(t *testing.T) {
 	// 8 nodes (root + A,B + a1,a2,b1,b2,b3) → 7 links.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 8 {
 		t.Errorf("node count = %d, want 8", got)
 	}
@@ -54,7 +54,7 @@ func TestTree_NodeAndLinkCount(t *testing.T) {
 
 func TestTree_BumpLinks(t *testing.T) {
 	// Links use cubic bump curves → C commands in the path.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.Contains(out, `d="M`) || !strings.Contains(out, "C") {
 		t.Errorf("expected bump link paths with cubic segments")
 	}
@@ -63,7 +63,7 @@ func TestTree_BumpLinks(t *testing.T) {
 func TestTree_TreeMode(t *testing.T) {
 	p := baseProps()
 	p.Mode = tree.ModeTree
-	out := render(t, p)
+	out := renderChart(t, p)
 	if strings.Count(out, "<circle") != 8 {
 		t.Errorf("tree mode should still render 8 nodes")
 	}
@@ -73,21 +73,21 @@ func TestTree_Layouts(t *testing.T) {
 	for _, l := range []tree.LayoutDir{tree.LayoutTopToBottom, tree.LayoutBottomToTop, tree.LayoutLeftToRight, tree.LayoutRightToLeft} {
 		p := baseProps()
 		p.Layout = l
-		if !strings.HasPrefix(render(t, p), "<svg") {
+		if !strings.HasPrefix(renderChart(t, p), "<svg") {
 			t.Errorf("layout %q failed", l)
 		}
 	}
 }
 
 func TestTree_Golden(t *testing.T) {
-	golden.Assert(t, "tree-basic", render(t, baseProps()))
+	golden.Assert(t, "tree-basic", renderChart(t, baseProps()))
 }
 
 func TestTree_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Org"
 	p.Desc = "Org chart."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Org</title>") || !strings.Contains(out, "<desc>Org chart.</desc>") {
 		t.Errorf("expected title/desc")
 	}
@@ -96,10 +96,10 @@ func TestTree_A11yTitleDesc(t *testing.T) {
 func TestTree_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive tree should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive tree must not emit data-tc-tooltip")
 	}
 }
@@ -108,13 +108,13 @@ func TestTree_VoronoiMesh(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
 	p.UseMesh = true
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "data-tc-mesh") {
 		t.Errorf("Interactive+UseMesh tree should emit a voronoi-mesh overlay")
 	}
 	// Interactive without mesh falls back to per-node tooltips.
 	p.UseMesh = false
-	perNode := render(t, p)
+	perNode := renderChart(t, p)
 	if strings.Contains(perNode, "data-tc-mesh") {
 		t.Errorf("tree without UseMesh must not emit a mesh overlay")
 	}

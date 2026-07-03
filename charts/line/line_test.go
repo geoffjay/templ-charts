@@ -28,7 +28,7 @@ func sampleData() []line.LineSeries {
 	}
 }
 
-func render(t *testing.T, props line.LineProps) string {
+func renderChart(t *testing.T, props line.LineProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := line.Line(props).Render(context.Background(), &b); err != nil {
@@ -42,7 +42,7 @@ func TestLine_RendersSVG(t *testing.T) {
 		Width: 500, Height: 300,
 		Data: sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got: %q", out[:minLen(out)])
 	}
@@ -57,7 +57,7 @@ func TestLine_PathCount(t *testing.T) {
 		Width: 500, Height: 300,
 		Data: sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Each line is a <path d="M…" fill="none" stroke=…>.
 	pathCount := strings.Count(out, `fill="none"`)
 	if pathCount != 2 {
@@ -71,7 +71,7 @@ func TestLine_AreaEnabled(t *testing.T) {
 		Data:       sampleData(),
 		EnableArea: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Areas emit <path fill="…" fill-opacity="…">. The fill-opacity attr is
 	// unique to area paths (line paths have fill="none").
 	if !strings.Contains(out, `fill-opacity`) {
@@ -85,7 +85,7 @@ func TestLine_PointsEnabled(t *testing.T) {
 		Data:         sampleData(),
 		EnablePoints: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// 6 points (2 series × 3 x-values) → 6 <circle> elements.
 	circleCount := strings.Count(out, "<circle")
 	if circleCount != 6 {
@@ -99,7 +99,7 @@ func TestLine_PointsDisabled(t *testing.T) {
 		Data:         sampleData(),
 		EnablePoints: false,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if strings.Contains(out, "<circle") {
 		t.Errorf("expected no <circle> when EnablePoints=false, found one")
 	}
@@ -112,7 +112,7 @@ func TestLine_GridLines(t *testing.T) {
 		EnableGridX: true,
 		EnableGridY: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	lineCount := strings.Count(out, "<line")
 	if lineCount == 0 {
 		t.Errorf("expected grid <line> elements, found 0")
@@ -124,12 +124,12 @@ func TestLine_AnimationsEmitSMIL(t *testing.T) {
 		Width: 500, Height: 300,
 		Data: sampleData(),
 	}
-	outOff := render(t, props)
+	outOff := renderChart(t, props)
 	if strings.Contains(outOff, "<animate") {
 		t.Errorf("expected no <animate> when Animate=false, found one")
 	}
 	props.Animate = true
-	outOn := render(t, props)
+	outOn := renderChart(t, props)
 	animateCount := strings.Count(outOn, "<animate")
 	if animateCount == 0 {
 		t.Errorf("expected <animate> elements when Animate=true, found 0")
@@ -145,7 +145,7 @@ func TestLine_CustomColors(t *testing.T) {
 			Colors: []string{"#ff0000", "#00ff00"},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.Contains(out, "#ff0000") {
 		t.Errorf("expected custom color #ff0000 in output")
 	}
@@ -157,7 +157,7 @@ func TestLine_Curve(t *testing.T) {
 		Data:  sampleData(),
 		Curve: core.CurveMonotoneX,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// A monotone curve should produce a path with C (cubic bezier) commands.
 	if !strings.Contains(out, "C") {
 		t.Errorf("expected cubic-bezier path commands for monotoneX curve")
@@ -173,7 +173,7 @@ func TestLine_MultipleSeries(t *testing.T) {
 			{ID: "C", Data: []line.LinePointData{{X: "a", Y: float64(3)}}},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	pathCount := strings.Count(out, `fill="none"`)
 	if pathCount != 3 {
 		t.Errorf("expected 3 line paths, got %d", pathCount)
@@ -191,7 +191,7 @@ func TestLine_Legends(t *testing.T) {
 			},
 		},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Legend emits a <g> with a symbol + <text>.
 	if !strings.Contains(out, "<text") {
 		t.Errorf("expected legend <text>, not found")
@@ -205,7 +205,7 @@ func TestLine_SlicesX(t *testing.T) {
 		Interactive:  true,
 		EnableSlices: line.EnableSlicesX,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Slices emit transparent <rect> with data-ref="slice:…".
 	if !strings.Contains(out, `data-ref="slice:`) {
 		t.Errorf("expected slice rects with data-ref, not found")
@@ -213,7 +213,7 @@ func TestLine_SlicesX(t *testing.T) {
 }
 
 func TestLine_ClientHoverMesh(t *testing.T) {
-	out := render(t, line.LineProps{
+	out := renderChart(t, line.LineProps{
 		Width: 500, Height: 300,
 		Data:        sampleData(),
 		Interactive: true,
@@ -229,7 +229,7 @@ func TestLine_ClientHoverMesh(t *testing.T) {
 }
 
 func TestLine_ClientHoverSlices(t *testing.T) {
-	out := render(t, line.LineProps{
+	out := renderChart(t, line.LineProps{
 		Width: 500, Height: 300,
 		Data:         sampleData(),
 		Interactive:  true,
@@ -252,7 +252,7 @@ func TestLine_SlicesDebug(t *testing.T) {
 		EnableSlices: line.EnableSlicesX,
 		DebugSlices:  true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Debug slices get a red stroke.
 	if !strings.Contains(out, `stroke="red"`) {
 		t.Errorf("expected debug slice red stroke, not found")
@@ -266,7 +266,7 @@ func TestLine_Mesh(t *testing.T) {
 		Interactive: true,
 		UseMesh:     true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// Mesh emits an overlay <rect> with hx-get when ChartID is set; without
 	// ChartID it still emits the rect (transparent). We just check a rect
 	// exists with fill-opacity="0".
@@ -285,7 +285,7 @@ func TestLine_MeshDetectionRadiusAndDebugCells(t *testing.T) {
 		DetectionRadius: 40,
 		DebugMesh:       true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.Contains(out, `data-tc-mesh-radius="40"`) {
 		t.Errorf("expected data-tc-mesh-radius from DetectionRadius")
 	}
@@ -308,7 +308,7 @@ func TestLine_NilValues(t *testing.T) {
 		},
 		EnablePoints: true,
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	// The line should still render (with a gap at the nil point).
 	pathCount := strings.Count(out, `fill="none"`)
 	if pathCount != 1 {
@@ -327,7 +327,7 @@ func TestLine_YScaleMax(t *testing.T) {
 		Data:   sampleData(),
 		YScale: scales.ScaleLinearSpec{Min: scales.FloatVal(0), Max: scales.FloatVal(100)},
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>")
 	}
@@ -345,7 +345,7 @@ func TestLine_Golden(t *testing.T) {
 		EnablePoints: true,
 		Data:         sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:minLen(out)])
 	}
@@ -364,7 +364,7 @@ func TestLine_Golden_Area(t *testing.T) {
 		EnablePoints: true,
 		Data:         sampleData(),
 	}
-	out := render(t, props)
+	out := renderChart(t, props)
 	golden.Assert(t, "line-area", out)
 }
 

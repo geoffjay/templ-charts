@@ -215,8 +215,11 @@ A plain query-param full-page render is the no-JS fallback. No new dependency.
    dead `core.MotionProps` embed from the 25 non-animating charts and the dead
    `sankey.EnableLinkGradient` / `calendar.MonthBorder*` props. No golden changes
    (output byte-stable); README field name already correct after the rename.
-3. **Documentation** (§5): `ExampleXxx` per family, `docs/USAGE.md`, color-shape
-   docs.
+3. [x] **Documentation** (§5): a runnable `ExampleXxx` in every chart package (29
+   examples across 28 files, all using `render.String`), `docs/USAGE.md` (render
+   pattern, props anatomy, the five color-config shapes, interactivity,
+   responsive/a11y, theming), and README link. `charts/colors` doc + README
+   field-name fix landed in Phase 1/2.
 4. **Benchmarks + load demo** (§6): bench suite, `make bench`, `/benchmark` page.
 5. **Per-chart detail page** (§7): the family registry, the `/chart/{slug}`
    endpoint + switchers, the full-width layout + snippet panel, index → cards.

@@ -31,7 +31,7 @@ func baseProps() radar.RadarProps {
 	}
 }
 
-func render(t *testing.T, props radar.RadarProps) string {
+func renderChart(t *testing.T, props radar.RadarProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := radar.Radar(props).Render(context.Background(), &b); err != nil {
@@ -41,7 +41,7 @@ func render(t *testing.T, props radar.RadarProps) string {
 }
 
 func TestRadar_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -53,7 +53,7 @@ func TestRadar_RendersSVG(t *testing.T) {
 func TestRadar_PolygonPerKey(t *testing.T) {
 	// One closed <path> per key (3) in the layers group. Each path is a polygon
 	// fill, so count <path with fill-opacity.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "fill-opacity"); got != 3 {
 		t.Errorf("polygon count via fill-opacity = %d, want 3", got)
 	}
@@ -62,7 +62,7 @@ func TestRadar_PolygonPerKey(t *testing.T) {
 func TestRadar_DotCount(t *testing.T) {
 	// 5 indices × 3 keys = 15 dots; each dot is a <circle>. The grid also emits
 	// 5 concentric level circles (default circular shape). 15 + 5 = 20 circles.
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, "<circle"); got != 20 {
 		t.Errorf("circle count = %d, want 20 (15 dots + 5 grid levels)", got)
 	}
@@ -71,7 +71,7 @@ func TestRadar_DotCount(t *testing.T) {
 func TestRadar_LinearGridUsesPolygons(t *testing.T) {
 	p := baseProps()
 	p.GridShape = radar.GridShapeLinear
-	out := render(t, p)
+	out := renderChart(t, p)
 	// No grid level circles now → only the 15 dots remain as circles.
 	if got := strings.Count(out, "<circle"); got != 15 {
 		t.Errorf("circle count = %d, want 15 (dots only; linear grid uses paths)", got)
@@ -81,7 +81,7 @@ func TestRadar_LinearGridUsesPolygons(t *testing.T) {
 func TestRadar_DotsDisabled(t *testing.T) {
 	p := baseProps()
 	p.EnableDots = radar.BoolPtr(false)
-	out := render(t, p)
+	out := renderChart(t, p)
 	// Only the 5 grid level circles remain.
 	if got := strings.Count(out, "<circle"); got != 5 {
 		t.Errorf("circle count = %d, want 5 (grid levels only)", got)
@@ -89,7 +89,7 @@ func TestRadar_DotsDisabled(t *testing.T) {
 }
 
 func TestRadar_IndexLabels(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, idx := range []string{"fruity", "bitter", "heavy", "strong", "sunny"} {
 		if !strings.Contains(out, ">"+idx+"<") {
 			t.Errorf("missing index label %q", idx)
@@ -98,7 +98,7 @@ func TestRadar_IndexLabels(t *testing.T) {
 }
 
 func TestRadar_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "radar-basic", out)
 }
 
@@ -106,17 +106,17 @@ func TestRadar_Golden_Linear(t *testing.T) {
 	p := baseProps()
 	p.GridShape = radar.GridShapeLinear
 	p.Rotation = 30
-	out := render(t, p)
+	out := renderChart(t, p)
 	golden.Assert(t, "radar-linear-rotated", out)
 }
 
 func TestRadar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive radar should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive radar must not emit data-tc-tooltip")
 	}
 }

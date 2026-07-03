@@ -30,7 +30,7 @@ func baseProps() treemap.TreemapProps {
 	}
 }
 
-func render(t *testing.T, props treemap.TreemapProps) string {
+func renderChart(t *testing.T, props treemap.TreemapProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := treemap.Treemap(props).Render(context.Background(), &b); err != nil {
@@ -40,7 +40,7 @@ func render(t *testing.T, props treemap.TreemapProps) string {
 }
 
 func TestTreemap_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") || !strings.Contains(out, "</svg>") {
 		t.Fatalf("not a well-formed svg")
 	}
@@ -49,14 +49,14 @@ func TestTreemap_RendersSVG(t *testing.T) {
 func TestTreemap_NodeCount(t *testing.T) {
 	// root + 3 top-level (A,B,C) + 5 leaves under A,B = 9 node rects (the extra
 	// <rect> is the SvgWrapper background, which carries no fill-opacity).
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, `fill-opacity=`); got != 9 {
 		t.Errorf("node rect count = %d, want 9", got)
 	}
 }
 
 func TestTreemap_LeafLabels(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	// leaf formattedValue labels present.
 	for _, want := range []string{">12<", ">15<", ">6<"} {
 		if !strings.Contains(out, want) {
@@ -66,7 +66,7 @@ func TestTreemap_LeafLabels(t *testing.T) {
 }
 
 func TestTreemap_ParentLabels(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, want := range []string{">A<", ">B<"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected parent label %q", want)
@@ -75,14 +75,14 @@ func TestTreemap_ParentLabels(t *testing.T) {
 }
 
 func TestTreemap_Golden(t *testing.T) {
-	golden.Assert(t, "treemap-basic", render(t, baseProps()))
+	golden.Assert(t, "treemap-basic", renderChart(t, baseProps()))
 }
 
 func TestTreemap_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Sales"
 	p.Desc = "Sales by region and product."
-	out := render(t, p)
+	out := renderChart(t, p)
 	if !strings.Contains(out, "<title>Sales</title>") || !strings.Contains(out, "<desc>Sales by region and product.</desc>") {
 		t.Errorf("expected title/desc")
 	}
@@ -91,10 +91,10 @@ func TestTreemap_A11yTitleDesc(t *testing.T) {
 func TestTreemap_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive treemap should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive treemap must not emit data-tc-tooltip")
 	}
 }

@@ -25,7 +25,7 @@ func baseProps() bullet.BulletProps {
 	}
 }
 
-func render(t *testing.T, props bullet.BulletProps) string {
+func renderChart(t *testing.T, props bullet.BulletProps) string {
 	t.Helper()
 	var b strings.Builder
 	if err := bullet.Bullet(props).Render(context.Background(), &b); err != nil {
@@ -35,7 +35,7 @@ func render(t *testing.T, props bullet.BulletProps) string {
 }
 
 func TestBullet_RendersSVG(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if !strings.HasPrefix(out, "<svg") {
 		t.Fatalf("expected <svg…>, got %q", out[:min(50, len(out))])
 	}
@@ -45,7 +45,7 @@ func TestBullet_RendersSVG(t *testing.T) {
 }
 
 func TestBullet_TitlesPresent(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	for _, id := range []string{"temp.", "power"} {
 		if !strings.Contains(out, ">"+id+"<") {
 			t.Errorf("missing title %q", id)
@@ -55,14 +55,14 @@ func TestBullet_TitlesPresent(t *testing.T) {
 
 func TestBullet_MarkerLines(t *testing.T) {
 	// 1 marker per item × 2 items = 2 marker <line>s with stroke-width="2".
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	if got := strings.Count(out, `stroke-width="2"`); got != 2 {
 		t.Errorf("marker line count = %d, want 2", got)
 	}
 }
 
 func TestBullet_Golden(t *testing.T) {
-	out := render(t, baseProps())
+	out := renderChart(t, baseProps())
 	golden.Assert(t, "bullet-basic", out)
 }
 
@@ -70,17 +70,17 @@ func TestBullet_Golden_Vertical(t *testing.T) {
 	p := baseProps()
 	p.Width, p.Height = 300, 500
 	p.Layout = bullet.BulletLayoutVertical
-	out := render(t, p)
+	out := renderChart(t, p)
 	golden.Assert(t, "bullet-vertical", out)
 }
 
 func TestBullet_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true
-	if !strings.Contains(render(t, p), "data-tc-tooltip") {
+	if !strings.Contains(renderChart(t, p), "data-tc-tooltip") {
 		t.Errorf("interactive bullet should emit data-tc-tooltip")
 	}
-	if strings.Contains(render(t, baseProps()), "data-tc-tooltip") {
+	if strings.Contains(renderChart(t, baseProps()), "data-tc-tooltip") {
 		t.Errorf("non-interactive bullet must not emit data-tc-tooltip")
 	}
 }
