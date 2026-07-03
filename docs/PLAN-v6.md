@@ -207,8 +207,15 @@ plumbing:
 
 ## 9. Implementation order (topological, by leverage/risk)
 
-1. **`internal/d3/quadtree` port** (§3.1) — self-contained foundation; unblocks
-   Barnes–Hut + quadtree collision.
+1. [x] **`internal/d3/quadtree` port** (§3.1) — **done**. Full d3-quadtree port
+   (`New`/`From`, `Add`/`AddAll`, `Remove`/`RemoveAll`, `Cover`, `Extent`, `Find`
+   with optional radius, `Visit`/`VisitAfter`, `Size`/`Data`/`Copy`), with the
+   `Node.Value`/`X`/`Y` scratch fields reserved for the Barnes–Hut aggregation
+   (§3.2). Self-contained and unimported so far, so no existing golden moved.
+   Tests: leaf-in-cell invariant, `Find` vs brute-force nearest, coincident
+   chaining, remove/collapse, visit pre/post order, a Barnes–Hut-style
+   `VisitAfter` centre-of-mass aggregation, copy independence, and a
+   structure-dump golden. `make ci` green. See `docs/NOTES.md` (v6 Phase 1).
 2. **Barnes–Hut many-body + quadtree collide** (§3.2) — θ path added, exact
    (θ=0) path kept as default so force goldens stay byte-stable.
 3. **Delaunator sweep-hull** (§3.3) — rewrite the triangulation core behind the

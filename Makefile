@@ -56,7 +56,7 @@ golden:
 		./charts/treemap ./charts/sunburst ./charts/icicle ./charts/circlepacking ./charts/tree \
 		./charts/voronoi ./charts/network ./charts/swarmplot \
 		./charts/sankey ./charts/chord ./charts/geo \
-		./internal/d3/geo \
+		./internal/d3/geo ./internal/d3/quadtree \
 		-update
 
 ## Run tests with coverage, writing a coverage profile + HTML report.
