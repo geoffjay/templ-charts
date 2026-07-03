@@ -59,123 +59,28 @@ func NewDelaunay(points []float64) *Delaunay {
 // point returns the i-th site coordinates.
 func (d *Delaunay) point(i int) (float64, float64) { return d.Points[2*i], d.Points[2*i+1] }
 
-// triangle is a working triangle referencing point indices a,b,c (indices into
-// an augmented point list that appends the three super-triangle vertices).
-type triangle struct{ a, b, c int }
-
-// triangulate runs Bowyer–Watson over the input points and fills d.Triangles
-// with the point indices of the final (super-triangle-free) triangles.
+// triangulate runs the Delaunator sweep-hull (see delaunator.go) and fills
+// d.Triangles with CCW-wound point-index triples. Delaunator winds triangles
+// the opposite way under this package's orient2d convention, so each triple is
+// normalised on emit; the resulting edge set (and thus every neighbour, hull,
+// and voronoi cell derived from it) is identical to the previous Bowyer–Watson
+// output for points in general position.
 func (d *Delaunay) triangulate() {
 	d.Triangles = nil
 	if d.n < 3 {
 		return
 	}
-
-	// Augmented coordinate accessor: indices [0,n) are input points; indices
-	// [n,n+3) are the three super-triangle vertices stored in `super`.
-	var super [3][2]float64
-	coord := func(i int) (float64, float64) {
-		if i < d.n {
-			return d.Points[2*i], d.Points[2*i+1]
-		}
-		v := super[i-d.n]
-		return v[0], v[1]
-	}
-
-	// Super-triangle: large enough to enclose every input point.
-	minX, minY := math.Inf(1), math.Inf(1)
-	maxX, maxY := math.Inf(-1), math.Inf(-1)
-	for i := 0; i < d.n; i++ {
-		x, y := d.point(i)
-		minX, minY = math.Min(minX, x), math.Min(minY, y)
-		maxX, maxY = math.Max(maxX, x), math.Max(maxY, y)
-	}
-	dx, dy := maxX-minX, maxY-minY
-	dmax := math.Max(dx, dy)
-	if dmax == 0 {
-		dmax = 1
-	}
-	midX, midY := (minX+maxX)/2, (minY+maxY)/2
-	// A generous margin keeps the super-triangle well clear of the data so its
-	// removal leaves the true triangulation of the input points.
-	const m = 20
-	super[0] = [2]float64{midX - m*dmax, midY - dmax}
-	super[1] = [2]float64{midX, midY + m*dmax}
-	super[2] = [2]float64{midX + m*dmax, midY - dmax}
-
-	tris := []triangle{{d.n, d.n + 1, d.n + 2}}
-
-	// Insert input points one at a time in input order (deterministic).
-	for i := 0; i < d.n; i++ {
-		px, py := d.point(i)
-
-		// Find triangles whose circumcircle contains the point.
-		bad := make([]bool, len(tris))
-		for ti := range tris {
-			t := tris[ti]
-			ax, ay := coord(t.a)
-			bx, by := coord(t.b)
-			cx, cy := coord(t.c)
-			if inCircumcircle(ax, ay, bx, by, cx, cy, px, py) {
-				bad[ti] = true
-			}
-		}
-
-		// The boundary of the cavity is the set of edges belonging to exactly
-		// one bad triangle.
-		type edge struct{ u, v int }
-		count := map[edge]int{}
-		norm := func(u, v int) edge {
-			if u < v {
-				return edge{u, v}
-			}
-			return edge{v, u}
-		}
-		// Preserve directed edges to re-wind new triangles consistently.
-		var dirEdges []edge
-		for ti := range tris {
-			if !bad[ti] {
-				continue
-			}
-			t := tris[ti]
-			for _, e := range [3]edge{{t.a, t.b}, {t.b, t.c}, {t.c, t.a}} {
-				count[norm(e.u, e.v)]++
-				dirEdges = append(dirEdges, e)
-			}
-		}
-
-		// Remove bad triangles.
-		kept := tris[:0]
-		for ti := range tris {
-			if !bad[ti] {
-				kept = append(kept, tris[ti])
-			}
-		}
-		tris = kept
-
-		// Re-triangulate the cavity: connect the new point to each boundary
-		// (directed) edge, keeping the winding of the removed triangles.
-		for _, e := range dirEdges {
-			if count[norm(e.u, e.v)] == 1 {
-				tris = append(tris, triangle{e.u, e.v, i})
-			}
-		}
-	}
-
-	// Drop triangles that touch a super-triangle vertex, then emit CCW-wound
-	// point-index triples.
-	for _, t := range tris {
-		if t.a >= d.n || t.b >= d.n || t.c >= d.n {
-			continue
-		}
-		ax, ay := d.point(t.a)
-		bx, by := d.point(t.b)
-		cx, cy := d.point(t.c)
-		// orient2d > 0 ⇒ counter-clockwise.
+	dl := newDelaunator(d.Points)
+	d.Triangles = make([]int, 0, len(dl.triangles))
+	for t := 0; t < len(dl.triangles); t += 3 {
+		a, b, c := dl.triangles[t], dl.triangles[t+1], dl.triangles[t+2]
+		ax, ay := d.point(a)
+		bx, by := d.point(b)
+		cx, cy := d.point(c)
 		if orient2d(ax, ay, bx, by, cx, cy) < 0 {
-			t.b, t.c = t.c, t.b
+			b, c = c, b
 		}
-		d.Triangles = append(d.Triangles, t.a, t.b, t.c)
+		d.Triangles = append(d.Triangles, a, b, c)
 	}
 }
 

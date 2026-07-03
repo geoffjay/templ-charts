@@ -20,8 +20,8 @@ func benchPoints(n int) [][2]float64 {
 	return pts
 }
 
-// BenchmarkNewDelaunayFrom times the Bowyer–Watson triangulation (O(n^2)) over
-// n deterministic points.
+// BenchmarkNewDelaunayFrom times the Delaunator sweep-hull triangulation
+// (O(n log n)) over n deterministic points.
 func BenchmarkNewDelaunayFrom(b *testing.B) {
 	for _, n := range []int{50, 100, 500, 1000} {
 		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {

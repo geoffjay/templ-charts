@@ -229,8 +229,18 @@ plumbing:
    only pays off for dense/clustered overlap — for the sparse settled swarm the
    exact loop is faster, so it stays opt-in. Cutting the per-tick tree-rebuild
    allocations is a §3.4 follow-up. See `docs/NOTES.md` (v6 Phase 2).
-3. **Delaunator sweep-hull** (§3.3) — rewrite the triangulation core behind the
-   existing `internal/d3/delaunay` surface; goldens must match.
+3. [x] **Delaunator sweep-hull** (§3.3) — done. Replaced the O(n²) Bowyer–Watson
+   core in `internal/d3/delaunay` with a faithful Delaunator sweep-hull port
+   (`delaunator.go`: seed-triangle + circumcentre-sorted incremental insertion,
+   angular hull hash, iterative `legalize` edge flips). The public surface is
+   unchanged — `triangulate()` re-winds each Delaunator triple to the package's
+   CCW convention and `computeNeighbors`/`computeHull`/`Find`/`Voronoi` derive
+   from `Triangles` exactly as before. Every golden held byte-for-byte (voronoi
+   chart + the line/network/scatterplot mesh + swarmplot), and the property
+   suite (empty-circumcircle, CCW winding, Euler count, Find-vs-brute-force,
+   voronoi partition coverage) passes on the new triangulation. Scaling is now
+   near-linear: 10× points → ~10.6× time (n=100→1000), vs the ~100× a quadratic
+   pass would show. `make ci` green. See `docs/NOTES.md` (v6 Phase 3).
 4. **`charts/canvas` backend** (§4) — draw-op types, `Recorder`, encoder, and
    the JS replay script; the backend-agnostic core (so the §4.4 PNG option stays
    open).
