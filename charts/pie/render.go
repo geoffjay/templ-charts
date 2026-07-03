@@ -117,7 +117,7 @@ func renderArcsLayer(props PieProps, result PieResult, theme *theming.Theme, bou
 		ArcGenerator:   result.ArcGenerator,
 		BorderWidth:    props.BorderWidth,
 		BorderColor:    borderColorFn,
-		IsInteractive:  props.IsInteractive,
+		Interactive:    props.Interactive,
 		ChartID:        props.ChartID,
 		Animate:        props.Animate,
 		TransitionMode: props.TransitionMode,

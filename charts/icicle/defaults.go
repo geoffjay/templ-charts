@@ -2,7 +2,6 @@ package icicle
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/icicle svgDefaultProps.
@@ -16,5 +15,4 @@ var Defaults = IcicleProps{
 	EnableLabels: BoolPtr(false),
 	Label:        "id",
 	Role:         "img",
-	MotionProps:  core.MotionProps{Animate: true, MotionConfig: "default"},
 }

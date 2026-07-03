@@ -210,9 +210,11 @@ A plain query-param full-page render is the no-JS fallback. No new dependency.
 
 1. [x] **`charts/render` helpers** (§3) + README quickstart + `charts/colors`
    package doc. Small, foundational — everything else can use `render.String`.
-2. **API honesty & consistency** (§4): standardize `Interactive`, add
-   `pie.IsFocusable`, remove/gate dead props; regenerate affected goldens; fix the
-   README field name. (Breaking for the four v1 charts — do it early.)
+2. [x] **API honesty & consistency** (§4): standardized `Interactive` (renamed
+   `IsInteractive` on bar/line/pie/heatmap), added `pie.IsFocusable`, removed the
+   dead `core.MotionProps` embed from the 25 non-animating charts and the dead
+   `sankey.EnableLinkGradient` / `calendar.MonthBorder*` props. No golden changes
+   (output byte-stable); README field name already correct after the rename.
 3. **Documentation** (§5): `ExampleXxx` per family, `docs/USAGE.md`, color-shape
    docs.
 4. **Benchmarks + load demo** (§6): bench suite, `make bench`, `/benchmark` page.

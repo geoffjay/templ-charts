@@ -16,5 +16,4 @@ var Defaults = PCProps{
 	Colors:            colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "category10"},
 	Layers:            DefaultLayers,
 	Role:              "img",
-	MotionProps:       core.MotionProps{Animate: true, MotionConfig: "default"},
 }

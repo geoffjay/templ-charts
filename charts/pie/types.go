@@ -171,7 +171,7 @@ type PieProps struct {
 	Fill []core.DefRule
 
 	// Interactivity.
-	IsInteractive    bool
+	Interactive      bool
 	InitialHiddenIDs []DatumId
 
 	// Layers.
@@ -188,6 +188,7 @@ type PieProps struct {
 	AriaDescribedBy string
 	Title           string
 	Desc            string
+	IsFocusable     bool
 
 	// Theme.
 	Theme *theming.Theme

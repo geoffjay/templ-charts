@@ -79,8 +79,6 @@ type IcicleProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // IcicleResult is the computed model produced by UseIcicle.

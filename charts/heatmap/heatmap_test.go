@@ -78,7 +78,7 @@ func TestHeatMap_Golden(t *testing.T) {
 func TestHeatMap_InteractiveEmitsTooltip(t *testing.T) {
 	out := render(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360, Data: sampleData(),
-		IsInteractive: true, ChartID: "hm",
+		Interactive: true, ChartID: "hm",
 	})
 	// 8 data cells (9 − 1 nil) emit a client tooltip; no server round-trip.
 	if got := strings.Count(out, "data-tc-tooltip"); got != 8 {

@@ -98,8 +98,6 @@ type TreeProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // TreeResult is the computed model produced by UseTree.

@@ -165,7 +165,7 @@ func (barComponent) Render(props any, override map[string]any) (string, error) {
 	}
 	// Force static overrides.
 	bp.Animate = false
-	bp.IsInteractive = false
+	bp.Interactive = false
 	bp.Theme = &theming.DefaultTheme
 	// Apply chart defaults (margin).
 	if bp.Margin == (core.Margin{}) {
@@ -200,7 +200,7 @@ func (lineComponent) Render(props any, override map[string]any) (string, error) 
 		return "", fmt.Errorf("static: line render expects line.LineProps, got %T", props)
 	}
 	lp.Animate = false
-	lp.IsInteractive = false
+	lp.Interactive = false
 	lp.Theme = &theming.DefaultTheme
 	if lp.Margin == (core.Margin{}) {
 		lp.Margin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}
@@ -228,7 +228,7 @@ func (pieComponent) Render(props any, override map[string]any) (string, error) {
 		return "", fmt.Errorf("static: pie render expects pie.PieProps, got %T", props)
 	}
 	pp.Animate = false
-	pp.IsInteractive = false
+	pp.Interactive = false
 	pp.Theme = &theming.DefaultTheme
 	if pp.Margin == (core.Margin{}) {
 		pp.Margin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}

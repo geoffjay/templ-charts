@@ -125,8 +125,6 @@ type WaffleProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // WaffleResult is the computed model produced by UseWaffle.

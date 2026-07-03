@@ -2,7 +2,6 @@ package funnel
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/funnel svgDefaultProps. Fields left zero in a
@@ -23,5 +22,4 @@ var Defaults = FunnelProps{
 	EnableBeforeSeparators: BoolPtr(true),
 	EnableAfterSeparators:  BoolPtr(true),
 	Role:                   "img",
-	MotionProps:            core.MotionProps{Animate: true, MotionConfig: "default"},
 }

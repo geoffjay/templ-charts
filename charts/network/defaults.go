@@ -1,7 +1,5 @@
 package network
 
-import "github.com/geoffjay/templ-charts/charts/core"
-
 // Defaults mirrors @nivo/network svgDefaultProps. Fields left zero in a
 // NetworkProps fall back to these via applyDefaults.
 var Defaults = NetworkProps{
@@ -18,7 +16,6 @@ var Defaults = NetworkProps{
 
 	LinkThickness: 1,
 
-	Layers:      DefaultLayers,
-	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "gentle"},
+	Layers: DefaultLayers,
+	Role:   "img",
 }

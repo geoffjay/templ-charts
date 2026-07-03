@@ -139,8 +139,6 @@ type RadialBarProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // RadialBarResult is the computed model produced by UseRadialBar.

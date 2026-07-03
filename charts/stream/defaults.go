@@ -19,5 +19,4 @@ var Defaults = StreamProps{
 	BorderColor: colors.NewFromContextColor("color", []colors.ColorModifier{{"darker", 1.0}}),
 	Layers:      DefaultLayers,
 	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "default"},
 }

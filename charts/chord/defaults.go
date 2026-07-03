@@ -2,7 +2,6 @@ package chord
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/chord svgDefaultProps. Fields left zero in a
@@ -33,9 +32,8 @@ var Defaults = ChordProps{
 	LabelRotation:  0,
 	LabelTextColor: colors.NewFromContextColor("color", []colors.ColorModifier{{"darker", 1}}),
 
-	Layers:      DefaultLayers,
-	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "gentle"},
+	Layers: DefaultLayers,
+	Role:   "img",
 }
 
 func boolPtr(b bool) *bool { return &b }

@@ -14,7 +14,7 @@ type ArcsProps struct {
 	ArcGenerator     *arcs.ArcGenerator
 	BorderWidth      float64
 	BorderColor      func(ComputedDatum) string
-	IsInteractive    bool
+	Interactive      bool
 	ChartID          string
 	Animate          bool
 	TransitionMode   TransitionMode
@@ -52,7 +52,7 @@ func buildArcLayerItems(props ArcsProps) []arcs.ArcLayerItem {
 			stroke = props.BorderColor(d)
 		}
 		var htmxGet, htmxTrigger, htmxSwap, htmxTarget string
-		if props.IsInteractive && props.ChartID != "" {
+		if props.Interactive && props.ChartID != "" {
 			htmxGet = fmt.Sprintf("/charts/%s/hover?arc=%s", props.ChartID, d.ID)
 			htmxTrigger = "mouseenter"
 			htmxSwap = "innerHTML"

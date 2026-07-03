@@ -2,7 +2,6 @@ package swarmplot
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/scales"
 )
 
@@ -24,5 +23,4 @@ var Defaults = SwarmPlotProps{
 	EnableGridY:          true,
 	Layers:               DefaultLayers,
 	Role:                 "img",
-	MotionProps:          core.MotionProps{Animate: true, MotionConfig: "gentle"},
 }

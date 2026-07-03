@@ -1,7 +1,5 @@
 package bullet
 
-import "github.com/geoffjay/templ-charts/charts/core"
-
 // Defaults mirrors @nivo/bullet defaultProps. Fields left zero in a BulletProps
 // fall back to these via applyDefaults.
 var Defaults = BulletProps{
@@ -19,5 +17,4 @@ var Defaults = BulletProps{
 	MeasureBorderWidth: 0,
 	MarkerSize:         0.6,
 	Role:               "img",
-	MotionProps:        core.MotionProps{Animate: true, MotionConfig: "default"},
 }

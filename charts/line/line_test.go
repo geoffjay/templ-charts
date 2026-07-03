@@ -201,9 +201,9 @@ func TestLine_Legends(t *testing.T) {
 func TestLine_SlicesX(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
-		Data:          sampleData(),
-		IsInteractive: true,
-		EnableSlices:  line.EnableSlicesX,
+		Data:         sampleData(),
+		Interactive:  true,
+		EnableSlices: line.EnableSlicesX,
 	}
 	out := render(t, props)
 	// Slices emit transparent <rect> with data-ref="slice:…".
@@ -215,10 +215,10 @@ func TestLine_SlicesX(t *testing.T) {
 func TestLine_ClientHoverMesh(t *testing.T) {
 	out := render(t, line.LineProps{
 		Width: 500, Height: 300,
-		Data:          sampleData(),
-		IsInteractive: true,
-		UseMesh:       true,
-		ClientHover:   true,
+		Data:        sampleData(),
+		Interactive: true,
+		UseMesh:     true,
+		ClientHover: true,
 	})
 	if !strings.Contains(out, "data-tc-mesh") {
 		t.Errorf("client-hover mesh should emit data-tc-mesh")
@@ -231,10 +231,10 @@ func TestLine_ClientHoverMesh(t *testing.T) {
 func TestLine_ClientHoverSlices(t *testing.T) {
 	out := render(t, line.LineProps{
 		Width: 500, Height: 300,
-		Data:          sampleData(),
-		IsInteractive: true,
-		EnableSlices:  line.EnableSlicesX,
-		ClientHover:   true,
+		Data:         sampleData(),
+		Interactive:  true,
+		EnableSlices: line.EnableSlicesX,
+		ClientHover:  true,
 	})
 	if !strings.Contains(out, "data-tc-tooltip") {
 		t.Errorf("client-hover slices should emit data-tc-tooltip")
@@ -247,10 +247,10 @@ func TestLine_ClientHoverSlices(t *testing.T) {
 func TestLine_SlicesDebug(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
-		Data:          sampleData(),
-		IsInteractive: true,
-		EnableSlices:  line.EnableSlicesX,
-		DebugSlices:   true,
+		Data:         sampleData(),
+		Interactive:  true,
+		EnableSlices: line.EnableSlicesX,
+		DebugSlices:  true,
 	}
 	out := render(t, props)
 	// Debug slices get a red stroke.
@@ -262,9 +262,9 @@ func TestLine_SlicesDebug(t *testing.T) {
 func TestLine_Mesh(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
-		Data:          sampleData(),
-		IsInteractive: true,
-		UseMesh:       true,
+		Data:        sampleData(),
+		Interactive: true,
+		UseMesh:     true,
 	}
 	out := render(t, props)
 	// Mesh emits an overlay <rect> with hx-get when ChartID is set; without
@@ -279,7 +279,7 @@ func TestLine_MeshDetectionRadiusAndDebugCells(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:            sampleData(),
-		IsInteractive:   true,
+		Interactive:     true,
 		UseMesh:         true,
 		ClientHover:     true,
 		DetectionRadius: 40,

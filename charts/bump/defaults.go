@@ -2,7 +2,6 @@ package bump
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/bump svgDefaultProps. Fields left zero in a BumpProps
@@ -32,7 +31,6 @@ var Defaults = BumpProps{
 	EnableGridX: true,
 	EnableGridY: true,
 
-	Layers:      DefaultLayers,
-	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "default"},
+	Layers: DefaultLayers,
+	Role:   "img",
 }

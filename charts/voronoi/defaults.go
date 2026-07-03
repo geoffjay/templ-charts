@@ -2,7 +2,6 @@ package voronoi
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/voronoi defaultVoronoiProps. Fields left zero in a
@@ -28,6 +27,5 @@ var Defaults = VoronoiProps{
 	PointSize:    4,
 	PointColor:   "#666666",
 
-	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "default"},
+	Role: "img",
 }

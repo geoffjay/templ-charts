@@ -127,8 +127,6 @@ type FunnelProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // FunnelResult is the computed model produced by UseFunnel.

@@ -2,7 +2,6 @@ package scatterplot
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/scales"
 )
 
@@ -17,5 +16,4 @@ var Defaults = ScatterPlotProps{
 	Colors:      colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 	Layers:      DefaultLayers,
 	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "default"},
 }

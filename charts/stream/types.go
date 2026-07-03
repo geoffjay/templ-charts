@@ -97,8 +97,6 @@ type StreamProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // StreamResult is the computed model produced by UseStream.

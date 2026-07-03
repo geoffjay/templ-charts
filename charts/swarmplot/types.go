@@ -116,8 +116,6 @@ type SwarmPlotProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // SwarmPlotResult is the computed model produced by UseSwarmPlot.

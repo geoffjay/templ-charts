@@ -91,10 +91,8 @@ type CalendarProps struct {
 	MonthSpacing float64
 	DaySpacing   float64
 
-	MonthBorderWidth float64
-	MonthBorderColor string
-	DayBorderWidth   float64
-	DayBorderColor   string
+	DayBorderWidth float64
+	DayBorderColor string
 
 	// EnableMonthLegends / EnableYearLegends gate the text legends. nil → true
 	// (nivo default); pass a pointer to false to disable. Pointer-typed so the
@@ -110,8 +108,6 @@ type CalendarProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // MonthLegendsEnabled resolves EnableMonthLegends: unset (nil) means true.

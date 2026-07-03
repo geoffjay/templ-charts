@@ -70,8 +70,6 @@ type SunburstProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // SunburstResult is the computed model produced by UseSunburst.

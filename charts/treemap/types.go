@@ -88,8 +88,6 @@ type TreemapProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // TreemapResult is the computed model produced by UseTreemap.

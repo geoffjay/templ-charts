@@ -211,7 +211,7 @@ type LineProps struct {
 	Legends []legends.LegendProps
 
 	// Interactivity.
-	IsInteractive bool
+	Interactive bool
 	// ClientHover routes mesh/slice hover through the client interactivity
 	// layer (charts/interact) instead of the htmx server round-trip: the mesh
 	// emits a data-tc-mesh points array (nearest-point + crosshair handled in

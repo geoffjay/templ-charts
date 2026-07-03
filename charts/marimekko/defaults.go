@@ -2,7 +2,6 @@ package marimekko
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/marimekko defaultProps. Fields left zero in a
@@ -17,5 +16,4 @@ var Defaults = MarimekkoProps{
 	EnableGridY:  true,
 	Layers:       DefaultLayers,
 	Role:         "img",
-	MotionProps:  core.MotionProps{Animate: true, MotionConfig: "default"},
 }

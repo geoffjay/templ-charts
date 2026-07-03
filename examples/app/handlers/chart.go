@@ -689,7 +689,7 @@ func (a *App) ensureRegistered(ds []demos.Demo) {
 }
 
 // demoCards renders the initial SVG for each demo (via the htmx full-render
-// path, which applies IsInteractive=true + ChartID) and builds a ChartCard
+// path, which applies Interactive=true + ChartID) and builds a ChartCard
 // per demo.
 func (a *App) demoCards(ds []demos.Demo) []templates.ChartCardProps {
 	cards := make([]templates.ChartCardProps, 0, len(ds))

@@ -2,7 +2,6 @@ package treemap
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/treemap svgDefaultProps. Fields left zero in a
@@ -20,5 +19,4 @@ var Defaults = TreemapProps{
 	ParentLabelSize:    20,
 	ParentLabelPadding: 6,
 	Role:               "img",
-	MotionProps:        core.MotionProps{Animate: true, MotionConfig: "default"},
 }

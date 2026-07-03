@@ -110,8 +110,6 @@ type RadarProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // ComputedPoint is one projected key/index point: its cartesian position

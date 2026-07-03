@@ -33,9 +33,6 @@ func applyDefaults(p CalendarProps) CalendarProps {
 	if p.YearSpacing == 0 {
 		p.YearSpacing = Defaults.YearSpacing
 	}
-	if p.MonthBorderColor == "" {
-		p.MonthBorderColor = Defaults.MonthBorderColor
-	}
 	if p.DayBorderColor == "" {
 		p.DayBorderColor = Defaults.DayBorderColor
 	}

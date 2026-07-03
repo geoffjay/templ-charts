@@ -161,7 +161,7 @@ func renderBarsLayer(props BarProps, result BarResult, bound core.SvgDefsAndFill
 			IsActive:          props.HoveredKey != "" && props.HoveredKey == barDatum.Key,
 			Dimmed:            props.HoveredKey != "" && props.HoveredKey != barDatum.Key,
 		}
-		if props.IsInteractive && props.ChartID != "" {
+		if props.Interactive && props.ChartID != "" {
 			bip.HxGet = fmt.Sprintf("/charts/%s/hover?bar=%s", props.ChartID, barDatum.Key)
 			bip.HxTrigger = "mouseenter"
 			bip.HxSwap = "innerHTML"

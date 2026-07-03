@@ -41,7 +41,7 @@ var Defaults = PieProps{
 	Colors:                      colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 	Defs:                        []core.Def{},
 	Fill:                        []core.DefRule{},
-	IsInteractive:               true,
+	Interactive:                 true,
 	MotionProps:                 core.MotionProps{Animate: true, MotionConfig: core.DefaultMotionConfig},
 	TransitionMode:              TransitionModeInnerRadius,
 	Legends:                     nil,

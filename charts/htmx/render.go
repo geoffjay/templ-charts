@@ -40,7 +40,7 @@ func renderFull(inst *ChartInstance) (string, error) {
 // applyBarState overlays the per-instance state onto a bar.BarProps clone.
 func applyBarState(props *bar.BarProps, id string, st State) {
 	props.ChartID = id
-	props.IsInteractive = true
+	props.Interactive = true
 	props.InitialHiddenIDs = st.HiddenIDs
 	props.HoveredKey = st.HoveredKey
 	if props.Legends != nil {
@@ -56,7 +56,7 @@ func applyBarState(props *bar.BarProps, id string, st State) {
 // applyLineState overlays the per-instance state onto a line.LineProps clone.
 func applyLineState(props *line.LineProps, id string, st State) {
 	props.ChartID = id
-	props.IsInteractive = true
+	props.Interactive = true
 	props.InitialHiddenIDs = st.HiddenIDs
 	props.HoverX = st.HoverX
 	props.HoverY = st.HoverY
@@ -74,7 +74,7 @@ func applyLineState(props *line.LineProps, id string, st State) {
 // applyPieState overlays the per-instance state onto a pie.PieProps clone.
 func applyPieState(props *pie.PieProps, id string, st State) {
 	props.ChartID = id
-	props.IsInteractive = true
+	props.Interactive = true
 	props.InitialHiddenIDs = st.HiddenIDs
 	props.ActiveID = st.ActiveID
 	if props.Legends != nil {
@@ -91,7 +91,7 @@ func applyPieState(props *pie.PieProps, id string, st State) {
 // clone (the hovered cell drives the active/dim opacity).
 func applyHeatmapState(props *heatmap.HeatMapProps, id string, st State) {
 	props.ChartID = id
-	props.IsInteractive = true
+	props.Interactive = true
 	props.HoveredKey = st.HoveredKey
 }
 

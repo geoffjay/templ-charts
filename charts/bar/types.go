@@ -167,7 +167,7 @@ type BarProps struct {
 	TooltipLabel core.PropertyAccessor[ComputedDatum, string]
 
 	// Interactivity / a11y.
-	IsInteractive    bool
+	Interactive      bool
 	InitialHiddenIDs []string
 
 	// Legends.

@@ -2,7 +2,6 @@ package radialbar
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/radial-bar commonDefaultProps + svgDefaultProps.
@@ -32,5 +31,4 @@ var Defaults = RadialBarProps{
 	LabelsRadiusOffset:    0.5,
 	LabelsTextColor:       colors.NewThemeColor("labels.text.fill"),
 	Role:                  "img",
-	MotionProps:           core.MotionProps{Animate: true, MotionConfig: core.DefaultMotionConfig},
 }

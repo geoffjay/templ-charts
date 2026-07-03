@@ -115,8 +115,6 @@ type BulletProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // BulletResult is the computed model produced by UseBullet.

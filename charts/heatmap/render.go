@@ -162,7 +162,7 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 
 func renderCellsLayer(props HeatMapProps, result HeatMapResult) string {
 	var s strings.Builder
-	interactive := props.IsInteractive && props.ChartID != ""
+	interactive := props.Interactive && props.ChartID != ""
 	for _, cell := range result.Cells {
 		cp := HeatMapCellProps{
 			Cell:         cell,

@@ -16,7 +16,7 @@ type MountProps struct {
 
 	// Interactive wires the hover/tooltip plumbing: a mouseleave reset on the
 	// chart container plus the sibling tooltip swap target. It should match the
-	// IsInteractive state of the registered instance. Leave false for a static
+	// Interactive state of the registered instance. Leave false for a static
 	// (zero-JS) embed.
 	Interactive bool
 

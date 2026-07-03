@@ -131,8 +131,6 @@ type MarimekkoProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // MarimekkoResult is the computed model produced by UseMarimekko.

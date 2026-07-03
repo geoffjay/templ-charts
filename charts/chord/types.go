@@ -117,8 +117,6 @@ type ChordProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // LabelEnabled resolves EnableLabel (nil → true, matching nivo's default).

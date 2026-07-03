@@ -1,7 +1,5 @@
 package geo
 
-import "github.com/geoffjay/templ-charts/charts/core"
-
 // commonDefaults mirrors @nivo/geo commonDefaultProps.
 var commonDefaults = GeoBase{
 	ProjectionType:        "mercator",
@@ -16,8 +14,7 @@ var commonDefaults = GeoBase{
 	BorderWidth: 0,
 	BorderColor: "#000000",
 
-	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "gentle"},
+	Role: "img",
 }
 
 // GeoMapDefaults mirrors @nivo/geo GeoMapDefaultProps.

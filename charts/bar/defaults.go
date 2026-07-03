@@ -35,7 +35,7 @@ var Defaults = BarProps{
 	BorderRadius:     0,
 	BorderWidth:      0,
 	BorderColor:      colors.NewFromContextColor("color", nil),
-	IsInteractive:    true,
+	Interactive:      true,
 	Legends:          []BarLegendProps{},
 	InitialHiddenIDs: []string{},
 	Annotations:      []annotations.AnnotationSpec[ComputedBarDatum]{},

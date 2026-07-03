@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -193,5 +192,3 @@ func themeBackground(t *theming.Theme) string {
 	}
 	return t.Background
 }
-
-var _ = core.MotionProps{}

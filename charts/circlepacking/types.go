@@ -64,8 +64,6 @@ type CirclePackingProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // CirclePackingResult is the computed model produced by UseCirclePacking.

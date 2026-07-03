@@ -156,8 +156,6 @@ type BoxPlotProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // BoxPlotResult is the computed model produced by UseBoxPlot.

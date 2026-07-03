@@ -142,11 +142,11 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 				b.WriteString(renderPointsLayer(props, result))
 			}
 		case LineLayerSlices:
-			if props.IsInteractive && props.EnableSlices != "" {
+			if props.Interactive && props.EnableSlices != "" {
 				b.WriteString(renderSlicesLayer(props, result))
 			}
 		case LineLayerMesh:
-			if props.IsInteractive && props.UseMesh && props.EnableSlices == "" {
+			if props.Interactive && props.UseMesh && props.EnableSlices == "" {
 				b.WriteString(renderMeshLayer(props, result, dims))
 			}
 		case LineLayerLegends:

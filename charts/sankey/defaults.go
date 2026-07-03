@@ -2,7 +2,6 @@ package sankey
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/sankey svgDefaultProps. Fields left zero in a
@@ -22,10 +21,9 @@ var Defaults = SankeyProps{
 	NodeBorderColor:  colors.NewFromContextColor("color", []colors.ColorModifier{{"darker", 0.5}}),
 	NodeBorderRadius: 0,
 
-	LinkOpacity:        0.25,
-	LinkContract:       0,
-	LinkBlendMode:      "multiply",
-	EnableLinkGradient: false,
+	LinkOpacity:   0.25,
+	LinkContract:  0,
+	LinkBlendMode: "multiply",
 
 	EnableLabels:     boolPtr(true),
 	Label:            "id",
@@ -34,9 +32,8 @@ var Defaults = SankeyProps{
 	LabelOrientation: SankeyLabelHorizontal,
 	LabelTextColor:   colors.NewFromContextColor("color", []colors.ColorModifier{{"darker", 0.8}}),
 
-	Layers:      DefaultLayers,
-	Role:        "img",
-	MotionProps: core.MotionProps{Animate: true, MotionConfig: "gentle"},
+	Layers: DefaultLayers,
+	Role:   "img",
 }
 
 func boolPtr(b bool) *bool { return &b }

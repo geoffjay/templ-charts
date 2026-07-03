@@ -154,10 +154,9 @@ type SankeyProps struct {
 	NodeBorderColor  colors.InheritedColorConfig
 	NodeBorderRadius float64
 
-	LinkOpacity        float64
-	LinkContract       float64
-	LinkBlendMode      string
-	EnableLinkGradient bool
+	LinkOpacity   float64
+	LinkContract  float64
+	LinkBlendMode string
 
 	EnableLabels     *bool  // nil → true
 	Label            string // node field to use as label (only "id" supported)
@@ -183,8 +182,6 @@ type SankeyProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // LabelsEnabled resolves EnableLabels (nil → true, matching nivo's default).

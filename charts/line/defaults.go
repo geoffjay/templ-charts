@@ -32,7 +32,7 @@ var Defaults = LineProps{
 	EnableGridX:          true,
 	EnableGridY:          true,
 	Legends:              []legends.LegendProps{},
-	IsInteractive:        true,
+	Interactive:          true,
 	DebugMesh:            false,
 	EnablePointLabel:     false,
 	PointLabel:           "data.yFormatted",

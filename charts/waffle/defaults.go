@@ -2,7 +2,6 @@ package waffle
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/grid"
 )
 
@@ -19,5 +18,4 @@ var Defaults = WaffleProps{
 	BorderColor:   colors.NewFromContextColor("color", []colors.ColorModifier{{"darker", 1.0}}),
 	Layers:        DefaultLayers,
 	Role:          "img",
-	MotionProps:   core.MotionProps{Animate: true, MotionConfig: core.DefaultMotionConfig},
 }

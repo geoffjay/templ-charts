@@ -96,8 +96,6 @@ type VoronoiProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // VoronoiResult is the computed model produced by UseVoronoi.

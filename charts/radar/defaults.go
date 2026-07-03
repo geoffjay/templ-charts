@@ -27,5 +27,4 @@ var Defaults = RadarProps{
 	FillOpacity:     0.25,
 	Legends:         nil,
 	Role:            "img",
-	MotionProps:     core.MotionProps{Animate: true, MotionConfig: core.DefaultMotionConfig},
 }

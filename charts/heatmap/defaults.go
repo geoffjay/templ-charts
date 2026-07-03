@@ -2,7 +2,6 @@ package heatmap
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/heatmap commonDefaultProps + svgDefaultProps. Fields
@@ -23,5 +22,4 @@ var Defaults = HeatMapProps{
 	LabelTextColor:  colors.NewFromContextColor("color", []colors.ColorModifier{{"darker", 2.0}}),
 	Layers:          DefaultLayers,
 	Role:            "img",
-	MotionProps:     core.MotionProps{Animate: true, MotionConfig: core.DefaultMotionConfig},
 }

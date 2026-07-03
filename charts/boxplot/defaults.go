@@ -2,7 +2,6 @@ package boxplot
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/boxplot svgDefaultProps. Fields left zero in a
@@ -29,5 +28,4 @@ var Defaults = BoxPlotProps{
 	WhiskerEndSize:  0.6,
 	Layers:          DefaultLayers,
 	Role:            "img",
-	MotionProps:     core.MotionProps{Animate: true, MotionConfig: "default"},
 }

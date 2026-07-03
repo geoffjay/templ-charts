@@ -125,8 +125,6 @@ type ScatterPlotProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // ScatterPlotResult is the computed model produced by UseScatterPlot.

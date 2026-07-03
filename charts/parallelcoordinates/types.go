@@ -146,8 +146,6 @@ type PCProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // PCResult is the computed model produced by UseParallelCoordinates.

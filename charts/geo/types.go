@@ -93,8 +93,6 @@ type GeoBase struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
-
-	core.MotionProps
 }
 
 // GeoMapProps mirrors @nivo/geo GeoMapSvgProps (supported subset).
