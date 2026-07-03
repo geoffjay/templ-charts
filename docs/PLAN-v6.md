@@ -216,8 +216,19 @@ plumbing:
    chaining, remove/collapse, visit pre/post order, a Barnes–Hut-style
    `VisitAfter` centre-of-mass aggregation, copy independence, and a
    structure-dump golden. `make ci` green. See `docs/NOTES.md` (v6 Phase 1).
-2. **Barnes–Hut many-body + quadtree collide** (§3.2) — θ path added, exact
-   (θ=0) path kept as default so force goldens stay byte-stable.
+2. [x] **Barnes–Hut many-body + quadtree collide** (§3.2) — **done**.
+   `ManyBodyForce.Theta(θ)` adds d3's Barnes–Hut path over the quadtree (θ>0);
+   `CollideForce.UseQuadtree()` adds the pruned collision pass. Both are opt-in —
+   the exact all-pairs loops stay the default and are byte-untouched, so the
+   network/swarmplot goldens don't move (a tree traversal sums in a different
+   order, so they can't be bit-identical). Tests: Barnes–Hut converges to exact
+   as θ→0 (≤1e-6), quadtree-collide matches exact within 1e-9, plus determinism
+   + no-overlap behavioural checks. Measured (Tick(120)): Barnes–Hut charge is
+   ~2.2× faster at n=1000 and ~7× at n=5000 (gap widens with n). The quadtree
+   collide, by contrast, is allocation-bound (the tree is rebuilt each tick) and
+   only pays off for dense/clustered overlap — for the sparse settled swarm the
+   exact loop is faster, so it stays opt-in. Cutting the per-tick tree-rebuild
+   allocations is a §3.4 follow-up. See `docs/NOTES.md` (v6 Phase 2).
 3. **Delaunator sweep-hull** (§3.3) — rewrite the triangulation core behind the
    existing `internal/d3/delaunay` surface; goldens must match.
 4. **`charts/canvas` backend** (§4) — draw-op types, `Recorder`, encoder, and

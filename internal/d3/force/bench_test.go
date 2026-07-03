@@ -90,3 +90,72 @@ func BenchmarkCollide(b *testing.B) {
 		})
 	}
 }
+
+// buildNetworkTheta is buildNetwork with the Barnes–Hut charge (θ=0.9).
+func buildNetworkTheta(n int, theta float64) *Simulation {
+	rng := &benchLCG{state: 0x9e3779b9}
+	nodes := make([]*Node, n)
+	for i := range nodes {
+		nodes[i] = NewNode(i)
+	}
+	var links []*Link
+	for i := 0; i < n; i++ {
+		degree := 1 + int(rng.next()*3)
+		for k := 0; k < degree; k++ {
+			j := int(rng.next() * float64(n))
+			if j != i {
+				links = append(links, NewLink(nodes[i], nodes[j], nil))
+			}
+		}
+	}
+	return NewSimulation(nodes).
+		Force("link", ForceLink(links).DistanceConst(30).StrengthConst(1)).
+		Force("charge", ForceManyBody().StrengthConst(-30).DistanceMin(1).Theta(theta)).
+		Force("center", ForceCenter(300, 300)).
+		Stop()
+}
+
+// BenchmarkSimulationBarnesHut times the same run with the O(n log n) Barnes–Hut
+// charge — compare against BenchmarkSimulation to see the asymptotic win at
+// large n (the two diverge as n grows).
+func BenchmarkSimulationBarnesHut(b *testing.B) {
+	for _, n := range []int{50, 100, 500, 1000, 5000} {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				b.StopTimer()
+				sim := buildNetworkTheta(n, 0.9)
+				b.StartTimer()
+				sim.Tick(120)
+			}
+		})
+	}
+}
+
+// BenchmarkCollideQuadtree times the swarm layout with the O(n log n) pruned
+// collision pass — compare against BenchmarkCollide.
+func BenchmarkCollideQuadtree(b *testing.B) {
+	const size = 6.0
+	for _, n := range []int{50, 100, 500, 1000, 5000} {
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				b.StopTimer()
+				nodes := make([]*Node, n)
+				for j := range nodes {
+					nodes[j] = NewNode(j)
+				}
+				radius := func(*Node) float64 { return size/2 + 1 }
+				sim := NewSimulation(nodes).
+					Force("x", ForceX(func(*Node) float64 { return 300 }).Strength(1)).
+					Force("y", ForceY(func(*Node) float64 { return 300 })).
+					Force("collide", ForceCollide(radius).UseQuadtree()).
+					Stop()
+				b.StartTimer()
+				sim.Tick(120)
+			}
+		})
+	}
+}
