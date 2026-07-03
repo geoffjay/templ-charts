@@ -118,6 +118,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/geo", Title: "Geo", Description: "GeoJSON maps (d3-geo): GeoMap + value-bound Choropleth, ten projections, optional graticule and continuous legend."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
+			{Href: "/benchmark", Title: "Benchmark", Description: "Server-side render time + SVG size for a bar chart across dataset sizes (load/scaling showcase)."},
 		},
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "templ-charts demo", Nav: "home"}, templates.IndexPage(props))

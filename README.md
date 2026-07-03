@@ -176,6 +176,7 @@ contrib/nivo/   upstream nivo clone (gitignored, reference only)
 | Lint (vet + fmt) | `make lint` |
 | Run tests with coverage | `make cover` |
 | Regenerate golden snapshots | `make golden` |
+| Run benchmarks (d3 ports + render paths) | `make bench` |
 | CI (lint + test) | `make ci` |
 | Run the demo app | `make run-demo` |
 | Tidy modules | `make tidy` |

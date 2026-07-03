@@ -52,6 +52,7 @@ func main() {
 	mux.HandleFunc("/geo", app.Geo)
 	mux.HandleFunc("/palettes", app.Palettes)
 	mux.HandleFunc("/themes", app.Themes)
+	mux.HandleFunc("/benchmark", app.Benchmark)
 
 	addr := ":8000"
 	log.Printf("templ-charts demo listening on http://localhost%s", addr)

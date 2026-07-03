@@ -220,7 +220,12 @@ A plain query-param full-page render is the no-JS fallback. No new dependency.
    pattern, props anatomy, the five color-config shapes, interactivity,
    responsive/a11y, theming), and README link. `charts/colors` doc + README
    field-name fix landed in Phase 1/2.
-4. **Benchmarks + load demo** (§6): bench suite, `make bench`, `/benchmark` page.
+4. [x] **Benchmarks + load demo** (§6): first benchmarks in the repo — d3 ports
+   (`force` all-pairs + collide, `delaunay` Bowyer–Watson + voronoi, `hierarchy`
+   treemap/pack, `sankey` layout) and render paths (bar/line/heatmap/network), all
+   N-parameterized; `make bench` target (excluded from CI); and a `/benchmark`
+   demo page (nav + index card) that reports live server-side render time + SVG
+   size across dataset sizes.
 5. **Per-chart detail page** (§7): the family registry, the `/chart/{slug}`
    endpoint + switchers, the full-width layout + snippet panel, index → cards.
 6. **Polish**: deepen the shallowest goldens where cheap, docs/README pass for the

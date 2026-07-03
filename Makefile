@@ -1,4 +1,4 @@
-.PHONY: all templ build test lint vet fmt run-demo generate tidy clean golden cover ci
+.PHONY: all templ build test lint vet fmt run-demo generate tidy clean golden cover bench ci
 
 TEMPL_PKG := github.com/a-h/templ/cmd/templ
 TEMPL_VERSION := v0.3.1020
@@ -64,6 +64,14 @@ cover:
 	go test -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
 	@ echo "coverage: coverage.out (text) + coverage.html (html)"
+
+## Run benchmarks (d3 layout ports + chart render paths). Not part of `ci`
+## because timings are environment-sensitive. Override the scope with
+## `make bench BENCH_PKGS='./internal/d3/force ./charts/bar'`.
+BENCH_PKGS ?= ./internal/d3/force ./internal/d3/delaunay ./internal/d3/hierarchy \
+	./internal/d3/sankey ./charts/bar ./charts/line ./charts/heatmap ./charts/network
+bench:
+	go test -run '^$$' -bench=. -benchmem $(BENCH_PKGS)
 
 ## CI entry point: lint + test (golden snapshots compared, not regenerated).
 ci: lint test

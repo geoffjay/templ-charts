@@ -21,7 +21,23 @@ func newServer(t *testing.T) (http.Handler, *handlers.App) {
 	mux.HandleFunc("/line", app.Line)
 	mux.HandleFunc("/pie", app.Pie)
 	mux.HandleFunc("/themes", app.Themes)
+	mux.HandleFunc("/benchmark", app.Benchmark)
 	return mux, app
+}
+
+func TestBenchmarkPage(t *testing.T) {
+	h, _ := newServer(t)
+	rec := do(t, h, http.MethodGet, "/benchmark")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("/benchmark: status = %d, want 200", rec.Code)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "<table") {
+		t.Error("/benchmark: body missing results <table")
+	}
+	if !strings.Contains(body, "<svg") {
+		t.Error("/benchmark: body missing showcase <svg")
+	}
 }
 
 func do(t *testing.T, h http.Handler, method, target string) *httptest.ResponseRecorder {
