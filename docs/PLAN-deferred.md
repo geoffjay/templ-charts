@@ -3,14 +3,36 @@
 A single living backlog of everything **not** yet built, consolidated from the
 `§11 "Explicitly deferred"` sections of [`PLAN.md`](PLAN.md),
 [`PLAN-v2.md`](PLAN-v2.md), [`PLAN-v3.md`](PLAN-v3.md), and the v4 audit (which
-verified each item is genuinely absent in the code, with citations). v4
-(consumability & showcase — see [`PLAN-v4.md`](PLAN-v4.md)) intentionally touches
-none of this; it is captured here so nothing discovered is lost and a future
-release can be scoped from one place.
+verified each item is genuinely absent in the code, with citations). It is
+captured here so nothing discovered is lost and a future release can be scoped
+from one place.
 
 Items are grouped by theme and each carries a rough size, the code evidence that
-it's still absent, and its likely future home. Nothing here is committed to a
-version yet.
+it's still absent, and its likely future home.
+
+## 0. Status — what v5 now scopes
+
+**v5 ("fidelity & finish" — see [`PLAN-v5.md`](PLAN-v5.md)) claims the following
+sections**, finishing the SVG story. They stay documented below (with their code
+evidence, still valid) but are **no longer part of the standing backlog** — track
+them in `PLAN-v5.md` and strike them here as they land:
+
+- **§3 Animation parity** → v5 §4 (wired `MotionProps` across the ~25 v2/v3 charts)
+- **§4 Interactivity model gaps** → v5 §6 (unified hover-others, hierarchy zoom,
+  retire line mousemove fallback, opt-in `ResizeObserver`)
+- **§5 Feature completions** → v5 §5 (waffle `areas`, calendar month outline,
+  sankey link gradients)
+- **§6 d3-geo `clipCircle`/`clipExtent`** → v5 §3 (the one *correctness* fix)
+- **§9 Test depth** → v5 §7 (network's second golden + the new variant goldens)
+
+**The standing remainder after v5** — the active backlog a future release should
+scope from — is:
+
+- **§1 Canvas + §2 large-N performance** — paired, the v6 theme.
+- **§7 Color spaces** — opportunistic.
+- **§8 Consumption surface** (beyond v4's render helpers) — opportunistic.
+
+Nothing below is committed to a version beyond the v5-scoped sections above.
 
 ## 1. Canvas rendering path — the headline deferral
 
@@ -44,7 +66,7 @@ benchmarks to baseline these; the optimizations themselves are deferred.
 - **Render cost**: ~585 `WriteString` calls build SVG by string append; no
   streaming/large-N story. Benchmark first (v4), optimize if needed.
 
-## 3. Animation parity (v2/v3 charts)
+## 3. Animation parity (v2/v3 charts) — **scoped into v5 (§4)**
 
 Animation is **v1-only** but advertised repository-wide. `MotionProps{Animate}`
 is defaulted on ≥8 v2/v3 charts (heatmap, waffle, sankey, treemap, radar, stream,
@@ -57,7 +79,7 @@ funnel, boxplot) yet **never read or rendered** — only bar/line/pie emit SMIL
   v2/v3 charts for real enter/update transitions.
 - **Size**: medium-large (per-chart geometry interpolation, ~25 charts).
 
-## 4. Interactivity model gaps
+## 4. Interactivity model gaps — **scoped into v5 (§6)**
 
 - **Unified hover-others dimming.** Flow/relationship charts handle "dim the
   others on hover" inconsistently: chord uses client CSS `:has()`
@@ -75,7 +97,7 @@ funnel, boxplot) yet **never read or rendered** — only bar/line/pie emit SMIL
   when the container resizes (cosmetic scaling is already covered by the
   `Responsive` viewBox prop). No `ResizeObserver` in `charts/interact/script.go`.
 
-## 5. Feature completions (partial charts)
+## 5. Feature completions (partial charts) — **scoped into v5 (§5)**
 
 Small, well-scoped finishes to existing charts:
 
@@ -89,7 +111,11 @@ Small, well-scoped finishes to existing charts:
 - **sankey link gradients** — `EnableLinkGradient` declared/defaulted but never
   read (`charts/sankey/types.go:160`); gradient `<defs>` rendering deferred.
 
-## 6. d3-geo completeness
+## 6. d3-geo completeness — **`clipCircle`/`clipExtent` scoped into v5 (§3)**
+
+The `clipCircle`/`clipExtent` items below are v5's one correctness fix; the
+remaining geo items (full projection catalog, `GeoPath` bounds/centroid/
+`fitExtent`, TopoJSON) stay deferred.
 
 - **`clipCircle`** — the small-circle preclip the azimuthal family needs to hide
   the far hemisphere. Absent (`internal/d3/geo` implements only
@@ -124,22 +150,23 @@ v4 ships `charts/render` helpers only. Deferred by explicit v4 scope decision:
 - **Unified color-setting API.** Five distinct color-config shapes exist across
   families; v4 documents them, but a single unifying interface is deferred.
 
-## 9. Test depth
+## 9. Test depth — **scoped into v5 (§7)**
 
-Every chart has a test and at least one golden, but ~14 charts have only a
-**single** snapshot (bump, calendar, heatmap, treemap, sunburst, icicle,
-circlepacking, tree, voronoi, network, marimekko, parallelcoordinates, polarbar,
-scatterplot, waffle). Deeper variant/edge-case golden coverage is deferred (v4
-deepens the cheapest as polish, not comprehensively).
+Every chart has a test and at least one golden. v4 polish lifted 14 of the 15
+single-golden charts to two snapshots; **`network` is the last chart still at a
+single golden**. v5 adds network's second golden plus the new animated/on-
+variant/azimuthal-geo goldens its other workstreams introduce.
 
 ## 10. Priority sketch (non-binding)
 
 A rough ordering if these were to be scoped into future releases:
 
-1. **Correctness now-ish**: geo `clipCircle` (§6) — the only item that makes
-   current output *wrong* rather than merely incomplete.
-2. **High-value features**: animation parity (§3), interactive zoom + unified
-   hover-others (§4), the partial-chart completions (§5).
-3. **The big theme**: Canvas (§1) + large-N performance (§2), together.
-4. **Opportunistic**: color spaces (§7), sample-data/registry (§8), test
-   depth (§9), as consumers demand them.
+1. ~~**Correctness now-ish**: geo `clipCircle` (§6).~~ → **v5 §3.**
+2. ~~**High-value features**: animation parity (§3), interactive zoom + unified
+   hover-others (§4), the partial-chart completions (§5).~~ → **v5 §4–6.**
+3. **The big theme (next)**: Canvas (§1) + large-N performance (§2), together —
+   the natural **v6** theme. v5's animation/layout output is reused by a Canvas
+   backend, so it lands first.
+4. **Opportunistic**: color spaces (§7) and the consumption surface (§8 —
+   sample-data export, `charts/static` registry extension, unified color API),
+   as consumers demand them. (Test depth §9 folded into v5 §7.)
