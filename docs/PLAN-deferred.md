@@ -10,38 +10,48 @@ from one place.
 Items are grouped by theme and each carries a rough size, the code evidence that
 it's still absent, and its likely future home.
 
-## 0. Status — what v5 now scopes
+## 0. Status — the full roadmap
 
-**v5 ("fidelity & finish" — see [`PLAN-v5.md`](PLAN-v5.md)) claims the following
-sections**, finishing the SVG story. They stay documented below (with their code
-evidence, still valid) but are **no longer part of the standing backlog** — track
-them in `PLAN-v5.md` and strike them here as they land:
+Every item below is now scoped into a themed release. The sections stay
+documented (with their code evidence) and are struck as they land.
 
-- **§3 Animation parity** → v5 §4 (wired `MotionProps` across the ~25 v2/v3 charts)
+**Done — v5 ("fidelity & finish", see [`PLAN-v5.md`](PLAN-v5.md)), which
+finished the SVG story:**
+
+- ~~**§3 Animation parity** → v5 §4 (wired `MotionProps` across the ~25 v2/v3 charts)~~ — **done**
 - ~~**§4 Interactivity model gaps** → v5 §6 (unified hover-others, hierarchy zoom,
   retire line mousemove fallback, opt-in `ResizeObserver`)~~ — **done**
-- **§5 Feature completions** → v5 §5 (waffle `areas`, calendar month outline,
-  sankey link gradients)
-- **§6 d3-geo `clipCircle`/`clipExtent`** → v5 §3 (the one *correctness* fix)
+- ~~**§5 Feature completions** → v5 §5 (waffle `areas`, calendar month outline,
+  sankey link gradients)~~ — **done**
+- ~~**§6 d3-geo `clipCircle`/`clipExtent`** → v5 §3 (the one *correctness* fix)~~ — **done**
 - ~~**§9 Test depth** → v5 §7 (network's second golden + the new variant goldens)~~ — **done**
 
-**The standing remainder after v5** — the active backlog a future release should
-scope from — is:
+**Scoped — v6 ("scale", see [`PLAN-v6.md`](PLAN-v6.md)), the Canvas + large-N
+theme:**
 
-- **§1 Canvas + §2 large-N performance** — paired, the v6 theme.
-- **§7 Color spaces** — opportunistic.
-- **§8 Consumption surface** (beyond v4's render helpers) — opportunistic.
+- **§1 Canvas rendering path** → v6 §4 (client draw-list backend)
+- **§2 Large-N performance** → v6 §3 (`d3-quadtree` port + Barnes–Hut, Delaunator sweep-hull)
 
-Nothing below is committed to a version beyond the v5-scoped sections above.
+**Scoped — v7 ("completeness & ergonomics", see [`PLAN-v7.md`](PLAN-v7.md)), the
+final opportunistic release:**
 
-## 1. Canvas rendering path — the headline deferral
+- **§7 Color spaces** → v7 §3 (HSL/Lab/Lch)
+- **§8 Consumption surface** → v7 §4 (public `samples`, `charts/static` → 28, unified color API)
+- **§6 geo remainder** (projection catalog, `GeoPath` bounds/centroid, `fitExtent`, TopoJSON) → v7 §5
+
+After v7 the consolidated backlog is closed; remaining work is maintenance, not a
+themed release. Nothing here is committed beyond the sections above.
+
+## 1. Canvas rendering path — **scoped into v6 (§4)**
 
 **The single largest remaining nivo capability.** nivo ships `*Canvas` variants
 (bar, line, scatterplot, heatmap, network, swarmplot, geo, voronoi, …) for
-large-N datasets; templ-charts is SVG-only.
+large-N datasets; templ-charts is SVG-only. v6 §4 builds the **client draw-list**
+backend (a deterministic server-emitted list of draw ops replayed into a
+`<canvas>` by a dependency-free JS renderer, reusing every `Use{Chart}` hook).
 
-- **Options**: server-side raster, or a client `<canvas>` draw-list emitted from
-  the same layout math the SVG path uses.
+- **Options**: a client `<canvas>` draw-list emitted from the same layout math
+  the SVG path uses (v6's choice), or server-side raster (documented secondary).
 - **Evidence absent**: `grep -ri canvas` finds only comments/aliases describing
   its absence (`charts/{bar,line,pie}/types.go:6` "no Canvas";
   `charts/axes/compute.go:76` `CanvasAxisProps = AxisProps` alias;
@@ -51,20 +61,23 @@ large-N datasets; templ-charts is SVG-only.
 - **Depends on / pairs with**: the large-N performance work (§2) — Canvas only
   pays off once the layout math scales.
 
-## 2. Large-N performance
+## 2. Large-N performance — **scoped into v6 (§3)**
 
 The layout ports are correct and deterministic but use quadratic algorithms
-(fine at chart scale, poor for large graphs/point clouds). v4 adds the first
-benchmarks to baseline these; the optimizations themselves are deferred.
+(fine at chart scale, poor for large graphs/point clouds). v4 added the first
+benchmarks to baseline these; v6 §3 does the optimizations (a new
+`internal/d3/quadtree` port is the shared prerequisite).
 
-- **Force: Barnes–Hut quadtree.** `internal/d3/force/manybody.go:73` is an exact
-  all-pairs O(n²) charge sum (deliberate, "equivalent to θ=0"); `collide.go:53`
-  is O(n²) pairwise. A quadtree brings charge to O(n log n).
+- **Force: Barnes–Hut quadtree.** `internal/d3/force/manybody.go` is an exact
+  all-pairs O(n²) charge sum (deliberate, "equivalent to θ=0"; the loop at `:65`);
+  `collide.go` is O(n²) pairwise (`:44`, its header notes "d3 uses a quadtree
+  purely to prune"). A quadtree brings both to O(n log n) with the θ parameter.
 - **Delaunay: delaunator / sweep-hull.** `internal/d3/delaunay/delaunay.go` is
-  classic Bowyer–Watson, O(n²) worst case (each insertion scans all triangles,
-  `:109`). A sweep-hull port is O(n log n).
-- **Render cost**: ~585 `WriteString` calls build SVG by string append; no
-  streaming/large-N story. Benchmark first (v4), optimize if needed.
+  classic Bowyer–Watson, O(n²) worst case (`:7-8`). A Delaunator sweep-hull port
+  is O(n log n), behind the same public surface.
+- **Render cost**: ~900 `WriteString` calls build SVG by string append; no
+  streaming/large-N story. v6's Canvas draw-list emitter is written
+  allocation-consciously; the SVG path itself is not rewritten.
 
 ## 3. Animation parity (v2/v3 charts) — **done in v5 (§4)**
 
@@ -136,30 +149,33 @@ goldens byte-stable). See `docs/NOTES.md` (v5 Phase 3).
 - ~~**`clipExtent`** — rectangular clip.~~ **Done (v5 Phase 1):** ported the
   screen-space rectangle postclip (`clip_rectangle.go`) + `Projection.ClipExtent`.
 - **Full projection catalog** beyond the ~10 nivo exposes; `GeoPath`
-  bounds/area/centroid and `fitExtent`/`fitSize`. *(Still deferred.)*
-- **TopoJSON decoding** — out of scope by design (callers supply GeoJSON); revisit
-  only if a consumer needs it.
+  bounds/area/centroid and `fitExtent`/`fitSize`. → **v7 §5.**
+- **TopoJSON decoding** — out of scope by design (callers supply GeoJSON);
+  → **v7 §5** adds it behind an opt-in decoder.
 
-## 7. Color spaces
+## 7. Color spaces — **scoped into v7 (§3)**
 
 `internal/d3/color` is **RGB-only** (`color.go:38` `type RGB`; the interface
 comment at `:15` says "and, in future, HSL"). HSL / Lab / Lch spaces are unported
-— add only when a chart needs perceptually-uniform interpolation or lightness
-modifiers beyond what RGB gives.
+— v7 §3 adds them behind the `Color` interface, with opt-in perceptual
+interpolation for scales/palettes and Lab-based lightness modifiers (RGB stays
+the default, so no golden moves).
 
-## 8. Consumption surface (beyond v4's render helpers)
+## 8. Consumption surface (beyond v4's render helpers) — **scoped into v7 (§4)**
 
-v4 ships `charts/render` helpers only. Deferred by explicit v4 scope decision:
+v4 ships `charts/render` helpers only. v7 §4 finishes the consumption story
+(all three additive):
 
 - **Public sample-data export.** Real per-chart data generators are unexported in
   `examples/app/demos` (`barData()`, `chordSample()`, …). A downstream user can't
-  get ready-made data to try a chart. An exported `samples` package (typed data
-  per chart) is deferred.
+  get ready-made data to try a chart. → **v7 §4** promotes them into a public
+  typed `samples` package (reused by the demo as the single source of truth).
 - **`charts/static` registry extension.** The registry + `Samples` cover only
-  bar/line/pie (`charts/static/types.go:49`, `samples.go:20`) — 3 of 28. Extending
-  the dispatcher and samples to all 28 charts is deferred.
+  bar/line/pie (`charts/static/types.go`, `samples.go`) — 3 of 28. → **v7 §4**
+  extends the dispatcher + samples to all 28 charts.
 - **Unified color-setting API.** Five distinct color-config shapes exist across
-  families; v4 documents them, but a single unifying interface is deferred.
+  families; v4 documents them. → **v7 §4** adds one additive unifying entry
+  point (no breaking rename).
 
 ## 9. Test depth — **done in v5 (§7)**
 
@@ -177,8 +193,10 @@ A rough ordering if these were to be scoped into future releases:
 2. ~~**High-value features**: animation parity (§3), interactive zoom + unified
    hover-others (§4), the partial-chart completions (§5).~~ → **v5 §4–6.**
 3. **The big theme (next)**: Canvas (§1) + large-N performance (§2), together —
-   the natural **v6** theme. v5's animation/layout output is reused by a Canvas
-   backend, so it lands first.
-4. **Opportunistic**: color spaces (§7) and the consumption surface (§8 —
-   sample-data export, `charts/static` registry extension, unified color API),
-   as consumers demand them. (Test depth §9 folded into v5 §7.)
+   the **v6** theme ([`PLAN-v6.md`](PLAN-v6.md)). v5's animation/layout output is
+   reused by the Canvas backend, and the quadtree/Delaunator perf ports land
+   first so Canvas has scaled layout to render.
+4. **Final completeness**: color spaces (§7), the consumption surface (§8 —
+   sample-data export, `charts/static` → 28, unified color API), and the geo
+   remainder (§6) — the **v7** theme ([`PLAN-v7.md`](PLAN-v7.md)), the last
+   planned release. (Test depth §9 folded into v5 §7.)
