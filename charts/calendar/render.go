@@ -7,6 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/grid"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -40,6 +41,12 @@ func applyDefaults(p CalendarProps) CalendarProps {
 	if p.DayBorderWidth == 0 {
 		p.DayBorderWidth = Defaults.DayBorderWidth
 	}
+	if p.MonthBorderColor == "" {
+		p.MonthBorderColor = Defaults.MonthBorderColor
+	}
+	if p.MonthBorderWidth == 0 {
+		p.MonthBorderWidth = Defaults.MonthBorderWidth
+	}
 	if p.Role == "" {
 		p.Role = Defaults.Role
 	}
@@ -50,6 +57,8 @@ func applyDefaults(p CalendarProps) CalendarProps {
 func renderLayers(props CalendarProps, result CalendarResult, theme *theming.Theme) string {
 	var b strings.Builder
 	b.WriteString(renderDaysLayer(props, result))
+	// Month outline sits on top of the day cells.
+	b.WriteString(renderMonthBordersLayer(props, result))
 	if props.MonthLegendsEnabled() {
 		b.WriteString(renderLegendText(result.MonthLegends, monthLegendItems, theme))
 	}
@@ -75,6 +84,67 @@ func renderDaysLayer(props CalendarProps, result CalendarResult) string {
 			cp.Tooltip = interact.TooltipHTML(day.Color, day.Day, strconv.FormatFloat(*day.Value, 'g', -1, 64))
 		}
 		s.WriteString(renderComponent(CalendarDay(cp)))
+	}
+	return s.String()
+}
+
+// renderMonthBordersLayer draws a per-month outline-path border around each
+// calendar month's day cells. It runs only when props.MonthBorderWidth > 0.
+// Days are grouped by calendar month (year+month), each group's contiguous
+// blocks are merged into outline polygons via grid.GetCellsPolygons, and each
+// month becomes one <path> whose d concatenates every polygon as a closed
+// subpath ("M … L … Z"). Mirrors @nivo/calendar's month outline path.
+func renderMonthBordersLayer(props CalendarProps, result CalendarResult) string {
+	if props.MonthBorderWidth <= 0 {
+		return ""
+	}
+
+	// Group days by calendar month, preserving first-seen order (days are
+	// already chronological).
+	type monthKey struct {
+		year  int
+		month int
+	}
+	var order []monthKey
+	groups := make(map[monthKey][]ComputedDay)
+	for _, d := range result.Days {
+		k := monthKey{year: d.Date.Year(), month: int(d.Date.Month())}
+		if _, ok := groups[k]; !ok {
+			order = append(order, k)
+		}
+		groups[k] = append(groups[k], d)
+	}
+
+	var s strings.Builder
+	for _, k := range order {
+		polygons := grid.GetCellsPolygons(groups[k])
+		var d strings.Builder
+		for _, poly := range polygons {
+			if len(poly) == 0 {
+				continue
+			}
+			for i, v := range poly {
+				if i == 0 {
+					d.WriteString("M")
+				} else {
+					d.WriteString(" L")
+				}
+				d.WriteString(fmtC(v[0]))
+				d.WriteString(",")
+				d.WriteString(fmtC(v[1]))
+			}
+			d.WriteString(" Z")
+		}
+		if d.Len() == 0 {
+			continue
+		}
+		s.WriteString(`<path fill="none" stroke="`)
+		s.WriteString(props.MonthBorderColor)
+		s.WriteString(`" stroke-width="`)
+		s.WriteString(fmtC(props.MonthBorderWidth))
+		s.WriteString(`" d="`)
+		s.WriteString(d.String())
+		s.WriteString(`"></path>`)
 	}
 	return s.String()
 }

@@ -2,6 +2,7 @@ package sankey
 
 import (
 	"context"
+	"hash/fnv"
 	"math"
 	"strconv"
 	"strings"
@@ -54,6 +55,18 @@ func applyDefaults(p SankeyProps) SankeyProps {
 	if p.LinkOpacity == 0 {
 		p.LinkOpacity = Defaults.LinkOpacity
 	}
+	if p.NodeHoverOpacity == 0 {
+		p.NodeHoverOpacity = Defaults.NodeHoverOpacity
+	}
+	if p.NodeHoverOthersOpacity == 0 {
+		p.NodeHoverOthersOpacity = Defaults.NodeHoverOthersOpacity
+	}
+	if p.LinkHoverOpacity == 0 {
+		p.LinkHoverOpacity = Defaults.LinkHoverOpacity
+	}
+	if p.LinkHoverOthersOpacity == 0 {
+		p.LinkHoverOthersOpacity = Defaults.LinkHoverOthersOpacity
+	}
 	if p.LinkBlendMode == "" {
 		p.LinkBlendMode = Defaults.LinkBlendMode
 	}
@@ -93,13 +106,20 @@ func isZeroInherited(c colors.InheritedColorConfig) bool {
 // renderLayers renders the enabled layers as an inner SVG string. width/height
 // are the inner dimensions (used for label side selection and legends).
 func renderLayers(props SankeyProps, result SankeyResult, width, height float64, theme *theming.Theme) string {
+	// When interactive, a scoped <style> block drives the hover-highlight
+	// (mirrors charts/chord): hovering a node/link re-lights it and its connected
+	// elements and dims the rest, all via CSS :has() with no JS/server call.
+	cid := sankeyChartID(result.Nodes)
 	var b strings.Builder
+	if props.Interactive {
+		b.WriteString(hoverStyleBlock(props, result, cid))
+	}
 	for _, layer := range props.Layers {
 		switch layer {
 		case SankeyLayerLinks:
-			b.WriteString(renderLinksLayer(props, result))
+			b.WriteString(renderLinksLayer(props, result, cid))
 		case SankeyLayerNodes:
-			b.WriteString(renderNodesLayer(props, result, theme))
+			b.WriteString(renderNodesLayer(props, result, theme, cid))
 		case SankeyLayerLabels:
 			b.WriteString(renderLabelsLayer(props, result, width, height, theme))
 		case SankeyLayerLegends:
@@ -109,13 +129,121 @@ func renderLayers(props SankeyProps, result SankeyResult, width, height float64,
 	return b.String()
 }
 
-func renderLinksLayer(props SankeyProps, result SankeyResult) string {
+// sankeyChartID derives a stable, CSS-safe token from the node ids so the
+// hover-highlight <style> rules only affect this chart instance (multiple
+// interactive sankeys can coexist on a page).
+func sankeyChartID(nodes []ComputedNode) string {
+	h := fnv.New32a()
+	for _, n := range nodes {
+		_, _ = h.Write([]byte(n.ID))
+		_, _ = h.Write([]byte{0})
+	}
+	return strconv.FormatUint(uint64(h.Sum32()), 16)
+}
+
+// hoverStyleBlock builds the scoped CSS implementing the hover-highlight. The
+// resting opacities are the inline fill-opacity attributes; these :has(...:hover)
+// rules override them — dimming everything, then re-lighting (higher specificity)
+// the hovered element and the elements connected to it.
+func hoverStyleBlock(props SankeyProps, result SankeyResult, cid string) string {
+	scope := ".tc-sk" + cid
+	idx := make(map[string]int, len(result.Nodes))
+	for i, n := range result.Nodes {
+		idx[n.ID] = i
+	}
+	no := fmtF(props.NodeHoverOpacity)
+	noo := fmtF(props.NodeHoverOthersOpacity)
+	lo := fmtF(props.LinkHoverOpacity)
+	loo := fmtF(props.LinkHoverOthersOpacity)
+
 	var b strings.Builder
+	b.WriteString(`<style>`)
+
+	// Hover a node → dim every node/link, then re-light the hovered node and the
+	// links attached to it (source or target).
+	for i := range result.Nodes {
+		k := strconv.Itoa(i)
+		pre := `svg:has(` + scope + `.n` + k + `:hover) ` + scope
+		b.WriteString(pre + `.tc-sk-node{fill-opacity:` + noo + `}`)
+		b.WriteString(pre + `.tc-sk-link{fill-opacity:` + loo + `}`)
+		b.WriteString(pre + `.tc-sk-node.n` + k + `{fill-opacity:` + no + `}`)
+		b.WriteString(pre + `.tc-sk-link.s` + k + `,` + pre + `.tc-sk-link.t` + k + `{fill-opacity:` + lo + `}`)
+	}
+
+	// Hover a link → dim everything, then re-light that link and its two nodes.
 	for i, l := range result.Links {
-		b.WriteString(`<path d="`)
+		li := strconv.Itoa(i)
+		a := strconv.Itoa(idx[l.Source])
+		t := strconv.Itoa(idx[l.Target])
+		pre := `svg:has(` + scope + `.l` + li + `:hover) ` + scope
+		b.WriteString(pre + `.tc-sk-node{fill-opacity:` + noo + `}`)
+		b.WriteString(pre + `.tc-sk-link{fill-opacity:` + loo + `}`)
+		b.WriteString(pre + `.tc-sk-link.l` + li + `{fill-opacity:` + lo + `}`)
+		b.WriteString(pre + `.tc-sk-node.n` + a + `,` + pre + `.tc-sk-node.n` + t + `{fill-opacity:` + no + `}`)
+	}
+
+	b.WriteString(`</style>`)
+	return b.String()
+}
+
+// sankeyNodeClass / sankeyLinkClass build the CSS class lists used by the
+// hover-highlight rules. Nodes are tagged by index; links by index plus their
+// source/target node indices (so a node-hover rule can re-light attached links).
+func sankeyNodeClass(cid string, i int) string {
+	return "tc-sk" + cid + " tc-sk-node n" + strconv.Itoa(i)
+}
+
+func sankeyLinkClass(cid string, i, src, tgt int) string {
+	return "tc-sk" + cid + " tc-sk-link l" + strconv.Itoa(i) + " s" + strconv.Itoa(src) + " t" + strconv.Itoa(tgt)
+}
+
+func renderLinksLayer(props SankeyProps, result SankeyResult, cid string) string {
+	var b strings.Builder
+	var nodeIdx map[string]int
+	if props.Interactive {
+		nodeIdx = make(map[string]int, len(result.Nodes))
+		for i, n := range result.Nodes {
+			nodeIdx[n.ID] = i
+		}
+	}
+	if props.EnableLinkGradient {
+		b.WriteString(`<defs>`)
+		for i, l := range result.Links {
+			b.WriteString(`<linearGradient id="`)
+			b.WriteString(linkGradientID(i))
+			b.WriteString(`" gradientUnits="userSpaceOnUse" x1="`)
+			b.WriteString(fmtF(l.GradX0))
+			b.WriteString(`" y1="`)
+			b.WriteString(fmtF(l.GradY0))
+			b.WriteString(`" x2="`)
+			b.WriteString(fmtF(l.GradX1))
+			b.WriteString(`" y2="`)
+			b.WriteString(fmtF(l.GradY1))
+			b.WriteString(`"><stop offset="0" stop-color="`)
+			b.WriteString(l.StartColor)
+			b.WriteString(`"/><stop offset="1" stop-color="`)
+			b.WriteString(l.EndColor)
+			b.WriteString(`"/></linearGradient>`)
+		}
+		b.WriteString(`</defs>`)
+	}
+	for i, l := range result.Links {
+		b.WriteString(`<path`)
+		if props.Interactive {
+			b.WriteString(` class="`)
+			b.WriteString(sankeyLinkClass(cid, i, nodeIdx[l.Source], nodeIdx[l.Target]))
+			b.WriteString(`"`)
+		}
+		b.WriteString(` d="`)
 		b.WriteString(l.Path)
 		b.WriteString(`" fill="`)
-		b.WriteString(l.Color)
+		if props.EnableLinkGradient {
+			b.WriteString(`url(#`)
+			b.WriteString(linkGradientID(i))
+			b.WriteString(`)`)
+		} else {
+			b.WriteString(l.Color)
+		}
 		b.WriteString(`" fill-opacity="`)
 		b.WriteString(fmtF(props.LinkOpacity))
 		b.WriteString(`" style="mix-blend-mode:`)
@@ -139,11 +267,17 @@ func renderLinksLayer(props SankeyProps, result SankeyResult) string {
 	return b.String()
 }
 
-func renderNodesLayer(props SankeyProps, result SankeyResult, theme *theming.Theme) string {
+func renderNodesLayer(props SankeyProps, result SankeyResult, theme *theming.Theme, cid string) string {
 	getBorderColor := colors.GetInheritedColorGenerator(props.NodeBorderColor, theme)
 	var b strings.Builder
 	for i, n := range result.Nodes {
-		b.WriteString(`<rect x="`)
+		b.WriteString(`<rect`)
+		if props.Interactive {
+			b.WriteString(` class="`)
+			b.WriteString(sankeyNodeClass(cid, i))
+			b.WriteString(`"`)
+		}
+		b.WriteString(` x="`)
 		b.WriteString(fmtF(n.X))
 		b.WriteString(`" y="`)
 		b.WriteString(fmtF(n.Y))
@@ -342,6 +476,11 @@ func ternary(cond bool, a, b string) string {
 		return a
 	}
 	return b
+}
+
+// linkGradientID builds a deterministic, index-based id for a link's gradient.
+func linkGradientID(i int) string {
+	return "sankey-grad-" + strconv.Itoa(i)
 }
 
 // fmtF formats a float rounded to 3 decimals (matching the d3-path serializer).

@@ -207,6 +207,13 @@ func (c *monotoneCurve) LineEnd() {
 }
 
 func (c *monotoneCurve) Point(x, y float64) {
+	// MonotoneY reflects the axes: d3 feeds (y,x) into the MonotoneX logic so
+	// the spline is monotone in y, then swaps back on output (the reflect flag in
+	// moveToCtx/lineToCtx/bezierCtx). Swapping only on output (without this input
+	// swap) transposes the emitted path — the bug this corrects.
+	if c.reflect {
+		x, y = y, x
+	}
 	t1 := math.NaN()
 	if x == c.x1 && y == c.y1 {
 		return // ignore coincident points

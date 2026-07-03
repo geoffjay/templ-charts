@@ -2,8 +2,11 @@ package d3shape
 
 import (
 	"math"
+	"strconv"
 	"testing"
 )
+
+func parseFloat(s string) (float64, error) { return strconv.ParseFloat(s, 64) }
 
 // goldenD3 holds the reference outputs from d3-shape v3.2.0 for the dataset
 // [[0,0],[10,20],[20,10],[30,40],[40,30]] with each curve factory.
@@ -77,20 +80,69 @@ func TestLineAccessors(t *testing.T) {
 	}
 }
 
-// d3: monotoneY reflects x/y
+// d3: monotoneY reflects the axes for slope computation but emits coordinates in
+// the ORIGINAL (x,y) order — so, like every interpolating curve, the resulting
+// path must pass through the input data points. (The prior port swapped only on
+// output, transposing the whole path; this test guards that regression.)
 func TestLineMonotoneY(t *testing.T) {
-	l := NewLine().Curve(CurveMonotoneY)
-	got := l.Call(lineTestData)
-	// monotoneY swaps x/y in the curve, so the path is the mirror of monotoneX.
-	// We just verify it produces a non-empty path with the expected structure.
+	got := NewLine().Curve(CurveMonotoneY).Call(lineTestData)
 	if len(got) == 0 {
 		t.Fatal("monotoneY produced empty path")
 	}
-	// The first segment should start with M0,0 (swapped: still 0,0)
-	wantPrefix := "M0,0"
-	if got[:len(wantPrefix)] != wantPrefix {
-		t.Errorf("monotoneY prefix: got=%q want=%q", got[:len(wantPrefix)], wantPrefix)
+	anchors := pathAnchors(got)
+	if len(anchors) != len(lineTestData) {
+		t.Fatalf("monotoneY anchor count = %d, want %d (path=%q)", len(anchors), len(lineTestData), got)
 	}
+	for i, p := range lineTestData {
+		if math.Abs(anchors[i][0]-p[0]) > 1e-6 || math.Abs(anchors[i][1]-p[1]) > 1e-6 {
+			t.Errorf("monotoneY anchor %d = %v, want %v (coords must not be transposed)\npath=%q",
+				i, anchors[i], p, got)
+		}
+	}
+}
+
+// pathAnchors extracts the on-curve points from a path made of one M pair
+// followed by C segments (the endpoint of each C is an anchor). Used to assert a
+// curve interpolates its data points.
+func pathAnchors(path string) [][2]float64 {
+	nums := pathNumbers(path)
+	if len(nums) < 2 {
+		return nil
+	}
+	var out [][2]float64
+	out = append(out, [2]float64{nums[0], nums[1]}) // M pair
+	// Remaining numbers are C segments of 6 numbers each; the last pair is the anchor.
+	for i := 2; i+6 <= len(nums); i += 6 {
+		out = append(out, [2]float64{nums[i+4], nums[i+5]})
+	}
+	return out
+}
+
+// pathNumbers pulls every signed decimal number out of an SVG path string.
+func pathNumbers(path string) []float64 {
+	var nums []float64
+	i := 0
+	for i < len(path) {
+		c := path[i]
+		if (c >= '0' && c <= '9') || c == '-' || c == '.' {
+			j := i + 1
+			for j < len(path) {
+				d := path[j]
+				if (d >= '0' && d <= '9') || d == '.' || d == '-' || d == 'e' {
+					j++
+					continue
+				}
+				break
+			}
+			if v, err := parseFloat(path[i:j]); err == nil {
+				nums = append(nums, v)
+			}
+			i = j
+		} else {
+			i++
+		}
+	}
+	return nums
 }
 
 // d3: linearClosed curve closes the path even for a line (non-area)

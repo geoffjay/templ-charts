@@ -101,6 +101,27 @@ func TestCalendar_AnimatedGolden(t *testing.T) {
 	golden.Assert(t, "calendar-animated", out)
 }
 
+func TestCalendar_MonthBorderGolden(t *testing.T) {
+	p := baseProps()
+	p.MonthBorderWidth = 2
+	p.MonthBorderColor = "#000000"
+	out := renderChart(t, p)
+	if !strings.Contains(out, `<path fill="none" stroke="#000000"`) {
+		t.Errorf("month-border calendar should emit a month outline <path>")
+	}
+	if !strings.Contains(out, " Z") {
+		t.Errorf("month outline path should contain a closed subpath (Z)")
+	}
+	golden.Assert(t, "calendar-month-border", out)
+}
+
+func TestCalendar_NoMonthBorderByDefault(t *testing.T) {
+	// The default render (MonthBorderWidth 0) must not emit a month outline.
+	if strings.Contains(renderChart(t, baseProps()), `<path fill="none"`) {
+		t.Errorf("default calendar must not emit a month outline <path>")
+	}
+}
+
 func TestCalendar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

@@ -82,11 +82,12 @@ green. See `docs/NOTES.md` (v5 Phase 2).
 
 ## 4. Interactivity model gaps — **scoped into v5 (§6)**
 
-- **Unified hover-others dimming.** Flow/relationship charts handle "dim the
-  others on hover" inconsistently: chord uses client CSS `:has()`
-  (`charts/chord/render.go:99`), network has **no** hover-others at all, sankey's
-  is deferred (props not even declared). A shared model (client CSS or HTMX
-  state) across sankey/network/chord is unbuilt.
+- **Unified hover-others dimming.** chord and now **sankey** (v5 Phase 3
+  follow-up) both implement client CSS `:has()` hover-highlight (dim others,
+  re-light connected); **network** still has none. Remaining: give network the
+  same treatment and, ideally, factor the near-identical chord/sankey `:has()`
+  style-block builders into one shared helper. (This is the Phase 4 §6 item; the
+  sankey half landed early from demo review.)
 - **Interactive zoom / drill-down** for icicle, treemap, circle-packing,
   sunburst. Layout is present; the client-driven zoom transition is not
   (deferral comments in each `types.go`).
@@ -98,19 +99,18 @@ green. See `docs/NOTES.md` (v5 Phase 2).
   when the container resizes (cosmetic scaling is already covered by the
   `Responsive` viewBox prop). No `ResizeObserver` in `charts/interact/script.go`.
 
-## 5. Feature completions (partial charts) — **scoped into v5 (§5)**
+## 5. Feature completions (partial charts) — **done in v5 (§5)**
 
-Small, well-scoped finishes to existing charts:
+All three shipped in v5 Phase 3 as opt-in / default-off features (existing
+goldens byte-stable). See `docs/NOTES.md` (v5 Phase 3).
 
-- **waffle "areas" polygon layer** — only `cells`/`legends` layers exist
-  (`charts/waffle/types.go:6`, `render.go:75`); the polygon `areas` layer nivo
-  ships is absent.
-- **calendar month outline-path border** — `MonthBorderColor/Width` props exist
-  and are defaulted (`charts/calendar/types.go:94`) but never emitted; the month
-  outline path is unimplemented (`render.go:52`). (v4 gates the dead props; the
-  path itself is here.)
-- **sankey link gradients** — `EnableLinkGradient` declared/defaulted but never
-  read (`charts/sankey/types.go:160`); gradient `<defs>` rendering deferred.
+- ~~**waffle "areas" polygon layer**~~ — **done**: `WaffleLayerAreas` (opt-in via
+  `Layers`) draws per-datum union outlines via `grid.GetCellsPolygons`.
+- ~~**calendar month outline-path border**~~ — **done**: re-added
+  `MonthBorderColor/Width` (default width 0 → off) backed by a real per-month
+  outline path.
+- ~~**sankey link gradients**~~ — **done**: re-added `EnableLinkGradient`
+  (default false) backed by per-link `<linearGradient>` defs.
 
 ## 6. d3-geo completeness — **`clipCircle`/`clipExtent` done in v5 (§3)**
 

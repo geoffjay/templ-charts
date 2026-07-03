@@ -52,5 +52,23 @@ func WaffleDemos() []WaffleDemo {
 				},
 			},
 		},
+		{
+			ID:          "waffle-areas",
+			Title:       "Areas layer",
+			Description: "The opt-in \"areas\" layer draws one union-outline polygon per datum instead of per-cell rects.",
+			Props: waffle.WaffleProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:      core.Margin{Top: 10, Right: 140, Bottom: 10, Left: 10},
+				Total:       100,
+				Rows:        10,
+				Columns:     10,
+				Data:        data,
+				BorderWidth: 1,
+				Layers:      []waffle.WaffleLayerId{waffle.WaffleLayerAreas, waffle.WaffleLayerLegends},
+				Legends: []waffle.WaffleLegend{
+					{Anchor: legends.LegendAnchorRight, Direction: legends.LegendDirectionColumn, TranslateX: 120},
+				},
+			},
+		},
 	}
 }

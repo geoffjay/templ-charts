@@ -104,6 +104,13 @@ func UseSankey(props SankeyProps) SankeyResult {
 			Thickness:      l.Width,
 		}
 		cl.Path = linkPath(horizontal, src, tgt, cl.Pos0, cl.Pos1, cl.Thickness, props.LinkContract)
+		if horizontal {
+			cl.GradX0, cl.GradY0 = src.X1, cl.Pos0
+			cl.GradX1, cl.GradY1 = tgt.X0, cl.Pos1
+		} else {
+			cl.GradX0, cl.GradY0 = cl.Pos0, src.Y1
+			cl.GradX1, cl.GradY1 = cl.Pos1, tgt.Y0
+		}
 		links = append(links, cl)
 	}
 

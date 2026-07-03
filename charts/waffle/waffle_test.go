@@ -105,6 +105,32 @@ func TestWaffle_GoldenAnimated(t *testing.T) {
 	golden.Assert(t, "waffle-animated", out)
 }
 
+func TestWaffle_GoldenAreas(t *testing.T) {
+	out := renderChart(t, waffle.WaffleProps{
+		Width: 400, Height: 400,
+		Margin: core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
+		Total:  100, Rows: 10, Columns: 10,
+		Data:        sampleData(),
+		BorderWidth: 1,
+		Layers:      []waffle.WaffleLayerId{waffle.WaffleLayerAreas, waffle.WaffleLayerLegends},
+	})
+	// The areas layer emits union-outline <path>s (closed subpaths), not the
+	// per-cell <rect>s of the cells layer.
+	if !strings.Contains(out, "<path") {
+		t.Fatalf("areas waffle should emit <path> polygons")
+	}
+	if !strings.Contains(out, "Z") {
+		t.Fatalf("areas waffle should emit closed subpaths (M … L … Z)")
+	}
+	// Each datum's color should appear on its area path.
+	for _, c := range []string{"#e8c1a0", "#f47560", "#f1e15b"} {
+		if !strings.Contains(out, c) {
+			t.Errorf("areas waffle should contain datum color %s", c)
+		}
+	}
+	golden.Assert(t, "waffle-areas", out)
+}
+
 func TestWaffle_InteractiveEmitsTooltip(t *testing.T) {
 	p := waffle.WaffleProps{
 		Width: 400, Height: 400, Total: 100, Rows: 10, Columns: 10, Data: sampleData(),

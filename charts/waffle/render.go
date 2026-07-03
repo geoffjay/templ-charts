@@ -8,6 +8,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/grid"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 )
@@ -79,6 +80,8 @@ func renderLayers(props WaffleProps, result WaffleResult, dims core.Dimensions) 
 		switch layer {
 		case WaffleLayerCells:
 			b.WriteString(renderCellsLayer(props, result))
+		case WaffleLayerAreas:
+			b.WriteString(renderAreasLayer(props, result))
 		case WaffleLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
 		}
@@ -104,6 +107,57 @@ func renderCellsLayer(props WaffleProps, result WaffleResult) string {
 			cp.Tooltip = interact.TooltipHTML(cell.Color, cell.Label, "")
 		}
 		inner.WriteString(renderComponent(WaffleCellShape(cp)))
+	}
+	return fmt.Sprintf(`<g transform="translate(%s,%s)">%s</g>`, fmtW(result.GridX), fmtW(result.GridY), inner.String())
+}
+
+// renderAreasLayer draws one union-outline <path> per datum (in computed-data
+// order for determinism) instead of per-cell rects. Each datum's data cells are
+// merged into minimal polygons via grid.GetCellsPolygons; each polygon becomes a
+// closed subpath (M … L … Z). Fill/stroke mirror how renderCellsLayer styles a
+// data cell (datum Color at full opacity, BorderColor at BorderWidth).
+func renderAreasLayer(props WaffleProps, result WaffleResult) string {
+	// Group data cells by DatumID.
+	byDatum := map[string][]WaffleCell{}
+	for _, cell := range result.Cells {
+		if cell.HasData {
+			byDatum[cell.DatumID] = append(byDatum[cell.DatumID], cell)
+		}
+	}
+
+	var inner strings.Builder
+	// Iterate in computed-data order (not map order) for deterministic output.
+	for _, cd := range result.ComputedData {
+		cells := byDatum[cd.ID]
+		if len(cells) == 0 {
+			continue
+		}
+		polygons := grid.GetCellsPolygons(cells)
+		var d strings.Builder
+		for _, poly := range polygons {
+			for j, v := range poly {
+				if j == 0 {
+					d.WriteString("M")
+				} else {
+					d.WriteString("L")
+				}
+				d.WriteString(fmtW(v[0]))
+				d.WriteString(",")
+				d.WriteString(fmtW(v[1]))
+				if j < len(poly)-1 {
+					d.WriteString(" ")
+				}
+			}
+			d.WriteString("Z")
+		}
+		if d.Len() == 0 {
+			continue
+		}
+		inner.WriteString(fmt.Sprintf(`<path d="%s" fill="%s" fill-opacity="%s"`, d.String(), cd.Color, fmtW(1)))
+		if props.BorderWidth > 0 && cd.BorderColor != "" {
+			inner.WriteString(fmt.Sprintf(` stroke="%s" stroke-width="%s"`, cd.BorderColor, fmtW(props.BorderWidth)))
+		}
+		inner.WriteString(`></path>`)
 	}
 	return fmt.Sprintf(`<g transform="translate(%s,%s)">%s</g>`, fmtW(result.GridX), fmtW(result.GridY), inner.String())
 }

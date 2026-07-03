@@ -9,9 +9,10 @@
 // label colors), charts/core (SvgWrapper + gradient defs), charts/legends,
 // charts/theming and charts/interact (optional client-side hover tooltips).
 //
-// v3 scope: SVG only, static render. The layout is deterministic, so goldens
-// are byte-stable. HTMX hover-others dimming and animated transitions are
-// deferred; per-node/link hover tooltips are available via Interactive.
+// SVG only; the layout is deterministic, so goldens are byte-stable. Interactive
+// enables per-node/link hover tooltips (charts/interact) plus a chord-style
+// hover-highlight (scoped CSS :has() — dims others, re-lights the connected
+// node/links). Enter animation is available via Animate (v5).
 package sankey
 
 import (
@@ -113,6 +114,13 @@ type ComputedLink struct {
 	Pos0           float64
 	Pos1           float64
 	Thickness      float64
+	// GradX0/GradY0 and GradX1/GradY1 are the absolute (userSpaceOnUse) anchor
+	// points of the ribbon's flow used for the link gradient: the center of the
+	// source edge and the center of the target edge respectively.
+	GradX0 float64
+	GradY0 float64
+	GradX1 float64
+	GradY1 float64
 }
 
 // SankeyLayerId enumerates the render layers. Mirrors @nivo/sankey LayerId.
@@ -157,6 +165,11 @@ type SankeyProps struct {
 	LinkOpacity   float64
 	LinkContract  float64
 	LinkBlendMode string
+	// EnableLinkGradient draws each link ribbon with a per-link
+	// <linearGradient> running from the source node color to the target node
+	// color along the flow direction, instead of a flat source-color fill.
+	// Mirrors @nivo/sankey enableLinkGradient (default false).
+	EnableLinkGradient bool
 
 	EnableLabels     *bool  // nil → true
 	Label            string // node field to use as label (only "id" supported)
@@ -167,8 +180,22 @@ type SankeyProps struct {
 
 	ValueFormat string // d3-format spec; empty → %g
 
-	// Interactive enables per-node/link client-side hover tooltips (charts/interact).
+	// Interactive enables per-node/link client-side hover tooltips
+	// (charts/interact) AND the chord-style hover-highlight: hovering a node or
+	// link dims the rest and re-lights the connected elements via a scoped CSS
+	// :has() <style> block (no JS/server round-trip). The *HoverOpacity /
+	// *HoverOthersOpacity fields control the highlighted / dimmed opacities;
+	// zero values fall back to the Defaults.
 	Interactive bool
+
+	// Hover-highlight opacities (used when Interactive). NodeHoverOpacity /
+	// LinkHoverOpacity are applied to the hovered element and its connected
+	// elements; NodeHoverOthersOpacity / LinkHoverOthersOpacity dim everything
+	// else. Mirror @nivo/sankey's nodeHover*/linkHover* props.
+	NodeHoverOpacity       float64
+	NodeHoverOthersOpacity float64
+	LinkHoverOpacity       float64
+	LinkHoverOthersOpacity float64
 
 	Legends []legends.LegendProps
 

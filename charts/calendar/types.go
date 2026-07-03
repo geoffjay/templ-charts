@@ -3,8 +3,8 @@
 // from a quantized value scale, and month/year legends. Reuses charts/core,
 // charts/theming, and the ported date math (no d3-time dependency).
 //
-// v2 scope: SVG only, static render. Day cells, day borders, and month/year
-// text legends are supported; the month outline-path border is deferred.
+// v2 scope: SVG only, static render. Day cells, day borders, month/year
+// text legends, and the per-month outline-path border are supported.
 package calendar
 
 import (
@@ -32,6 +32,14 @@ type ComputedDay struct {
 	Value   *float64 // nil when no data for the day
 	HasData bool
 }
+
+// GetX/GetY/GetWidth/GetHeight let ComputedDay satisfy grid.GridCellLike, so a
+// month's day cells can be merged into an outline polygon via
+// grid.GetCellsPolygons.
+func (d ComputedDay) GetX() float64      { return d.X }
+func (d ComputedDay) GetY() float64      { return d.Y }
+func (d ComputedDay) GetWidth() float64  { return d.Size }
+func (d ComputedDay) GetHeight() float64 { return d.Size }
 
 // MonthLegend is a month label positioned over its columns/rows.
 type MonthLegend struct {
@@ -93,6 +101,14 @@ type CalendarProps struct {
 
 	DayBorderWidth float64
 	DayBorderColor string
+
+	// MonthBorderColor / MonthBorderWidth draw a per-month outline-path border
+	// around each calendar month's day cells (see renderMonthBordersLayer). The
+	// outline is emitted only when MonthBorderWidth > 0; it defaults to 0 (off)
+	// so the default render carries no month outline. Mirrors @nivo/calendar's
+	// monthBorderColor / monthBorderWidth.
+	MonthBorderColor string
+	MonthBorderWidth float64
 
 	// EnableMonthLegends / EnableYearLegends gate the text legends. nil → true
 	// (nivo default); pass a pointer to false to disable. Pointer-typed so the

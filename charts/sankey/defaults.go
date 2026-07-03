@@ -25,6 +25,11 @@ var Defaults = SankeyProps{
 	LinkContract:  0,
 	LinkBlendMode: "multiply",
 
+	NodeHoverOpacity:       1,
+	NodeHoverOthersOpacity: 0.35,
+	LinkHoverOpacity:       0.6,
+	LinkHoverOthersOpacity: 0.1,
+
 	EnableLabels:     boolPtr(true),
 	Label:            "id",
 	LabelPosition:    SankeyLabelInside,

@@ -3,8 +3,9 @@
 // charts/grid layout primitives (GenerateGrid) plus charts/colors ordinal
 // scales, charts/legends, charts/theming, and charts/core.
 //
-// v2 scope: SVG only, static render. The polygon "areas" layer (cell-group
-// outlines) is deferred; the cells + legends layers are supported.
+// v2 scope: SVG only, static render. The cells + legends layers are on by
+// default; the polygon "areas" layer (one union-outline polygon per datum,
+// instead of per-cell rects) is a supported opt-in layer via props.Layers.
 package waffle
 
 import (
@@ -57,16 +58,25 @@ type WaffleCell struct {
 	HasData     bool
 }
 
-// WaffleLayerId enumerates the render layers. Mirrors @nivo/waffle layer ids
-// (the "areas" layer is deferred in v2).
+// GetX/GetY/GetWidth/GetHeight let WaffleCell satisfy grid.GridCellLike so it
+// can be passed to grid.GetCellsPolygons (used by the "areas" layer).
+func (c WaffleCell) GetX() float64      { return c.X }
+func (c WaffleCell) GetY() float64      { return c.Y }
+func (c WaffleCell) GetWidth() float64  { return c.Width }
+func (c WaffleCell) GetHeight() float64 { return c.Height }
+
+// WaffleLayerId enumerates the render layers. Mirrors @nivo/waffle layer ids.
+// The "areas" layer is a supported opt-in (not in DefaultLayers).
 type WaffleLayerId string
 
 const (
 	WaffleLayerCells   WaffleLayerId = "cells"
+	WaffleLayerAreas   WaffleLayerId = "areas"
 	WaffleLayerLegends WaffleLayerId = "legends"
 )
 
-// DefaultLayers is the v2 layer order (areas deferred).
+// DefaultLayers is the default layer order. The "areas" layer is opt-in and is
+// intentionally omitted here so existing renders stay byte-identical.
 var DefaultLayers = []WaffleLayerId{WaffleLayerCells, WaffleLayerLegends}
 
 // WaffleLegend configures a discrete legend.

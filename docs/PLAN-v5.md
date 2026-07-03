@@ -244,9 +244,12 @@ Extend the existing app and the v4 detail-page registry
    green. Scope call recorded in `docs/NOTES.md`: enter = fade-in/radius-scale,
    not per-chart geometry morph (deferred refinement). Demo animate toggle (§9)
    wired on the detail page.
-3. **Partial-chart completions** (§5): waffle `areas`, calendar month outline,
-   sankey link gradients — independent, parallelizable, each with an on-variant
-   golden + demo variant.
+3. [x] **Partial-chart completions** (§5) — **done**. waffle `areas` (opt-in
+   `WaffleLayerAreas` via `grid.GetCellsPolygons`), calendar month outline
+   (re-added `MonthBorder*`, default width 0 → off), sankey link gradients
+   (re-added `EnableLinkGradient`, default false, per-link `<linearGradient>`).
+   All default-off/opt-in → existing goldens byte-stable; one on-variant golden
+   + one demo tile each; `make ci` green. See `docs/NOTES.md` (v5 Phase 3).
 4. **Interactivity completions** (§6): shared hover-others helper (chord →
    sankey/network) first, then hierarchy zoom, then retire the line fallback,
    then the opt-in `ResizeObserver`.

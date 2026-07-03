@@ -61,6 +61,9 @@ func SankeyDemos() []SankeyDemo {
 	justify := base()
 	justify.Align = sankey.SankeyAlignJustify
 
+	gradient := base()
+	gradient.EnableLinkGradient = true
+
 	interactive := base()
 	interactive.Interactive = true
 	interactive.Legends = []legends.LegendProps{{
@@ -93,9 +96,15 @@ func SankeyDemos() []SankeyDemo {
 			Props:       justify,
 		},
 		{
+			ID:          "sankey-gradient",
+			Title:       "Link gradients",
+			Description: "enableLinkGradient draws each ribbon with a per-link <linearGradient> running from the source node color to the target node color along the flow direction (gradientUnits=userSpaceOnUse), instead of a flat source-color fill.",
+			Props:       gradient,
+		},
+		{
 			ID:          "sankey-interactive",
-			Title:       "Interactive + legend",
-			Description: "Hover a node or ribbon for a client-side tooltip (charts/interact), with a box legend of the node ids beneath.",
+			Title:       "Interactive (hover to highlight)",
+			Description: "Interactive tiles show a client-side tooltip (charts/interact) AND highlight on hover like the chord chart: hovering a node re-lights it and its connected ribbons (and hovering a ribbon re-lights it and its two nodes) while dimming the rest — driven entirely by a scoped CSS :has() block, no JS or server round-trip. A box legend of the node ids sits beneath.",
 			Props:       interactive,
 		},
 	}

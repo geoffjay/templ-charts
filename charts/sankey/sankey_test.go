@@ -77,6 +77,42 @@ func TestSankey_VerticalGolden(t *testing.T) {
 	golden.Assert(t, "sankey-vertical", renderChart(t, p))
 }
 
+func TestSankey_GradientGolden(t *testing.T) {
+	p := baseProps()
+	p.EnableLinkGradient = true
+	out := renderChart(t, p)
+	if !strings.Contains(out, "<linearGradient") {
+		t.Errorf("gradient sankey should emit a <linearGradient>")
+	}
+	if !strings.Contains(out, `fill="url(#`) {
+		t.Errorf("gradient sankey link paths should reference the gradient via fill=url(#...)")
+	}
+	golden.Assert(t, "sankey-gradient", out)
+}
+
+func TestSankey_HighlightGolden(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	out := renderChart(t, p)
+	// The hover-highlight emits a scoped <style> with :has() rules and tags each
+	// node/link with the correspondence classes.
+	for _, want := range []string{"<style>", "svg:has(", ":hover)", "tc-sk-node", "tc-sk-link", `class="tc-sk`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("interactive sankey missing %q in output", want)
+		}
+	}
+	golden.Assert(t, "sankey-highlight", out)
+}
+
+func TestSankey_NoHighlightWhenStatic(t *testing.T) {
+	// The <style>/class machinery must be absent for a non-interactive render
+	// (keeps the static goldens byte-stable).
+	out := renderChart(t, baseProps())
+	if strings.Contains(out, "<style>") || strings.Contains(out, "tc-sk-node") {
+		t.Errorf("static sankey should not emit hover-highlight style/classes")
+	}
+}
+
 func TestSankey_Deterministic(t *testing.T) {
 	if renderChart(t, baseProps()) != renderChart(t, baseProps()) {
 		t.Errorf("sankey render is not deterministic")

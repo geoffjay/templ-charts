@@ -44,6 +44,18 @@ func CalendarDemos() []CalendarDemo {
 				Colors:    []string{"#d3f2a3", "#97e196", "#6cc08b", "#4c9b82", "#217a79"},
 			},
 		},
+		{
+			ID:          "calendar-month-border",
+			Title:       "Month outlines",
+			Description: "monthBorderWidth=2 draws a per-month outline-path border around each month's day cells.",
+			Props: calendar.CalendarProps{
+				Width: commonChartWidth, Height: 220,
+				Margin: core.Margin{Top: 40, Right: 20, Bottom: 10, Left: 40},
+				From:   from, To: to, Data: data,
+				MonthBorderWidth: 2,
+				MonthBorderColor: "#000000",
+			},
+		},
 	}
 }
 
