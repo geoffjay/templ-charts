@@ -126,3 +126,17 @@ func TestScatterPlot_VoronoiMesh(t *testing.T) {
 		t.Errorf("DetectionRadius should emit data-tc-mesh-radius")
 	}
 }
+
+func TestScatterPlot_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	out := renderChart(t, p)
+	if !strings.Contains(out, `<animate attributeName="r" from="0"`) {
+		t.Errorf("Animate=true should emit an r enter animation")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("Animate=false should not emit any <animate>")
+	}
+	golden.Assert(t, "scatterplot-animated", out)
+}

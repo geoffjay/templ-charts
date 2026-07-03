@@ -25,7 +25,7 @@ svg, _ := render.String(pie.Pie(pie.PieProps{
         map[string]any{"id": "Python", "value": 35.0},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := pie.PieProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []any{
@@ -38,6 +38,7 @@ svg, _ := render.String(pie.Pie(pie.PieProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(pie.Pie(p))
 		},
 	})

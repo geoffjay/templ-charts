@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 )
@@ -78,7 +79,7 @@ func renderGeoMapLayers(props GeoMapProps, result GeoResult) string {
 		case GeoLayerGraticule:
 			b.WriteString(renderGraticule(props.GeoBase, result))
 		case GeoLayerFeatures:
-			b.WriteString(renderFeatures(result.Features, props.Interactive, false))
+			b.WriteString(renderFeatures(result.Features, props.Interactive, false, props.Animate, props.MotionStagger))
 		}
 	}
 	return b.String()
@@ -93,7 +94,7 @@ func renderChoroplethLayers(props ChoroplethProps, result GeoResult, width, heig
 		case GeoLayerGraticule:
 			b.WriteString(renderGraticule(props.GeoBase, result))
 		case GeoLayerFeatures:
-			b.WriteString(renderFeatures(result.Features, props.Interactive, true))
+			b.WriteString(renderFeatures(result.Features, props.Interactive, true, props.Animate, props.MotionStagger))
 		case GeoLayerLegends:
 			b.WriteString(renderChoroplethLegends(props, result, width, height))
 		}
@@ -118,9 +119,9 @@ func renderGraticule(b GeoBase, result GeoResult) string {
 
 // renderFeatures emits one <path> per feature. withValue controls the tooltip
 // content (Choropleth shows the value; GeoMap shows only the id).
-func renderFeatures(features []ComputedFeature, interactive, withValue bool) string {
+func renderFeatures(features []ComputedFeature, interactive, withValue, animate bool, stagger float64) string {
 	var b strings.Builder
-	for _, f := range features {
+	for i, f := range features {
 		if f.Path == "" {
 			continue
 		}
@@ -147,7 +148,11 @@ func renderFeatures(features []ComputedFeature, interactive, withValue bool) str
 		} else {
 			b.WriteString(` pointer-events="none"`)
 		}
-		b.WriteString(`></path>`)
+		b.WriteString(`>`)
+		if animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, stagger)))
+		}
+		b.WriteString(`</path>`)
 	}
 	return b.String()
 }

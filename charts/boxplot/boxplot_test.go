@@ -107,3 +107,16 @@ func TestBoxPlot_InteractiveEmitsTooltip(t *testing.T) {
 		t.Errorf("non-interactive boxplot must not emit data-tc-tooltip")
 	}
 }
+
+func TestBoxPlot_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.01
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("animated boxplot should emit <animate>")
+	}
+	p.Animate = false
+	if strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("non-animated boxplot must not emit <animate>")
+	}
+}

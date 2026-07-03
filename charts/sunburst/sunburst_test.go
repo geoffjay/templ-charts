@@ -70,6 +70,26 @@ func TestSunburst_A11yTitleDesc(t *testing.T) {
 	}
 }
 
+func TestSunburst_Animate(t *testing.T) {
+	on := renderChart(t, func() sunburst.SunburstProps {
+		p := baseProps()
+		p.Animate = true
+		return p
+	}())
+	if !strings.Contains(on, `<animate attributeName="opacity"`) {
+		t.Errorf("animated sunburst should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("non-animated sunburst must not emit any <animate>")
+	}
+}
+
+func TestSunburst_GoldenAnimated(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	golden.Assert(t, "sunburst-animated", renderChart(t, p))
+}
+
 func TestSunburst_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

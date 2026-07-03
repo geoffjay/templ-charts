@@ -169,7 +169,7 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 
 func renderBoxPlotsLayer(props BoxPlotProps, result BoxPlotResult) string {
 	var b strings.Builder
-	for _, box := range result.Boxes {
+	for i, box := range result.Boxes {
 		bw := box.Bandwidth
 		fmt.Fprintf(&b, `<g transform="%s"`, box.Transform)
 		if box.Opacity > 0 && box.Opacity < 1 {
@@ -195,7 +195,13 @@ func renderBoxPlotsLayer(props BoxPlotProps, result BoxPlotResult) string {
 		if props.BorderWidth > 0 && box.BorderColor != "" {
 			fmt.Fprintf(&b, ` stroke="%s" stroke-width="%s"`, box.BorderColor, fmtN(props.BorderWidth))
 		}
-		b.WriteString("></rect>")
+		if props.Animate {
+			b.WriteString(">")
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+			b.WriteString("</rect>")
+		} else {
+			b.WriteString("></rect>")
+		}
 		// Median line.
 		fmt.Fprintf(&b, `<line x1="%s" x2="%s" y1="0" y2="0" stroke="%s" stroke-width="%s"></line>`,
 			fmtN(-bw/2), fmtN(bw/2), box.MedianColor, fmtN(props.MedianWidth))

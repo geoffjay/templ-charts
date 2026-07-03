@@ -97,3 +97,15 @@ func TestFunnel_InteractiveEmitsTooltip(t *testing.T) {
 		t.Errorf("non-interactive funnel must not emit data-tc-tooltip")
 	}
 }
+
+func TestFunnel_AnimateFadeIn(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("funnel with Animate=true should emit <animate> fade-in")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("funnel with Animate=false must not emit <animate>")
+	}
+}

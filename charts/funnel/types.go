@@ -127,6 +127,13 @@ type FunnelProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// funnel part (600ms). MotionStagger delays successive parts by that many
+	// seconds (0 ⇒ all enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/funnel's enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // FunnelResult is the computed model produced by UseFunnel.

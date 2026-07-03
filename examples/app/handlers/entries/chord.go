@@ -26,7 +26,7 @@ svg, _ := render.String(chord.Chord(chord.ChordProps{
         {5678, 4321, 0},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := chord.ChordProps{
 				Width: 520, Height: 520, Responsive: true,
 				Keys: []string{"Tokyo", "Osaka", "Kyoto"},
@@ -40,6 +40,7 @@ svg, _ := render.String(chord.Chord(chord.ChordProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(chord.Chord(p))
 		},
 	})

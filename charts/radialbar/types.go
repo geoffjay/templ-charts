@@ -139,6 +139,13 @@ type RadialBarProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// bar arc (600ms). MotionStagger delays successive bars by that many
+	// seconds (0 ⇒ all bars enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/radial-bar's enter transition.
+	Animate       bool
+	MotionStagger float64
 }
 
 // RadialBarResult is the computed model produced by UseRadialBar.

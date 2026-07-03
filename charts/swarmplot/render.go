@@ -171,7 +171,7 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 func renderCirclesLayer(props SwarmPlotProps, result SwarmPlotResult) string {
 	var b strings.Builder
 	drawBorder := props.BorderWidth > 0 && !isTransparent(props.BorderColor)
-	for _, n := range result.Nodes {
+	for i, n := range result.Nodes {
 		b.WriteString(`<circle cx="`)
 		b.WriteString(fmtF(n.X))
 		b.WriteString(`" cy="`)
@@ -195,7 +195,11 @@ func renderCirclesLayer(props SwarmPlotProps, result SwarmPlotResult) string {
 			b.WriteString(templ.EscapeString(interact.TooltipHTML(n.Color, n.ID, n.FormattedValue)))
 			b.WriteString(`" style="pointer-events:auto"`)
 		}
-		b.WriteString(`></circle>`)
+		b.WriteString(`>`)
+		if props.Animate {
+			b.WriteString(core.SMILAnimate("r", "0", fmtF(n.Size/2), core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</circle>`)
 	}
 	return b.String()
 }

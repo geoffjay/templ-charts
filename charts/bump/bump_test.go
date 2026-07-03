@@ -155,3 +155,15 @@ func TestBump_VoronoiMesh(t *testing.T) {
 		t.Errorf("DebugMesh should draw the voronoi cells")
 	}
 }
+
+func TestBump_AnimateFadeIn(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("bump with Animate=true should emit <animate> fade-in")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("bump with Animate=false must not emit <animate>")
+	}
+}

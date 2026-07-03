@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -46,8 +47,8 @@ func renderTree(props TreeProps, result TreeResult, theme *theming.Theme) string
 	var b strings.Builder
 	perNodeTooltip := props.Interactive && !props.UseMesh
 
-	// Links (behind nodes).
-	for _, l := range result.Links {
+	// Links (behind nodes). Fade in on enter when animating.
+	for i, l := range result.Links {
 		if l.Path == "" {
 			continue
 		}
@@ -59,12 +60,16 @@ func renderTree(props TreeProps, result TreeResult, theme *theming.Theme) string
 		b.WriteString(fmtF(props.LinkThickness))
 		b.WriteString(`" stroke-opacity="`)
 		b.WriteString(fmtF(props.LinkOpacity))
-		b.WriteString(`"></path>`)
+		b.WriteString(`">`)
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</path>`)
 	}
 
-	// Nodes.
+	// Nodes. Scale radius from 0 on enter when animating.
 	r := props.NodeSize / 2
-	for _, n := range result.Nodes {
+	for i, n := range result.Nodes {
 		b.WriteString(`<circle cx="`)
 		b.WriteString(fmtF(n.X))
 		b.WriteString(`" cy="`)
@@ -81,7 +86,11 @@ func renderTree(props TreeProps, result TreeResult, theme *theming.Theme) string
 			b.WriteString(templ.EscapeString(interact.TooltipHTML(n.Color, n.ID, "")))
 			b.WriteString(`" style="pointer-events:auto"`)
 		}
-		b.WriteString(`></circle>`)
+		b.WriteString(`>`)
+		if props.Animate {
+			b.WriteString(core.SMILAnimate("r", "0", fmtF(r), core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</circle>`)
 	}
 
 	// Labels.

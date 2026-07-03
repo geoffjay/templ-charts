@@ -28,7 +28,7 @@ svg, _ := render.String(marimekko.Marimekko(marimekko.MarimekkoProps{
         {ID: "USA", Value: 63, Dimensions: map[string]float64{"agree": 48, "disagree": 15}},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := marimekko.MarimekkoProps{
 				Width: 720, Height: 440, Responsive: true,
 				Dimensions: []marimekko.MarimekkoDimension{
@@ -44,6 +44,7 @@ svg, _ := render.String(marimekko.Marimekko(marimekko.MarimekkoProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(marimekko.Marimekko(p))
 		},
 	})

@@ -30,7 +30,7 @@ svg, _ := render.String(scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
     EnableGridX: true,
     EnableGridY: true,
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := scatterplot.ScatterPlotProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []scatterplot.ScatterPlotSerie{
@@ -48,6 +48,7 @@ svg, _ := render.String(scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(scatterplot.ScatterPlot(p))
 		},
 	})

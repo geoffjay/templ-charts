@@ -7,6 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -37,7 +38,7 @@ func renderCircles(props CirclePackingProps, result CirclePackingResult, theme *
 	fill, fontSize, fontFamily := labelsTextStyle(theme)
 
 	var circles, labels strings.Builder
-	for _, c := range result.Circles {
+	for i, c := range result.Circles {
 		if c.R <= 0 {
 			continue
 		}
@@ -68,7 +69,11 @@ func renderCircles(props CirclePackingProps, result CirclePackingResult, theme *
 			circles.WriteString(templ.EscapeString(interact.TooltipHTML(c.Color, c.ID, c.FormattedValue)))
 			circles.WriteString(`" style="pointer-events:auto"`)
 		}
-		circles.WriteString(`></circle>`)
+		circles.WriteString(`>`)
+		if props.Animate {
+			circles.WriteString(core.SMILAnimate("r", "0", fmtF(c.R), core.StaggerBegin(i, props.MotionStagger)))
+		}
+		circles.WriteString(`</circle>`)
 
 		if props.LabelsEnabled() && c.IsLeaf && c.R >= props.LabelsSkipRadius {
 			labels.WriteString(text(c.X, c.Y, c.ID, fill, fontSize, fontFamily))

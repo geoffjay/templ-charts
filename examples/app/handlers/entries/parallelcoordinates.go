@@ -29,7 +29,7 @@ svg, _ := render.String(pc.ParallelCoordinates(pc.PCProps{
         {ID: "batch B", Values: map[string]any{"temp": 35.0, "cost": 9.0, "grade": "A"}},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := pc.PCProps{
 				Width: 720, Height: 440, Responsive: true,
 				Variables: []pc.PCVariable{
@@ -46,6 +46,7 @@ svg, _ := render.String(pc.ParallelCoordinates(pc.PCProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(pc.ParallelCoordinates(p))
 		},
 	})

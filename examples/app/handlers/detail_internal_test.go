@@ -22,8 +22,8 @@ func TestAllChartEntriesRender(t *testing.T) {
 		if e.Snippet == "" {
 			t.Errorf("%s: empty Snippet", slug)
 		}
-		// Default theme, no palette.
-		svg, err := e.Render(def, "")
+		// Default theme, no palette, animate off.
+		svg, err := e.Render(def, "", false)
 		if err != nil {
 			t.Errorf("%s: Render(default) error: %v", slug, err)
 			continue
@@ -33,8 +33,12 @@ func TestAllChartEntriesRender(t *testing.T) {
 		}
 		// A non-default theme + palette must also render (palette is a no-op for
 		// non-ordinal charts, which is fine — it must still render).
-		if _, err := e.Render(def, colors.PaletteTableau10); err != nil {
+		if _, err := e.Render(def, colors.PaletteTableau10, false); err != nil {
 			t.Errorf("%s: Render(palette=tableau10) error: %v", slug, err)
+		}
+		// With animate on it must also render.
+		if _, err := e.Render(def, "", true); err != nil {
+			t.Errorf("%s: Render(animate=true) error: %v", slug, err)
 		}
 	}
 }

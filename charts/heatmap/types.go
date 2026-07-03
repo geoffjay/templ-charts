@@ -146,6 +146,13 @@ type HeatMapProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// cell (600ms). MotionStagger delays successive cells by that many seconds
+	// (0 ⇒ all cells enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/heatmap's enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // HeatMapResult is the computed model produced by UseHeatMap and consumed by

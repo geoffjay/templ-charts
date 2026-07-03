@@ -210,7 +210,7 @@ func textAnchorFromAngle(angleRad float64) string {
 func renderShapeLayer(props RadarProps, result RadarResult) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, `<g transform="translate(%s,%s)">`, fmtR(result.CenterX), fmtR(result.CenterY))
-	for _, serie := range result.Series {
+	for i, serie := range result.Series {
 		if serie.Path == "" {
 			continue
 		}
@@ -218,7 +218,11 @@ func renderShapeLayer(props RadarProps, result RadarResult) string {
 		if props.BorderWidth > 0 && serie.Stroke != "" {
 			fmt.Fprintf(&b, ` stroke="%s" stroke-width="%s"`, serie.Stroke, fmtR(props.BorderWidth))
 		}
-		b.WriteString("></path>")
+		b.WriteString(">")
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString("</path>")
 	}
 	b.WriteString("</g>")
 	return b.String()

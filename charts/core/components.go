@@ -53,6 +53,12 @@ type DotsItemProps struct {
 	// layer (charts/interact) on hover: it is emitted as a data-tc-tooltip
 	// attribute and the dot becomes pointer-events:auto so it is hoverable.
 	Tooltip string
+	// Animate, when true, emits a SMIL enter animation scaling the dot's radius
+	// from 0 to its final value (600ms). AnimateBegin is the per-dot start
+	// offset (for staggering). Both default off/empty, so static output is
+	// byte-identical. See core.SMILAnimate.
+	Animate      bool
+	AnimateBegin string
 }
 
 // CartesianMarker is a marker spec (axis x/y, value, optional legend).

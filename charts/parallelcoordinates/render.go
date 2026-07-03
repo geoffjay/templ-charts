@@ -76,7 +76,7 @@ func renderLayers(props PCProps, result PCResult, dims core.Dimensions, theme *t
 // renderLinesLayer emits one <path> per datum polyline.
 func renderLinesLayer(props PCProps, result PCResult) string {
 	var b strings.Builder
-	for _, ln := range result.Lines {
+	for i, ln := range result.Lines {
 		if ln.Path == "" {
 			continue
 		}
@@ -99,7 +99,11 @@ func renderLinesLayer(props PCProps, result PCResult) string {
 			b.WriteString(fmtF(props.LineOpacity))
 			b.WriteString(`"`)
 		}
-		b.WriteString(`></path>`)
+		b.WriteString(`>`)
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</path>`)
 	}
 	return b.String()
 }

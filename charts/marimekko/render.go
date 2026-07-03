@@ -158,7 +158,7 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 func renderBarsLayer(props MarimekkoProps, result MarimekkoResult, theme *theming.Theme) string {
 	getBorderColor := colors.GetInheritedColorGenerator(props.BorderColor, theme)
 	var b strings.Builder
-	for _, bar := range result.Bars {
+	for i, bar := range result.Bars {
 		if bar.Width <= 0 || bar.Height <= 0 {
 			continue
 		}
@@ -187,7 +187,13 @@ func renderBarsLayer(props MarimekkoProps, result MarimekkoResult, theme *themin
 			b.WriteString(templ.EscapeString(interact.TooltipHTML(bar.Color, bar.Index+" - "+bar.DimensionID, bar.FormattedValue)))
 			b.WriteString(`" style="pointer-events:auto"`)
 		}
-		b.WriteString(`></rect>`)
+		if props.Animate {
+			b.WriteString(`>`)
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+			b.WriteString(`</rect>`)
+		} else {
+			b.WriteString(`></rect>`)
+		}
 	}
 	return b.String()
 }

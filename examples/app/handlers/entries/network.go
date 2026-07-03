@@ -29,7 +29,7 @@ svg, _ := render.String(network.Network(network.NetworkProps{
     LinkDistance: 90,
     Repulsivity:  120,
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := network.NetworkProps{
 				Width: 440, Height: 440, Responsive: true,
 				Nodes: []network.NetworkInputNode{
@@ -45,6 +45,7 @@ svg, _ := render.String(network.Network(network.NetworkProps{
 				Repulsivity:  120,
 				Theme:        theme,
 			}
+			p.Animate = animate
 			return render.String(network.Network(p))
 		},
 	})

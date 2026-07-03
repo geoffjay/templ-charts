@@ -50,6 +50,19 @@ func TestVoronoi_RendersSVG(t *testing.T) {
 	}
 }
 
+func TestVoronoi_Animate(t *testing.T) {
+	if out := renderChart(t, baseProps()); strings.Contains(out, "<animate") {
+		t.Errorf("no <animate> expected when Animate=false")
+	}
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	out := renderChart(t, p)
+	if !strings.Contains(out, `<animate attributeName="r" from="0"`) {
+		t.Errorf("expected point radius <animate> when Animate=true")
+	}
+}
+
 func TestVoronoi_PointCount(t *testing.T) {
 	// One <circle> per input datum (points layer, enabled by default).
 	out := renderChart(t, baseProps())

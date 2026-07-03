@@ -25,7 +25,7 @@ svg, _ := render.String(voronoi.Voronoi(voronoi.VoronoiProps{
         {ID: "2", X: 0.78, Y: 0.22},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := voronoi.VoronoiProps{
 				Width: 440, Height: 440, Responsive: true,
 				Data: []voronoi.VoronoiDatum{
@@ -35,7 +35,8 @@ svg, _ := render.String(voronoi.Voronoi(voronoi.VoronoiProps{
 					{ID: "3", X: 0.55, Y: 0.78},
 					{ID: "4", X: 0.30, Y: 0.55},
 				},
-				Theme: theme,
+				Theme:   theme,
+				Animate: animate,
 			}
 			return render.String(voronoi.Voronoi(p))
 		},

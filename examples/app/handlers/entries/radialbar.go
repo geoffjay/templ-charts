@@ -28,7 +28,7 @@ svg, _ := render.String(radialbar.RadialBar(radialbar.RadialBarProps{
         }},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := radialbar.RadialBarProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []radialbar.RadialBarSerie{
@@ -44,6 +44,7 @@ svg, _ := render.String(radialbar.RadialBar(radialbar.RadialBarProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(radialbar.RadialBar(p))
 		},
 	})

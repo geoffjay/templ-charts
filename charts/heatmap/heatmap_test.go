@@ -75,6 +75,23 @@ func TestHeatMap_Golden(t *testing.T) {
 	golden.Assert(t, "heatmap-basic", out)
 }
 
+func TestHeatMap_GoldenAnimated(t *testing.T) {
+	// Animate + a stagger: each cell gets a SMIL opacity fade-in with an
+	// increasing begin offset. Locks in the enter-animation markup; the
+	// non-animated goldens above stay byte-stable (Animate defaults off).
+	out := renderChart(t, heatmap.HeatMapProps{
+		Width: 500, Height: 360,
+		Margin:        core.Margin{Top: 40, Right: 40, Bottom: 40, Left: 60},
+		Data:          sampleData(),
+		Animate:       true,
+		MotionStagger: 0.05,
+	})
+	if !strings.Contains(out, `<animate attributeName="opacity" from="0" to="1"`) {
+		t.Errorf("expected opacity fade-in <animate> when Animate=true")
+	}
+	golden.Assert(t, "heatmap-animated", out)
+}
+
 func TestHeatMap_GoldenDiverging(t *testing.T) {
 	// Same base props/data as heatmap-basic, but with a diverging color
 	// scheme instead of the default sequential "brown_blueGreen". This

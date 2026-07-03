@@ -180,10 +180,14 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 
 func renderNodesLayer(props ScatterPlotProps, result ScatterPlotResult) string {
 	var b strings.Builder
-	for _, n := range result.Nodes {
+	for i, n := range result.Nodes {
 		dp := core.DotsItemProps{X: n.X, Y: n.Y, Size: n.Size, Color: n.Color}
 		if props.Interactive {
 			dp.Tooltip = interact.TooltipHTML(n.Color, n.SerieID, "x: "+n.FormattedX+", y: "+n.FormattedY)
+		}
+		if props.Animate {
+			dp.Animate = true
+			dp.AnimateBegin = core.StaggerBegin(i, props.MotionStagger)
 		}
 		b.WriteString(renderComponent(core.DotsItem(dp)))
 	}

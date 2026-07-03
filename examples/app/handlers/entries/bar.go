@@ -26,7 +26,7 @@ svg, _ := render.String(bar.Bar(bar.BarProps{
         {"country": "Japan", "hot dogs": 28, "burgers": 51},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := bar.BarProps{
 				Width: 720, Height: 440, Responsive: true,
 				IndexBy: "country",
@@ -41,6 +41,7 @@ svg, _ := render.String(bar.Bar(bar.BarProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(bar.Bar(p))
 		},
 	})

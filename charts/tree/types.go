@@ -98,6 +98,12 @@ type TreeProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate emits a SMIL enter animation (600ms) — links fade in and nodes
+	// scale their radius from 0 — staggered by MotionStagger seconds per item.
+	// Defaults off, so static output is unchanged.
+	Animate       bool
+	MotionStagger float64
 }
 
 // TreeResult is the computed model produced by UseTree.

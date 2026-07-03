@@ -25,7 +25,7 @@ svg, _ := render.String(line.Line(line.LineProps{
         }},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := line.LineProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []line.LineSeries{
@@ -41,6 +41,7 @@ svg, _ := render.String(line.Line(line.LineProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(line.Line(p))
 		},
 	})

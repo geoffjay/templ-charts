@@ -146,6 +146,13 @@ type PCProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// datum polyline (600ms). MotionStagger delays successive lines by that many
+	// seconds (0 ⇒ all enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/parallel-coordinates' enter transition.
+	Animate       bool
+	MotionStagger float64
 }
 
 // PCResult is the computed model produced by UseParallelCoordinates.

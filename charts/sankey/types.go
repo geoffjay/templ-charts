@@ -182,6 +182,13 @@ type SankeyProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// node rect and link path (600ms). MotionStagger delays successive items by
+	// that many seconds (0 ⇒ all enter together). Defaults off, so static output
+	// is unchanged. Mirrors @nivo/sankey's enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // LabelsEnabled resolves EnableLabels (nil → true, matching nivo's default).

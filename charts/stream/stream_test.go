@@ -83,6 +83,20 @@ func TestStream_Golden_Expand(t *testing.T) {
 	golden.Assert(t, "stream-expand", out)
 }
 
+func TestStream_GoldenAnimated(t *testing.T) {
+	// Animate + a stagger: each layer area gets a SMIL opacity fade-in with an
+	// increasing begin offset. Locks in the enter-animation markup; the
+	// non-animated goldens above stay byte-stable (Animate defaults off).
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	out := renderChart(t, p)
+	if !strings.Contains(out, `<animate attributeName="opacity" from="0" to="1"`) {
+		t.Errorf("expected opacity fade-in <animate> when Animate=true")
+	}
+	golden.Assert(t, "stream-animated", out)
+}
+
 func TestStream_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

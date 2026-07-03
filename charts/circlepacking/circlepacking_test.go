@@ -80,3 +80,15 @@ func TestCirclePacking_Interactive(t *testing.T) {
 		t.Errorf("non-interactive circle-packing must not emit data-tc-tooltip")
 	}
 }
+
+func TestCirclePacking_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("Animate=true should emit an <animate> enter transition")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("Animate=false should not emit any <animate>")
+	}
+}

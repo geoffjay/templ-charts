@@ -64,6 +64,13 @@ type CirclePackingProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL enter animation on each circle scaling
+	// its radius from 0 to its final value (600ms). MotionStagger delays
+	// successive circles by that many seconds (0 ⇒ all enter together).
+	// Defaults off, so static output is unchanged.
+	Animate       bool
+	MotionStagger float64
 }
 
 // CirclePackingResult is the computed model produced by UseCirclePacking.

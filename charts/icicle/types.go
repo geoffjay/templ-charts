@@ -70,6 +70,13 @@ type IcicleProps struct {
 	// Interactive enables per-node client-side hover tooltips (charts/interact).
 	Interactive bool
 
+	// Animate enables the nivo-style enter animation (opacity fade-in) on each
+	// rect. Default false: the rendered SVG is byte-identical to the un-animated
+	// output. MotionStagger delays each successive rect by that many seconds
+	// (0 = all enter together). See core.SMILFadeIn / StaggerBegin.
+	Animate       bool
+	MotionStagger float64
+
 	Theme *theming.Theme
 
 	Role            string

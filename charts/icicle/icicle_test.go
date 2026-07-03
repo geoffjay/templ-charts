@@ -91,3 +91,16 @@ func TestIcicle_Interactive(t *testing.T) {
 		t.Errorf("non-interactive icicle must not emit data-tc-tooltip")
 	}
 }
+
+func TestIcicle_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.01
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("animated icicle should emit <animate>")
+	}
+	p.Animate = false
+	if strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("non-animated icicle must not emit <animate>")
+	}
+}

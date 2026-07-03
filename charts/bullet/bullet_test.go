@@ -84,3 +84,16 @@ func TestBullet_InteractiveEmitsTooltip(t *testing.T) {
 		t.Errorf("non-interactive bullet must not emit data-tc-tooltip")
 	}
 }
+
+func TestBullet_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.01
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("animated bullet should emit <animate>")
+	}
+	p.Animate = false
+	if strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("non-animated bullet must not emit <animate>")
+	}
+}

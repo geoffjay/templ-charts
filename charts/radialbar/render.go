@@ -9,6 +9,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	polaraxes "github.com/geoffjay/templ-charts/charts/polar-axes"
@@ -202,7 +203,7 @@ func renderTracksLayer(result RadialBarResult) string {
 func renderBarsLayer(props RadialBarProps, result RadialBarResult, theme *theming.Theme) string {
 	getBorderColor := colors.GetInheritedColorGenerator(props.BorderColor, theme)
 	items := make([]arcs.ArcLayerItem, 0, len(result.Bars))
-	for _, bar := range result.Bars {
+	for i, bar := range result.Bars {
 		sp := arcs.ArcShapeProps{
 			Path: result.ArcGenerator.GenerateSvgArc(bar.Arc),
 			Fill: bar.Color,
@@ -213,6 +214,10 @@ func renderBarsLayer(props RadialBarProps, result RadialBarResult, theme *themin
 		}
 		if props.Interactive {
 			sp.DataTooltip = interact.TooltipHTML(bar.Color, bar.GroupID+" - "+bar.Category, bar.FormattedValue)
+		}
+		if props.Animate {
+			sp.Animate = true
+			sp.AnimateBegin = core.StaggerBegin(i, props.MotionStagger)
 		}
 		items = append(items, arcs.ArcLayerItem{Arc: bar.Arc, Props: sp})
 	}

@@ -86,7 +86,7 @@ func renderLayers(props BumpProps, result BumpResult, dims core.Dimensions, them
 		case BumpLayerAxes:
 			b.WriteString(renderAxesLayer(props, result, dims, theme))
 		case BumpLayerLines:
-			b.WriteString(renderLinesLayer(result))
+			b.WriteString(renderLinesLayer(props, result))
 		case BumpLayerPoints:
 			b.WriteString(renderPointsLayer(props, result))
 		case BumpLayerLabels:
@@ -196,9 +196,9 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 }
 
 // renderLinesLayer emits one <path> per serie (fill:none stroke:color).
-func renderLinesLayer(result BumpResult) string {
+func renderLinesLayer(props BumpProps, result BumpResult) string {
 	var b strings.Builder
-	for _, s := range result.Series {
+	for i, s := range result.Series {
 		if s.LinePath == "" {
 			continue
 		}
@@ -210,7 +210,11 @@ func renderLinesLayer(result BumpResult) string {
 		b.WriteString(fmtF(s.LineWidth))
 		b.WriteString(`" stroke-linecap="round" style="opacity:`)
 		b.WriteString(fmtF(s.Opacity))
-		b.WriteString(`"></path>`)
+		b.WriteString(`">`)
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</path>`)
 	}
 	return b.String()
 }

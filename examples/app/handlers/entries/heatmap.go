@@ -29,7 +29,7 @@ svg, _ := render.String(heatmap.HeatMap(heatmap.HeatMapProps{
         }},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			v := func(f float64) *float64 { return &f }
 			p := heatmap.HeatMapProps{
 				Width: 720, Height: 440, Responsive: true,
@@ -43,6 +43,7 @@ svg, _ := render.String(heatmap.HeatMap(heatmap.HeatMapProps{
 				},
 				Theme: theme,
 			}
+			p.Animate = animate
 			return render.String(heatmap.HeatMap(p))
 		},
 	})

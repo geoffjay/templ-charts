@@ -26,7 +26,7 @@ svg, _ := render.String(stream.Stream(stream.StreamProps{
         {"Raoul": 12, "Josiane": 22, "Marcel": 28},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := stream.StreamProps{
 				Width: 720, Height: 440, Responsive: true,
 				Keys: []string{"Raoul", "Josiane", "Marcel"},
@@ -40,6 +40,7 @@ svg, _ := render.String(stream.Stream(stream.StreamProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(stream.Stream(p))
 		},
 	})

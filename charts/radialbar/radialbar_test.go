@@ -94,6 +94,17 @@ func TestRadialBar_Golden_Labels(t *testing.T) {
 	golden.Assert(t, "radialbar-labels", out)
 }
 
+func TestRadialBar_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	if !strings.Contains(renderChart(t, p), `<animate attributeName="opacity"`) {
+		t.Errorf("animated radial bar should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("non-animated radial bar must not emit any <animate>")
+	}
+}
+
 func TestRadialBar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

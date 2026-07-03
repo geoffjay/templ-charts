@@ -110,6 +110,13 @@ type RadarProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// series polygon (600ms). MotionStagger delays successive series by that
+	// many seconds (0 ⇒ all enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/radar's enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // ComputedPoint is one projected key/index point: its cartesian position

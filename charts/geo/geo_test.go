@@ -180,6 +180,30 @@ func TestGeo_Deterministic(t *testing.T) {
 	}
 }
 
+func TestGeo_Animate(t *testing.T) {
+	const fade = `<animate attributeName="opacity" from="0" to="1"`
+
+	m := baseMap()
+	m.Animate = true
+	m.MotionStagger = 0.01
+	if !strings.Contains(renderGeoMap(t, m), fade) {
+		t.Errorf("animated GeoMap should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderGeoMap(t, baseMap()), "<animate") {
+		t.Errorf("non-animated GeoMap must not emit <animate>")
+	}
+
+	c := baseChoropleth()
+	c.Animate = true
+	c.MotionStagger = 0.01
+	if !strings.Contains(renderChoropleth(t, c), fade) {
+		t.Errorf("animated Choropleth should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderChoropleth(t, baseChoropleth()), "<animate") {
+		t.Errorf("non-animated Choropleth must not emit <animate>")
+	}
+}
+
 func TestGeoMap_Golden(t *testing.T) {
 	p := baseMap()
 	p.EnableGraticule = true

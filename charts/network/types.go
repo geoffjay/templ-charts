@@ -126,6 +126,13 @@ type NetworkProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL enter animation on each node scaling its
+	// radius from 0 to its final value (600ms). MotionStagger delays successive
+	// nodes by that many seconds (0 ⇒ all nodes enter together). Defaults off,
+	// so static output is unchanged.
+	Animate       bool
+	MotionStagger float64
 }
 
 // NetworkResult is the computed model produced by UseNetwork.

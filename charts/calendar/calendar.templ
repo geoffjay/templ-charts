@@ -40,6 +40,10 @@ type CalendarDayProps struct {
 	// Tooltip is the client-side hover HTML (charts/interact); emitted as
 	// data-tc-tooltip when non-empty.
 	Tooltip string
+	// Animate emits a SMIL opacity fade-in on the day cell; AnimateBegin is the
+	// per-cell start offset (for staggering). See core.SMILFadeIn.
+	Animate      bool
+	AnimateBegin string
 }
 
 // CalendarDay renders one day cell as a <rect>. Mirrors @nivo/calendar
@@ -60,7 +64,11 @@ templ CalendarDay(props CalendarDayProps) {
 			data-tc-tooltip={ props.Tooltip }
 			style="cursor: pointer"
 		}
-	></rect>
+	>
+		if props.Animate {
+			@templ.Raw(core.SMILFadeIn(props.AnimateBegin))
+		}
+	</rect>
 }
 
 // CalendarLegendLabelProps is the input to the CalendarLegendLabel component.

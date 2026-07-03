@@ -233,9 +233,17 @@ Extend the existing app and the v4 detail-page registry
    straddling-ring cut, clipExtent crop; azimuthal path goldens) and an
    orthographic-globe demo tile. No pre-existing golden drifted; `make ci` green.
    See `docs/NOTES.md` (v5 Phase 1).
-2. **Animation primitives + threading** (§4). The largest workstream; do it as
-   five shared family primitives (rects → arcs → lines/areas → circles →
-   cells/paths), each with an animated golden, then the demo toggle.
+2. [x] **Animation primitives + threading** (§4) — **done**. Added the shared
+   `charts/core/animate.go` SMIL helpers (`SMILAnimate`/`SMILFadeIn`/
+   `StaggerBegin`, default-off so goldens stay byte-stable) and threaded
+   `Animate`/`MotionStagger` through all ~25 v2/v3 charts by geometry family:
+   opacity fade-in for rects/arcs/lines/cells (arcs via a fallback on the shared
+   `arcs.ArcShape`, keeping its `AnimateFromPath` d-morph), radius-scale for
+   circles (scatterplot via optional fields on shared `core.DotsItem`). Six
+   `*-animated` goldens + per-chart wiring tests; no golden drift; `make ci`
+   green. Scope call recorded in `docs/NOTES.md`: enter = fade-in/radius-scale,
+   not per-chart geometry morph (deferred refinement). Demo animate toggle (§9)
+   wired on the detail page.
 3. **Partial-chart completions** (§5): waffle `areas`, calendar month outline,
    sankey link gradients — independent, parallelizable, each with an on-variant
    golden + demo variant.

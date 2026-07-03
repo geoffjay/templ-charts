@@ -9,6 +9,7 @@ import (
 	"github.com/a-h/templ"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 )
 
@@ -152,7 +153,11 @@ func renderCellsLayer(props VoronoiProps, result VoronoiResult) string {
 				b.WriteString(`" pointer-events="all" data-tc-tooltip="`)
 				b.WriteString(interact.EscapeAttr(interact.TooltipHTML(cellTooltipColor(props, p), p.ID, pointValue(p))))
 			}
-			b.WriteString(`"></path>`)
+			b.WriteString(`">`)
+			if props.Animate {
+				b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+			}
+			b.WriteString(`</path>`)
 		}
 		return b.String()
 	}
@@ -183,7 +188,7 @@ func cellTooltipColor(props VoronoiProps, p ComputedPoint) string {
 func renderPointsLayer(props VoronoiProps, result VoronoiResult) string {
 	var b strings.Builder
 	r := props.PointSize / 2
-	for _, p := range result.Points {
+	for i, p := range result.Points {
 		b.WriteString(`<circle cx="`)
 		b.WriteString(fmtF(p.X))
 		b.WriteString(`" cy="`)
@@ -192,7 +197,11 @@ func renderPointsLayer(props VoronoiProps, result VoronoiResult) string {
 		b.WriteString(fmtF(r))
 		b.WriteString(`" fill="`)
 		b.WriteString(props.PointColor)
-		b.WriteString(`"></circle>`)
+		b.WriteString(`">`)
+		if props.Animate {
+			b.WriteString(core.SMILAnimate("r", "0", fmtF(r), core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</circle>`)
 	}
 	return b.String()
 }

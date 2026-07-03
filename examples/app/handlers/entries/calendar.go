@@ -31,7 +31,7 @@ svg, _ := render.String(calendar.Calendar(calendar.CalendarProps{
         {Day: "2024-07-20", Value: 73},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := calendar.CalendarProps{
 				Width: 720, Height: 440, Responsive: true,
 				From: time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
@@ -43,6 +43,7 @@ svg, _ := render.String(calendar.Calendar(calendar.CalendarProps{
 				},
 				Theme: theme,
 			}
+			p.Animate = animate
 			return render.String(calendar.Calendar(p))
 		},
 	})

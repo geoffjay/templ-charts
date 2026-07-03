@@ -28,7 +28,7 @@ svg, _ := render.String(boxplot.BoxPlot(boxplot.BoxPlotProps{
     Data:    data,
     ColorBy: "group",
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			var data []boxplot.BoxPlotDatum
 			for _, g := range []string{"Alpha", "Beta"} {
 				for i := 0; i < 8; i++ {
@@ -44,6 +44,7 @@ svg, _ := render.String(boxplot.BoxPlot(boxplot.BoxPlotProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(boxplot.BoxPlot(p))
 		},
 	})

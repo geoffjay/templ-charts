@@ -28,7 +28,7 @@ svg, _ := render.String(bump.Bump(bump.BumpProps{
         }},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := bump.BumpProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []bump.BumpSerie{
@@ -44,6 +44,7 @@ svg, _ := render.String(bump.Bump(bump.BumpProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(bump.Bump(p))
 		},
 	})

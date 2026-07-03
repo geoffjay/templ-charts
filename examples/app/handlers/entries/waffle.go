@@ -26,7 +26,7 @@ svg, _ := render.String(waffle.Waffle(waffle.WaffleProps{
         {ID: "children", Label: "Children", Value: 19},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := waffle.WaffleProps{
 				Width: 720, Height: 440, Responsive: true,
 				Total: 100, Rows: 10, Columns: 10,
@@ -40,6 +40,7 @@ svg, _ := render.String(waffle.Waffle(waffle.WaffleProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(waffle.Waffle(p))
 		},
 	})

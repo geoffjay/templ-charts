@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -87,13 +88,17 @@ func renderLayers(props FunnelProps, result FunnelResult, theme *theming.Theme) 
 
 func renderPartsLayer(props FunnelProps, result FunnelResult) string {
 	var b strings.Builder
-	for _, part := range result.Parts {
+	for i, part := range result.Parts {
 		// Filled trapezoid.
 		fmt.Fprintf(&b, `<path d="%s" fill="%s" fill-opacity="%s"`, part.AreaPath, part.Color, fmtN(part.FillOpacity))
 		if props.Interactive {
 			fmt.Fprintf(&b, ` style="cursor:pointer" data-tc-tooltip="%s"`, interact.EscapeAttr(interact.TooltipHTML(part.Color, part.Label, part.FormattedValue)))
 		}
-		b.WriteString("></path>")
+		b.WriteString(">")
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString("</path>")
 		// Side borders (no top/bottom join).
 		if part.BorderWidth > 0 && part.BorderColor != "" {
 			for _, d := range []string{part.BorderPathA, part.BorderPathB} {

@@ -80,6 +80,13 @@ type BulletProps struct {
 	// static render.
 	Interactive bool
 
+	// Animate enables the nivo-style enter animation (opacity fade-in) on each
+	// range/measure rect. Default false: the rendered SVG is byte-identical to
+	// the un-animated output. MotionStagger delays each successive row by that
+	// many seconds (0 = all enter together). See core.SMILFadeIn / StaggerBegin.
+	Animate       bool
+	MotionStagger float64
+
 	Layout  BulletLayout
 	Reverse bool
 	Spacing float64

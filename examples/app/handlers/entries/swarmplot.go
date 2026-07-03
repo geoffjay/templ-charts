@@ -26,7 +26,7 @@ svg, _ := render.String(swarmplot.SwarmPlot(swarmplot.SwarmPlotProps{
     Groups: []string{"A", "B", "C"},
     Size:   8,
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := swarmplot.SwarmPlotProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []swarmplot.SwarmPlotDatum{
@@ -44,6 +44,7 @@ svg, _ := render.String(swarmplot.SwarmPlot(swarmplot.SwarmPlotProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(swarmplot.SwarmPlot(p))
 		},
 	})

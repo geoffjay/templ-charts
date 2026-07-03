@@ -25,7 +25,7 @@ svg, _ := render.String(polarbar.PolarBar(polarbar.PolarBarProps{
         {Index: "Tue", Values: map[string]float64{"walk": 6, "bus": 7, "bike": 4}},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := polarbar.PolarBarProps{
 				Width: 720, Height: 440, Responsive: true,
 				Keys: []string{"walk", "bus", "bike"},
@@ -38,6 +38,7 @@ svg, _ := render.String(polarbar.PolarBar(polarbar.PolarBarProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(polarbar.PolarBar(p))
 		},
 	})

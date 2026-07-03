@@ -27,7 +27,7 @@ svg, _ := render.String(sankey.Sankey(sankey.SankeyProps{
         {Source: "Grid", Target: "Homes", Value: 12},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := sankey.SankeyProps{
 				Width: 720, Height: 440, Responsive: true,
 				Nodes: []sankey.SankeyInputNode{
@@ -44,6 +44,7 @@ svg, _ := render.String(sankey.Sankey(sankey.SankeyProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(sankey.Sankey(p))
 		},
 	})

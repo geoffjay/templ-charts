@@ -150,3 +150,16 @@ func TestMarimekko_Legend(t *testing.T) {
 		t.Errorf("expected legend to include dimension ids")
 	}
 }
+
+func TestMarimekko_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.01
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("animated marimekko should emit <animate>")
+	}
+	p.Animate = false
+	if strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("non-animated marimekko must not emit <animate>")
+	}
+}

@@ -95,6 +95,17 @@ func TestPolarBar_A11yTitleDesc(t *testing.T) {
 	}
 }
 
+func TestPolarBar_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	if !strings.Contains(renderChart(t, p), `<animate attributeName="opacity"`) {
+		t.Errorf("animated polar bar should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("non-animated polar bar must not emit any <animate>")
+	}
+}
+
 func TestPolarBar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

@@ -66,18 +66,19 @@ benchmarks to baseline these; the optimizations themselves are deferred.
 - **Render cost**: ~585 `WriteString` calls build SVG by string append; no
   streaming/large-N story. Benchmark first (v4), optimize if needed.
 
-## 3. Animation parity (v2/v3 charts) — **scoped into v5 (§4)**
+## 3. Animation parity (v2/v3 charts) — **done in v5 (§4)**
 
-Animation is **v1-only** but advertised repository-wide. `MotionProps{Animate}`
-is defaulted on ≥8 v2/v3 charts (heatmap, waffle, sankey, treemap, radar, stream,
-funnel, boxplot) yet **never read or rendered** — only bar/line/pie emit SMIL
-`<animate>` (`charts/bar/bar_item.templ:151`, `charts/line/lines.templ:39`,
-`charts/arcs/arc_shape.templ:66`).
+**Done (v5 Phase 2):** a wired `Animate`/`MotionStagger` was threaded (default
+off, byte-stable) through all ~25 v2/v3 charts via shared SMIL enter primitives
+in `charts/core/animate.go` — opacity fade-in for rects/arcs/lines/cells,
+radius-scale for circles. Six `*-animated` goldens lock the markup; `make ci`
+green. See `docs/NOTES.md` (v5 Phase 2).
 
-- **v4** makes the surface honest (removes/gates the dead defaults).
-- **Deferred**: actually wiring SMIL `<animate>` (or CSS keyframes) into the
-  v2/v3 charts for real enter/update transitions.
-- **Size**: medium-large (per-chart geometry interpolation, ~25 charts).
+- **Remaining refinement (still deferred):** per-chart collapsed→final
+  *geometry morph* (radius / `d` interpolation) beyond the v1 bar/line/pie
+  primitives — the enter animation is currently fade-in / radius-scale. The
+  shared `arcs.ArcShape` already supports opt-in d-morph via `AnimateFromPath`;
+  extending morph geometry to the other families is a future pass.
 
 ## 4. Interactivity model gaps — **scoped into v5 (§6)**
 

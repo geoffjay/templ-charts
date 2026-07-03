@@ -24,7 +24,7 @@ svg, _ := render.String(treemap.Treemap(treemap.TreemapProps{
         {ID: "colors", Value: 41},
     }},
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := treemap.TreemapProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: treemap.TreemapNode{ID: "root", Children: []treemap.TreemapNode{
@@ -36,6 +36,7 @@ svg, _ := render.String(treemap.Treemap(treemap.TreemapProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(treemap.Treemap(p))
 		},
 	})

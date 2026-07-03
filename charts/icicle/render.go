@@ -7,6 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -46,7 +47,7 @@ func renderRects(props IcicleProps, result IcicleResult, theme *theming.Theme) s
 	fill, fontSize, fontFamily := labelsTextStyle(theme)
 
 	var rects, labels strings.Builder
-	for _, r := range result.Rects {
+	for i, r := range result.Rects {
 		if r.Width <= 0 || r.Height <= 0 {
 			continue
 		}
@@ -84,7 +85,13 @@ func renderRects(props IcicleProps, result IcicleResult, theme *theming.Theme) s
 			rects.WriteString(templ.EscapeString(interact.TooltipHTML(r.Color, r.ID, r.FormattedValue)))
 			rects.WriteString(`" style="pointer-events:auto"`)
 		}
-		rects.WriteString(`></rect>`)
+		if props.Animate {
+			rects.WriteString(`>`)
+			rects.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+			rects.WriteString(`</rect>`)
+		} else {
+			rects.WriteString(`></rect>`)
+		}
 
 		if props.LabelsEnabled() {
 			labels.WriteString(text(r.X+r.Width/2, r.Y+r.Height/2, labelText(props.Label, r), fill, fontSize, fontFamily))

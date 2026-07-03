@@ -24,7 +24,7 @@ svg, _ := render.String(bullet.Bullet(bullet.BulletProps{
         {ID: "power", Ranges: []float64{0, 30, 70, 120}, Measures: []float64{48, 88}, Markers: []float64{95}},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := bullet.BulletProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []bullet.BulletItemDatum{
@@ -33,6 +33,7 @@ svg, _ := render.String(bullet.Bullet(bullet.BulletProps{
 				},
 				Theme: theme,
 			}
+			p.Animate = animate
 			return render.String(bullet.Bullet(p))
 		},
 	})

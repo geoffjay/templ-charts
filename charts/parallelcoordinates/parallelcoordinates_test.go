@@ -127,3 +127,15 @@ func TestPC_InteractiveEmitsTooltip(t *testing.T) {
 		t.Errorf("non-interactive PC must not emit data-tc-tooltip")
 	}
 }
+
+func TestPC_AnimateFadeIn(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("PC with Animate=true should emit <animate> fade-in")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("PC with Animate=false must not emit <animate>")
+	}
+}

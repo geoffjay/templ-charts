@@ -113,6 +113,13 @@ type WaffleProps struct {
 	// data cell emits a data-tc-tooltip. Default false keeps the static render.
 	Interactive bool
 
+	// Animate enables the nivo-style enter animation (opacity fade-in) on each
+	// cell. Default false: the rendered SVG is byte-identical to the
+	// un-animated output. MotionStagger delays each successive cell by that many
+	// seconds (0 = all cells enter together). See core.SMILFadeIn / StaggerBegin.
+	Animate       bool
+	MotionStagger float64
+
 	Legends []WaffleLegend
 
 	Theme  *theming.Theme

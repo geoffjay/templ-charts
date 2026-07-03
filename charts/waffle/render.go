@@ -90,11 +90,15 @@ func renderCellsLayer(props WaffleProps, result WaffleResult) string {
 	// Cells are positioned relative to the grid origin; wrap them in a single
 	// translate so each cell's X/Y stays in grid-local coordinates.
 	var inner strings.Builder
-	for _, cell := range result.Cells {
+	for i, cell := range result.Cells {
 		cp := WaffleCellShapeProps{
 			Cell:         cell,
 			BorderWidth:  props.BorderWidth,
 			BorderRadius: props.BorderRadius,
+			Animate:      props.Animate,
+		}
+		if props.Animate {
+			cp.AnimateBegin = core.StaggerBegin(i, props.MotionStagger)
 		}
 		if props.Interactive && cell.HasData {
 			cp.Tooltip = interact.TooltipHTML(cell.Color, cell.Label, "")

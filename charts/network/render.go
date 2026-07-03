@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 )
 
@@ -85,7 +86,7 @@ func renderLinksLayer(result NetworkResult) string {
 
 func renderNodesLayer(props NetworkProps, result NetworkResult) string {
 	var b strings.Builder
-	for _, node := range result.Nodes {
+	for i, node := range result.Nodes {
 		b.WriteString(`<circle cx="`)
 		b.WriteString(fmtF(node.X))
 		b.WriteString(`" cy="`)
@@ -110,7 +111,11 @@ func renderNodesLayer(props NetworkProps, result NetworkResult) string {
 			b.WriteString(templ.EscapeString(interact.TooltipHTML(node.Color, node.ID, "")))
 			b.WriteString(`" style="pointer-events:auto"`)
 		}
-		b.WriteString(`></circle>`)
+		b.WriteString(`>`)
+		if props.Animate {
+			b.WriteString(core.SMILAnimate("r", "0", fmtF(node.Size/2), core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</circle>`)
 	}
 	return b.String()
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/axes"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -63,7 +64,11 @@ func renderItems(props BulletProps, result BulletResult, theme *theming.Theme) s
 	horizontal := props.Layout != BulletLayoutVertical
 	fill, fontSize, fontFamily := labelsTextStyle(theme)
 	var b strings.Builder
-	for _, item := range result.Items {
+	for i, item := range result.Items {
+		animBegin := ""
+		if props.Animate {
+			animBegin = core.StaggerBegin(i, props.MotionStagger)
+		}
 		fmt.Fprintf(&b, `<g transform="translate(%s,%s)">`, fmtN(item.OffsetX), fmtN(item.OffsetY))
 		// Ranges (full band).
 		for _, r := range item.Ranges {
@@ -71,7 +76,7 @@ func renderItems(props BulletProps, result BulletResult, theme *theming.Theme) s
 			if props.Interactive {
 				tip = interact.TooltipHTML(r.Color, item.ID, fmtN(r.V0)+" – "+fmtN(r.V1))
 			}
-			writeRect(&b, r, tip)
+			writeRect(&b, r, tip, animBegin)
 		}
 		// Measures (centered thin band).
 		for _, m := range item.Measures {
@@ -79,7 +84,7 @@ func renderItems(props BulletProps, result BulletResult, theme *theming.Theme) s
 			if props.Interactive {
 				tip = interact.TooltipHTML(m.Color, item.ID, fmtN(m.V1))
 			}
-			writeRect(&b, m, tip)
+			writeRect(&b, m, tip, animBegin)
 		}
 		// Axis.
 		axisName := "x"
@@ -127,13 +132,23 @@ func renderItems(props BulletProps, result BulletResult, theme *theming.Theme) s
 	return b.String()
 }
 
-func writeRect(b *strings.Builder, r ComputedRect, tooltip string) {
+// writeRect emits a range/measure rect. When animBegin is non-empty an
+// opacity fade-in <animate> is nested inside (animBegin is the SMIL begin
+// offset, e.g. "0s"). An empty animBegin means animation is disabled and the
+// rect stays self-closing (byte-identical to the un-animated output).
+func writeRect(b *strings.Builder, r ComputedRect, tooltip, animBegin string) {
 	fmt.Fprintf(b, `<rect x="%s" y="%s" width="%s" height="%s" fill="%s"`,
 		fmtN(r.X), fmtN(r.Y), fmtN(maxF(r.Width, 0)), fmtN(maxF(r.Height, 0)), r.Color)
 	if tooltip != "" {
 		fmt.Fprintf(b, ` style="cursor:pointer" data-tc-tooltip="%s"`, interact.EscapeAttr(tooltip))
 	}
-	b.WriteString("></rect>")
+	if animBegin != "" {
+		b.WriteString(">")
+		b.WriteString(core.SMILFadeIn(animBegin))
+		b.WriteString("</rect>")
+	} else {
+		b.WriteString("></rect>")
+	}
 }
 
 func textAnchor(align string) string {

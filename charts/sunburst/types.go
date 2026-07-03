@@ -70,6 +70,13 @@ type SunburstProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// arc (600ms). MotionStagger delays successive arcs by that many seconds
+	// (0 ⇒ all arcs enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/sunburst's enter transition.
+	Animate       bool
+	MotionStagger float64
 }
 
 // SunburstResult is the computed model produced by UseSunburst.

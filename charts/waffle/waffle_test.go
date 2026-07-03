@@ -90,6 +90,21 @@ func TestWaffle_GoldenFillDirection(t *testing.T) {
 	golden.Assert(t, "waffle-fill-bottom", out)
 }
 
+func TestWaffle_GoldenAnimated(t *testing.T) {
+	out := renderChart(t, waffle.WaffleProps{
+		Width: 400, Height: 400,
+		Margin: core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
+		Total:  100, Rows: 10, Columns: 10,
+		Data:          sampleData(),
+		Animate:       true,
+		MotionStagger: 0.01,
+	})
+	if !strings.Contains(out, `<animate attributeName="opacity" from="0" to="1"`) {
+		t.Fatalf("animated waffle should emit an opacity fade-in <animate>")
+	}
+	golden.Assert(t, "waffle-animated", out)
+}
+
 func TestWaffle_InteractiveEmitsTooltip(t *testing.T) {
 	p := waffle.WaffleProps{
 		Width: 400, Height: 400, Total: 100, Rows: 10, Columns: 10, Data: sampleData(),

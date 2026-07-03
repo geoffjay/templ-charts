@@ -51,6 +51,18 @@ func TestDetailPage(t *testing.T) {
 	if rec := do(t, h, http.MethodGet, "/chart/nope"); rec.Code != http.StatusNotFound {
 		t.Errorf("/chart/nope: status = %d, want 404", rec.Code)
 	}
+
+	// The animate toggle must flip the chart's SMIL enter animation: with
+	// ?animate=1 the SVG contains <animate elements; the default render (no
+	// param) must not.
+	animOn := do(t, h, http.MethodGet, "/chart/heatmap?animate=1").Body.String()
+	if !strings.Contains(animOn, "<animate") {
+		t.Error("/chart/heatmap?animate=1: body missing <animate element")
+	}
+	animOff := do(t, h, http.MethodGet, "/chart/heatmap").Body.String()
+	if strings.Contains(animOff, "<animate") {
+		t.Error("/chart/heatmap (default): body should not contain <animate")
+	}
 }
 
 func TestBenchmarkPage(t *testing.T) {

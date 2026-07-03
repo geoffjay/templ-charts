@@ -8,6 +8,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -47,7 +48,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 func renderArcs(props SunburstProps, result SunburstResult, theme *theming.Theme) string {
 	arcGen := arcs.CreateArcGenerator(props.CornerRadius, 0)
 	items := make([]arcs.ArcLayerItem, 0, len(result.Arcs))
-	for _, a := range result.Arcs {
+	for i, a := range result.Arcs {
 		sp := arcs.ArcShapeProps{
 			Path: arcGen.GenerateSvgArc(a.Arc),
 			Fill: a.Color,
@@ -58,6 +59,10 @@ func renderArcs(props SunburstProps, result SunburstResult, theme *theming.Theme
 		}
 		if props.Interactive {
 			sp.DataTooltip = interact.TooltipHTML(a.Color, a.ID, a.FormattedValue)
+		}
+		if props.Animate {
+			sp.Animate = true
+			sp.AnimateBegin = core.StaggerBegin(i, props.MotionStagger)
 		}
 		items = append(items, arcs.ArcLayerItem{Arc: a.Arc, Props: sp})
 	}

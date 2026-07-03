@@ -27,7 +27,7 @@ svg, _ := render.String(radar.Radar(radar.RadarProps{
         {"taste": "heavy", "chardonnay": 56.0, "syrah": 99.0},
     },
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := radar.RadarProps{
 				Width: 720, Height: 440, Responsive: true,
 				IndexBy: "taste",
@@ -42,6 +42,7 @@ svg, _ := render.String(radar.Radar(radar.RadarProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(radar.Radar(p))
 		},
 	})

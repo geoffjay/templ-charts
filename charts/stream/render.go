@@ -163,7 +163,7 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 
 func renderAreasLayer(props StreamProps, result StreamResult) string {
 	var b strings.Builder
-	for _, layer := range result.Layers {
+	for i, layer := range result.Layers {
 		if layer.Path == "" {
 			continue
 		}
@@ -174,7 +174,11 @@ func renderAreasLayer(props StreamProps, result StreamResult) string {
 		if props.Interactive {
 			fmt.Fprintf(&b, ` style="cursor:pointer" data-tc-tooltip="%s"`, interact.EscapeAttr(interact.TooltipHTML(layer.Color, layer.Label, "")))
 		}
-		b.WriteString("></path>")
+		b.WriteString(">")
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString("</path>")
 	}
 	return b.String()
 }

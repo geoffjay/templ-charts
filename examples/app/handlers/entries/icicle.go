@@ -24,7 +24,7 @@ svg, _ := render.String(icicle.Icicle(icicle.IcicleProps{
         {ID: "billing", Value: 22},
     }},
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := icicle.IcicleProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: icicle.IcicleNode{ID: "root", Children: []icicle.IcicleNode{
@@ -36,6 +36,7 @@ svg, _ := render.String(icicle.Icicle(icicle.IcicleProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(icicle.Icicle(p))
 		},
 	})

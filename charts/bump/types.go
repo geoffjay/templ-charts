@@ -156,6 +156,13 @@ type BumpProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// series line (600ms). MotionStagger delays successive series by that many
+	// seconds (0 ⇒ all enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/bump's enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // BumpResult is the computed model produced by UseBump.

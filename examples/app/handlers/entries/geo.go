@@ -29,7 +29,7 @@ svg, _ := render.String(geo.Choropleth(geo.ChoroplethProps{
     Data:     []geo.ChoroplethDatum{{ID: "AAA", Value: 10}},
     GeoBase:  geo.GeoBase{Width: 400, Height: 300, ProjectionScale: 60},
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			features := []geo.Feature{
 				{
 					Type: "Feature",
@@ -66,6 +66,7 @@ svg, _ := render.String(geo.Choropleth(geo.ChoroplethProps{
 					Theme:           theme,
 				},
 			}
+			p.Animate = animate
 			return render.String(geo.Choropleth(p))
 		},
 	})

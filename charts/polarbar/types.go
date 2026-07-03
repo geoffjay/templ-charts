@@ -114,6 +114,13 @@ type PolarBarProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// bar arc (600ms). MotionStagger delays successive arcs by that many
+	// seconds (0 ⇒ all arcs enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/polar-bar's enter transition.
+	Animate       bool
+	MotionStagger float64
 }
 
 // PolarBarResult is the computed model produced by UsePolarBar.

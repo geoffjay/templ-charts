@@ -103,3 +103,15 @@ func TestSwarmPlot_VoronoiMesh(t *testing.T) {
 		t.Errorf("Interactive+UseMesh should emit a voronoi mesh")
 	}
 }
+
+func TestSwarmPlot_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("Animate=true should emit an <animate> enter transition")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("Animate=false should not emit any <animate>")
+	}
+}

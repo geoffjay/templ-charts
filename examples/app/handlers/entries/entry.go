@@ -17,10 +17,11 @@ type ChartEntry struct {
 	Title       string
 	Description string
 	Snippet     string
-	// Render builds the chart at the given theme (nil = default) and palette
+	// Render builds the chart at the given theme (nil = default), palette
 	// ("" = the chart's own default; ignored by charts whose colors are not
-	// palette-driven) and returns the SVG string.
-	Render func(theme *theming.Theme, palette colors.PaletteID) (string, error)
+	// palette-driven), and animate flag (true enables the chart's SMIL enter
+	// animation; default off) and returns the SVG string.
+	Render func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error)
 }
 
 // registry maps slug → entry, populated by each chart file's init().

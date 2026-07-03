@@ -96,6 +96,17 @@ func TestChord_A11yTitleDesc(t *testing.T) {
 	}
 }
 
+func TestChord_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	if !strings.Contains(renderChart(t, p), `<animate attributeName="opacity"`) {
+		t.Errorf("animated chord should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("non-animated chord must not emit any <animate>")
+	}
+}
+
 func TestChord_Interactive(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

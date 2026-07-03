@@ -1,5 +1,7 @@
 package arcs
 
+import "github.com/geoffjay/templ-charts/charts/core"
+
 // ArcShapeProps renders a single arc as an SVG <path>.
 type ArcShapeProps struct {
 	// Path is the pre-rendered SVG path-data string from ArcGenerator.
@@ -23,12 +25,14 @@ type ArcShapeProps struct {
 	// interactivity layer (charts/interact) on hover, emitted as a
 	// data-tc-tooltip attribute on the arc <path>.
 	DataTooltip string
-	// Animate, when true, emits a SMIL <animate> on attributeName="d" growing
-	// the outer radius from innerRadius to outerRadius (transitionMode
-	// "innerRadius"). AnimateFromPath is the pre-animation path; AnimateToPath
-	// is the final path (== Path).
+	// Animate, when true, emits an enter animation on the arc <path>. When
+	// AnimateFromPath is set it grows the "d" path from that collapsed path to
+	// Path (transitionMode "innerRadius"); otherwise it emits an opacity
+	// fade-in (the arcs family's default enter — see core.SMILFadeIn).
+	// AnimateBegin is the per-arc start offset (for staggering).
 	Animate         bool
 	AnimateFromPath string
+	AnimateBegin    string
 }
 
 // ArcShape renders one arc as an SVG <path>. Mirrors @nivo/arcs ArcShape.
@@ -64,6 +68,8 @@ templ ArcShape(props ArcShapeProps) {
 	>
 		if props.Animate && props.AnimateFromPath != "" {
 			<animate attributeName="d" from={ props.AnimateFromPath } to={ props.Path } begin="0s" dur="0.6s" fill="freeze"></animate>
+		} else if props.Animate {
+			@templ.Raw(core.SMILFadeIn(props.AnimateBegin))
 		}
 	</path>
 }

@@ -117,6 +117,13 @@ type ChordProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// ribbon and arc <path> (600ms). MotionStagger delays successive items by
+	// that many seconds (0 ⇒ all enter together). Defaults off, so static
+	// output is unchanged. Mirrors @nivo/chord's enter transition.
+	Animate       bool
+	MotionStagger float64
 }
 
 // LabelEnabled resolves EnableLabel (nil → true, matching nivo's default).

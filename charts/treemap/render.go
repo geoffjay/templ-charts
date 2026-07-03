@@ -8,6 +8,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -60,7 +61,7 @@ func renderNodes(props TreemapProps, result TreemapResult, theme *theming.Theme)
 	fill, fontSize, fontFamily := labelsTextStyle(theme)
 
 	var rects, labels strings.Builder
-	for _, n := range result.Nodes {
+	for i, n := range result.Nodes {
 		if n.Width <= 0 || n.Height <= 0 {
 			continue
 		}
@@ -95,7 +96,13 @@ func renderNodes(props TreemapProps, result TreemapResult, theme *theming.Theme)
 			rects.WriteString(templ.EscapeString(interact.TooltipHTML(n.Color, n.ID, n.FormattedValue)))
 			rects.WriteString(`" style="pointer-events:auto"`)
 		}
-		rects.WriteString(`></rect>`)
+		if props.Animate {
+			rects.WriteString(`>`)
+			rects.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+			rects.WriteString(`</rect>`)
+		} else {
+			rects.WriteString(`></rect>`)
+		}
 
 		// Labels.
 		if n.IsParent {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -110,7 +111,7 @@ func renderLayers(props SankeyProps, result SankeyResult, width, height float64,
 
 func renderLinksLayer(props SankeyProps, result SankeyResult) string {
 	var b strings.Builder
-	for _, l := range result.Links {
+	for i, l := range result.Links {
 		b.WriteString(`<path d="`)
 		b.WriteString(l.Path)
 		b.WriteString(`" fill="`)
@@ -129,7 +130,11 @@ func renderLinksLayer(props SankeyProps, result SankeyResult) string {
 		} else {
 			b.WriteString(` pointer-events="none"`)
 		}
-		b.WriteString(`></path>`)
+		b.WriteString(`>`)
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</path>`)
 	}
 	return b.String()
 }
@@ -137,7 +142,7 @@ func renderLinksLayer(props SankeyProps, result SankeyResult) string {
 func renderNodesLayer(props SankeyProps, result SankeyResult, theme *theming.Theme) string {
 	getBorderColor := colors.GetInheritedColorGenerator(props.NodeBorderColor, theme)
 	var b strings.Builder
-	for _, n := range result.Nodes {
+	for i, n := range result.Nodes {
 		b.WriteString(`<rect x="`)
 		b.WriteString(fmtF(n.X))
 		b.WriteString(`" y="`)
@@ -175,7 +180,11 @@ func renderNodesLayer(props SankeyProps, result SankeyResult, theme *theming.The
 			b.WriteString(templ.EscapeString(interact.TooltipHTML(n.Color, n.Label, n.FormattedValue)))
 			b.WriteString(`" style="pointer-events:auto"`)
 		}
-		b.WriteString(`></rect>`)
+		b.WriteString(`>`)
+		if props.Animate {
+			b.WriteString(core.SMILFadeIn(core.StaggerBegin(i, props.MotionStagger)))
+		}
+		b.WriteString(`</rect>`)
 	}
 	return b.String()
 }

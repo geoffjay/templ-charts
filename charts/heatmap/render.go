@@ -163,12 +163,16 @@ func resolveAxis(props *axes.AxisProps, axis string, scale scales.Scale, length,
 func renderCellsLayer(props HeatMapProps, result HeatMapResult) string {
 	var s strings.Builder
 	interactive := props.Interactive && props.ChartID != ""
-	for _, cell := range result.Cells {
+	for i, cell := range result.Cells {
 		cp := HeatMapCellProps{
 			Cell:         cell,
 			BorderWidth:  props.BorderWidth,
 			BorderRadius: props.BorderRadius,
 			EnableLabel:  props.LabelsEnabled(),
+			Animate:      props.Animate,
+		}
+		if props.Animate {
+			cp.AnimateBegin = core.StaggerBegin(i, props.MotionStagger)
 		}
 		// Only cells with data are hoverable. v2 routes hover through the
 		// client interactivity layer (charts/interact) — no server round-trip.

@@ -120,3 +120,15 @@ func TestRadar_InteractiveEmitsTooltip(t *testing.T) {
 		t.Errorf("non-interactive radar must not emit data-tc-tooltip")
 	}
 }
+
+func TestRadar_AnimateFadeIn(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	if !strings.Contains(renderChart(t, p), "<animate") {
+		t.Errorf("radar with Animate=true should emit <animate> fade-in")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("radar with Animate=false must not emit <animate>")
+	}
+}

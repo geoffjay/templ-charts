@@ -133,7 +133,11 @@ templ DotsItem(props DotsItemProps) {
 				stroke={ props.BorderColor }
 				stroke-width={ fmtFloat(props.BorderWidth) }
 			}
-		></circle>
+		>
+			if props.Animate {
+				@templ.Raw(SMILAnimate("r", "0", fmtFloat(props.Size/2), props.AnimateBegin))
+			}
+		</circle>
 		if props.Label != "" {
 			<text
 				text-anchor={ textAnchorOr(props.LabelTextAnchor, "middle") }

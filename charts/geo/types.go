@@ -93,6 +93,14 @@ type GeoBase struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// feature path (600ms). MotionStagger delays successive features by that
+	// many seconds (0 ⇒ all enter together). Defaults off, so static output is
+	// unchanged. Shared by GeoMap and Choropleth via GeoBase. Mirrors @nivo/geo's
+	// enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // GeoMapProps mirrors @nivo/geo GeoMapSvgProps (supported subset).

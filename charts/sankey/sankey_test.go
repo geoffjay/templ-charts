@@ -107,6 +107,18 @@ func TestSankey_Interactive(t *testing.T) {
 	}
 }
 
+func TestSankey_Animate(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.01
+	if !strings.Contains(renderChart(t, p), `<animate attributeName="opacity" from="0" to="1"`) {
+		t.Errorf("animated sankey should emit an opacity fade-in <animate>")
+	}
+	if strings.Contains(renderChart(t, baseProps()), "<animate") {
+		t.Errorf("non-animated sankey must not emit <animate>")
+	}
+}
+
 func TestSankey_LabelsDisabled(t *testing.T) {
 	p := baseProps()
 	disabled := false

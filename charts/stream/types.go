@@ -97,6 +97,13 @@ type StreamProps struct {
 	Title           string
 	Desc            string
 	IsFocusable     bool
+
+	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
+	// stream layer area (600ms). MotionStagger delays successive layers by that
+	// many seconds (0 ⇒ all enter together). Defaults off, so static output is
+	// unchanged. Mirrors @nivo/stream's enter transition (opacity component).
+	Animate       bool
+	MotionStagger float64
 }
 
 // StreamResult is the computed model produced by UseStream.

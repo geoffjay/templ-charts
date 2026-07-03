@@ -90,6 +90,17 @@ func TestCalendar_GoldenVertical(t *testing.T) {
 	golden.Assert(t, "calendar-vertical", renderChart(t, p))
 }
 
+func TestCalendar_AnimatedGolden(t *testing.T) {
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.01
+	out := renderChart(t, p)
+	if !strings.Contains(out, `<animate attributeName="opacity" from="0" to="1"`) {
+		t.Errorf("animated calendar should emit an opacity fade-in <animate>")
+	}
+	golden.Assert(t, "calendar-animated", out)
+}
+
 func TestCalendar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

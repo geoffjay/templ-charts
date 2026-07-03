@@ -41,6 +41,22 @@ func TestTree_RendersSVG(t *testing.T) {
 	}
 }
 
+func TestTree_Animate(t *testing.T) {
+	if out := renderChart(t, baseProps()); strings.Contains(out, "<animate") {
+		t.Errorf("no <animate> expected when Animate=false")
+	}
+	p := baseProps()
+	p.Animate = true
+	p.MotionStagger = 0.05
+	out := renderChart(t, p)
+	if !strings.Contains(out, `<animate attributeName="r" from="0"`) {
+		t.Errorf("expected node radius <animate> when Animate=true")
+	}
+	if !strings.Contains(out, `<animate attributeName="opacity" from="0" to="1"`) {
+		t.Errorf("expected link fade-in <animate> when Animate=true")
+	}
+}
+
 func TestTree_NodeAndLinkCount(t *testing.T) {
 	// 8 nodes (root + A,B + a1,a2,b1,b2,b3) → 7 links.
 	out := renderChart(t, baseProps())

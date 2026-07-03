@@ -24,7 +24,7 @@ svg, _ := render.String(cp.CirclePacking(cp.CirclePackingProps{
         {ID: "B", Value: 24},
     }},
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := cp.CirclePackingProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: cp.CirclePackingNode{ID: "root", Children: []cp.CirclePackingNode{
@@ -36,6 +36,7 @@ svg, _ := render.String(cp.CirclePacking(cp.CirclePackingProps{
 			if palette != "" {
 				p.Colors = colors.Scheme(palette)
 			}
+			p.Animate = animate
 			return render.String(cp.CirclePacking(p))
 		},
 	})

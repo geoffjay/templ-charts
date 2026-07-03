@@ -24,14 +24,15 @@ svg, _ := render.String(tree.Tree(tree.TreeProps{
         {ID: "B"},
     }},
 }))`,
-		Render: func(theme *theming.Theme, palette colors.PaletteID) (string, error) {
+		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := tree.TreeProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: tree.TreeNode{ID: "root", Children: []tree.TreeNode{
 					{ID: "A"},
 					{ID: "B"},
 				}},
-				Theme: theme,
+				Theme:   theme,
+				Animate: animate,
 			}
 			return render.String(tree.Tree(p))
 		},
