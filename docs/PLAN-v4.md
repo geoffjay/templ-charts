@@ -208,8 +208,8 @@ A plain query-param full-page render is the no-JS fallback. No new dependency.
 
 ## 9. Implementation order (topological)
 
-1. **`charts/render` helpers** (§3) + README quickstart + `charts/colors` package
-   doc. Small, foundational — everything else can use `render.String`.
+1. [x] **`charts/render` helpers** (§3) + README quickstart + `charts/colors`
+   package doc. Small, foundational — everything else can use `render.String`.
 2. **API honesty & consistency** (§4): standardize `Interactive`, add
    `pie.IsFocusable`, remove/gate dead props; regenerate affected goldens; fix the
    README field name. (Breaking for the four v1 charts — do it early.)

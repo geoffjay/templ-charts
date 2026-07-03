@@ -1,3 +1,16 @@
+// Package colors mirrors @nivo/colors: the color model shared by every chart.
+// It provides ordinal (categorical), sequential, diverging, and quantize color
+// scales; inherited-color config (theme/from/modifier resolution); the full
+// d3-scale-chromatic scheme catalog (categorical, cyclical, diverging,
+// sequential single- and multi-hue) plus continuous interpolators (viridis,
+// inferno, magma, plasma, warm, cool, cubehelix); and a named-palette catalog
+// with ergonomic lookup/enumeration helpers (Scheme, Palettes, PalettesByKind,
+// LookupPalette, ColorblindSafePalettes, PaletteColors).
+//
+// Charts set colors through the Colors field on their props; the common shape
+// is an OrdinalColorScaleConfig (usually built with colors.Scheme). Color
+// modifiers (brighter/darker/opacity) are backed by internal/d3/color, which
+// is currently RGB-only.
 package colors
 
 import (

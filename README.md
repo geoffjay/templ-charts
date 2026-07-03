@@ -49,23 +49,31 @@ tooltip (client-side); click a legend item to toggle a series (HTMX). The
 
 ## Usage
 
+Every chart is a [`templ.Component`](https://templ.guide). The `charts/render`
+helpers turn one into an SVG string (or write it to an `io.Writer`) in a single
+call:
+
 ```go
 import (
-    "context"
     "github.com/geoffjay/templ-charts/charts/bar"
+    "github.com/geoffjay/templ-charts/charts/render"
 )
 
-func render() (string, error) {
-    var b strings.Builder
-    err := bar.Bar(bar.BarProps{
+func chart() (string, error) {
+    return render.String(bar.Bar(bar.BarProps{
         Width: 700, Height: 400,
         IndexBy: "country",
         Keys:    []string{"hot dogs", "burgers"},
         Data:    data,
-    }).Render(context.Background(), &b)
-    return b.String(), err
+    }))
 }
 ```
+
+`render.To(w, component)` writes directly to an `io.Writer` (e.g. an
+`http.ResponseWriter`); `render.StringCtx`/`render.ToCtx` take an explicit
+`context.Context`. Since each chart is a plain `templ.Component`, you can also
+render it yourself with `component.Render(ctx, w)` and embed it in a larger
+templ page.
 
 ### Interactivity
 
@@ -135,7 +143,8 @@ and the `/palettes` page in the demo app for a visual gallery.
 ```
 charts/         library packages (mirror nivo names): core, theming, scales,
                 colors, axes, rects, arcs, text, tooltip, legends,
-                annotations, interact, static, grid, polar-axes, htmx, and the
+                annotations, interact, static, grid, polar-axes, htmx, render
+                (convenience String/To helpers), and the
                 chart types: bar, line, pie, heatmap, waffle, calendar, radar,
                 radialbar, scatterplot, stream, bullet, funnel, boxplot, bump,
                 marimekko, parallelcoordinates, polarbar, treemap, sunburst,
