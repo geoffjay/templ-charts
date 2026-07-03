@@ -221,7 +221,9 @@ func renderSlicesLayer(props LineProps, result LineResult) string {
 		Debug:   props.DebugSlices,
 		ChartID: props.ChartID,
 	}
-	if props.ClientHover {
+	// Client hover is the default (v5 retired the per-mousemove server round-trip);
+	// ServerHover opts back into the legacy htmx path.
+	if !props.ServerHover {
 		sp.ChartID = ""
 		sp.Tooltips = buildSliceTooltips(result.Slices)
 	}
@@ -235,7 +237,9 @@ func renderMeshLayer(props LineProps, result LineResult, dims core.Dimensions) s
 		Debug:   props.DebugMesh,
 		ChartID: props.ChartID,
 	}
-	if props.ClientHover {
+	// Client hover is the default (v5 retired the per-mousemove server round-trip);
+	// ServerHover opts back into the legacy htmx path.
+	if !props.ServerHover {
 		mp.ChartID = ""
 		mp.DataMesh = buildMeshData(result.Points)
 		mp.DetectionRadius = props.DetectionRadius

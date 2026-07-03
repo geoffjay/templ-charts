@@ -141,10 +141,11 @@ func sankeyChartID(nodes []ComputedNode) string {
 	return strconv.FormatUint(uint64(h.Sum32()), 16)
 }
 
-// hoverStyleBlock builds the scoped CSS implementing the hover-highlight. The
-// resting opacities are the inline fill-opacity attributes; these :has(...:hover)
-// rules override them — dimming everything, then re-lighting (higher specificity)
-// the hovered element and the elements connected to it.
+// hoverStyleBlock builds the scoped CSS implementing the hover-highlight via the
+// shared charts/interact helper. The resting opacities are the inline
+// fill-opacity attributes; these :has(...:hover) rules override them — dimming
+// everything, then re-lighting (higher specificity) the hovered element and the
+// elements connected to it.
 func hoverStyleBlock(props SankeyProps, result SankeyResult, cid string) string {
 	scope := ".tc-sk" + cid
 	idx := make(map[string]int, len(result.Nodes))
@@ -156,18 +157,21 @@ func hoverStyleBlock(props SankeyProps, result SankeyResult, cid string) string 
 	lo := fmtF(props.LinkHoverOpacity)
 	loo := fmtF(props.LinkHoverOthersOpacity)
 
-	var b strings.Builder
-	b.WriteString(`<style>`)
+	hh := interact.HoverHighlight{Scope: scope}
 
 	// Hover a node → dim every node/link, then re-light the hovered node and the
 	// links attached to it (source or target).
 	for i := range result.Nodes {
 		k := strconv.Itoa(i)
-		pre := `svg:has(` + scope + `.n` + k + `:hover) ` + scope
-		b.WriteString(pre + `.tc-sk-node{fill-opacity:` + noo + `}`)
-		b.WriteString(pre + `.tc-sk-link{fill-opacity:` + loo + `}`)
-		b.WriteString(pre + `.tc-sk-node.n` + k + `{fill-opacity:` + no + `}`)
-		b.WriteString(pre + `.tc-sk-link.s` + k + `,` + pre + `.tc-sk-link.t` + k + `{fill-opacity:` + lo + `}`)
+		hh.Groups = append(hh.Groups, interact.HoverGroup{
+			Trigger: `.n` + k,
+			Rules: []interact.HoverRule{
+				{Sels: []string{`.tc-sk-node`}, Body: `fill-opacity:` + noo},
+				{Sels: []string{`.tc-sk-link`}, Body: `fill-opacity:` + loo},
+				{Sels: []string{`.tc-sk-node.n` + k}, Body: `fill-opacity:` + no},
+				{Sels: []string{`.tc-sk-link.s` + k, `.tc-sk-link.t` + k}, Body: `fill-opacity:` + lo},
+			},
+		})
 	}
 
 	// Hover a link → dim everything, then re-light that link and its two nodes.
@@ -175,15 +179,18 @@ func hoverStyleBlock(props SankeyProps, result SankeyResult, cid string) string 
 		li := strconv.Itoa(i)
 		a := strconv.Itoa(idx[l.Source])
 		t := strconv.Itoa(idx[l.Target])
-		pre := `svg:has(` + scope + `.l` + li + `:hover) ` + scope
-		b.WriteString(pre + `.tc-sk-node{fill-opacity:` + noo + `}`)
-		b.WriteString(pre + `.tc-sk-link{fill-opacity:` + loo + `}`)
-		b.WriteString(pre + `.tc-sk-link.l` + li + `{fill-opacity:` + lo + `}`)
-		b.WriteString(pre + `.tc-sk-node.n` + a + `,` + pre + `.tc-sk-node.n` + t + `{fill-opacity:` + no + `}`)
+		hh.Groups = append(hh.Groups, interact.HoverGroup{
+			Trigger: `.l` + li,
+			Rules: []interact.HoverRule{
+				{Sels: []string{`.tc-sk-node`}, Body: `fill-opacity:` + noo},
+				{Sels: []string{`.tc-sk-link`}, Body: `fill-opacity:` + loo},
+				{Sels: []string{`.tc-sk-link.l` + li}, Body: `fill-opacity:` + lo},
+				{Sels: []string{`.tc-sk-node.n` + a, `.tc-sk-node.n` + t}, Body: `fill-opacity:` + no},
+			},
+		})
 	}
 
-	b.WriteString(`</style>`)
-	return b.String()
+	return hh.Style()
 }
 
 // sankeyNodeClass / sankeyLinkClass build the CSS class lists used by the

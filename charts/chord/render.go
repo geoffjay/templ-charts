@@ -138,28 +138,35 @@ func chartID(keys []string) string {
 // entityClass is the CSS class marking an element as belonging to entity i.
 func entityClass(i int) string { return "tc-e" + strconv.Itoa(i) }
 
-// hoverStyleBlock builds the scoped CSS that implements the hover-highlight.
-// Base rules set the resting opacity; :has(...:hover) rules dim all cells and
-// then re-light the hovered entity's arc and connected ribbons. Selector
-// specificity guarantees highlight > dim > base.
+// hoverStyleBlock builds the scoped CSS that implements the hover-highlight via
+// the shared charts/interact helper. Base rules set the resting opacity;
+// :has(...:hover) rules dim all cells and then re-light the hovered entity's arc
+// and connected ribbons. Selector specificity guarantees highlight > dim > base.
 func hoverStyleBlock(props ChordProps, cid string) string {
 	scope := ".tc-c" + cid
-	var b strings.Builder
-	b.WriteString(`<style>`)
-	// Resting opacity (also the graceful fallback where :has is unsupported).
-	b.WriteString(scope + `.tc-arc{opacity:` + fmtF(props.ArcOpacity) + `}`)
-	b.WriteString(scope + `.tc-ribbon{opacity:` + fmtF(props.RibbonOpacity) + `}`)
-	for i := 0; i < len(props.Keys); i++ {
-		hov := `svg:has(` + scope + `.` + entityClass(i) + `:hover) `
-		// Dim every cell…
-		b.WriteString(hov + scope + `.tc-arc{opacity:` + fmtF(props.InactiveArcOpacity) + `}`)
-		b.WriteString(hov + scope + `.tc-ribbon{opacity:` + fmtF(props.InactiveRibbonOpacity) + `}`)
-		// …then re-light the ones belonging to the hovered entity.
-		b.WriteString(hov + scope + `.tc-arc.` + entityClass(i) + `{opacity:` + fmtF(props.ActiveArcOpacity) + `}`)
-		b.WriteString(hov + scope + `.tc-ribbon.` + entityClass(i) + `{opacity:` + fmtF(props.ActiveRibbonOpacity) + `}`)
+	hh := interact.HoverHighlight{
+		Scope: scope,
+		// Resting opacity (also the graceful fallback where :has is unsupported).
+		Resting: []interact.HoverRule{
+			{Sels: []string{`.tc-arc`}, Body: `opacity:` + fmtF(props.ArcOpacity)},
+			{Sels: []string{`.tc-ribbon`}, Body: `opacity:` + fmtF(props.RibbonOpacity)},
+		},
 	}
-	b.WriteString(`</style>`)
-	return b.String()
+	for i := 0; i < len(props.Keys); i++ {
+		ec := `.` + entityClass(i)
+		hh.Groups = append(hh.Groups, interact.HoverGroup{
+			Trigger: ec,
+			Rules: []interact.HoverRule{
+				// Dim every cell…
+				{Sels: []string{`.tc-arc`}, Body: `opacity:` + fmtF(props.InactiveArcOpacity)},
+				{Sels: []string{`.tc-ribbon`}, Body: `opacity:` + fmtF(props.InactiveRibbonOpacity)},
+				// …then re-light the ones belonging to the hovered entity.
+				{Sels: []string{`.tc-arc` + ec}, Body: `opacity:` + fmtF(props.ActiveArcOpacity)},
+				{Sels: []string{`.tc-ribbon` + ec}, Body: `opacity:` + fmtF(props.ActiveRibbonOpacity)},
+			},
+		})
+	}
+	return hh.Style()
 }
 
 // centered wraps inner SVG in a group translated to the circle center, matching

@@ -7,11 +7,15 @@ import (
 	"testing"
 
 	"github.com/geoffjay/templ-charts/charts/bar"
+	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
+	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/sunburst"
+	"github.com/geoffjay/templ-charts/charts/treemap"
 )
 
 // newBarRegistry builds a registry with one interactive bar instance for the
@@ -455,5 +459,102 @@ func TestHeatmapHoverMissingCellIs400(t *testing.T) {
 	rec := do(t, h, http.MethodGet, "/charts/demo-heatmap/hover")
 	if rec.Code != http.StatusBadRequest {
 		t.Errorf("status = %d, want 400 for missing cell", rec.Code)
+	}
+}
+
+// --- hierarchy zoom (icicle/treemap/circle-packing/sunburst) ---
+
+func icicleData() icicle.IcicleNode {
+	return icicle.IcicleNode{ID: "root", Children: []icicle.IcicleNode{
+		{ID: "A", Children: []icicle.IcicleNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
+		{ID: "B", Children: []icicle.IcicleNode{{ID: "b1", Value: 6}}},
+		{ID: "C", Value: 10},
+	}}
+}
+
+// assertZoomRoundTrip drives the shared zoom handler contract: focusing a child
+// changes the SVG, and zooming back to root restores the unfocused render.
+func assertZoomRoundTrip(t *testing.T, h *htmx.Handler, id, childID string) {
+	t.Helper()
+	base, err := h.RenderFull(id)
+	if err != nil {
+		t.Fatalf("RenderFull(%s): %v", id, err)
+	}
+	rec := do(t, h, http.MethodGet, "/charts/"+id+"/zoom?node="+childID)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("zoom status = %d, want 200", rec.Code)
+	}
+	focused := rec.Body.String()
+	if !strings.Contains(focused, "<svg") {
+		t.Errorf("zoom body should be a full SVG")
+	}
+	if focused == base {
+		t.Errorf("focusing %q did not change the render", childID)
+	}
+	if inst := h.Registry().Get(id); inst == nil || inst.State().FocusID != childID {
+		t.Errorf("focus state = %q, want %q", h.Registry().Get(id).State().FocusID, childID)
+	}
+	// Re-clicking the focused node zooms out to its parent — for a depth-1 node
+	// that is the root (full view), restoring the original render.
+	rec2 := do(t, h, http.MethodGet, "/charts/"+id+"/zoom?node="+childID)
+	if rec2.Code != http.StatusOK {
+		t.Fatalf("zoom-out status = %d, want 200", rec2.Code)
+	}
+	if got := rec2.Body.String(); got != base {
+		t.Errorf("zooming back to root did not restore the unfocused render")
+	}
+}
+
+func TestHandler_IcicleZoom(t *testing.T) {
+	r := htmx.NewRegistry()
+	r.RegisterIcicle("demo-icicle", icicle.IcicleProps{
+		Width: 500, Height: 300, EnableZooming: true, Data: icicleData(),
+	})
+	assertZoomRoundTrip(t, htmx.NewHandler(r), "demo-icicle", "A")
+}
+
+func TestHandler_TreemapZoom(t *testing.T) {
+	r := htmx.NewRegistry()
+	r.RegisterTreemap("demo-treemap", treemap.TreemapProps{
+		Width: 500, Height: 400, EnableZooming: true,
+		Data: treemap.TreemapNode{ID: "root", Children: []treemap.TreemapNode{
+			{ID: "A", Children: []treemap.TreemapNode{{ID: "a1", Value: 12}, {ID: "a2", Value: 8}}},
+			{ID: "B", Children: []treemap.TreemapNode{{ID: "b1", Value: 10}}},
+			{ID: "C", Value: 15},
+		}},
+	})
+	assertZoomRoundTrip(t, htmx.NewHandler(r), "demo-treemap", "A")
+}
+
+func TestHandler_CirclePackingZoom(t *testing.T) {
+	r := htmx.NewRegistry()
+	r.RegisterCirclePacking("demo-cp", cp.CirclePackingProps{
+		Width: 400, Height: 400, EnableZooming: true,
+		Data: cp.CirclePackingNode{ID: "root", Children: []cp.CirclePackingNode{
+			{ID: "A", Children: []cp.CirclePackingNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
+			{ID: "B", Children: []cp.CirclePackingNode{{ID: "b1", Value: 6}}},
+			{ID: "C", Value: 10},
+		}},
+	})
+	assertZoomRoundTrip(t, htmx.NewHandler(r), "demo-cp", "A")
+}
+
+func TestHandler_SunburstZoom(t *testing.T) {
+	r := htmx.NewRegistry()
+	r.RegisterSunburst("demo-sb", sunburst.SunburstProps{
+		Width: 400, Height: 400, EnableZooming: true,
+		Data: sunburst.SunburstNode{ID: "root", Children: []sunburst.SunburstNode{
+			{ID: "A", Children: []sunburst.SunburstNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
+			{ID: "B", Children: []sunburst.SunburstNode{{ID: "b1", Value: 6}}},
+			{ID: "C", Value: 10},
+		}},
+	})
+	assertZoomRoundTrip(t, htmx.NewHandler(r), "demo-sb", "A")
+}
+
+func TestHandler_ZoomUnsupportedKind(t *testing.T) {
+	rec := do(t, htmx.NewHandler(newBarRegistry(t)), http.MethodGet, "/charts/demo-bar/zoom?node=x")
+	if rec.Code != http.StatusBadRequest {
+		t.Errorf("zoom on a bar should be 400, got %d", rec.Code)
 	}
 }

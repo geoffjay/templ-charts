@@ -1,6 +1,7 @@
 package network
 
 import (
+	"hash/fnv"
 	"math"
 	"strconv"
 	"strings"
@@ -36,6 +37,18 @@ func applyDefaults(p NetworkProps) NetworkProps {
 	if p.LinkThickness == 0 {
 		p.LinkThickness = Defaults.LinkThickness
 	}
+	if p.NodeHoverOpacity == 0 {
+		p.NodeHoverOpacity = Defaults.NodeHoverOpacity
+	}
+	if p.NodeHoverOthersOpacity == 0 {
+		p.NodeHoverOthersOpacity = Defaults.NodeHoverOthersOpacity
+	}
+	if p.LinkHoverOpacity == 0 {
+		p.LinkHoverOpacity = Defaults.LinkHoverOpacity
+	}
+	if p.LinkHoverOthersOpacity == 0 {
+		p.LinkHoverOthersOpacity = Defaults.LinkHoverOthersOpacity
+	}
 	if len(p.Layers) == 0 {
 		p.Layers = Defaults.Layers
 	}
@@ -48,13 +61,19 @@ func applyDefaults(p NetworkProps) NetworkProps {
 // renderLayers renders the enabled layers as an inner SVG string. Annotations
 // are deferred (no network annotation specs in v3).
 func renderLayers(props NetworkProps, result NetworkResult) string {
+	// When interactive (and not routing hover through the mesh overlay), a scoped
+	// <style> block drives the chord/sankey-style hover-highlight via CSS :has().
+	cid := networkChartID(result.Nodes)
 	var b strings.Builder
+	if hoverHighlightOn(props) {
+		b.WriteString(hoverStyleBlock(props, result, cid))
+	}
 	for _, layer := range props.Layers {
 		switch layer {
 		case NetworkLayerLinks:
-			b.WriteString(renderLinksLayer(result))
+			b.WriteString(renderLinksLayer(props, result, cid))
 		case NetworkLayerNodes:
-			b.WriteString(renderNodesLayer(props, result))
+			b.WriteString(renderNodesLayer(props, result, cid))
 		case NetworkLayerMesh:
 			b.WriteString(renderMeshLayer(props, result))
 		case NetworkLayerAnnotations:
@@ -64,10 +83,112 @@ func renderLayers(props NetworkProps, result NetworkResult) string {
 	return b.String()
 }
 
-func renderLinksLayer(result NetworkResult) string {
-	var b strings.Builder
+// hoverHighlightOn reports whether the CSS :has() hover-highlight is active: it
+// needs Interactive and is mutually exclusive with the voronoi mesh overlay
+// (which sits atop the nodes and captures the pointer, so :has(circle:hover)
+// would never fire).
+func hoverHighlightOn(props NetworkProps) bool {
+	return props.Interactive && !props.UseMesh
+}
+
+// networkChartID derives a stable, CSS-safe token from the node ids so the
+// hover-highlight <style> rules only affect this chart instance.
+func networkChartID(nodes []ComputedNode) string {
+	h := fnv.New32a()
+	for _, n := range nodes {
+		_, _ = h.Write([]byte(n.ID))
+		_, _ = h.Write([]byte{0})
+	}
+	return strconv.FormatUint(uint64(h.Sum32()), 16)
+}
+
+// hoverStyleBlock builds the scoped hover-highlight CSS via the shared
+// charts/interact helper. Hovering a node dims every node/link, then re-lights
+// the hovered node, its incident links and its neighbour nodes; hovering a link
+// re-lights it and its two endpoints.
+func hoverStyleBlock(props NetworkProps, result NetworkResult, cid string) string {
+	scope := ".tc-nw" + cid
+	idx := make(map[string]int, len(result.Nodes))
+	for i, n := range result.Nodes {
+		idx[n.ID] = i
+	}
+	// Adjacency: for each node, the neighbour node indices reached by a link.
+	neighbours := make([][]int, len(result.Nodes))
 	for _, l := range result.Links {
-		b.WriteString(`<line x1="`)
+		s, sok := idx[l.Source]
+		t, tok := idx[l.Target]
+		if sok && tok {
+			neighbours[s] = append(neighbours[s], t)
+			neighbours[t] = append(neighbours[t], s)
+		}
+	}
+	no := fmtF(props.NodeHoverOpacity)
+	noo := fmtF(props.NodeHoverOthersOpacity)
+	lo := fmtF(props.LinkHoverOpacity)
+	loo := fmtF(props.LinkHoverOthersOpacity)
+
+	hh := interact.HoverHighlight{Scope: scope}
+
+	// Hover a node → dim all, then re-light the node + its neighbours + its links.
+	for i := range result.Nodes {
+		k := strconv.Itoa(i)
+		nodeSels := []string{`.tc-nw-node.n` + k}
+		for _, n := range neighbours[i] {
+			nodeSels = append(nodeSels, `.tc-nw-node.n`+strconv.Itoa(n))
+		}
+		hh.Groups = append(hh.Groups, interact.HoverGroup{
+			Trigger: `.n` + k,
+			Rules: []interact.HoverRule{
+				{Sels: []string{`.tc-nw-node`}, Body: `opacity:` + noo},
+				{Sels: []string{`.tc-nw-link`}, Body: `opacity:` + loo},
+				{Sels: []string{`.tc-nw-link.s` + k, `.tc-nw-link.t` + k}, Body: `opacity:` + lo},
+				{Sels: nodeSels, Body: `opacity:` + no},
+			},
+		})
+	}
+
+	// Hover a link → dim all, then re-light that link and its two endpoints.
+	for i, l := range result.Links {
+		li := strconv.Itoa(i)
+		a := strconv.Itoa(idx[l.Source])
+		t := strconv.Itoa(idx[l.Target])
+		hh.Groups = append(hh.Groups, interact.HoverGroup{
+			Trigger: `.l` + li,
+			Rules: []interact.HoverRule{
+				{Sels: []string{`.tc-nw-node`}, Body: `opacity:` + noo},
+				{Sels: []string{`.tc-nw-link`}, Body: `opacity:` + loo},
+				{Sels: []string{`.tc-nw-link.l` + li}, Body: `opacity:` + lo},
+				{Sels: []string{`.tc-nw-node.n` + a, `.tc-nw-node.n` + t}, Body: `opacity:` + no},
+			},
+		})
+	}
+
+	return hh.Style()
+}
+
+func renderLinksLayer(props NetworkProps, result NetworkResult, cid string) string {
+	var b strings.Builder
+	var idx map[string]int
+	if hoverHighlightOn(props) {
+		idx = make(map[string]int, len(result.Nodes))
+		for i, n := range result.Nodes {
+			idx[n.ID] = i
+		}
+	}
+	for i, l := range result.Links {
+		b.WriteString(`<line`)
+		if hoverHighlightOn(props) {
+			b.WriteString(` class="tc-nw`)
+			b.WriteString(cid)
+			b.WriteString(` tc-nw-link l`)
+			b.WriteString(strconv.Itoa(i))
+			b.WriteString(` s`)
+			b.WriteString(strconv.Itoa(idx[l.Source]))
+			b.WriteString(` t`)
+			b.WriteString(strconv.Itoa(idx[l.Target]))
+			b.WriteString(`"`)
+		}
+		b.WriteString(` x1="`)
 		b.WriteString(fmtF(l.X1))
 		b.WriteString(`" y1="`)
 		b.WriteString(fmtF(l.Y1))
@@ -84,10 +205,18 @@ func renderLinksLayer(result NetworkResult) string {
 	return b.String()
 }
 
-func renderNodesLayer(props NetworkProps, result NetworkResult) string {
+func renderNodesLayer(props NetworkProps, result NetworkResult, cid string) string {
 	var b strings.Builder
 	for i, node := range result.Nodes {
-		b.WriteString(`<circle cx="`)
+		b.WriteString(`<circle`)
+		if hoverHighlightOn(props) {
+			b.WriteString(` class="tc-nw`)
+			b.WriteString(cid)
+			b.WriteString(` tc-nw-node n`)
+			b.WriteString(strconv.Itoa(i))
+			b.WriteString(`"`)
+		}
+		b.WriteString(` cx="`)
 		b.WriteString(fmtF(node.X))
 		b.WriteString(`" cy="`)
 		b.WriteString(fmtF(node.Y))

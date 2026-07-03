@@ -212,12 +212,20 @@ type LineProps struct {
 
 	// Interactivity.
 	Interactive bool
-	// ClientHover routes mesh/slice hover through the client interactivity
-	// layer (charts/interact) instead of the htmx server round-trip: the mesh
-	// emits a data-tc-mesh points array (nearest-point + crosshair handled in
-	// the browser) and slices emit data-tc-tooltip. Resolves the per-mousemove
-	// round-trip the v1 NOTES.md flagged. Default false keeps the htmx path.
-	ClientHover          bool
+	// ClientHover is retained for compatibility: mesh/slice hover now routes
+	// through the client interactivity layer (charts/interact) by default, so
+	// setting this is a no-op. The client mesh emits a data-tc-mesh points array
+	// (nearest-point + crosshair handled in the browser) and slices emit
+	// data-tc-tooltip — no per-mousemove server round-trip. See ServerHover to
+	// opt back into the legacy htmx path.
+	ClientHover bool
+	// ServerHover opts back into the legacy htmx per-mousemove server round-trip
+	// for mesh/slice hover (a full server SVG re-render on every throttled
+	// mousemove), for the genuinely-JS-limited case where htmx is present but the
+	// charts/interact client script is not. Default false: v5 retires the
+	// per-mousemove fallback and makes the client path the default (the v1
+	// NOTES.md item). Requires ChartID.
+	ServerHover          bool
 	UseMesh              bool
 	EnableSlices         EnableSlices
 	DebugSlices          bool

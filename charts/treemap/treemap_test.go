@@ -117,3 +117,58 @@ func TestTreemap_Animate(t *testing.T) {
 		t.Errorf("non-animated treemap must not emit <animate>")
 	}
 }
+
+func TestTreemap_ZoomOffNoZoomAttrs(t *testing.T) {
+	if strings.Contains(renderChart(t, baseProps()), "/zoom?node=") {
+		t.Errorf("default treemap must not emit /zoom hx-get")
+	}
+	p := baseProps()
+	p.EnableZooming = true // no ChartID → still off
+	if strings.Contains(renderChart(t, p), "/zoom?node=") {
+		t.Errorf("treemap with EnableZooming but no ChartID must not emit /zoom hx-get")
+	}
+}
+
+func TestTreemap_ZoomOnEmitsZoomTargets(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "tm1"
+	out := renderChart(t, p)
+	for _, id := range []string{"A", "B", "C", "a1", "b1"} {
+		if !strings.Contains(out, "/charts/tm1/zoom?node="+id+`"`) {
+			t.Errorf("zoomable treemap should emit zoom target for node %q", id)
+		}
+	}
+	if !strings.Contains(out, `hx-target="#chart-tm1"`) {
+		t.Errorf("zoom targets should swap into #chart-tm1")
+	}
+}
+
+func TestTreemap_ZoomedShowsBreadcrumb(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "tm1"
+	p.FocusID = "A"
+	out := renderChart(t, p)
+	if !strings.Contains(out, "/charts/tm1/zoom?node=root") {
+		t.Errorf("focused treemap breadcrumb should link back to root")
+	}
+	if strings.Contains(out, "/charts/tm1/zoom?node=b1") {
+		t.Errorf("focused treemap should not render nodes outside the focus subtree")
+	}
+}
+
+func TestTreemap_GoldenZoomable(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "tm1"
+	golden.Assert(t, "treemap-zoomable", renderChart(t, p))
+}
+
+func TestTreemap_GoldenZoomed(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "tm1"
+	p.FocusID = "A"
+	golden.Assert(t, "treemap-zoomed", renderChart(t, p))
+}

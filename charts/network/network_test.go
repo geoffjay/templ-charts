@@ -152,6 +152,41 @@ func TestNetwork_Interactive(t *testing.T) {
 	}
 }
 
+func TestNetwork_HighlightGolden(t *testing.T) {
+	p := baseProps()
+	p.Interactive = true
+	out := renderChart(t, p)
+	// The hover-highlight emits a scoped <style> with :has() rules and tags each
+	// node/link with the correspondence classes.
+	for _, want := range []string{"<style>", "svg:has(", ":hover)", "tc-nw-node", "tc-nw-link", `class="tc-nw`} {
+		if !strings.Contains(out, want) {
+			t.Errorf("interactive network missing %q in output", want)
+		}
+	}
+	golden.Assert(t, "network-highlight", out)
+}
+
+func TestNetwork_NoHighlightWhenStatic(t *testing.T) {
+	// The <style>/class machinery must be absent for a non-interactive render
+	// (keeps the static golden byte-stable).
+	out := renderChart(t, baseProps())
+	if strings.Contains(out, "<style>") || strings.Contains(out, "tc-nw-node") {
+		t.Errorf("static network should not emit hover-highlight style/classes")
+	}
+}
+
+func TestNetwork_NoHighlightWithMesh(t *testing.T) {
+	// UseMesh routes hover through the overlay, so the :has() highlight (which
+	// needs to hover the circles directly) is suppressed.
+	p := baseProps()
+	p.Interactive = true
+	p.UseMesh = true
+	out := renderChart(t, p)
+	if strings.Contains(out, "tc-nw-node") || strings.Contains(out, "svg:has(") {
+		t.Errorf("mesh-routed network should not emit the :has() hover-highlight")
+	}
+}
+
 func TestNetwork_Animate(t *testing.T) {
 	p := baseProps()
 	p.Animate = true

@@ -79,6 +79,23 @@ type TreemapProps struct {
 	// Interactive enables per-node client-side hover tooltips (charts/interact).
 	Interactive bool
 
+	// EnableZooming turns each rect into a click-to-zoom target and renders a
+	// breadcrumb when focused. It only takes effect when ChartID is also set
+	// (htmx mode): clicking a node re-runs the treemap layout on that node's
+	// subtree via GET /charts/{ChartID}/zoom?node=<id>. Default false → the
+	// rendered SVG is byte-identical to the un-zoomable output.
+	EnableZooming bool
+
+	// ChartID is the htmx registry instance id. When set the chart emits hx-*
+	// wiring scoped to this id, mirroring bar/line/pie. Empty for standalone
+	// renders.
+	ChartID string
+
+	// FocusID is the id of the currently-focused node (the zoom target). Empty
+	// (or the root id) shows the full chart. Set by the htmx zoom handler on a
+	// props clone; consumers normally leave it zero.
+	FocusID string
+
 	// Animate enables the nivo-style enter animation (opacity fade-in) on each
 	// node rect. Default false: the rendered SVG is byte-identical to the
 	// un-animated output. MotionStagger delays each successive node by that many
@@ -97,9 +114,18 @@ type TreemapProps struct {
 	IsFocusable     bool
 }
 
+// Crumb is one segment of the zoom breadcrumb: the node id (used to build the
+// zoom-back hx-get) and a display label.
+type Crumb struct {
+	ID    string
+	Label string
+}
+
 // TreemapResult is the computed model produced by UseTreemap.
 type TreemapResult struct {
 	Nodes []ComputedNode
+	// Breadcrumb is the root→focus ancestor path, non-nil only when focused.
+	Breadcrumb []Crumb
 }
 
 // BoolPtr returns a pointer to b — a helper for the *bool props.

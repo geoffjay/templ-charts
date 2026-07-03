@@ -25,11 +25,22 @@ func UseTreemap(props TreemapProps) TreemapResult {
 		PaddingOuter(props.OuterPadding)
 	tm.Layout(root)
 
+	// Focused zoom: re-run the treemap layout on the subtree rooted at the
+	// focused node over the full inner rect (re-sum is unnecessary — Sum already
+	// set the subtree values). Only the focus subtree is rendered. focus == nil
+	// ⇒ identity, so the un-focused output is byte-identical to before.
+	focus := findNode(root, props.FocusID)
+	layoutRoot := root
+	if focus != nil && focus.Depth > 0 {
+		tm.Layout(focus)
+		layoutRoot = focus
+	}
+
 	getColor := colors.GetOrdinalColorScale[string](props.Colors, func(id string) string { return id })
 	format := valueFormatter(props.ValueFormat)
 
 	nodes := make([]ComputedNode, 0)
-	root.Each(func(n *d3hierarchy.Node) {
+	layoutRoot.Each(func(n *d3hierarchy.Node) {
 		id := n.Data.(TreemapNode).ID
 		nodes = append(nodes, ComputedNode{
 			ID:             id,
@@ -46,7 +57,38 @@ func UseTreemap(props TreemapProps) TreemapResult {
 		})
 	})
 
-	return TreemapResult{Nodes: nodes}
+	return TreemapResult{Nodes: nodes, Breadcrumb: breadcrumbOf(focus, func(n *d3hierarchy.Node) string {
+		return n.Data.(TreemapNode).ID
+	})}
+}
+
+// findNode returns the node whose TreemapNode.ID matches id, or nil if id is
+// empty/unmatched (the root is never a zoom target).
+func findNode(root *d3hierarchy.Node, id string) *d3hierarchy.Node {
+	if id == "" {
+		return nil
+	}
+	var found *d3hierarchy.Node
+	root.Each(func(n *d3hierarchy.Node) {
+		if found == nil && n.Data.(TreemapNode).ID == id {
+			found = n
+		}
+	})
+	return found
+}
+
+// breadcrumbOf returns the root→focus ancestor path as crumbs; nil when
+// unfocused.
+func breadcrumbOf(focus *d3hierarchy.Node, id func(*d3hierarchy.Node) string) []Crumb {
+	if focus == nil || focus.Depth == 0 {
+		return nil
+	}
+	anc := focus.Ancestors()
+	crumbs := make([]Crumb, 0, len(anc))
+	for i := len(anc) - 1; i >= 0; i-- {
+		crumbs = append(crumbs, Crumb{ID: id(anc[i]), Label: id(anc[i])})
+	}
+	return crumbs
 }
 
 // treemapChildren adapts TreemapNode children for the hierarchy builder.

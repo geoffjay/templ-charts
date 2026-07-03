@@ -100,3 +100,58 @@ func TestSunburst_Interactive(t *testing.T) {
 		t.Errorf("non-interactive sunburst must not emit data-tc-tooltip")
 	}
 }
+
+func TestSunburst_ZoomOffNoZoomAttrs(t *testing.T) {
+	if strings.Contains(renderChart(t, baseProps()), "/zoom?node=") {
+		t.Errorf("default sunburst must not emit /zoom hx-get")
+	}
+	p := baseProps()
+	p.EnableZooming = true // no ChartID → still off
+	if strings.Contains(renderChart(t, p), "/zoom?node=") {
+		t.Errorf("sunburst with EnableZooming but no ChartID must not emit /zoom hx-get")
+	}
+}
+
+func TestSunburst_ZoomOnEmitsZoomTargets(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "sb1"
+	out := renderChart(t, p)
+	for _, id := range []string{"A", "B", "C", "a1", "a2", "b1"} {
+		if !strings.Contains(out, "/charts/sb1/zoom?node="+id+`"`) {
+			t.Errorf("zoomable sunburst should emit zoom target for node %q", id)
+		}
+	}
+	if !strings.Contains(out, `hx-target="#chart-sb1"`) {
+		t.Errorf("zoom targets should swap into #chart-sb1")
+	}
+}
+
+func TestSunburst_ZoomedShowsBreadcrumb(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "sb1"
+	p.FocusID = "A"
+	out := renderChart(t, p)
+	if !strings.Contains(out, "/charts/sb1/zoom?node=root") {
+		t.Errorf("focused sunburst breadcrumb should link back to root")
+	}
+	if strings.Contains(out, "/charts/sb1/zoom?node=b1") {
+		t.Errorf("focused sunburst should not render nodes outside the focus subtree")
+	}
+}
+
+func TestSunburst_GoldenZoomable(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "sb1"
+	golden.Assert(t, "sunburst-zoomable", renderChart(t, p))
+}
+
+func TestSunburst_GoldenZoomed(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "sb1"
+	p.FocusID = "A"
+	golden.Assert(t, "sunburst-zoomed", renderChart(t, p))
+}

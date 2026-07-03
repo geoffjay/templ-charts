@@ -5,7 +5,10 @@
 //
 // v3 scope: SVG only, static render. The layout is deterministic (phyllotaxis
 // seeding + d3's LCG, a fixed Iterations count), so goldens are byte-stable.
-// Annotations and animated transitions are deferred.
+// Annotations are deferred. Interactive adds per-node hover tooltips and (unless
+// UseMesh routes hover through the voronoi overlay) a chord/sankey-style
+// hover-highlight via scoped CSS :has(); Animate (v5) adds a radius enter
+// transition.
 package network
 
 import (
@@ -103,8 +106,23 @@ type NetworkProps struct {
 	// its physics (LinkDistance/Repulsivity) and often occupies only the center.
 	FitView bool
 
-	// Interactive enables per-node client-side hover tooltips (charts/interact).
+	// Interactive enables per-node client-side hover tooltips (charts/interact)
+	// AND — unless UseMesh routes hover through the voronoi overlay — a
+	// chord/sankey-style hover-highlight: hovering a node dims the rest and
+	// re-lights that node, its links and its neighbours; hovering a link
+	// re-lights it and its two endpoints. Driven by a scoped CSS :has() <style>
+	// block (no JS/server round-trip). The *HoverOpacity / *HoverOthersOpacity
+	// fields set the highlighted / dimmed opacities; zero falls back to Defaults.
 	Interactive bool
+
+	// Hover-highlight opacities (used when Interactive && !UseMesh).
+	// NodeHoverOpacity / LinkHoverOpacity apply to the hovered element and its
+	// connected elements; NodeHoverOthersOpacity / LinkHoverOthersOpacity dim
+	// everything else.
+	NodeHoverOpacity       float64
+	NodeHoverOthersOpacity float64
+	LinkHoverOpacity       float64
+	LinkHoverOthersOpacity float64
 
 	// UseMesh routes hover through an accurate voronoi mesh (charts/interact,
 	// backed by internal/d3/delaunay) built over the node centers rather than

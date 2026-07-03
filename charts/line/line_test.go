@@ -244,6 +244,67 @@ func TestLine_ClientHoverSlices(t *testing.T) {
 	}
 }
 
+func TestLine_ClientHoverIsDefault(t *testing.T) {
+	// v5 retired the per-mousemove server round-trip: with a ChartID set but no
+	// ServerHover, mesh/slice hover defaults to the client path (data-tc-*), not
+	// the htmx round-trip.
+	mesh := renderChart(t, line.LineProps{
+		Width: 500, Height: 300,
+		Data:        sampleData(),
+		Interactive: true,
+		UseMesh:     true,
+		ChartID:     "abc",
+	})
+	if !strings.Contains(mesh, "data-tc-mesh") {
+		t.Errorf("mesh should default to client data-tc-mesh")
+	}
+	if strings.Contains(mesh, "hover?mesh=1") {
+		t.Errorf("mesh should not emit the htmx round-trip by default (retired)")
+	}
+	slices := renderChart(t, line.LineProps{
+		Width: 500, Height: 300,
+		Data:         sampleData(),
+		Interactive:  true,
+		EnableSlices: line.EnableSlicesX,
+		ChartID:      "abc",
+	})
+	if !strings.Contains(slices, "data-tc-tooltip") {
+		t.Errorf("slices should default to client data-tc-tooltip")
+	}
+	if strings.Contains(slices, "/slice?axis=") {
+		t.Errorf("slices should not emit the htmx round-trip by default (retired)")
+	}
+}
+
+func TestLine_ServerHoverOptIn(t *testing.T) {
+	// ServerHover opts back into the legacy htmx per-mousemove round-trip.
+	mesh := renderChart(t, line.LineProps{
+		Width: 500, Height: 300,
+		Data:        sampleData(),
+		Interactive: true,
+		UseMesh:     true,
+		ChartID:     "abc",
+		ServerHover: true,
+	})
+	if !strings.Contains(mesh, "hover?mesh=1") {
+		t.Errorf("ServerHover mesh should emit the htmx round-trip")
+	}
+	if strings.Contains(mesh, "data-tc-mesh=") {
+		t.Errorf("ServerHover mesh should not emit client data-tc-mesh")
+	}
+	slices := renderChart(t, line.LineProps{
+		Width: 500, Height: 300,
+		Data:         sampleData(),
+		Interactive:  true,
+		EnableSlices: line.EnableSlicesX,
+		ChartID:      "abc",
+		ServerHover:  true,
+	})
+	if !strings.Contains(slices, "/slice?axis=") {
+		t.Errorf("ServerHover slices should emit the htmx round-trip")
+	}
+}
+
 func TestLine_SlicesDebug(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,

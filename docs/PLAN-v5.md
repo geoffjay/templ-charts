@@ -250,9 +250,28 @@ Extend the existing app and the v4 detail-page registry
    (re-added `EnableLinkGradient`, default false, per-link `<linearGradient>`).
    All default-off/opt-in → existing goldens byte-stable; one on-variant golden
    + one demo tile each; `make ci` green. See `docs/NOTES.md` (v5 Phase 3).
-4. **Interactivity completions** (§6): shared hover-others helper (chord →
-   sankey/network) first, then hierarchy zoom, then retire the line fallback,
-   then the opt-in `ResizeObserver`.
+4. [x] **Interactivity completions** (§6) — **done** (all four sub-items):
+   - **Unified hover-others** — chord's `:has()` pattern lifted into a shared
+     `charts/interact` helper (`HoverHighlight`/`HoverGroup`/`HoverRule`); chord
+     and sankey migrated onto it **byte-identically** (no golden drift), and
+     **network** given the same hover-highlight fresh (dim others; re-light the
+     hovered node + its links + neighbours, or a hovered link + its endpoints),
+     gated on `Interactive && !UseMesh`. New `network-highlight` golden also
+     closes §7's network-second-golden gap.
+   - **Hierarchy zoom** (icicle/treemap/circle-packing/sunburst) — opt-in
+     `EnableZooming`+`ChartID`, a new `zoom` htmx verb + `FocusID` state and the
+     four new registry kinds, per-family focus recompute in each `Use{Chart}`
+     hook, and a clickable breadcrumb; default-off so existing goldens stay
+     byte-stable (new `*-zoomable`/`*-zoomed` goldens lock the on-variants).
+   - **Line per-mousemove fallback retired** — the client hover path is now the
+     default for line mesh/slices; `ServerHover` is the explicit opt-in for the
+     legacy htmx round-trip (set automatically by the htmx registry, which *is*
+     the server path). `ClientHover` kept as a compat no-op.
+   - **Opt-in `ResizeObserver`** — added to the client script, gated by
+     `data-tc-observe` (+ optional `data-tc-observe-target`): debounced
+     re-fetch with the new `?w=&h=` on resize, via htmx when present else
+     `fetch`. Costs nothing unless opted in.
+   See `docs/NOTES.md` (v5 Phase 4).
 5. **Test depth + polish** (§7): network second golden, remaining variant
    goldens, `README`/`docs`/`NOTES.md` updates for the v5 surface, `make golden`
    idempotent, `make ci` green.

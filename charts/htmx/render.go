@@ -6,9 +6,13 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/bar"
+	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
+	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/sunburst"
+	"github.com/geoffjay/templ-charts/charts/treemap"
 )
 
 // renderFull renders the full SVG for the instance, applying the current
@@ -33,6 +37,22 @@ func renderFull(inst *ChartInstance) (string, error) {
 		props := inst.Props.(heatmap.HeatMapProps)
 		applyHeatmapState(&props, inst.ID, st)
 		return renderComponent(heatmap.HeatMap(props))
+	case KindIcicle:
+		props := inst.Props.(icicle.IcicleProps)
+		applyIcicleState(&props, inst.ID, st)
+		return renderComponent(icicle.Icicle(props))
+	case KindTreemap:
+		props := inst.Props.(treemap.TreemapProps)
+		applyTreemapState(&props, inst.ID, st)
+		return renderComponent(treemap.Treemap(props))
+	case KindCirclePack:
+		props := inst.Props.(cp.CirclePackingProps)
+		applyCirclePackingState(&props, inst.ID, st)
+		return renderComponent(cp.CirclePacking(props))
+	case KindSunburst:
+		props := inst.Props.(sunburst.SunburstProps)
+		applySunburstState(&props, inst.ID, st)
+		return renderComponent(sunburst.Sunburst(props))
 	}
 	return "", errUnknownKind
 }
@@ -57,6 +77,10 @@ func applyBarState(props *bar.BarProps, id string, st State) {
 func applyLineState(props *line.LineProps, id string, st State) {
 	props.ChartID = id
 	props.Interactive = true
+	// The htmx registry IS the server-round-trip path, so it opts into the
+	// legacy per-mousemove server hover (mesh/slice hx-get endpoints); the
+	// standalone default is now the client path (v5 retired the fallback).
+	props.ServerHover = true
 	props.InitialHiddenIDs = st.HiddenIDs
 	props.HoverX = st.HoverX
 	props.HoverY = st.HoverY
@@ -93,6 +117,148 @@ func applyHeatmapState(props *heatmap.HeatMapProps, id string, st State) {
 	props.ChartID = id
 	props.Interactive = true
 	props.HoveredKey = st.HoveredKey
+}
+
+// applyIcicleState overlays the per-instance state onto an icicle.IcicleProps
+// clone: the chart id (so hx-* zoom wiring is scoped) and the current zoom
+// focus. EnableZooming stays whatever the caller registered.
+func applyIcicleState(props *icicle.IcicleProps, id string, st State) {
+	props.ChartID = id
+	props.Interactive = true
+	props.FocusID = st.FocusID
+}
+
+// applyTreemapState overlays the per-instance state onto a treemap.TreemapProps
+// clone.
+func applyTreemapState(props *treemap.TreemapProps, id string, st State) {
+	props.ChartID = id
+	props.Interactive = true
+	props.FocusID = st.FocusID
+}
+
+// applyCirclePackingState overlays the per-instance state onto a
+// cp.CirclePackingProps clone.
+func applyCirclePackingState(props *cp.CirclePackingProps, id string, st State) {
+	props.ChartID = id
+	props.Interactive = true
+	props.FocusID = st.FocusID
+}
+
+// applySunburstState overlays the per-instance state onto a
+// sunburst.SunburstProps clone.
+func applySunburstState(props *sunburst.SunburstProps, id string, st State) {
+	props.ChartID = id
+	props.Interactive = true
+	props.FocusID = st.FocusID
+}
+
+// zoomParentID resolves the parent-node id of nodeID for a hierarchy instance,
+// walking the chart's input data. It returns "" when nodeID is the root or a
+// depth-1 node (whose parent is the root) — i.e. zooming out returns to the
+// full view. Returns ("", false) for a non-hierarchy kind.
+func zoomParentID(inst *ChartInstance, nodeID string) (string, bool) {
+	switch inst.Kind {
+	case KindIcicle:
+		root := inst.Props.(icicle.IcicleProps).Data
+		return icicleParent(root, "", nodeID), true
+	case KindTreemap:
+		root := inst.Props.(treemap.TreemapProps).Data
+		return treemapParent(root, "", nodeID), true
+	case KindCirclePack:
+		root := inst.Props.(cp.CirclePackingProps).Data
+		return cpParent(root, "", nodeID), true
+	case KindSunburst:
+		root := inst.Props.(sunburst.SunburstProps).Data
+		return sunburstParent(root, "", nodeID), true
+	}
+	return "", false
+}
+
+// The parent resolvers return the id of parentID when a child matches target,
+// or "" if the parent is the root (so zoom-out reaches the full view). They
+// recurse depth-first over the input hierarchy.
+func icicleParent(n icicle.IcicleNode, parentID, target string) string {
+	for _, c := range n.Children {
+		if c.ID == target {
+			return parentID
+		}
+		if childHasIcicle(c, target) {
+			return icicleParent(c, n.ID, target)
+		}
+	}
+	return ""
+}
+
+func childHasIcicle(n icicle.IcicleNode, target string) bool {
+	for _, c := range n.Children {
+		if c.ID == target || childHasIcicle(c, target) {
+			return true
+		}
+	}
+	return false
+}
+
+func treemapParent(n treemap.TreemapNode, parentID, target string) string {
+	for _, c := range n.Children {
+		if c.ID == target {
+			return parentID
+		}
+		if childHasTreemap(c, target) {
+			return treemapParent(c, n.ID, target)
+		}
+	}
+	return ""
+}
+
+func childHasTreemap(n treemap.TreemapNode, target string) bool {
+	for _, c := range n.Children {
+		if c.ID == target || childHasTreemap(c, target) {
+			return true
+		}
+	}
+	return false
+}
+
+func cpParent(n cp.CirclePackingNode, parentID, target string) string {
+	for _, c := range n.Children {
+		if c.ID == target {
+			return parentID
+		}
+		if childHasCP(c, target) {
+			return cpParent(c, n.ID, target)
+		}
+	}
+	return ""
+}
+
+func childHasCP(n cp.CirclePackingNode, target string) bool {
+	for _, c := range n.Children {
+		if c.ID == target || childHasCP(c, target) {
+			return true
+		}
+	}
+	return false
+}
+
+func sunburstParent(n sunburst.SunburstNode, parentID, target string) string {
+	for _, c := range n.Children {
+		if c.ID == target {
+			return parentID
+		}
+		if childHasSunburst(c, target) {
+			return sunburstParent(c, n.ID, target)
+		}
+	}
+	return ""
+}
+
+func childHasSunburst(n sunburst.SunburstNode, target string) bool {
+	for _, c := range n.Children {
+		if c.ID == target || childHasSunburst(c, target) {
+			return true
+		}
+	}
+	return false
 }
 
 // renderComponent renders a templ.Component to a string.

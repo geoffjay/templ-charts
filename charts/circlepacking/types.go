@@ -55,6 +55,24 @@ type CirclePackingProps struct {
 	// Interactive enables per-node client-side hover tooltips (charts/interact).
 	Interactive bool
 
+	// EnableZooming turns each circle into a click-to-zoom target and renders a
+	// breadcrumb when focused. It only takes effect when ChartID is also set
+	// (htmx mode): clicking a circle applies the d3 zoomable-pack transform so
+	// that node fills the viewport, via GET /charts/{ChartID}/zoom?node=<id>.
+	// Default false → the rendered SVG is byte-identical to the un-zoomable
+	// output.
+	EnableZooming bool
+
+	// ChartID is the htmx registry instance id. When set the chart emits hx-*
+	// wiring scoped to this id, mirroring bar/line/pie. Empty for standalone
+	// renders.
+	ChartID string
+
+	// FocusID is the id of the currently-focused node (the zoom target). Empty
+	// (or the root id) shows the full chart. Set by the htmx zoom handler on a
+	// props clone; consumers normally leave it zero.
+	FocusID string
+
 	Theme *theming.Theme
 
 	Role            string
@@ -73,9 +91,18 @@ type CirclePackingProps struct {
 	MotionStagger float64
 }
 
+// Crumb is one segment of the zoom breadcrumb: the node id (used to build the
+// zoom-back hx-get) and a display label.
+type Crumb struct {
+	ID    string
+	Label string
+}
+
 // CirclePackingResult is the computed model produced by UseCirclePacking.
 type CirclePackingResult struct {
 	Circles []ComputedCircle
+	// Breadcrumb is the root→focus ancestor path, non-nil only when focused.
+	Breadcrumb []Crumb
 }
 
 // BoolPtr returns a pointer to b — a helper for the *bool props.

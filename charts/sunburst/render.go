@@ -3,6 +3,7 @@ package sunburst
 import (
 	"context"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -44,9 +45,16 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 	return c.Type == 0 && c.Scheme == "" && c.Static == "" && len(c.Colors) == 0 && c.Func == nil && c.DatumPath == ""
 }
 
+// zoomEnabled reports whether click-to-zoom wiring should be emitted: gated on
+// EnableZooming plus a ChartID (htmx mode). Static renders stay byte-identical.
+func zoomEnabled(props SunburstProps) bool {
+	return props.EnableZooming && props.ChartID != ""
+}
+
 // renderArcs draws the sunburst arcs (and optional labels) via charts/arcs.
 func renderArcs(props SunburstProps, result SunburstResult, theme *theming.Theme) string {
 	arcGen := arcs.CreateArcGenerator(props.CornerRadius, 0)
+	zoom := zoomEnabled(props)
 	items := make([]arcs.ArcLayerItem, 0, len(result.Arcs))
 	for i, a := range result.Arcs {
 		sp := arcs.ArcShapeProps{
@@ -59,6 +67,11 @@ func renderArcs(props SunburstProps, result SunburstResult, theme *theming.Theme
 		}
 		if props.Interactive {
 			sp.DataTooltip = interact.TooltipHTML(a.Color, a.ID, a.FormattedValue)
+		}
+		if zoom {
+			sp.HxGet = "/charts/" + props.ChartID + "/zoom?node=" + templ.EscapeString(a.ID)
+			sp.HxTarget = "#chart-" + props.ChartID
+			sp.HxSwap = "innerHTML"
 		}
 		if props.Animate {
 			sp.Animate = true
@@ -74,7 +87,64 @@ func renderArcs(props SunburstProps, result SunburstResult, theme *theming.Theme
 	if props.ArcLabelsEnabled() {
 		out += renderArcLabels(props, result, theme)
 	}
+	if zoom && len(result.Breadcrumb) > 0 {
+		fill, fontSize, fontFamily := labelsTextStyle(theme)
+		out += renderBreadcrumb(props.ChartID, result.Breadcrumb, fill, fontSize, fontFamily)
+	}
 	return out
+}
+
+// renderBreadcrumb draws the root→focus ancestor path as clickable text
+// segments (top-left), each zooming to that ancestor. Only emitted when
+// focused.
+func renderBreadcrumb(chartID string, crumbs []Crumb, fill string, fontSize float64, fontFamily string) string {
+	if fontSize <= 0 {
+		fontSize = 11
+	}
+	var b strings.Builder
+	x := 4.0
+	y := fontSize + 2
+	for i, c := range crumbs {
+		if i > 0 {
+			b.WriteString(`<text x="`)
+			b.WriteString(fmtF(x))
+			b.WriteString(`" y="`)
+			b.WriteString(fmtF(y))
+			b.WriteString(`" dominant-baseline="central" style="pointer-events:none;fill:`)
+			b.WriteString(fill)
+			b.WriteString(`;font-size:`)
+			b.WriteString(fmtF(fontSize))
+			b.WriteString(`px"> / </text>`)
+			x += float64(len(" / ")) * fontSize * 0.5
+		}
+		b.WriteString(`<text x="`)
+		b.WriteString(fmtF(x))
+		b.WriteString(`" y="`)
+		b.WriteString(fmtF(y))
+		b.WriteString(`" dominant-baseline="central" hx-get="/charts/`)
+		b.WriteString(chartID)
+		b.WriteString(`/zoom?node=`)
+		b.WriteString(templ.EscapeString(c.ID))
+		b.WriteString(`" hx-target="#chart-`)
+		b.WriteString(chartID)
+		b.WriteString(`" hx-swap="innerHTML" style="cursor:pointer;pointer-events:auto;fill:`)
+		b.WriteString(fill)
+		b.WriteString(`;font-size:`)
+		b.WriteString(fmtF(fontSize))
+		if fontFamily != "" {
+			b.WriteString(`;font-family:`)
+			b.WriteString(fontFamily)
+		}
+		b.WriteString(`;text-decoration:underline">`)
+		b.WriteString(templ.EscapeString(c.Label))
+		b.WriteString(`</text>`)
+		x += float64(len(c.Label)) * fontSize * 0.55
+	}
+	return b.String()
+}
+
+func fmtF(v float64) string {
+	return strconv.FormatFloat(math.Round(v*1000)/1000, 'g', -1, 64)
 }
 
 func renderArcLabels(props SunburstProps, result SunburstResult, theme *theming.Theme) string {

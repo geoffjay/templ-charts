@@ -84,7 +84,7 @@ func NetworkDemos() []NetworkDemo {
 		{
 			ID:          "network-high-repulsivity",
 			Title:       "High repulsivity (spread out)",
-			Description: "repulsivity 300: the charge dominates, pushing every node strongly apart so the graph fills most of the frame. Hover a node for its id.",
+			Description: "repulsivity 300: the charge dominates, pushing every node strongly apart so the graph fills most of the frame. Hover a node to highlight it, its links and its neighbours (dimming the rest) — a scoped CSS :has() block, no JS — plus a tooltip with its id.",
 			Props: network.NetworkProps{
 				Width: side, Height: side, Margin: margin,
 				Nodes: nodes, Links: links,

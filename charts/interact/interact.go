@@ -24,6 +24,19 @@ const TooltipAttrName = "data-tc-tooltip"
 // nearest-point (mesh) hover.
 const MeshAttrName = "data-tc-mesh"
 
+// ObserveAttrName is the opt-in attribute that turns on the ResizeObserver
+// re-fetch: its value is a GET URL the client re-requests (with the new
+// content-box ?w=&h= appended) whenever the element resizes, swapping the
+// response in for a pixel-accurate re-render of an axes-heavy chart. An optional
+// data-tc-observe-target CSS selector (ObserveTargetAttrName) redirects the swap
+// to another element; absent, the observed element is swapped. Costs nothing on
+// pages that never set it.
+const ObserveAttrName = "data-tc-observe"
+
+// ObserveTargetAttrName optionally overrides which element receives the
+// ResizeObserver re-fetch swap (a CSS selector); default is the observed one.
+const ObserveTargetAttrName = "data-tc-observe-target"
+
 // TooltipHTML builds the standard one-line tooltip markup: a small color chip
 // followed by "label: value" (or just value/label when the other is empty).
 // All styling is inline so the tooltip renders correctly without any extra CSS

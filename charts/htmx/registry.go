@@ -21,19 +21,27 @@ import (
 	"sync"
 
 	"github.com/geoffjay/templ-charts/charts/bar"
+	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
+	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/line"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/sunburst"
+	"github.com/geoffjay/templ-charts/charts/treemap"
 )
 
 // ChartKind enumerates the chart types the registry can serve.
 type ChartKind string
 
 const (
-	KindBar     ChartKind = "bar"
-	KindLine    ChartKind = "line"
-	KindPie     ChartKind = "pie"
-	KindHeatmap ChartKind = "heatmap"
+	KindBar        ChartKind = "bar"
+	KindLine       ChartKind = "line"
+	KindPie        ChartKind = "pie"
+	KindHeatmap    ChartKind = "heatmap"
+	KindIcicle     ChartKind = "icicle"
+	KindTreemap    ChartKind = "treemap"
+	KindCirclePack ChartKind = "circlepacking"
+	KindSunburst   ChartKind = "sunburst"
 )
 
 // ChartInstance is one registered chart: its kind, an immutable props
@@ -54,6 +62,7 @@ type ChartInstance struct {
 	hoverX     float64 // line mesh hover x (chart units)
 	hoverY     float64 // line mesh hover y (chart units)
 	hasHover   bool    // line mesh: a hover is active (gates crosshair render)
+	focusID    string  // hierarchy zoom focus node id ("" = root / full view)
 }
 
 // State is a snapshot of the mutable per-instance state. Returned by
@@ -65,6 +74,7 @@ type State struct {
 	HoverX     float64 // line mesh hover x (chart units, drives crosshair)
 	HoverY     float64 // line mesh hover y (chart units, drives crosshair)
 	HasHover   bool    // line mesh: a hover is active (gates crosshair render)
+	FocusID    string  // hierarchy zoom focus node id ("" = root / full view)
 }
 
 // State returns a copy of the instance's mutable state.
@@ -78,7 +88,15 @@ func (c *ChartInstance) State() State {
 		HoverX:     c.hoverX,
 		HoverY:     c.hoverY,
 		HasHover:   c.hasHover,
+		FocusID:    c.focusID,
 	}
+}
+
+// setFocus sets the hierarchy zoom focus node id ("" clears to the full view).
+func (c *ChartInstance) setFocus(id string) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.focusID = id
 }
 
 // setHidden replaces the hidden-id list (toggle endpoint).
@@ -183,6 +201,27 @@ func (r *Registry) RegisterHeatmap(id string, props heatmap.HeatMapProps) *Chart
 	return r.Register(id, KindHeatmap, props)
 }
 
+// RegisterIcicle is a convenience wrapper for Register(id, KindIcicle, props).
+func (r *Registry) RegisterIcicle(id string, props icicle.IcicleProps) *ChartInstance {
+	return r.Register(id, KindIcicle, props)
+}
+
+// RegisterTreemap is a convenience wrapper for Register(id, KindTreemap, props).
+func (r *Registry) RegisterTreemap(id string, props treemap.TreemapProps) *ChartInstance {
+	return r.Register(id, KindTreemap, props)
+}
+
+// RegisterCirclePacking is a convenience wrapper for
+// Register(id, KindCirclePack, props).
+func (r *Registry) RegisterCirclePacking(id string, props cp.CirclePackingProps) *ChartInstance {
+	return r.Register(id, KindCirclePack, props)
+}
+
+// RegisterSunburst is a convenience wrapper for Register(id, KindSunburst, props).
+func (r *Registry) RegisterSunburst(id string, props sunburst.SunburstProps) *ChartInstance {
+	return r.Register(id, KindSunburst, props)
+}
+
 // Get returns the instance for id, or nil if not registered.
 func (r *Registry) Get(id string) *ChartInstance {
 	r.mu.RLock()
@@ -226,4 +265,5 @@ func (c *ChartInstance) SetStateForTest(s State) {
 	c.hoverX = s.HoverX
 	c.hoverY = s.HoverY
 	c.hasHover = s.HasHover
+	c.focusID = s.FocusID
 }

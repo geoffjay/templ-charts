@@ -1,14 +1,20 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"html"
 	"net/http"
 	"strings"
 
 	"github.com/a-h/templ"
+	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/htmx"
+	"github.com/geoffjay/templ-charts/charts/icicle"
+	"github.com/geoffjay/templ-charts/charts/sunburst"
 	"github.com/geoffjay/templ-charts/charts/theming"
+	"github.com/geoffjay/templ-charts/charts/treemap"
 	"github.com/geoffjay/templ-charts/examples/app/demos"
 	"github.com/geoffjay/templ-charts/examples/app/handlers/entries"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
@@ -61,21 +67,127 @@ func (a *App) Detail(w http.ResponseWriter, r *http.Request) {
 	palette := colors.PaletteID(r.URL.Query().Get("palette"))
 	animate := r.URL.Query().Get("animate") == "1"
 
-	svg, err := entry.Render(theme, palette, animate)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	// The four hierarchy charts are click-to-zoom: register a zoomable instance
+	// with the htmx registry and mount it (so hx-get="/charts/<id>/zoom" +
+	// breadcrumb round-trip through the existing handler), instead of a static
+	// SVG. Every other chart keeps its plain static detail render.
+	var chartHTML string
+	if id, kind, props, ok := a.zoomableChart(slug, theme, palette); ok {
+		a.registry.Register(id, kind, props)
+		svg, err := a.handler.RenderFull(id)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		var b strings.Builder
+		if err := htmx.Mount(htmx.MountProps{ID: id, SVG: svg, Interactive: true, Class: "tc-detail-chart chart"}).
+			Render(context.Background(), &b); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		chartHTML = b.String()
+	} else {
+		svg, err := entry.Render(theme, palette, animate)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		chartHTML = `<div class="tc-detail-chart chart">` + svg + `</div>`
 	}
 
-	html := buildDetailHTML(entry, svg, themeName, palette, animate)
+	html := buildDetailHTML(entry, chartHTML, themeName, palette, animate)
 	a.renderPage(w,
 		templates.LayoutProps{Title: entry.Title + " — templ-charts demo"},
 		templ.Raw(html))
 }
 
+// zoomableChart returns a registered-instance definition for the four
+// hierarchy charts (icicle/treemap/circle-packing/sunburst) with EnableZooming
+// + a ChartID set, using a multi-level sample so the drill-down is meaningful.
+// ok is false for every other slug.
+func (a *App) zoomableChart(slug string, theme *theming.Theme, palette colors.PaletteID) (string, htmx.ChartKind, any, bool) {
+	scheme := colors.OrdinalColorScaleConfig{}
+	if palette != "" {
+		scheme = colors.Scheme(palette)
+	}
+	id := "detail-" + slug
+	switch slug {
+	case "icicle":
+		p := icicle.IcicleProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: icicleSample()}
+		if palette != "" {
+			p.Colors = scheme
+		}
+		return id, htmx.KindIcicle, p, true
+	case "treemap":
+		p := treemap.TreemapProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: treemapSample()}
+		if palette != "" {
+			p.Colors = scheme
+		}
+		return id, htmx.KindTreemap, p, true
+	case "circle-packing":
+		p := cp.CirclePackingProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: cpSample()}
+		if palette != "" {
+			p.Colors = scheme
+		}
+		return id, htmx.KindCirclePack, p, true
+	case "sunburst":
+		p := sunburst.SunburstProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: sunburstSample()}
+		if palette != "" {
+			p.Colors = scheme
+		}
+		return id, htmx.KindSunburst, p, true
+	}
+	return "", "", nil, false
+}
+
+func icicleSample() icicle.IcicleNode {
+	return icicle.IcicleNode{ID: "root", Children: []icicle.IcicleNode{
+		{ID: "analytics", Children: []icicle.IcicleNode{
+			{ID: "charts", Children: []icicle.IcicleNode{{ID: "icicle", Value: 8}, {ID: "sunburst", Value: 6}}},
+			{ID: "dashboards", Value: 12},
+		}},
+		{ID: "billing", Children: []icicle.IcicleNode{{ID: "invoices", Value: 10}, {ID: "reports", Value: 5}}},
+		{ID: "support", Value: 9},
+	}}
+}
+
+func treemapSample() treemap.TreemapNode {
+	return treemap.TreemapNode{ID: "root", Children: []treemap.TreemapNode{
+		{ID: "viz", Children: []treemap.TreemapNode{
+			{ID: "charts", Children: []treemap.TreemapNode{{ID: "bar", Value: 14}, {ID: "line", Value: 9}}},
+			{ID: "maps", Value: 11},
+		}},
+		{ID: "colors", Children: []treemap.TreemapNode{{ID: "categorical", Value: 12}, {ID: "sequential", Value: 7}}},
+		{ID: "layout", Value: 10},
+	}}
+}
+
+func cpSample() cp.CirclePackingNode {
+	return cp.CirclePackingNode{ID: "root", Children: []cp.CirclePackingNode{
+		{ID: "A", Children: []cp.CirclePackingNode{
+			{ID: "A1", Children: []cp.CirclePackingNode{{ID: "A1a", Value: 8}, {ID: "A1b", Value: 5}}},
+			{ID: "A2", Value: 10},
+		}},
+		{ID: "B", Children: []cp.CirclePackingNode{{ID: "B1", Value: 12}, {ID: "B2", Value: 6}}},
+		{ID: "C", Value: 9},
+	}}
+}
+
+func sunburstSample() sunburst.SunburstNode {
+	return sunburst.SunburstNode{ID: "root", Children: []sunburst.SunburstNode{
+		{ID: "fruit", Children: []sunburst.SunburstNode{
+			{ID: "citrus", Children: []sunburst.SunburstNode{{ID: "orange", Value: 8}, {ID: "lemon", Value: 4}}},
+			{ID: "berry", Value: 10},
+		}},
+		{ID: "veg", Children: []sunburst.SunburstNode{{ID: "root-veg", Value: 9}, {ID: "leafy", Value: 6}}},
+		{ID: "grain", Value: 7},
+	}}
+}
+
 // buildDetailHTML assembles the detail page body: switchers, the full-width
-// chart, and the code snippet.
-func buildDetailHTML(e entries.ChartEntry, svg, themeName string, palette colors.PaletteID, animate bool) string {
+// chart, and the code snippet. chartHTML is the ready-to-inject chart block
+// (a static SVG wrapper, or the htmx.Mount container for zoomable charts).
+func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette colors.PaletteID, animate bool) string {
 	var b strings.Builder
 
 	// animateSuffix carries the current animate selection through the theme and
@@ -119,8 +231,8 @@ func buildDetailHTML(e entries.ChartEntry, svg, themeName string, palette colors
 	b.WriteString(switchLink(base+"&animate=1", "on", animate))
 	b.WriteString(`</div>`)
 
-	// Full-width chart.
-	b.WriteString(`<div class="tc-detail-chart chart">` + svg + `</div>`)
+	// Full-width chart (static wrapper or zoomable htmx.Mount container).
+	b.WriteString(chartHTML)
 
 	// Code snippet.
 	b.WriteString(`<h3>Code</h3>`)

@@ -18,8 +18,8 @@ evidence, still valid) but are **no longer part of the standing backlog** — tr
 them in `PLAN-v5.md` and strike them here as they land:
 
 - **§3 Animation parity** → v5 §4 (wired `MotionProps` across the ~25 v2/v3 charts)
-- **§4 Interactivity model gaps** → v5 §6 (unified hover-others, hierarchy zoom,
-  retire line mousemove fallback, opt-in `ResizeObserver`)
+- ~~**§4 Interactivity model gaps** → v5 §6 (unified hover-others, hierarchy zoom,
+  retire line mousemove fallback, opt-in `ResizeObserver`)~~ — **done**
 - **§5 Feature completions** → v5 §5 (waffle `areas`, calendar month outline,
   sankey link gradients)
 - **§6 d3-geo `clipCircle`/`clipExtent`** → v5 §3 (the one *correctness* fix)
@@ -80,24 +80,37 @@ green. See `docs/NOTES.md` (v5 Phase 2).
   shared `arcs.ArcShape` already supports opt-in d-morph via `AnimateFromPath`;
   extending morph geometry to the other families is a future pass.
 
-## 4. Interactivity model gaps — **scoped into v5 (§6)**
+## 4. Interactivity model gaps — **done in v5 (§6)**
 
-- **Unified hover-others dimming.** chord and now **sankey** (v5 Phase 3
-  follow-up) both implement client CSS `:has()` hover-highlight (dim others,
-  re-light connected); **network** still has none. Remaining: give network the
-  same treatment and, ideally, factor the near-identical chord/sankey `:has()`
-  style-block builders into one shared helper. (This is the Phase 4 §6 item; the
-  sankey half landed early from demo review.)
-- **Interactive zoom / drill-down** for icicle, treemap, circle-packing,
-  sunburst. Layout is present; the client-driven zoom transition is not
-  (deferral comments in each `types.go`).
-- **Line per-mousemove server round-trip.** The non-JS fallback
-  (`charts/line/mesh.templ:64`, `mousemove throttle:40ms`) still round-trips to
-  the server; the client mesh path (`charts/interact/script.go`) already replaces
-  it when `DataMesh` is set. Fully retiring the fallback is deferred.
-- **`ResizeObserver` re-fetch.** Pixel-accurate re-render on axes-heavy charts
-  when the container resizes (cosmetic scaling is already covered by the
-  `Responsive` viewBox prop). No `ResizeObserver` in `charts/interact/script.go`.
+All four sub-items shipped in v5 Phase 4 (default-off / opt-in where they add
+markup, so existing goldens stayed byte-stable). See `docs/NOTES.md` (v5 Phase 4).
+
+- ~~**Unified hover-others dimming.**~~ — **done in v5 (Phase 4 §6)**: chord's
+  `:has()` hover-highlight pattern was factored into one shared
+  `charts/interact` helper (`HoverHighlight`/`HoverGroup`/`HoverRule`); chord and
+  sankey were migrated onto it **byte-identically**, and **network** was given
+  the same treatment (dim others, re-light the hovered node + its links +
+  neighbours, or a hovered link + its two endpoints), gated on `Interactive &&
+  !UseMesh`. New `network-highlight` golden.
+- ~~**Interactive zoom / drill-down** for icicle, treemap, circle-packing,
+  sunburst.~~ — **done in v5 (Phase 4 §6)**: opt-in `EnableZooming` + `ChartID`
+  turn each node into an htmx zoom target (`GET /charts/{id}/zoom?node=`); the
+  `htmx` registry gained the four kinds + a `zoom` verb / `FocusID` state, and
+  each `Use{Chart}` hook does the per-family focus recompute (partition rescale
+  for icicle/sunburst, subtree re-layout for treemap, zoomable-pack transform
+  for circle-packing) plus a clickable breadcrumb. Default-off → existing
+  goldens byte-stable. See `docs/NOTES.md` (v5 Phase 4 — hierarchy zoom).
+- ~~**Line per-mousemove server round-trip.**~~ — **done in v5 (Phase 4 §6)**:
+  the client mesh/slice hover path is now the **default**; the per-mousemove
+  htmx round-trip is only emitted when the new `ServerHover` opt-in is set (the
+  htmx registry sets it automatically, since it *is* the server path).
+  `ClientHover` retained as a compat no-op.
+- ~~**`ResizeObserver` re-fetch.**~~ — **done in v5 (Phase 4 §6)**: an opt-in
+  observer in `charts/interact/script.go`, gated by `data-tc-observe="<url>"`
+  (+ optional `data-tc-observe-target`), debounce-re-fetches with the new
+  `?w=&h=` on container resize (via htmx when present, else `fetch`); costs
+  nothing unless opted in. Cosmetic fluid scaling stays covered by the
+  `Responsive` viewBox.
 
 ## 5. Feature completions (partial charts) — **done in v5 (§5)**
 

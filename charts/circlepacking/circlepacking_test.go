@@ -92,3 +92,58 @@ func TestCirclePacking_Animate(t *testing.T) {
 		t.Errorf("Animate=false should not emit any <animate>")
 	}
 }
+
+func TestCirclePacking_ZoomOffNoZoomAttrs(t *testing.T) {
+	if strings.Contains(renderChart(t, baseProps()), "/zoom?node=") {
+		t.Errorf("default circlepacking must not emit /zoom hx-get")
+	}
+	p := baseProps()
+	p.EnableZooming = true // no ChartID → still off
+	if strings.Contains(renderChart(t, p), "/zoom?node=") {
+		t.Errorf("circlepacking with EnableZooming but no ChartID must not emit /zoom hx-get")
+	}
+}
+
+func TestCirclePacking_ZoomOnEmitsZoomTargets(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "cp1"
+	out := renderChart(t, p)
+	for _, id := range []string{"A", "B", "C", "a1", "a2", "b1"} {
+		if !strings.Contains(out, "/charts/cp1/zoom?node="+id+`"`) {
+			t.Errorf("zoomable circlepacking should emit zoom target for node %q", id)
+		}
+	}
+	if !strings.Contains(out, `hx-target="#chart-cp1"`) {
+		t.Errorf("zoom targets should swap into #chart-cp1")
+	}
+}
+
+func TestCirclePacking_ZoomedShowsBreadcrumb(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "cp1"
+	p.FocusID = "A"
+	out := renderChart(t, p)
+	if !strings.Contains(out, "/charts/cp1/zoom?node=root") {
+		t.Errorf("focused circlepacking breadcrumb should link back to root")
+	}
+	if strings.Contains(out, "/charts/cp1/zoom?node=b1") {
+		t.Errorf("focused circlepacking should not render nodes outside the focus subtree")
+	}
+}
+
+func TestCirclePacking_GoldenZoomable(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "cp1"
+	golden.Assert(t, "circlepacking-zoomable", renderChart(t, p))
+}
+
+func TestCirclePacking_GoldenZoomed(t *testing.T) {
+	p := baseProps()
+	p.EnableZooming = true
+	p.ChartID = "cp1"
+	p.FocusID = "A"
+	golden.Assert(t, "circlepacking-zoomed", renderChart(t, p))
+}

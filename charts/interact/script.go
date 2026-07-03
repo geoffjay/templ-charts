@@ -12,8 +12,16 @@ package interact
 //     nearest point on mousemove, shows its tooltip, and draws a crosshair —
 //     replacing the line chart's per-mousemove server round-trip.
 //
+// It also provides an opt-in ResizeObserver (data-tc-observe): elements that
+// carry that attribute are re-fetched on container resize for a pixel-accurate
+// re-render (tick/label density on axes-heavy charts), with the new content-box
+// width/height appended as ?w=&h=. This is the only part that round-trips, and
+// only for elements that explicitly opt in — cosmetic fluid scaling is already
+// covered by the Responsive viewBox, so pages that never set data-tc-observe
+// pay nothing.
+//
 // State-changing interactions (series toggle, active-arc) stay on the server
-// via HTMX; this script never round-trips. It reuses the .tc-chart /
+// via HTMX; the hover layer never round-trips. It reuses the .tc-chart /
 // .tc-chart-tooltip container conventions emitted by htmx.Mount, so charts
 // embedded with zero JS still render statically. Loaded once per page via
 // ScriptTag (or by inlining Script).
@@ -201,4 +209,58 @@ const Script = `(function () {
     var to = e.relatedTarget;
     if (!to || !chart.contains(to)) hide(chart);
   }, true);
+
+  // --- opt-in ResizeObserver re-fetch --------------------------------------
+  // Elements carrying data-tc-observe="<url>" are re-fetched on resize for a
+  // pixel-accurate re-render; the new content-box w/h are appended to the URL.
+  // Uses htmx when present (preserving hx-* swap semantics), else fetch +
+  // innerHTML. Purely opt-in — pages without data-tc-observe are untouched.
+  function observeURL(el, w, h) {
+    var base = el.getAttribute('data-tc-observe');
+    if (!base) return null;
+    return base + (base.indexOf('?') === -1 ? '?' : '&') + 'w=' + w + '&h=' + h;
+  }
+
+  function refetch(el) {
+    var r = el.getBoundingClientRect();
+    var w = Math.round(r.width), h = Math.round(r.height);
+    if (!w || !h || (el._tcW === w && el._tcH === h)) return;
+    el._tcW = w; el._tcH = h;
+    var url = observeURL(el, w, h);
+    if (!url) return;
+    var sel = el.getAttribute('data-tc-observe-target');
+    var tgt = sel ? document.querySelector(sel) : el;
+    if (!tgt) return;
+    if (window.htmx && typeof window.htmx.ajax === 'function') {
+      window.htmx.ajax('GET', url, { target: tgt, swap: 'innerHTML' });
+      return;
+    }
+    fetch(url).then(function (res) { return res.text(); }).then(function (html) {
+      tgt.innerHTML = html;
+    }).catch(function () {});
+  }
+
+  if (typeof ResizeObserver === 'function') {
+    var ro = new ResizeObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        (function (el) {
+          // The observer fires once on observe(); record the baseline size and
+          // skip so we only re-fetch on an actual later change.
+          var rr = el.getBoundingClientRect();
+          if (el._tcW === undefined) { el._tcW = Math.round(rr.width); el._tcH = Math.round(rr.height); return; }
+          clearTimeout(el._tcTimer);
+          el._tcTimer = setTimeout(function () { refetch(el); }, 150);
+        })(entries[i].target);
+      }
+    });
+    var observeAll = function () {
+      var els = document.querySelectorAll('[data-tc-observe]');
+      for (var i = 0; i < els.length; i++) {
+        if (!els[i]._tcObserved) { els[i]._tcObserved = true; ro.observe(els[i]); }
+      }
+    };
+    observeAll();
+    document.addEventListener('htmx:afterSwap', observeAll);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', observeAll);
+  }
 })();`

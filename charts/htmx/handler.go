@@ -104,6 +104,12 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		h.handleToggle(w, r, inst)
+	case "zoom":
+		if r.Method != http.MethodGet {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		h.handleZoom(w, r, inst)
 	default:
 		http.NotFound(w, r)
 	}
@@ -131,6 +137,36 @@ func (h *Handler) handleToggle(w http.ResponseWriter, r *http.Request, inst *Cha
 		return
 	}
 	inst.toggleHidden(series)
+	out, err := renderFull(inst)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "image/svg+xml; charset=utf-8")
+	_, _ = w.Write([]byte(out))
+}
+
+// handleZoom updates the hierarchy chart's zoom focus and re-renders the full
+// SVG (swapped into #chart-<id> via hx-swap="innerHTML", same mechanism as
+// toggle). The `node` query param is the clicked node id. Clicking the
+// currently-focused node zooms out to its parent (or the root/full view);
+// clicking any other node focuses it. An empty node param resets to root.
+func (h *Handler) handleZoom(w http.ResponseWriter, r *http.Request, inst *ChartInstance) {
+	switch inst.Kind {
+	case KindIcicle, KindTreemap, KindCirclePack, KindSunburst:
+	default:
+		http.Error(w, "zoom not supported for this chart kind", http.StatusBadRequest)
+		return
+	}
+	node := r.URL.Query().Get("node")
+	st := inst.State()
+	if node == st.FocusID {
+		// Re-clicking the focused node zooms out to its parent (or root).
+		parent, _ := zoomParentID(inst, node)
+		inst.setFocus(parent)
+	} else {
+		inst.setFocus(node)
+	}
 	out, err := renderFull(inst)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

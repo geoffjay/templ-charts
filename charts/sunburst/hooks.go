@@ -24,13 +24,43 @@ func UseSunburst(props SunburstProps) SunburstResult {
 
 	d3hierarchy.NewPartition().Size(2*math.Pi, radius*radius).Layout(root)
 
+	// Focused rescale (d3 zoomable-sunburst): remap the angular span so the
+	// focused node's [x0,x1] fills the full 2π, and the radial (r²) span so the
+	// focused node's depth becomes the inner edge and its subtree fills to the
+	// outer radius. focus == nil ⇒ identity (byte-identical to pre-zoom output).
+	focus := findNode(root, props.FocusID)
+	if focus != nil && focus.Depth > 0 {
+		fx0, fx1 := focus.X0, focus.X1
+		xk := 2 * math.Pi
+		if fx1 > fx0 {
+			xk = 2 * math.Pi / (fx1 - fx0)
+		}
+		fy0 := focus.Y0
+		maxY := radius * radius
+		yk := 1.0
+		if maxY > fy0 {
+			yk = maxY / (maxY - fy0)
+		}
+		root.Each(func(n *d3hierarchy.Node) {
+			n.X0 = (n.X0 - fx0) * xk
+			n.X1 = (n.X1 - fx0) * xk
+			n.Y0 = math.Max(0, n.Y0-fy0) * yk
+			n.Y1 = math.Max(0, n.Y1-fy0) * yk
+		})
+	}
+
 	getColor := colors.GetOrdinalColorScale[string](props.Colors, func(id string) string { return id })
 	format := valueFormatter(props.ValueFormat)
+
+	visible := visibleSet(focus)
 
 	out := make([]ComputedArc, 0)
 	root.Each(func(n *d3hierarchy.Node) {
 		if n.Depth == 0 {
 			return // root is the hollow center
+		}
+		if visible != nil && !visible[n] {
+			return
 		}
 		out = append(out, ComputedArc{
 			ID:             n.Data.(SunburstNode).ID,
@@ -47,7 +77,50 @@ func UseSunburst(props SunburstProps) SunburstResult {
 		})
 	})
 
-	return SunburstResult{Center: center, Arcs: out}
+	return SunburstResult{Center: center, Arcs: out, Breadcrumb: breadcrumbOf(focus, func(n *d3hierarchy.Node) string {
+		return n.Data.(SunburstNode).ID
+	})}
+}
+
+// findNode returns the node whose SunburstNode.ID matches id, or nil if id is
+// empty/unmatched (the root is never a zoom target).
+func findNode(root *d3hierarchy.Node, id string) *d3hierarchy.Node {
+	if id == "" {
+		return nil
+	}
+	var found *d3hierarchy.Node
+	root.Each(func(n *d3hierarchy.Node) {
+		if found == nil && n.Data.(SunburstNode).ID == id {
+			found = n
+		}
+	})
+	return found
+}
+
+// visibleSet returns the focus node plus its descendants; nil when unfocused.
+func visibleSet(focus *d3hierarchy.Node) map[*d3hierarchy.Node]bool {
+	if focus == nil || focus.Depth == 0 {
+		return nil
+	}
+	set := map[*d3hierarchy.Node]bool{}
+	for _, d := range focus.Descendants() {
+		set[d] = true
+	}
+	return set
+}
+
+// breadcrumbOf returns the root→focus ancestor path as crumbs; nil when
+// unfocused.
+func breadcrumbOf(focus *d3hierarchy.Node, id func(*d3hierarchy.Node) string) []Crumb {
+	if focus == nil || focus.Depth == 0 {
+		return nil
+	}
+	anc := focus.Ancestors()
+	crumbs := make([]Crumb, 0, len(anc))
+	for i := len(anc) - 1; i >= 0; i-- {
+		crumbs = append(crumbs, Crumb{ID: id(anc[i]), Label: id(anc[i])})
+	}
+	return crumbs
 }
 
 func sunburstChildren(d any) []any {

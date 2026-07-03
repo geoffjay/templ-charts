@@ -16,6 +16,11 @@ var Defaults = NetworkProps{
 
 	LinkThickness: 1,
 
+	NodeHoverOpacity:       1,
+	NodeHoverOthersOpacity: 0.35,
+	LinkHoverOpacity:       1,
+	LinkHoverOthersOpacity: 0.15,
+
 	Layers: DefaultLayers,
 	Role:   "img",
 }

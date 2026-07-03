@@ -12,7 +12,7 @@ func TestScript_NonEmpty(t *testing.T) {
 	if len(interact.Script) < 100 {
 		t.Fatalf("Script looks too short (%d bytes)", len(interact.Script))
 	}
-	for _, want := range []string{"data-tc-tooltip", "data-tc-mesh", "tc-chart", "tc-crosshair", "getScreenCTM"} {
+	for _, want := range []string{"data-tc-tooltip", "data-tc-mesh", "tc-chart", "tc-crosshair", "getScreenCTM", "data-tc-observe", "ResizeObserver"} {
 		if !strings.Contains(interact.Script, want) {
 			t.Errorf("Script missing %q", want)
 		}
@@ -119,5 +119,38 @@ func TestEscapeAttr(t *testing.T) {
 	}
 	if !strings.Contains(out, "&quot;") || !strings.Contains(out, "&lt;") {
 		t.Errorf("EscapeAttr should encode quotes/brackets: %q", out)
+	}
+}
+
+func TestHoverHighlight_Empty(t *testing.T) {
+	if got := (interact.HoverHighlight{Scope: ".tc-x"}).Style(); got != "" {
+		t.Errorf("empty highlight should render nothing, got %q", got)
+	}
+}
+
+func TestHoverHighlight_Structure(t *testing.T) {
+	hh := interact.HoverHighlight{
+		Scope:   ".tc-x",
+		Resting: []interact.HoverRule{{Sels: []string{".a"}, Body: "opacity:0.9"}},
+		Groups: []interact.HoverGroup{{
+			Trigger: ".n0",
+			Rules: []interact.HoverRule{
+				{Sels: []string{".a"}, Body: "opacity:0.2"},
+				{Sels: []string{".a.n0", ".a.n1"}, Body: "opacity:1"},
+			},
+		}},
+	}
+	got := hh.Style()
+	// Resting rule (also the :has-unsupported fallback).
+	if !strings.Contains(got, ".tc-x.a{opacity:0.9}") {
+		t.Errorf("missing resting rule in %q", got)
+	}
+	// Dim rule under the :has() prefix.
+	if !strings.Contains(got, "svg:has(.tc-x.n0:hover) .tc-x.a{opacity:0.2}") {
+		t.Errorf("missing dim rule in %q", got)
+	}
+	// Multi-selector relight rule repeats the full prefix per comma part.
+	if !strings.Contains(got, "svg:has(.tc-x.n0:hover) .tc-x.a.n0,svg:has(.tc-x.n0:hover) .tc-x.a.n1{opacity:1}") {
+		t.Errorf("missing multi-selector relight rule in %q", got)
 	}
 }
