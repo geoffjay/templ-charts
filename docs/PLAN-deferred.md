@@ -111,21 +111,18 @@ Small, well-scoped finishes to existing charts:
 - **sankey link gradients** — `EnableLinkGradient` declared/defaulted but never
   read (`charts/sankey/types.go:160`); gradient `<defs>` rendering deferred.
 
-## 6. d3-geo completeness — **`clipCircle`/`clipExtent` scoped into v5 (§3)**
+## 6. d3-geo completeness — **`clipCircle`/`clipExtent` done in v5 (§3)**
 
-The `clipCircle`/`clipExtent` items below are v5's one correctness fix; the
-remaining geo items (full projection catalog, `GeoPath` bounds/centroid/
-`fitExtent`, TopoJSON) stay deferred.
-
-- **`clipCircle`** — the small-circle preclip the azimuthal family needs to hide
-  the far hemisphere. Absent (`internal/d3/geo` implements only
-  `clipAntimeridian`). **Consequence today**: orthographic/gnomonic/stereographic/
-  azimuthal* projections render the **whole sphere** and can show far-side
-  geometry — a real correctness gap, not cosmetic.
-- **`clipExtent`** — rectangular clip (`internal/d3/geo/projection.go:10`
-  "clipExtent omitted").
+- ~~**`clipCircle`** — the small-circle preclip the azimuthal family needs to
+  hide the far hemisphere.~~ **Done (v5 Phase 1):** ported into `internal/d3/geo`
+  (`circle.go`), wired into the generic clip framework, and installed as the
+  default preclip on all five azimuthal projection constructors — so
+  orthographic/gnomonic/stereographic/azimuthal* now render only the visible
+  hemisphere. This was the sole item that made output *wrong*; it is now closed.
+- ~~**`clipExtent`** — rectangular clip.~~ **Done (v5 Phase 1):** ported the
+  screen-space rectangle postclip (`clip_rectangle.go`) + `Projection.ClipExtent`.
 - **Full projection catalog** beyond the ~10 nivo exposes; `GeoPath`
-  bounds/area/centroid and `fitExtent`/`fitSize`.
+  bounds/area/centroid and `fitExtent`/`fitSize`. *(Still deferred.)*
 - **TopoJSON decoding** — out of scope by design (callers supply GeoJSON); revisit
   only if a consumer needs it.
 

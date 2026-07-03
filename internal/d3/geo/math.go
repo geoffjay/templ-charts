@@ -4,14 +4,16 @@
 // pipeline (radians → rotate → clip → resample → project) fed by a GeoJSON
 // stream traversal — so output matches d3 for the common rendering path.
 //
-// Scope (v3 minimal-viable, see docs/PLAN-v3.md §3.6 and NOTES.md): all ten
-// projection types nivo exposes are present, adaptive resampling and
-// antimeridian clipping are faithful ports, and GeoPath emits SVG path
-// strings. Deferred: clipCircle (azimuthal back-face hiding) and clipExtent
-// (rectangular clip). Cylindrical/pseudocylindrical projections (mercator,
-// equirectangular, transverseMercator, naturalEarth1, equalEarth) are fully
-// correct; azimuthal-family projections render the whole sphere until
-// clipCircle lands.
+// Scope: all ten projection types nivo exposes are present, adaptive resampling
+// and antimeridian clipping are faithful ports, and GeoPath emits SVG path
+// strings. As of v5 the clip machinery also includes clipCircle (the azimuthal
+// small-circle preclip that hides the far hemisphere) and clipExtent (the
+// rectangular screen-space postclip), so every projection — cylindrical,
+// pseudocylindrical, and azimuthal (orthographic/gnomonic/stereographic/
+// azimuthal*) — renders correctly. Still deferred (GeoMap/Choropleth don't need
+// them): GeoPath bounds/area/centroid and fitExtent/fitSize; projections beyond
+// the ~10 nivo exposes; TopoJSON (callers supply GeoJSON). See docs/PLAN-v5.md
+// §3 and NOTES.md.
 package geo
 
 import "math"

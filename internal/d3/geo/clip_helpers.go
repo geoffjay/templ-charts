@@ -93,20 +93,51 @@ func polygonContains(polygon [][][2]float64, point [2]float64) bool {
 	return boolXor(cond, winding&1 == 1)
 }
 
+// markPointSink is implemented by sinks that record an intersection marker (the
+// third component of a buffered point). The circle clipper emits marked points
+// (2/3) to flag entry/exit intersections; sinks that don't care ignore the mark.
+type markPointSink interface {
+	pointMark(x, y float64, m int)
+}
+
+// emitPoint forwards a point to sink, carrying the intersection mark when the
+// sink records it (the ring buffer) and dropping it otherwise (the real sink).
+func emitPoint(sink Sink, x, y float64, m int) {
+	if mp, ok := sink.(markPointSink); ok {
+		mp.pointMark(x, y, m)
+		return
+	}
+	sink.Point(x, y)
+}
+
 // clipBuffer collects clipped line segments as lists of [x,y,m] points, where m
-// is an intersection marker (0 here — the antimeridian clipper adds no marks).
-// Ported from d3-geo src/clip/buffer.js.
+// is an intersection marker (0 for ordinary points; 2/3 for circle-clip
+// entry/exit intersections). Ported from d3-geo src/clip/buffer.js.
 type clipBuffer struct {
 	noopSink
 	lines [][][3]float64
 }
 
-func (b *clipBuffer) Point(x, y float64) {
+func (b *clipBuffer) Point(x, y float64) { b.pointMark(x, y, 0) }
+
+func (b *clipBuffer) pointMark(x, y float64, m int) {
 	n := len(b.lines)
-	b.lines[n-1] = append(b.lines[n-1], [3]float64{x, y, 0})
+	b.lines[n-1] = append(b.lines[n-1], [3]float64{x, y, float64(m)})
 }
 func (b *clipBuffer) LineStart() { b.lines = append(b.lines, [][3]float64{}) }
 func (b *clipBuffer) LineEnd()   {}
+
+// rejoin concatenates the last buffered line onto the first, used by the
+// rectangle clipper when a ring's first and last points are both visible.
+// Ported from d3-geo src/clip/buffer.js rejoin.
+func (b *clipBuffer) rejoin() {
+	if len(b.lines) > 1 {
+		last := b.lines[len(b.lines)-1]
+		first := b.lines[0]
+		b.lines = b.lines[1 : len(b.lines)-1]
+		b.lines = append(b.lines, append(last, first...))
+	}
+}
 
 func (b *clipBuffer) result() [][][3]float64 {
 	r := b.lines

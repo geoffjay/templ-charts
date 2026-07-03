@@ -18,7 +18,9 @@ type Projection struct {
 	deltaLambda, deltaPhi, deltaGamma float64 // rotate, radians
 	delta2                            float64 // precision²
 
-	preclip func(Sink) Sink
+	theta    *float64 // clip angle, radians (nil ⇒ antimeridian preclip)
+	preclip  func(Sink) Sink
+	postclip func(Sink) Sink // screen-space clip (identity ⇒ no clipExtent)
 
 	rotate                 transform
 	projectTransform       transform
@@ -28,16 +30,21 @@ type Projection struct {
 
 func newProjection(project transform) *Projection {
 	p := &Projection{
-		project: project,
-		k:       150,
-		x:       480,
-		y:       250,
-		delta2:  0.5,
-		preclip: clipAntimeridian,
+		project:  project,
+		k:        150,
+		x:        480,
+		y:        250,
+		delta2:   0.5,
+		preclip:  clipAntimeridian,
+		postclip: identityStream,
 	}
 	p.recenter()
 	return p
 }
+
+// identityStream is the default postclip: it passes the sink through unchanged
+// (no clipExtent). Mirrors d3-geo's identity stream.
+func identityStream(sink Sink) Sink { return sink }
 
 func (p *Projection) recenter() {
 	cx, cy := p.project.forward(p.lambda, p.phi)
@@ -61,9 +68,9 @@ func (p *Projection) recenter() {
 }
 
 // Stream returns the projecting stream feeding sink. Chain (outermost first):
-// radians → rotate → preclip → resample+project → sink.
+// radians → rotate → preclip → resample+project → postclip → sink.
 func (p *Projection) Stream(sink Sink) Sink {
-	return transformRadians(transformRotate(p.rotate)(p.preclip(p.projectResample(sink))))
+	return transformRadians(transformRotate(p.rotate)(p.preclip(p.projectResample(p.postclip(sink)))))
 }
 
 // Project maps (lon,lat) degrees to plane coordinates directly (no clip or
@@ -108,6 +115,44 @@ func (p *Projection) Center(lon, lat float64) *Projection {
 func (p *Projection) Precision(delta float64) *Projection {
 	p.delta2 = delta * delta
 	p.recenter()
+	return p
+}
+
+// ClipAngle sets the preclip small-circle radius in degrees: a non-zero angle
+// installs clipCircle(angle) so the projection hides geometry beyond that
+// angular distance from the center (the azimuthal family's far hemisphere); 0
+// restores the default antimeridian preclip. Mirrors d3-geo projection.clipAngle.
+func (p *Projection) ClipAngle(deg float64) *Projection {
+	if deg != 0 {
+		r := deg * radians
+		p.theta = &r
+		p.preclip = clipCircle(r)
+	} else {
+		p.theta = nil
+		p.preclip = clipAntimeridian
+	}
+	return p
+}
+
+// ClipAngleValue returns the current clip angle in degrees, or 0 when the
+// antimeridian preclip is in effect.
+func (p *Projection) ClipAngleValue() float64 {
+	if p.theta == nil {
+		return 0
+	}
+	return *p.theta * degrees
+}
+
+// ClipExtent installs a rectangular screen-space postclip cropping output to the
+// box [[x0,y0],[x1,y1]]. Mirrors d3-geo projection.clipExtent.
+func (p *Projection) ClipExtent(x0, y0, x1, y1 float64) *Projection {
+	p.postclip = clipRectangle(x0, y0, x1, y1)
+	return p
+}
+
+// ClearClipExtent removes any rectangular postclip (d3's clipExtent(null)).
+func (p *Projection) ClearClipExtent() *Projection {
+	p.postclip = identityStream
 	return p
 }
 

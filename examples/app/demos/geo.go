@@ -74,6 +74,16 @@ func GeoMapDemos() []GeoMapDemo {
 	natural.ProjectionScale = fitScale(innerW, 2.73)
 	natural.EnableGraticule = true
 
+	// Orthographic globe: an azimuthal projection whose clipCircle preclip hides
+	// the far hemisphere (the v5 correctness fix). Rotated to center on Africa;
+	// the graticule and borders end cleanly at the visible limb instead of
+	// wrapping the whole sphere.
+	globe := base()
+	globe.ProjectionType = "orthographic"
+	globe.ProjectionScale = innerW / 2 // radius = scale for the unit-sphere raw
+	globe.ProjectionRotation = [3]float64{-10, -25, 0}
+	globe.EnableGraticule = true
+
 	interactive := base()
 	interactive.Interactive = true
 
@@ -95,6 +105,12 @@ func GeoMapDemos() []GeoMapDemo {
 			Title:       "Natural Earth projection",
 			Description: "projectionType:'naturalEarth1' — a pseudocylindrical projection with curved meridians. The graticule and every country border are adaptively resampled so straight lat/lon segments become the projection's true curves.",
 			Props:       natural,
+		},
+		{
+			ID:          "geomap-globe",
+			Title:       "Orthographic globe",
+			Description: "projectionType:'orthographic' — an azimuthal projection. internal/d3/geo's clipCircle preclip hides the far hemisphere, so only the visible cap renders and the graticule ends cleanly at the limb (before v5 the whole sphere drew, overlaying far-side geometry).",
+			Props:       globe,
 		},
 		{
 			ID:          "geomap-interactive",

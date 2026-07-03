@@ -5,11 +5,12 @@ import "math"
 // Raw projections and their constructors, ported from the corresponding
 // d3-geo src/projection/*.js modules. Each constructor returns a *Projection
 // wrapping the raw transform with the standard machinery. nivo always sets
-// scale/translate/rotate explicitly, so the d3 per-projection default scales
-// and clip angles are not replicated here (see NOTES.md for the deferred
-// clipCircle that the azimuthal family needs to hide the far hemisphere).
+// scale/translate/rotate explicitly, so the d3 per-projection default scales are
+// not replicated here; the azimuthal family's default clip angles (which nivo
+// does NOT override) are installed via ClipAngle so the far hemisphere is hidden
+// by clipCircle.
 
-// --- Cylindrical / pseudocylindrical (fully correct with antimeridian clip) ---
+// --- Cylindrical / pseudocylindrical (antimeridian clip) ---
 
 func mercatorRaw() transform {
 	return transform{
@@ -68,7 +69,7 @@ func equalEarthRaw() transform {
 	}
 }
 
-// --- Azimuthal family (front hemisphere correct; far side needs clipCircle) ---
+// --- Azimuthal family (far hemisphere hidden by clipCircle via ClipAngle) ---
 
 func azimuthalRaw(scale func(cxcy float64) float64) func(lambda, phi float64) (float64, float64) {
 	return func(x, y float64) (float64, float64) {
@@ -149,16 +150,28 @@ func stereographicRaw() transform {
 
 // Constructors mirror the geo* factory names.
 
-func GeoMercator() *Projection             { return newProjection(mercatorRaw()) }
-func GeoEquirectangular() *Projection      { return newProjection(equirectangularRaw()) }
-func GeoTransverseMercator() *Projection   { return newProjection(transverseMercatorRaw()) }
-func GeoNaturalEarth1() *Projection        { return newProjection(naturalEarth1Raw()) }
-func GeoEqualEarth() *Projection           { return newProjection(equalEarthRaw()) }
-func GeoAzimuthalEqualArea() *Projection   { return newProjection(azimuthalEqualAreaRaw()) }
-func GeoAzimuthalEquidistant() *Projection { return newProjection(azimuthalEquidistantRaw()) }
-func GeoGnomonic() *Projection             { return newProjection(gnomonicRaw()) }
-func GeoOrthographic() *Projection         { return newProjection(orthographicRaw()) }
-func GeoStereographic() *Projection        { return newProjection(stereographicRaw()) }
+func GeoMercator() *Projection           { return newProjection(mercatorRaw()) }
+func GeoEquirectangular() *Projection    { return newProjection(equirectangularRaw()) }
+func GeoTransverseMercator() *Projection { return newProjection(transverseMercatorRaw()) }
+func GeoNaturalEarth1() *Projection      { return newProjection(naturalEarth1Raw()) }
+func GeoEqualEarth() *Projection         { return newProjection(equalEarthRaw()) }
+
+// The azimuthal family installs the same default clip angles d3-geo bakes into
+// its constructors (nivo overrides scale/translate/rotate but not clipAngle), so
+// the far hemisphere is hidden via clipCircle instead of rendering the whole
+// sphere.
+func GeoAzimuthalEqualArea() *Projection {
+	return newProjection(azimuthalEqualAreaRaw()).ClipAngle(180 - 1e-3)
+}
+
+func GeoAzimuthalEquidistant() *Projection {
+	return newProjection(azimuthalEquidistantRaw()).ClipAngle(180 - 1e-3)
+}
+func GeoGnomonic() *Projection     { return newProjection(gnomonicRaw()).ClipAngle(60) }
+func GeoOrthographic() *Projection { return newProjection(orthographicRaw()).ClipAngle(90 + epsilon) }
+func GeoStereographic() *Projection {
+	return newProjection(stereographicRaw()).ClipAngle(142)
+}
 
 // ProjectionByType maps the nivo projectionType id to a fresh projection.
 // Unknown ids fall back to mercator. Mirrors @nivo/geo's projectionById.

@@ -225,9 +225,14 @@ Extend the existing app and the v4 detail-page registry
 
 ## 10. Implementation order (topological, by leverage/risk)
 
-1. **geo `clipCircle` + `clipExtent`** (§3). Leads because it's the only
-   *correctness* fix and is self-contained in `internal/d3/geo`. Port → unit
-   tests → azimuthal path goldens → geo demo variant.
+1. [x] **geo `clipCircle` + `clipExtent`** (§3) — **done**. Ported both clips into
+   `internal/d3/geo` (circle preclip + `circleStream`; rectangle postclip + line
+   clip), added `Projection.ClipAngle`/`ClipExtent` and the postclip stage to
+   `Stream`, and installed d3's default azimuthal clip angles so all ten
+   projections render correctly. Behavioral + golden tests (far-side drop,
+   straddling-ring cut, clipExtent crop; azimuthal path goldens) and an
+   orthographic-globe demo tile. No pre-existing golden drifted; `make ci` green.
+   See `docs/NOTES.md` (v5 Phase 1).
 2. **Animation primitives + threading** (§4). The largest workstream; do it as
    five shared family primitives (rects → arcs → lines/areas → circles →
    cells/paths), each with an animated golden, then the demo toggle.
