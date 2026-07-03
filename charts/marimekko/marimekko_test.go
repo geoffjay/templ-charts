@@ -110,6 +110,12 @@ func TestMarimekko_Golden(t *testing.T) {
 	golden.Assert(t, "marimekko-basic", out)
 }
 
+func TestMarimekko_GoldenHorizontal(t *testing.T) {
+	p := baseProps()
+	p.Layout = marimekko.MarimekkoLayoutHorizontal
+	golden.Assert(t, "marimekko-horizontal", renderChart(t, p))
+}
+
 func TestMarimekko_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Survey by country"

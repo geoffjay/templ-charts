@@ -65,6 +65,12 @@ func TestIcicle_Golden(t *testing.T) {
 	golden.Assert(t, "icicle-basic", renderChart(t, baseProps()))
 }
 
+func TestIcicle_GoldenRight(t *testing.T) {
+	p := baseProps()
+	p.Orientation = icicle.OrientationRight
+	golden.Assert(t, "icicle-right", renderChart(t, p))
+}
+
 func TestIcicle_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Icicle"

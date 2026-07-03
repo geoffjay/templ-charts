@@ -74,6 +74,13 @@ func TestScatterPlot_Golden(t *testing.T) {
 	golden.Assert(t, "scatterplot-basic", out)
 }
 
+func TestScatterPlot_GoldenNoGrid(t *testing.T) {
+	p := baseProps()
+	p.EnableGridX = false
+	p.EnableGridY = false
+	golden.Assert(t, "scatterplot-no-grid", renderChart(t, p))
+}
+
 func TestScatterPlot_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Groups A and B"

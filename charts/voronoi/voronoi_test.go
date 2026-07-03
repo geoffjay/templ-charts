@@ -100,6 +100,14 @@ func TestVoronoi_Golden(t *testing.T) {
 	golden.Assert(t, "voronoi-basic", out)
 }
 
+func TestVoronoi_GoldenCellFill(t *testing.T) {
+	// Enabling cell fill exercises the per-cell path rendering path (each cell
+	// filled with its site color) instead of the default hollow single-path cells.
+	p := baseProps()
+	p.EnableCellFill = voronoi.BoolPtr(true)
+	golden.Assert(t, "voronoi-cell-fill", renderChart(t, p))
+}
+
 func TestVoronoi_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Voronoi diagram"

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/grid"
 	"github.com/geoffjay/templ-charts/charts/waffle"
 	"github.com/geoffjay/templ-charts/internal/golden"
 )
@@ -76,6 +77,17 @@ func TestWaffle_Golden(t *testing.T) {
 		Data: sampleData(),
 	})
 	golden.Assert(t, "waffle-basic", out)
+}
+
+func TestWaffle_GoldenFillDirection(t *testing.T) {
+	out := renderChart(t, waffle.WaffleProps{
+		Width: 400, Height: 400,
+		Margin: core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
+		Total:  100, Rows: 10, Columns: 10,
+		FillDirection: grid.GridFillBottom,
+		Data:          sampleData(),
+	})
+	golden.Assert(t, "waffle-fill-bottom", out)
 }
 
 func TestWaffle_InteractiveEmitsTooltip(t *testing.T) {

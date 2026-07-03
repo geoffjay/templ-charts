@@ -54,6 +54,12 @@ func TestSunburst_Golden(t *testing.T) {
 	golden.Assert(t, "sunburst-basic", renderChart(t, baseProps()))
 }
 
+func TestSunburst_GoldenArcLabels(t *testing.T) {
+	p := baseProps()
+	p.EnableArcLabels = sunburst.BoolPtr(true)
+	golden.Assert(t, "sunburst-arc-labels", renderChart(t, p))
+}
+
 func TestSunburst_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Breakdown"

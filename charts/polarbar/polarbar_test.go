@@ -73,6 +73,12 @@ func TestPolarBar_Golden(t *testing.T) {
 	golden.Assert(t, "polarbar-basic", out)
 }
 
+func TestPolarBar_GoldenInnerRadius(t *testing.T) {
+	p := baseProps()
+	p.InnerRadius = 0.5 // ratio in [0,1]; default 0 → donut hole
+	golden.Assert(t, "polarbar-inner-radius", renderChart(t, p))
+}
+
 func TestPolarBar_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Temperatures"

@@ -75,6 +75,19 @@ func TestHeatMap_Golden(t *testing.T) {
 	golden.Assert(t, "heatmap-basic", out)
 }
 
+func TestHeatMap_GoldenDiverging(t *testing.T) {
+	// Same base props/data as heatmap-basic, but with a diverging color
+	// scheme instead of the default sequential "brown_blueGreen". This
+	// exercises the diverging color-scale code path.
+	out := renderChart(t, heatmap.HeatMapProps{
+		Width: 500, Height: 360,
+		Margin: core.Margin{Top: 40, Right: 40, Bottom: 40, Left: 60},
+		Data:   sampleData(),
+		Colors: heatmap.HeatMapColorConfig{Type: "diverging", Scheme: "red_blue"},
+	})
+	golden.Assert(t, "heatmap-diverging", out)
+}
+
 func TestHeatMap_InteractiveEmitsTooltip(t *testing.T) {
 	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360, Data: sampleData(),

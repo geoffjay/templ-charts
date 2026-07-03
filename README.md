@@ -28,9 +28,12 @@ remains out of scope).
 
 See [`docs/PLAN.md`](docs/PLAN.md) for the v1 design,
 [`docs/PLAN-v2.md`](docs/PLAN-v2.md) for the v2 chart catalog + interactivity
-and accessibility work, and [`docs/PLAN-v3.md`](docs/PLAN-v3.md) for the v3
-push to full nivo SVG parity (the five deferred d3 ports and the fifteen
-charts they unblock).
+and accessibility work, [`docs/PLAN-v3.md`](docs/PLAN-v3.md) for the v3 push to
+full nivo SVG parity (the five deferred d3 ports and the fifteen charts they
+unblock), and [`docs/PLAN-v4.md`](docs/PLAN-v4.md) for the v4 consumability &
+showcase work (render helpers, docs/examples, benchmarks, and the per-chart
+detail pages). The remaining backlog lives in
+[`docs/PLAN-deferred.md`](docs/PLAN-deferred.md).
 
 ## Quickstart
 
@@ -158,11 +161,15 @@ internal/d3/    pure-Go ports of d3-shape, d3-scale, d3-array, d3-format,
                 d3-time-format, d3-color, d3-hierarchy, d3-delaunay, d3-force,
                 d3-sankey, d3-chord, d3-geo
 internal/golden small snapshot-test helper
-examples/app/   runnable demo app (stdlib net/http)
+examples/app/   runnable demo app (stdlib net/http); handlers/entries holds the
+                per-chart detail-page definitions (one file per chart)
+docs/USAGE.md   consumer guide (render, colors, interactivity, a11y, theming)
 docs/PLAN.md    v1 implementation plan
 docs/PLAN-v2.md v2 plan (chart catalog, interactivity, a11y)
 docs/PLAN-v3.md v3 plan (five d3 ports, fifteen charts, full SVG parity)
-docs/NOTES.md   port-by-port implementation notes + deferred items
+docs/PLAN-v4.md v4 plan (consumability & showcase)
+docs/PLAN-deferred.md consolidated backlog of deferred work
+docs/NOTES.md   port-by-port implementation notes
 contrib/nivo/   upstream nivo clone (gitignored, reference only)
 ```
 
@@ -220,18 +227,20 @@ make ci
 
 ## Status
 
-v3 complete: **full nivo SVG chart parity**. On top of v1's three charts and
-v2's ten, v3 ports the five deferred d3 modules (hierarchy, delaunay, force,
-sankey, chord, geo) plus `curveBumpX/Y`, and delivers the fifteen charts they
-unblock — bump, marimekko, parallel-coordinates, polar-bar, treemap, sunburst,
-icicle, circle-packing, tree, voronoi, network, swarmplot, sankey, chord, and
-geo (GeoMap + Choropleth). d3-delaunay also retrofits true voronoi-mesh hover
-into line/scatterplot/bump/swarmplot/tree. Every SVG chart type nivo ships now
-has a templ-charts equivalent.
+v4 complete: **consumability & showcase**. On top of v3's full nivo SVG chart
+parity (v1's three charts + v2's ten + v3's fifteen), v4 makes the library
+comfortable to consume and shows it off: the `charts/render` helpers, a runnable
+`ExampleXxx` per chart family, [`docs/USAGE.md`](docs/USAGE.md), the first
+benchmarks (`make bench`) with a `/benchmark` load-demo page, and per-chart
+**detail pages** in the demo app (full-width chart + live theme/palette switchers
++ copy-pasteable Go snippet). v4 also made the API honest — animation is v1-only,
+so the dead `MotionProps` defaults were removed from the 25 non-animating charts,
+along with other unwired props — and standardized the interactivity flag on
+`Interactive`.
 
-Still SVG-only — **Canvas rendering remains the largest deferred capability**
-(the natural v4 theme). Other documented deferrals: geo's `clipCircle` /
-`clipExtent` (azimuthal-family projections render the whole sphere) and
-interactive zoom for icicle/treemap/circle-packing/sunburst. See
-[`docs/PLAN-v3.md`](docs/PLAN-v3.md) §11 and [`docs/NOTES.md`](docs/NOTES.md)
-for the full deferred list and port-by-port implementation notes.
+Still SVG-only — **Canvas rendering remains the largest deferred capability**.
+Other documented deferrals: geo's `clipCircle` / `clipExtent` (azimuthal-family
+projections render the whole sphere), interactive zoom for
+icicle/treemap/circle-packing/sunburst, and full v2/v3 animation. See
+[`docs/PLAN-deferred.md`](docs/PLAN-deferred.md) for the consolidated backlog and
+[`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.

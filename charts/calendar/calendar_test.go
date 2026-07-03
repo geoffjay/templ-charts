@@ -84,6 +84,12 @@ func TestCalendar_Golden(t *testing.T) {
 	golden.Assert(t, "calendar-quarter", renderChart(t, baseProps()))
 }
 
+func TestCalendar_GoldenVertical(t *testing.T) {
+	p := baseProps()
+	p.Direction = calendar.DirectionVertical
+	golden.Assert(t, "calendar-vertical", renderChart(t, p))
+}
+
 func TestCalendar_InteractiveEmitsTooltip(t *testing.T) {
 	p := baseProps()
 	p.Interactive = true

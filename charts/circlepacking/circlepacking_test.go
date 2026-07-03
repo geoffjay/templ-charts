@@ -54,6 +54,12 @@ func TestCirclePacking_Golden(t *testing.T) {
 	golden.Assert(t, "circlepacking-basic", renderChart(t, baseProps()))
 }
 
+func TestCirclePacking_GoldenPadding(t *testing.T) {
+	p := baseProps()
+	p.Padding = 12
+	golden.Assert(t, "circlepacking-padding", renderChart(t, p))
+}
+
 func TestCirclePacking_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Packed"

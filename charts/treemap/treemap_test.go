@@ -78,6 +78,12 @@ func TestTreemap_Golden(t *testing.T) {
 	golden.Assert(t, "treemap-basic", renderChart(t, baseProps()))
 }
 
+func TestTreemap_GoldenBinaryTile(t *testing.T) {
+	p := baseProps()
+	p.Tile = treemap.TileBinary
+	golden.Assert(t, "treemap-binary", renderChart(t, p))
+}
+
 func TestTreemap_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Sales"

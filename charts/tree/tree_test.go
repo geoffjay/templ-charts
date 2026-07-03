@@ -83,6 +83,14 @@ func TestTree_Golden(t *testing.T) {
 	golden.Assert(t, "tree-basic", renderChart(t, baseProps()))
 }
 
+func TestTree_GoldenTreeMode(t *testing.T) {
+	// baseProps defaults to the dendrogram (cluster) layout; ModeTree runs the
+	// tidy-tree algorithm instead, producing distinct node positions.
+	p := baseProps()
+	p.Mode = tree.ModeTree
+	golden.Assert(t, "tree-tree-mode", renderChart(t, p))
+}
+
 func TestTree_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Org"

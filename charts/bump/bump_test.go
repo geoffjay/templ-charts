@@ -93,6 +93,12 @@ func TestBump_Golden(t *testing.T) {
 	golden.Assert(t, "bump-basic", out)
 }
 
+func TestBump_GoldenLinear(t *testing.T) {
+	p := baseProps()
+	p.Interpolation = bump.InterpolationLinear
+	golden.Assert(t, "bump-linear", renderChart(t, p))
+}
+
 func TestBump_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Ranking over time"

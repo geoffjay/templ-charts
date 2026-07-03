@@ -98,6 +98,12 @@ func TestPC_Golden(t *testing.T) {
 	golden.Assert(t, "parallelcoordinates-basic", out)
 }
 
+func TestPC_GoldenVertical(t *testing.T) {
+	p := baseProps()
+	p.Layout = pc.PCLayoutVertical
+	golden.Assert(t, "parallelcoordinates-vertical", renderChart(t, p))
+}
+
 func TestPC_A11yTitleDesc(t *testing.T) {
 	p := baseProps()
 	p.Title = "Four variables"

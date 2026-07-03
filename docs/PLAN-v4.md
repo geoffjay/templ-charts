@@ -235,8 +235,14 @@ A plain query-param full-page render is the no-JS fallback. No new dependency.
    `templ.Raw` — no new `.templ`), and the index links repointed to
    `/chart/{slug}`. Covered by `TestDetailPage`, `TestAllChartEntriesRender`
    (renders every entry), and `TestIndexLinksHaveEntries`.
-6. **Polish**: deepen the shallowest goldens where cheap, docs/README pass for the
-   full v4 surface, `make ci` green.
+6. [x] **Polish**: added one variant golden to each of the 14 single-snapshot
+   charts (bump-linear, calendar-vertical, heatmap-diverging, scatterplot-no-grid,
+   waffle-fill-bottom, marimekko-horizontal, polarbar-inner-radius, treemap-binary,
+   sunburst-arc-labels, icicle-right, circlepacking-padding, tree-tree-mode,
+   voronoi-cell-fill, parallelcoordinates-vertical) — no existing golden touched;
+   docs/README pass for the full v4 surface (README status/links/layout,
+   `docs/USAGE.md`, `docs/NOTES.md` v4 note); `make golden` idempotent and
+   `make ci` green.
 
 ## 10. Scope summary for v4
 
