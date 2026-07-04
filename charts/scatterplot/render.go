@@ -6,6 +6,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/axes"
+	"github.com/geoffjay/templ-charts/charts/canvas"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
@@ -98,6 +99,63 @@ func renderMeshLayer(props ScatterPlotProps, result ScatterPlotResult, dims core
 		})
 	}
 	return interact.MeshOverlay(pts, dims.InnerWidth, dims.InnerHeight, props.DebugMesh, props.DetectionRadius)
+}
+
+// renderCanvas renders the scatterplot with the Canvas backend: the nodes
+// become a <canvas> draw-list (one FillCircle per node, FillStyle emitted only
+// when the color changes), while grid sits in an SVG pane behind the canvas and
+// axes/markers/legends/mesh in an SVG pane in front (charts/canvas Compose). The
+// draw-list is margin-translated to share the SVG panes' coordinate space, so a
+// Canvas scatterplot lines up exactly with its SVG twin.
+func renderCanvas(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {
+	rec := canvas.NewRecorder()
+	rec.Translate(dims.Margin.Left, dims.Margin.Top)
+	recordNodes(rec, result)
+	id := props.ChartID
+	if id == "" {
+		id = "tc-scatterplot"
+	}
+	grid := renderGridLayer(props, result, dims, theme)
+	overlay := renderCanvasOverlay(props, result, dims, theme)
+	return canvas.Compose(id, dims.OuterWidth, dims.OuterHeight,
+		dims.Margin.Left, dims.Margin.Top, themeBackground(theme),
+		rec.Ops(), grid, overlay)
+}
+
+// recordNodes writes one FillCircle per node into rec (radius = Size/2, matching
+// core.DotsItem's <circle r="Size/2">), emitting a FillStyle only when the color
+// changes from the previous node. One draw op per node keeps a strict
+// correspondence with the SVG nodes layer.
+func recordNodes(rec *canvas.Recorder, result ScatterPlotResult) {
+	prev := ""
+	for _, n := range result.Nodes {
+		if n.Color != prev {
+			rec.FillStyle(n.Color)
+			prev = n.Color
+		}
+		rec.FillCircle(n.X, n.Y, n.Size/2)
+	}
+}
+
+// renderCanvasOverlay renders the SVG panes drawn on top of the canvas marks:
+// every layer except grid (drawn behind, via renderGridLayer) and nodes (which
+// became the canvas draw-list). The mesh layer here is the transparent hover
+// hit-surface over the canvas (docs/PLAN-v6.md §4.3).
+func renderCanvasOverlay(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {
+	var b strings.Builder
+	for _, layer := range props.Layers {
+		switch layer {
+		case ScatterPlotLayerAxes:
+			b.WriteString(renderAxesLayer(props, result, dims, theme))
+		case ScatterPlotLayerMarkers:
+			b.WriteString(renderMarkersLayer(props, result, dims))
+		case ScatterPlotLayerLegends:
+			b.WriteString(renderLegendsLayer(props, result, dims))
+		case ScatterPlotLayerMesh:
+			b.WriteString(renderMeshLayer(props, result, dims))
+		}
+	}
+	return b.String()
 }
 
 func renderGridLayer(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {

@@ -6,6 +6,7 @@ import (
 
 	"github.com/a-h/templ"
 	"github.com/geoffjay/templ-charts/charts/axes"
+	"github.com/geoffjay/templ-charts/charts/canvas"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
@@ -83,6 +84,93 @@ func renderLayers(props HeatMapProps, result HeatMapResult, dims core.Dimensions
 			b.WriteString(renderLegendsLayer(props, result, dims))
 		case HeatMapLayerAnnotations:
 			// Annotations deferred (no heatmap annotation specs in v2).
+		}
+	}
+	return b.String()
+}
+
+// renderCanvas renders the heatmap with the Canvas backend: each cell becomes a
+// FillRect (plus an optional StrokeRect border and FillText label) in a
+// <canvas> draw-list, while grid sits in an SVG pane behind the canvas and
+// axes/legends in an SVG pane in front (charts/canvas Compose). FillStyle /
+// GlobalAlpha are emitted only when they change, so the draw-list stays compact
+// across many cells. The draw-list is margin-translated to share the SVG panes'
+// coordinate space.
+func renderCanvas(props HeatMapProps, result HeatMapResult, dims core.Dimensions, theme *theming.Theme) string {
+	rec := canvas.NewRecorder()
+	rec.Translate(dims.Margin.Left, dims.Margin.Top)
+	recordCells(rec, props, result)
+
+	id := props.ChartID
+	if id == "" {
+		id = "tc-heatmap"
+	}
+	grid := renderGridLayer(props, result, dims, theme)
+	overlay := renderCanvasOverlay(props, result, dims, theme)
+	return canvas.Compose(id, dims.OuterWidth, dims.OuterHeight,
+		dims.Margin.Left, dims.Margin.Top, themeBackground(theme),
+		rec.Ops(), grid, overlay)
+}
+
+// recordCells writes one FillRect per cell into rec (matching the SVG cell
+// <rect>), plus an optional border StrokeRect and value-label FillText. FillStyle
+// and GlobalAlpha are tracked and emitted only on change, so the draw-list stays
+// compact; the FillRect count corresponds one-to-one with the SVG cells layer.
+func recordCells(rec *canvas.Recorder, props HeatMapProps, result HeatMapResult) {
+	enableLabel := props.LabelsEnabled()
+	if enableLabel {
+		rec.Font("11px sans-serif")
+		rec.TextAlign("center")
+		rec.TextBaseline("middle")
+	}
+
+	curFill, curAlpha := "", 1.0
+	setFill := func(c string) {
+		if c != curFill {
+			rec.FillStyle(c)
+			curFill = c
+		}
+	}
+	setAlpha := func(a float64) {
+		if a != curAlpha {
+			rec.GlobalAlpha(a)
+			curAlpha = a
+		}
+	}
+
+	for _, cell := range result.Cells {
+		x := cell.XPos - cell.Width/2
+		y := cell.YPos - cell.Height/2
+		w := maxH(cell.Width, 0)
+		h := maxH(cell.Height, 0)
+		setAlpha(cell.Opacity)
+		setFill(cell.Color)
+		rec.FillRect(x, y, w, h)
+		if props.BorderWidth > 0 && cell.BorderColor != "" {
+			setAlpha(1)
+			rec.StrokeStyle(cell.BorderColor)
+			rec.LineWidth(props.BorderWidth)
+			rec.StrokeRect(x, y, w, h)
+		}
+		if enableLabel && cell.Label != "" {
+			setAlpha(1)
+			setFill(cell.LabelTextColor)
+			rec.FillText(cell.Label, cell.XPos, cell.YPos)
+		}
+	}
+}
+
+// renderCanvasOverlay renders the SVG panes drawn on top of the canvas marks:
+// the axes and legends layers (grid goes behind via renderGridLayer; cells
+// became the canvas draw-list).
+func renderCanvasOverlay(props HeatMapProps, result HeatMapResult, dims core.Dimensions, theme *theming.Theme) string {
+	var b strings.Builder
+	for _, layer := range props.Layers {
+		switch layer {
+		case HeatMapLayerAxes:
+			b.WriteString(renderAxesLayer(props, result, theme))
+		case HeatMapLayerLegends:
+			b.WriteString(renderLegendsLayer(props, result, dims))
 		}
 	}
 	return b.String()

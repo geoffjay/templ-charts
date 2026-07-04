@@ -5,6 +5,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
+	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
 // HeatmapDemos returns the heatmap demos for the /heatmap page. They are
@@ -50,6 +51,19 @@ func HeatmapDemos() []Demo {
 				Data:         heatmapData(),
 				EnableLabels: heatmap.BoolPtr(false),
 				ForceSquare:  true,
+			},
+		},
+		{
+			ID:          "heatmap-canvas",
+			Title:       "Canvas backend",
+			Description: "The same grid rendered with the Canvas engine (charts/canvas): each cell is a FillRect in a <canvas> draw-list while axes stay SVG — for large-N grids where one <rect> per cell is too many DOM nodes.",
+			Kind:        htmx.KindHeatmap,
+			Props: heatmap.HeatMapProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:  margin,
+				Data:    heatmapData(),
+				Render:  theming.EngineCanvas,
+				ChartID: "heatmap-canvas",
 			},
 		},
 	}

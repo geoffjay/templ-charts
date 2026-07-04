@@ -132,6 +132,12 @@ type HeatMapProps struct {
 	Theme  *theming.Theme
 	Layers []HeatMapLayerId
 
+	// Render selects the backend: the zero value (or theming.EngineSVG) renders
+	// SVG as always; theming.EngineCanvas draws the cells into a <canvas>
+	// draw-list (charts/canvas) with grid/axes/legends kept as SVG panes. Default
+	// SVG keeps every existing golden byte-stable.
+	Render theming.Engine
+
 	// Interactivity (htmx). When Interactive is true and ChartID is set,
 	// cells with data emit hx-* hover attributes. HoveredKey is the cell id
 	// (serieId.x) currently hovered, which drives the active/dim opacity.

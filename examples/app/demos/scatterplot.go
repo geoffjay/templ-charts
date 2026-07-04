@@ -4,6 +4,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
+	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
 // ScatterPlotDemo is one scatterplot tile on the /scatterplot page.
@@ -60,6 +61,22 @@ func ScatterPlotDemos() []ScatterPlotDemo {
 				Legends: []legends.LegendProps{
 					{Anchor: legends.LegendAnchorBottomRight, Direction: legends.LegendDirectionColumn, TranslateX: 0, TranslateY: 0},
 				},
+			},
+		},
+		{
+			ID:          "scatter-canvas",
+			Title:       "Canvas backend",
+			Description: "The same series rendered with the Canvas engine (charts/canvas): the dots are drawn into a <canvas> draw-list while grid and axes stay SVG. Same output, one node instead of one SVG element per point — for large-N data.",
+			Props: scatterplot.ScatterPlotProps{
+				Width: commonChartWidth, Height: commonChartHeight,
+				Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
+				Data:        data,
+				EnableGridX: true,
+				EnableGridY: true,
+				Render:      theming.EngineCanvas,
+				ChartID:     "scatter-canvas",
+				Title:       "Scatterplot: Canvas backend",
+				Desc:        "Two series of x/y points drawn into a canvas draw-list; grid and axes remain SVG panes.",
 			},
 		},
 	}

@@ -256,8 +256,20 @@ plumbing:
    item 5), so no existing golden moved; the package's own `canvas-drawlist`
    golden pins the encoding. `make ci` green, `make golden` idempotent. See
    `docs/NOTES.md` (v6 Phase 4).
-5. **Canvas chart variants** (§5), tranche by tranche (scatterplot + heatmap
-   first), each with draw-list + correspondence goldens and a demo tile.
+5. [x] **Canvas chart variants — tranche 1 (scatterplot + heatmap)** (§5) — done.
+   Both charts gained a `Render theming.Engine` prop (default/zero = SVG, so
+   every existing golden is byte-stable); `EngineCanvas` branches the templ to
+   `renderCanvas`, which records the marks (`recordNodes` → one FillCircle per
+   node; `recordCells` → one FillRect + optional border/label per cell) into a
+   margin-translated draw-list and composes it via `canvas.Compose`: a grid SVG
+   pane *below* the `<canvas>`, axes/legends/mesh SVG panes *above*. All
+   axis/grid/legend/mesh SVG code is reused verbatim — only the high-cardinality
+   marks move to the draw-list. New draw-list goldens (`scatterplot-canvas-drawlist`,
+   `heatmap-canvas-drawlist`) plus correspondence tests asserting one draw op per
+   mark and equal count vs the SVG render. Demo tiles added to both pages;
+   `canvas.CanvasScriptTag()` loaded in the app layout. `make ci` green, `make
+   golden` idempotent, no existing golden moved. Tranches 2–3 (network/swarmplot/
+   voronoi; line/bar/geo) remain. See `docs/NOTES.md` (v6 Phase 5).
 6. **Benchmarks + large-N demo + docs** (§7–§8): `make bench` large-N cases,
    the showcase page, `README`/`USAGE`/`NOTES` updates, `make golden` idempotent,
    `make ci` green.

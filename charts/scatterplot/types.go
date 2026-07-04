@@ -118,6 +118,16 @@ type ScatterPlotProps struct {
 	Theme  *theming.Theme
 	Layers []ScatterPlotLayerId
 
+	// Render selects the backend: the zero value (or theming.EngineSVG) renders
+	// SVG as always; theming.EngineCanvas draws the nodes into a <canvas>
+	// draw-list (charts/canvas) with grid/axes/legends kept as SVG panes and the
+	// hover mesh as a transparent overlay. Default SVG keeps every golden stable.
+	Render theming.Engine
+	// ChartID gives the <canvas> element a stable id (Canvas engine only);
+	// defaults to "tc-scatterplot" when empty. Set it when embedding several
+	// Canvas scatterplots on one page.
+	ChartID string
+
 	Role            string
 	AriaLabel       string
 	AriaLabelledBy  string

@@ -10,7 +10,10 @@ import (
 	templruntime "github.com/a-h/templ/runtime"
 )
 
-import "github.com/geoffjay/templ-charts/charts/core"
+import (
+	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/theming"
+)
 
 // ScatterPlot renders a complete scatterplot SVG: dimensions → UseScatterPlot →
 // layer pipeline (grid → axes → nodes → markers → legends) → SvgWrapper.
@@ -43,22 +46,29 @@ func ScatterPlot(props ScatterPlotProps) templ.Component {
 		props.Height = dims.InnerHeight
 		result := UseScatterPlot(props)
 		theme := resolveTheme(props.Theme)
-		templ_7745c5c3_Err = core.SvgWrapper(core.SvgWrapperProps{
-			Width:           dims.OuterWidth,
-			Height:          dims.OuterHeight,
-			Margin:          dims.Margin,
-			Background:      themeBackground(theme),
-			Role:            props.Role,
-			AriaLabel:       props.AriaLabel,
-			AriaLabelledBy:  props.AriaLabelledBy,
-			AriaDescribedBy: props.AriaDescribedBy,
-			Title:           props.Title,
-			Desc:            props.Desc,
-			IsFocusable:     props.IsFocusable,
-			Responsive:      props.Responsive,
-		}, renderLayers(props, result, dims, theme)).Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if props.Render == theming.EngineCanvas {
+			templ_7745c5c3_Err = templ.Raw(renderCanvas(props, result, dims, theme)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = core.SvgWrapper(core.SvgWrapperProps{
+				Width:           dims.OuterWidth,
+				Height:          dims.OuterHeight,
+				Margin:          dims.Margin,
+				Background:      themeBackground(theme),
+				Role:            props.Role,
+				AriaLabel:       props.AriaLabel,
+				AriaLabelledBy:  props.AriaLabelledBy,
+				AriaDescribedBy: props.AriaDescribedBy,
+				Title:           props.Title,
+				Desc:            props.Desc,
+				IsFocusable:     props.IsFocusable,
+				Responsive:      props.Responsive,
+			}, renderLayers(props, result, dims, theme)).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		return nil
 	})

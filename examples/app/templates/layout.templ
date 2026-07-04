@@ -1,6 +1,9 @@
 package templates
 
-import "github.com/geoffjay/templ-charts/charts/interact"
+import (
+	"github.com/geoffjay/templ-charts/charts/canvas"
+	"github.com/geoffjay/templ-charts/charts/interact"
+)
 
 // Layout renders the HTML shell: doctype, head (title + inline CSS), the
 // htmx.org CDN script, the header nav, the main content, and a footer. The
@@ -23,6 +26,9 @@ templ Layout(props LayoutProps, content templ.Component) {
 			// point hover tooltips and the line crosshair, driven by data-tc-*
 			// attributes. Coexists with the htmx hover used by bar/pie.
 			@interact.ScriptTag()
+			// Canvas replay layer (charts/canvas): paints the draw-list of any
+			// Canvas-engine chart (scatterplot/heatmap) into its <canvas>.
+			@canvas.CanvasScriptTag()
 		</head>
 		<body>
 			<header>
