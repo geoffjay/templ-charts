@@ -152,6 +152,30 @@ func (p Palette) Swatch(n int) []string {
 	}
 }
 
+// SwatchIn is Swatch with an explicit interpolation space for sequential and
+// diverging palettes: the gradient is sampled at n evenly-spaced stops blended
+// in `space` (SpaceLab/SpaceLch for perceptually-uniform previews). SpaceRGB —
+// and every categorical palette, whose colors are discrete regardless of space
+// — falls back to Swatch, so existing callers are unaffected.
+func (p Palette) SwatchIn(n int, space Space) []string {
+	if space == SpaceRGB || p.Kind == KindCategorical {
+		return p.Swatch(n)
+	}
+	if n <= 0 {
+		return nil
+	}
+	interp := schemeInterpolatorInSpace(string(p.ID), space)
+	out := make([]string, n)
+	if n == 1 {
+		out[0] = interp(0.5)
+		return out
+	}
+	for i := range out {
+		out[i] = interp(float64(i) / float64(n-1))
+	}
+	return out
+}
+
 // Scheme is the ergonomic constructor for an ordinal (categorical) color
 // config from a palette id: colors.Scheme(colors.PaletteTableau10). It is a
 // concise alternative to spelling out the OrdinalColorScaleConfig struct.

@@ -61,11 +61,11 @@ func TestRGBFunc(t *testing.T) {
 
 func TestBrighterDarker(t *testing.T) {
 	c := RGBColor("#808080")
-	bright := c.Brighter(1)
+	bright := c.Brighter(1).RGB()
 	if !(toByte(bright.R) > toByte(c.R)) {
 		t.Errorf("Brighter(1) should be brighter: %d vs %d", toByte(bright.R), toByte(c.R))
 	}
-	dark := c.Darker(1)
+	dark := c.Darker(1).RGB()
 	if !(toByte(dark.R) < toByte(c.R)) {
 		t.Errorf("Darker(1) should be darker: %d vs %d", toByte(dark.R), toByte(c.R))
 	}
@@ -73,7 +73,7 @@ func TestBrighterDarker(t *testing.T) {
 	// modulo clamping at the bright step (channels that brighten to 1.0
 	// stay clamped). Use a small amount to avoid the clamp ceiling.
 	orig := RGBColor("#808080")
-	round := orig.Brighter(0.5).Darker(0.5)
+	round := orig.Brighter(0.5).Darker(0.5).RGB()
 	if math.Abs(round.R-orig.R) > 1e-9 {
 		t.Errorf("Brighter(0.5).Darker(0.5) != identity: got %v want %v",
 			round.R, orig.R)

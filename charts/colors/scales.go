@@ -218,6 +218,10 @@ type SequentialColorScaleConfig struct {
 	Scheme       string // interpolator id
 	Colors       [2]string
 	Interpolator func(float64) string
+	// Space selects the interpolation color space (additive; the zero value
+	// SpaceRGB reproduces today's gamma-sRGB interpolation byte-for-byte).
+	// Set SpaceLab/SpaceLch for perceptually-uniform ramps.
+	Space Space
 }
 
 // SequentialColorScaleValues holds the min/max the scale is bound to.
@@ -243,7 +247,7 @@ func GetSequentialColorScale(config SequentialColorScaleConfig, values Sequentia
 	}
 	var interp func(float64) string
 	if config.Colors[0] != "" && config.Colors[1] != "" {
-		interp = interpolateRgbBasis([]string{config.Colors[0], config.Colors[1]})
+		interp = interpolateInSpace([]string{config.Colors[0], config.Colors[1]}, config.Space)
 	} else if config.Interpolator != nil {
 		interp = config.Interpolator
 	} else {
@@ -251,7 +255,7 @@ func GetSequentialColorScale(config SequentialColorScaleConfig, values Sequentia
 		if scheme == "" {
 			scheme = SequentialColorScaleDefaults.Scheme
 		}
-		interp = ColorInterpolators[scheme]
+		interp = schemeInterpolatorInSpace(scheme, config.Space)
 	}
 	if interp == nil {
 		interp = func(float64) string { return "#000" }
@@ -282,6 +286,9 @@ type DivergingColorScaleConfig struct {
 	Scheme       string
 	Colors       [3]string
 	Interpolator func(float64) string
+	// Space selects the interpolation color space (additive; the zero value
+	// SpaceRGB reproduces today's gamma-sRGB interpolation byte-for-byte).
+	Space Space
 }
 
 // DivergingColorScaleDefaults mirrors nivo's divergingColorScaleDefaults.
@@ -309,7 +316,7 @@ func GetDivergingColorScale(config DivergingColorScaleConfig, values SequentialC
 
 	var interp func(float64) string
 	if config.Colors[0] != "" && config.Colors[1] != "" && config.Colors[2] != "" {
-		interp = interpolateRgbBasis([]string{config.Colors[0], config.Colors[1], config.Colors[2]})
+		interp = interpolateInSpace([]string{config.Colors[0], config.Colors[1], config.Colors[2]}, config.Space)
 	} else if config.Interpolator != nil {
 		interp = config.Interpolator
 	} else {
@@ -317,7 +324,7 @@ func GetDivergingColorScale(config DivergingColorScaleConfig, values SequentialC
 		if scheme == "" {
 			scheme = DivergingColorScaleDefaults.Scheme
 		}
-		interp = ColorInterpolators[scheme]
+		interp = schemeInterpolatorInSpace(scheme, config.Space)
 	}
 	if interp == nil {
 		interp = func(float64) string { return "#000" }

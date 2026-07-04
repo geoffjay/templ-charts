@@ -157,12 +157,23 @@ func hex2(v int) string {
 }
 
 // ApplyColorModifiers applies a chain of brighter/darker/opacity modifiers to
-// a base color string. Mirrors nivo's color modifier pipeline.
+// a base color string in RGB space. Mirrors nivo's color modifier pipeline.
 func ApplyColorModifiers(color string, modifiers [][2]any) string {
+	return ApplyColorModifiersInSpace(color, modifiers, d3color.SpaceRGB)
+}
+
+// ApplyColorModifiersInSpace is ApplyColorModifiers with an explicit
+// interpolation space for the brighter/darker lightness modifiers. SpaceRGB
+// (the default used by ApplyColorModifiers) is byte-identical to the legacy
+// behaviour; SpaceLab/SpaceLch apply the modifiers as CIELAB/CIELCh lightness
+// steps (d3-color's Lab.brighter/darker, adding/subtracting Kn=18 to L), which
+// keeps hue and chroma stable — the perceptually "proper" darken/lighten.
+// The opacity modifier is space-independent.
+func ApplyColorModifiersInSpace(color string, modifiers [][2]any, space d3color.Space) string {
 	if len(modifiers) == 0 {
 		return color
 	}
-	c := d3color.RGBColor(color)
+	var c d3color.Color = d3color.RGBColor(color).In(space)
 	for _, m := range modifiers {
 		if len(m) < 2 {
 			continue

@@ -32,6 +32,11 @@ type InheritedColorConfig struct {
 	FromPath string
 	// Modifiers applies to the from-context variant.
 	Modifiers []ColorModifier
+	// ModifierSpace selects the color space the brighter/darker modifiers are
+	// applied in (additive; the zero value SpaceRGB reproduces nivo's exact
+	// RGB modifier behaviour). SpaceLab/SpaceLch give perceptually-proper
+	// lightness steps.
+	ModifierSpace Space
 	// Type discriminates the variant.
 	Type InheritedColorType
 }
@@ -61,9 +66,17 @@ func NewThemeColor(path string) InheritedColorConfig {
 	return InheritedColorConfig{Type: InheritedColorTypeTheme, ThemePath: path}
 }
 
-// NewFromContextColor returns a {from: path, modifiers: ...} config.
+// NewFromContextColor returns a {from: path, modifiers: ...} config (modifiers
+// applied in RGB, matching nivo).
 func NewFromContextColor(path string, modifiers []ColorModifier) InheritedColorConfig {
 	return InheritedColorConfig{Type: InheritedColorTypeFromContext, FromPath: path, Modifiers: modifiers}
+}
+
+// NewFromContextColorInSpace is NewFromContextColor with an explicit color
+// space for the brighter/darker modifiers (SpaceLab/SpaceLch for perceptual
+// lightness steps; SpaceRGB matches NewFromContextColor).
+func NewFromContextColorInSpace(path string, modifiers []ColorModifier, space Space) InheritedColorConfig {
+	return InheritedColorConfig{Type: InheritedColorTypeFromContext, FromPath: path, Modifiers: modifiers, ModifierSpace: space}
 }
 
 // ParseInheritedColorConfig accepts the loose forms nivo allows (string,
@@ -125,7 +138,7 @@ func GetInheritedColorGenerator(config InheritedColorConfig, theme *theming.Them
 			for i, m := range config.Modifiers {
 				mods[i] = [2]any{m[0], m[1]}
 			}
-			return ApplyColorModifiers(base, mods)
+			return ApplyColorModifiersInSpace(base, mods, config.ModifierSpace)
 		}
 	default: // static
 		return func(any) string { return config.Static }

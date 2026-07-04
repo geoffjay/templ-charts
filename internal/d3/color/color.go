@@ -12,9 +12,11 @@ import (
 	"strings"
 )
 
-// Color is the common interface implemented by RGB (and, in future, HSL).
-// Mirrors the subset of d3-color's Color that nivo touches: brighter/darker
-// modifiers, opacity mutation, and string formatting.
+// Color is the common interface implemented by every color space in this
+// package: RGB, HSL, Lab, and Lch. Mirrors the subset of d3-color's Color that
+// templ-charts touches: brighter/darker modifiers (applied in the receiver's
+// own space, matching d3-color), opacity mutation, string formatting, and
+// in-space interpolation.
 type Color interface {
 	Brighter(k float64) Color
 	Darker(k float64) Color
@@ -26,10 +28,14 @@ type Color interface {
 	String() string
 	Opacity() float64
 	SetOpacity(o float64)
-	// RGB returns the color as an *RGB; for an *RGB it returns itself.
+	// RGB returns the color converted to an *RGB; for an *RGB it returns itself.
 	RGB() *RGB
 	// Copy returns a deep clone of the color.
 	Copy() Color
+	// Interpolate returns the color at position t in [0,1] between the receiver
+	// and other, interpolated in the receiver's color space (other is converted
+	// into that space first). Matches d3-color's interpolate* family.
+	Interpolate(other Color, t float64) Color
 }
 
 // RGB is the d3-color rgb color space. Channels are in [0,1] internally,
@@ -73,18 +79,18 @@ func RGBColor(s string) *RGB {
 
 // Brighter multiplies channel values by 0.7^-k (k=1 ≈ 1.43x brighter).
 // Channels are clamped to [0,1] afterward. d3-color preserves opacity.
-func (c *RGB) Brighter(k float64) *RGB {
+func (c *RGB) Brighter(k float64) Color {
 	if k == 0 {
-		return c.Copy().RGB()
+		return c.Copy()
 	}
 	k = math.Pow(0.7, -k)
 	return NewRGB(c.R*k, c.G*k, c.B*k, c.Opac)
 }
 
 // Darker multiplies channel values by 0.7^k (k=1 ≈ 0.7x, i.e. ~30% darker).
-func (c *RGB) Darker(k float64) *RGB {
+func (c *RGB) Darker(k float64) Color {
 	if k == 0 {
-		return c.Copy().RGB()
+		return c.Copy()
 	}
 	k = math.Pow(0.7, k)
 	return NewRGB(c.R*k, c.G*k, c.B*k, c.Opac)
@@ -136,7 +142,20 @@ func (c *RGB) SetOpacity(o float64) { c.Opac = clampUnit(o) }
 func (c *RGB) RGB() *RGB { return c }
 
 // Copy returns a deep clone.
-func (c *RGB) Copy() *RGB { return &RGB{R: c.R, G: c.G, B: c.B, Opac: c.Opac} }
+func (c *RGB) Copy() Color { return &RGB{R: c.R, G: c.G, B: c.B, Opac: c.Opac} }
+
+// Interpolate returns the color at t in [0,1] between c and other, linearly in
+// RGB space (channels and opacity). Matches d3-color's interpolateRgb with
+// gamma=1. other is converted to RGB first.
+func (c *RGB) Interpolate(other Color, t float64) Color {
+	o := other.RGB()
+	return &RGB{
+		R:    lerp(c.R, o.R, t),
+		G:    lerp(c.G, o.G, t),
+		B:    lerp(c.B, o.B, t),
+		Opac: lerp(c.Opac, o.Opac, t),
+	}
+}
 
 // --- parsing ---------------------------------------------------------------
 
@@ -365,6 +384,19 @@ func parseAlpha(s string) (float64, bool) {
 func clampChannel(v float64) float64 { return clampFloat(v, 0, 1) }
 func clampUnit(v float64) float64    { return clampFloat(v, 0, 1) }
 
+// lerp linearly interpolates from a to b at t. NaN endpoints follow d3-color's
+// nogamma convention: if a is NaN the result is b, matching how d3 handles a
+// missing (NaN) channel by holding the other endpoint's value.
+func lerp(a, b, t float64) float64 {
+	if math.IsNaN(a) {
+		return b
+	}
+	if math.IsNaN(b) {
+		return a
+	}
+	return a + (b-a)*t
+}
+
 func clampFloat(v, lo, hi float64) float64 {
 	if math.IsNaN(v) {
 		return lo
@@ -456,7 +488,7 @@ func namedColor(name string) (*RGB, bool) {
 //
 // Modifier types: "brighter", "darker", "opacity".
 func ApplyModifiers(color string, modifiers [][2]any) (string, error) {
-	c := RGBColor(color)
+	var c Color = RGBColor(color)
 	for _, m := range modifiers {
 		if len(m) != 2 {
 			return "", fmt.Errorf("d3color: invalid modifier %#v", m)
