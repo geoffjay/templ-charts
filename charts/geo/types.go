@@ -73,6 +73,12 @@ type GeoBase struct {
 	ProjectionTranslation [2]float64 // fractions of inner width/height (default [0.5,0.5])
 	ProjectionRotation    [3]float64 // [λ,φ,γ] degrees
 
+	// Fit, when true, auto-scales and centers the projection so the features
+	// fill the inner frame (d3-geo fitExtent), ignoring ProjectionScale /
+	// ProjectionTranslation. ProjectionRotation is still applied first. This
+	// removes the manual scale/center fiddling a map otherwise needs.
+	Fit bool
+
 	EnableGraticule    bool
 	GraticuleLineWidth float64
 	GraticuleLineColor string

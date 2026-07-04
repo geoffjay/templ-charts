@@ -3,6 +3,7 @@ package demos
 import (
 	"github.com/geoffjay/templ-charts/charts/boxplot"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/samples"
 )
 
 // BoxPlotDemo is one boxplot tile on the /boxplot page.
@@ -31,16 +32,8 @@ func BoxPlotDemos() []BoxPlotDemo {
 	}
 }
 
-// boxplotData generates a deterministic spread per group (no randomness so the
-// page render is stable).
+// boxplotData is the shared boxplot dataset, sourced from the public samples
+// package.
 func boxplotData() []boxplot.BoxPlotDatum {
-	var out []boxplot.BoxPlotDatum
-	groups := []string{"Alpha", "Beta", "Gamma", "Delta"}
-	for gi, g := range groups {
-		for i := 0; i < 30; i++ {
-			v := float64((i*9+gi*13)%50) + float64(gi)*8 + 20
-			out = append(out, boxplot.BoxPlotDatum{Group: g, Value: v})
-		}
-	}
-	return out
+	return samples.BoxPlot()
 }

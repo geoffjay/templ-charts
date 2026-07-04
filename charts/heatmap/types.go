@@ -60,6 +60,11 @@ type HeatMapColorConfig struct {
 	MinValue  *float64
 	MaxValue  *float64
 	DivergeAt *float64 // diverging only
+	// Space selects the interpolation color space for the scale (additive; the
+	// zero value colors.SpaceRGB reproduces today's gamma-sRGB interpolation
+	// byte-for-byte). Set colors.SpaceLab/SpaceLch for perceptually-uniform
+	// cell coloring.
+	Space colors.Space
 }
 
 // HeatMapLayerId enumerates the render layers. Mirrors @nivo/heatmap LayerId.

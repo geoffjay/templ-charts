@@ -2,6 +2,7 @@ package demos
 
 import (
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/samples"
 	"github.com/geoffjay/templ-charts/charts/treemap"
 )
 
@@ -13,19 +14,10 @@ type TreemapDemo struct {
 	Props       treemap.TreemapProps
 }
 
+// treemapSample is the shared hierarchy, sourced from the public samples
+// package.
 func treemapSample() treemap.TreemapNode {
-	return treemap.TreemapNode{ID: "nivo", Children: []treemap.TreemapNode{
-		{ID: "viz", Children: []treemap.TreemapNode{
-			{ID: "stack", Value: 33}, {ID: "chart", Value: 41}, {ID: "xAxis", Value: 18},
-		}},
-		{ID: "colors", Children: []treemap.TreemapNode{
-			{ID: "rgb", Value: 25}, {ID: "hsl", Value: 16},
-		}},
-		{ID: "utils", Children: []treemap.TreemapNode{
-			{ID: "randomize", Value: 22}, {ID: "sortBy", Value: 30}, {ID: "format", Value: 12},
-		}},
-		{ID: "misc", Value: 45},
-	}}
+	return samples.Treemap()
 }
 
 // TreemapDemos returns the treemap demos for the /treemap page.

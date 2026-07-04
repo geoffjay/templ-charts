@@ -5,6 +5,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
+	"github.com/geoffjay/templ-charts/charts/samples"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
@@ -69,18 +70,8 @@ func HeatmapDemos() []Demo {
 	}
 }
 
-// heatmapData is a deterministic 5-country × 6-metric dataset.
+// heatmapData is the shared heatmap dataset, sourced from the public samples
+// package.
 func heatmapData() []heatmap.HeatMapSerie {
-	countries := []string{"Japan", "France", "USA", "Germany", "Brazil"}
-	metrics := []string{"Train", "Subway", "Bus", "Car", "Bike", "Walk"}
-	out := make([]heatmap.HeatMapSerie, len(countries))
-	for i, c := range countries {
-		data := make([]heatmap.HeatMapDatum, len(metrics))
-		for j, m := range metrics {
-			v := float64((i*13+j*29)%100 + 5)
-			data[j] = heatmap.HeatMapDatum{X: m, Y: &v}
-		}
-		out[i] = heatmap.HeatMapSerie{ID: c, Data: data}
-	}
-	return out
+	return samples.Heatmap()
 }

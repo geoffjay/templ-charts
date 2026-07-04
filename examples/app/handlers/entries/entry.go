@@ -28,6 +28,13 @@ type ChartEntry struct {
 	// (scatterplot, heatmap). The detail page shows an engine switcher and uses
 	// this on ?engine=canvas. Same signature as Render.
 	CanvasRender func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error)
+
+	// SpaceRender, when non-nil, renders the chart in a chosen color-interpolation
+	// space (RGB/Lab/Lch) — set only for charts whose colors come from a
+	// sequential/diverging scale (heatmap). The detail page shows a "color space"
+	// switcher and uses this on ?space=lab|lch, illustrating the perceptual
+	// difference. Same signature as Render plus the space.
+	SpaceRender func(theme *theming.Theme, palette colors.PaletteID, animate bool, space colors.Space) (string, error)
 }
 
 // registry maps slug → entry, populated by each chart file's init().

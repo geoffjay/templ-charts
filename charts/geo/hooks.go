@@ -13,17 +13,22 @@ import (
 // buildProjection mirrors @nivo/geo useGeoMap: projectionById(type) with scale,
 // translate (inner width/height × translation fraction), and rotation. width /
 // height are the inner dimensions.
-func buildProjection(b GeoBase, width, height float64) *d3geo.Projection {
-	return d3geo.ProjectionByType(b.ProjectionType).
-		Scale(b.ProjectionScale).
-		Translate(width*b.ProjectionTranslation[0], height*b.ProjectionTranslation[1]).
+func buildProjection(b GeoBase, width, height float64, features []Feature) *d3geo.Projection {
+	p := d3geo.ProjectionByType(b.ProjectionType).
 		Rotate(b.ProjectionRotation[0], b.ProjectionRotation[1], b.ProjectionRotation[2])
+	if b.Fit && len(features) > 0 {
+		// Auto-fit the features to the inner frame (d3-geo fitExtent).
+		return p.FitExtent(0, 0, width, height, features)
+	}
+	return p.
+		Scale(b.ProjectionScale).
+		Translate(width*b.ProjectionTranslation[0], height*b.ProjectionTranslation[1])
 }
 
 // UseGeoMap computes the projected feature paths and graticule for a GeoMap.
 // width/height are the inner dimensions.
 func UseGeoMap(props GeoMapProps, width, height float64) GeoResult {
-	proj := buildProjection(props.GeoBase, width, height)
+	proj := buildProjection(props.GeoBase, width, height, props.Features)
 	path := d3geo.NewPath(proj)
 
 	features := make([]ComputedFeature, 0, len(props.Features))
@@ -47,7 +52,7 @@ func UseGeoMap(props GeoMapProps, width, height float64) GeoResult {
 // id, builds a quantize color scale over the value domain, and colors each
 // matched feature (unmatched → unknownColor). width/height are inner dims.
 func UseChoropleth(props ChoroplethProps, width, height float64) GeoResult {
-	proj := buildProjection(props.GeoBase, width, height)
+	proj := buildProjection(props.GeoBase, width, height, props.Features)
 	path := d3geo.NewPath(proj)
 
 	byID := make(map[string]float64, len(props.Data))

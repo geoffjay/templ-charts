@@ -3,6 +3,7 @@ package demos
 import (
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/icicle"
+	"github.com/geoffjay/templ-charts/charts/samples"
 )
 
 // IcicleDemo is one icicle tile on the /icicle page (static render).
@@ -13,16 +14,9 @@ type IcicleDemo struct {
 	Props       icicle.IcicleProps
 }
 
+// icicleSample is the shared hierarchy, sourced from the public samples package.
 func icicleSample() icicle.IcicleNode {
-	return icicle.IcicleNode{ID: "root", Children: []icicle.IcicleNode{
-		{ID: "analytics", Children: []icicle.IcicleNode{
-			{ID: "charts", Value: 40}, {ID: "reports", Value: 22},
-		}},
-		{ID: "billing", Children: []icicle.IcicleNode{
-			{ID: "invoices", Value: 18}, {ID: "refunds", Value: 9}, {ID: "plans", Value: 15},
-		}},
-		{ID: "auth", Value: 28},
-	}}
+	return samples.Icicle()
 }
 
 // IcicleDemos returns the icicle demos for the /icicle page.

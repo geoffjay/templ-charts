@@ -2,6 +2,7 @@ package demos
 
 import (
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/samples"
 	"github.com/geoffjay/templ-charts/charts/sunburst"
 )
 
@@ -13,16 +14,10 @@ type SunburstDemo struct {
 	Props       sunburst.SunburstProps
 }
 
+// sunburstSample is the shared hierarchy, sourced from the public samples
+// package.
 func sunburstSample() sunburst.SunburstNode {
-	return sunburst.SunburstNode{ID: "root", Children: []sunburst.SunburstNode{
-		{ID: "fruit", Children: []sunburst.SunburstNode{
-			{ID: "apple", Value: 30}, {ID: "pear", Value: 18}, {ID: "grape", Value: 22},
-		}},
-		{ID: "veg", Children: []sunburst.SunburstNode{
-			{ID: "carrot", Value: 20}, {ID: "pea", Value: 14},
-		}},
-		{ID: "grain", Value: 26},
-	}}
+	return samples.Sunburst()
 }
 
 // SunburstDemos returns the sunburst demos for the /sunburst page.

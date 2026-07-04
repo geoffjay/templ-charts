@@ -11,7 +11,7 @@ func init() {
 	register(ChartEntry{
 		Slug:        "geo",
 		Title:       "Geo",
-		Description: "Choropleth: a {id,value} dataset bound onto GeoJSON features, colored by a quantize scale.",
+		Description: "Choropleth: a {id,value} dataset bound onto GeoJSON features, colored by a quantize scale. The projection is auto-fit to the frame (fitExtent) — no manual scale/center.",
 		Snippet: `import (
     "github.com/geoffjay/templ-charts/charts/geo"
     "github.com/geoffjay/templ-charts/charts/render"
@@ -27,7 +27,8 @@ features := []geo.Feature{
 svg, _ := render.String(geo.Choropleth(geo.ChoroplethProps{
     Features: features,
     Data:     []geo.ChoroplethDatum{{ID: "AAA", Value: 10}},
-    GeoBase:  geo.GeoBase{Width: 400, Height: 300, ProjectionScale: 60},
+    // Fit auto-scales/centers the projection to the frame (d3-geo fitExtent).
+    GeoBase:  geo.GeoBase{Width: 400, Height: 300, Fit: true},
 }))`,
 		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			features := []geo.Feature{
@@ -60,10 +61,10 @@ svg, _ := render.String(geo.Choropleth(geo.ChoroplethProps{
 				},
 				GeoBase: geo.GeoBase{
 					Width: 400, Height: 300, Responsive: true,
-					ProjectionScale: 60,
-					BorderWidth:     0.4,
-					BorderColor:     "#152238",
-					Theme:           theme,
+					Fit:         true,
+					BorderWidth: 0.4,
+					BorderColor: "#152238",
+					Theme:       theme,
 				},
 			}
 			p.Animate = animate

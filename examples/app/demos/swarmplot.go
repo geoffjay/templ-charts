@@ -1,9 +1,8 @@
 package demos
 
 import (
-	"strconv"
-
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/samples"
 	"github.com/geoffjay/templ-charts/charts/swarmplot"
 )
 
@@ -16,24 +15,11 @@ type SwarmPlotDemo struct {
 	Props       swarmplot.SwarmPlotProps
 }
 
-// swarmSample builds a spread of values across three groups (a small
-// pseudo-random but fixed sequence so the demo is stable).
+// swarmSample is the shared value spread, sourced from the public samples
+// package (samples.SwarmPlot also returns the group list).
 func swarmSample() []swarmplot.SwarmPlotDatum {
-	groups := []string{"group A", "group B", "group C"}
-	// A fixed value sequence per group index, enough points to show the swarm.
-	seq := []float64{
-		12, 47, 23, 68, 34, 89, 5, 56, 78, 30, 41, 62,
-		19, 73, 27, 51, 44, 8, 95, 60, 15, 38, 82, 49,
-		22, 66, 11, 90, 33, 57, 71, 4, 84, 26, 53, 40,
-	}
-	data := make([]swarmplot.SwarmPlotDatum, 0, len(seq))
-	for i, v := range seq {
-		g := groups[i%len(groups)]
-		data = append(data, swarmplot.SwarmPlotDatum{
-			ID: "n" + strconv.Itoa(i), Group: g, Value: v,
-		})
-	}
-	return data
+	d, _ := samples.SwarmPlot()
+	return d
 }
 
 // SwarmPlotDemos returns the swarmplot demos for the /swarmplot page.

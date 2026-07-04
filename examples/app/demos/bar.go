@@ -11,6 +11,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
+	"github.com/geoffjay/templ-charts/charts/samples"
 )
 
 // Demo describes one chart instance on a page: the htmx instance id, a human
@@ -144,18 +145,9 @@ func BarDemos() []Demo {
 	}
 }
 
-// barData is the shared 7 countries × 6 keys dataset used by the bar demos.
-// Deterministic so the rendered SVG is stable.
+// barData is the shared bar dataset, sourced from the public samples package
+// (the single source of truth; samples.Bar also returns the key list).
 func barData() []bar.BarDatum {
-	countries := []string{"USA", "Germany", "France", "Japan", "Brazil", "India", "China"}
-	keys := []string{"hot dogs", "burgers", "sandwich", "kebab", "fries", "donut"}
-	data := make([]bar.BarDatum, len(countries))
-	for i, c := range countries {
-		row := map[string]any{"country": c}
-		for j, k := range keys {
-			row[k] = float64((i*7+j*13)%100 + 10)
-		}
-		data[i] = row
-	}
-	return data
+	d, _ := samples.Bar()
+	return d
 }

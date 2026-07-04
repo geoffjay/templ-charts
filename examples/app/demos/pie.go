@@ -4,6 +4,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/pie"
+	"github.com/geoffjay/templ-charts/charts/samples"
 )
 
 // PieDemos returns the set of pie chart demos for the /pie page.
@@ -110,15 +111,8 @@ func PieDemos() []Demo {
 	}
 }
 
-// pieData is the shared programming-language dataset for the pie demos.
+// pieData is the shared programming-language dataset, sourced from the public
+// samples package.
 func pieData() []any {
-	labels := []string{"Go", "Rust", "TypeScript", "Python", "Ruby", "Elixir", "C", "Zig", "Kotlin"}
-	data := make([]any, len(labels))
-	for i, l := range labels {
-		data[i] = map[string]any{
-			"id":    l,
-			"value": float64((i*17+3)%80 + 10),
-		}
-	}
-	return data
+	return samples.Pie()
 }

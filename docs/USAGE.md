@@ -99,10 +99,48 @@ by chart family:
 5. **Plain color strings** — network: `NodeColor`, `NodeBorderColor`,
    `LinkColor string` (per-node/link overrides fall back to these).
 
+**One entry point over all five.** `colors.Set(v)` infers the intent from `v`
+(a `PaletteID`, a `[]string`, a color string, a `func(any) string`, or a
+pre-built config) and resolves it to whichever shape a field wants via
+`.Ordinal()`, `.Inherited()`, `.Sequential()`, `.Diverging()`, or `.Static()`.
+It renames/removes nothing — the shapes above still work — so adopt it where
+convenient:
+
+```go
+Colors:      colors.Set(colors.PaletteTableau10).Ordinal(),
+BorderColor: colors.Set("#333").Inherited(),
+```
+
+**Perceptual interpolation (opt-in).** Sequential/diverging scales and palette
+gradient sampling interpolate in RGB by default. Pass a `Space`
+(`colors.SpaceLab` / `colors.SpaceLch`) for a perceptually-uniform ramp — via
+the scale config's `Space` field, `colors.Set(...).InSpace(space)`, or
+`Palette.SwatchIn(n, space)`. Lightness modifiers can likewise apply in Lab
+(`colors.SetFromDatum(path).WithModifiers(...).InSpace(colors.SpaceLab)`). The
+default RGB behavior is byte-for-byte unchanged.
+
 Enumerate the palette catalog at runtime with `colors.Palettes()`,
 `colors.PalettesByKind`, `colors.ColorblindSafePalettes`, and
 `colors.LookupPalette`. See [`PALETTES.md`](PALETTES.md) for the full id list and
 the demo `/palettes` page for a gallery.
+
+## Sample data & the static registry
+
+`charts/samples` provides ready-to-render, typed, deterministic data for every
+chart family — `samples.Bar()`, `samples.Line()`, `samples.Chord()`,
+`samples.Choropleth()`, … (charts needing more than one input return the extras,
+e.g. `nodes, links := samples.Sankey()`). It's the quickest way to try a chart.
+
+`charts/static` renders any of the 28 families by id through one dispatcher:
+
+```go
+import "github.com/geoffjay/templ-charts/charts/static"
+
+sample := static.Samples[static.ChartTypeBar]           // bundled demo props
+svg, _ := static.RenderChart(static.ChartTypeBar, sample.Props, map[string]any{
+    "width": 640, "height": 400,                         // whitelisted overrides
+})
+```
 
 ## Interactivity
 

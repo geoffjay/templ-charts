@@ -3,6 +3,7 @@ package demos
 import (
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
+	"github.com/geoffjay/templ-charts/charts/samples"
 	"github.com/geoffjay/templ-charts/charts/sankey"
 )
 
@@ -15,26 +16,10 @@ type SankeyDemo struct {
 	Props       sankey.SankeyProps
 }
 
-// sankeySample builds a small energy-flow graph: two sources feed two
-// intermediates, which converge on a single sink.
+// sankeySample is the shared energy-flow graph (nodes + links), sourced from
+// the public samples package.
 func sankeySample() ([]sankey.SankeyInputNode, []sankey.SankeyInputLink) {
-	nodes := []sankey.SankeyInputNode{
-		{ID: "Coal"},
-		{ID: "Gas"},
-		{ID: "Grid"},
-		{ID: "Solar"},
-		{ID: "Homes"},
-		{ID: "Industry"},
-	}
-	links := []sankey.SankeyInputLink{
-		{Source: "Coal", Target: "Grid", Value: 12},
-		{Source: "Gas", Target: "Grid", Value: 8},
-		{Source: "Solar", Target: "Grid", Value: 5},
-		{Source: "Solar", Target: "Homes", Value: 3},
-		{Source: "Grid", Target: "Homes", Value: 15},
-		{Source: "Grid", Target: "Industry", Value: 10},
-	}
-	return nodes, links
+	return samples.Sankey()
 }
 
 // SankeyDemos returns the sankey demos for the /sankey page: horizontal +

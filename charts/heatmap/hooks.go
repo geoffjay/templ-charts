@@ -157,6 +157,7 @@ func buildColorScale(cfg HeatMapColorConfig, min, max float64) func(float64) str
 			MinValue:  cfg.MinValue,
 			MaxValue:  cfg.MaxValue,
 			DivergeAt: cfg.DivergeAt,
+			Space:     cfg.Space,
 		}, vals)
 	}
 	return colors.GetSequentialColorScale(colors.SequentialColorScaleConfig{
@@ -164,6 +165,7 @@ func buildColorScale(cfg HeatMapColorConfig, min, max float64) func(float64) str
 		Scheme:   cfg.Scheme,
 		MinValue: cfg.MinValue,
 		MaxValue: cfg.MaxValue,
+		Space:    cfg.Space,
 	}, vals)
 }
 

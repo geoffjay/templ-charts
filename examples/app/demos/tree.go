@@ -2,6 +2,7 @@ package demos
 
 import (
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/samples"
 	"github.com/geoffjay/templ-charts/charts/tree"
 )
 
@@ -13,15 +14,9 @@ type TreeDemo struct {
 	Props       tree.TreeProps
 }
 
+// treeSample is the shared hierarchy, sourced from the public samples package.
 func treeSample() tree.TreeNode {
-	return tree.TreeNode{ID: "root", Children: []tree.TreeNode{
-		{ID: "A", Children: []tree.TreeNode{
-			{ID: "A.1", Children: []tree.TreeNode{{ID: "A.1.a"}, {ID: "A.1.b"}}},
-			{ID: "A.2"},
-		}},
-		{ID: "B", Children: []tree.TreeNode{{ID: "B.1"}, {ID: "B.2"}, {ID: "B.3"}}},
-		{ID: "C"},
-	}}
+	return samples.Tree()
 }
 
 // TreeDemos returns the tree demos for the /tree page.

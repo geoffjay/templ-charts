@@ -188,7 +188,27 @@ colors.Scheme(colors.PaletteOkabeIto)        // a named palette (colorblind-safe
 colors.PaletteColors("#4269d0", "#efb118")   // an explicit custom color list
 ```
 
+Or use the unified `colors.Set` entry point, which infers intent from its
+argument and resolves to whichever config shape a field expects:
+
+```go
+colors.Set(colors.PaletteTableau10).Ordinal()          // categorical `Colors`
+colors.Set([]string{"#f00", "#0f0"}).Ordinal()          // explicit list
+colors.Set(colors.PaletteViridis).InSpace(colors.SpaceLab).Sequential() // perceptual
+colors.Set("#333").Inherited()                          // BorderColor/LabelTextColor
+```
+
+**Perceptual interpolation.** Sequential/diverging scales and palette gradient
+sampling interpolate in RGB by default, but accept a `Space` selector for
+perceptually-uniform ramps (`colors.SpaceLab` / `colors.SpaceLch`); the default
+RGB behavior is unchanged. `internal/d3/color` implements HSL, Lab, and Lch
+next to RGB.
+
 Charts default to the `nivo` palette when `Colors` is left unset.
+
+**Sample data.** The `charts/samples` package returns ready-to-render, typed,
+deterministic data for every chart family (`samples.Bar()`, `samples.Chord()`,
+…) — a fast way to try a chart before wiring your own data.
 
 Enumerate the catalog at runtime (for pickers, docs, galleries):
 
@@ -208,8 +228,9 @@ and the `/palettes` page in the demo app for a visual gallery.
 ```
 charts/         library packages (mirror nivo names): core, theming, scales,
                 colors, axes, rects, arcs, text, tooltip, legends,
-                annotations, interact, static, grid, polar-axes, htmx, render
-                (convenience String/To helpers), and the
+                annotations, interact, static (render any of the 28 families by
+                id), grid, polar-axes, htmx, canvas, samples (typed per-chart
+                demo data), render (convenience String/To helpers), and the
                 chart types: bar, line, pie, heatmap, waffle, calendar, radar,
                 radialbar, scatterplot, stream, bullet, funnel, boxplot, bump,
                 marimekko, parallelcoordinates, polarbar, treemap, sunburst,
@@ -227,6 +248,9 @@ docs/PLAN-v2.md v2 plan (chart catalog, interactivity, a11y)
 docs/PLAN-v3.md v3 plan (five d3 ports, fifteen charts, full SVG parity)
 docs/PLAN-v4.md v4 plan (consumability & showcase)
 docs/PLAN-v5.md v5 plan (fidelity & finish: geo clip, animation, zoom, hover)
+docs/PLAN-v6.md v6 plan (scale: quadtree/Barnes–Hut, Delaunator, Canvas backend)
+docs/PLAN-v7.md v7 plan (completeness & ergonomics: color spaces, samples/static,
+                geo measurement/fit/conics/TopoJSON) — the final themed release
 docs/PLAN-deferred.md consolidated backlog of deferred work
 docs/NOTES.md   port-by-port implementation notes
 contrib/nivo/   upstream nivo clone (gitignored, reference only)
@@ -286,28 +310,35 @@ make ci
 
 ## Status
 
-v6 in progress: **scale**. On top of v5's *fidelity & finish*, v6 adds the
-large-N performance foundations and a Canvas rendering path:
+**v7 — completeness & ergonomics — is the final themed release.** It closes the
+three opportunistic items that outlived every prior release, all additive and
+all leaving the existing goldens byte-stable:
 
-- **Faster force layouts** — `internal/d3/quadtree` port backing an opt-in
-  Barnes–Hut many-body (`ForceManyBody().Theta(θ)`, ~2.2× at n=1000, ~7× at
-  n=5000) and a quadtree-pruned collision pass (`ForceCollide().UseQuadtree()`).
-- **O(n log n) Delaunay** — the `internal/d3/delaunay` core is now a Delaunator
-  sweep-hull (was O(n²) Bowyer–Watson); near-linear scaling, identical output.
-- **Canvas backend** (`charts/canvas`) — a compact, deterministic draw-list
-  recorded from the same layout hooks and replayed into a `<canvas>` by a small
-  dependency-free script. Opt-in per chart via `Render: theming.EngineCanvas`;
-  **scatterplot** and **heatmap** are wired (tranche 1). At 20k points a
-  scatterplot's payload drops ~4.4× (2.3 MB SVG → 0.5 MB Canvas). See the
-  `/benchmark` page and the `engine` switcher on those charts' detail pages.
+- **Perceptual color spaces** — `internal/d3/color` gains **HSL, Lab, and Lch**
+  alongside RGB (faithful d3-color conversions + in-space interpolation).
+  Sequential/diverging scales and palette sampling take an opt-in `Space`
+  selector (default RGB), and lightness modifiers can apply in Lab. See the
+  **color space** switcher on the heatmap detail page.
+- **Consumption surface** — a public typed **`charts/samples`** package (one
+  ready-to-render dataset per chart family), the **`charts/static`** registry
+  extended from 3 to **all 28** chart families through one reflective adapter,
+  and one unifying **`colors.Set(...)`** API over the existing color-config
+  shapes.
+- **Geo completeness** — `GeoPath` **bounds/area/centroid**, projection
+  **`FitExtent`/`FitSize`/`FitWidth`/`FitHeight`**, the **conic** projection
+  family (conformal/equal-area/equidistant with standard parallels), and an
+  opt-in **TopoJSON** decoder (GeoJSON is still the default input). See the
+  auto-fit choropleth on the geo detail page.
 
-Both force fast-paths and the Canvas engine are opt-in with SVG as the default,
-so all pre-existing goldens stayed byte-stable; new goldens lock the draw-lists.
+This builds on v1–v3 (full nivo SVG parity, 28 families), v4 (consumability),
+v5 (fidelity & finish: geo clip, animation, zoom, hover), and v6 (scale: the
+`d3-quadtree`/Barnes–Hut and Delaunator ports plus the Canvas backend). Every
+v7 addition defaults to prior behavior, so all pre-existing goldens stayed
+byte-stable; new goldens/tests lock the new surface, validated against
+d3-color / d3-geo / topojson-client.
 
-Remaining v6: Canvas tranches 2–3 (network/swarmplot/voronoi; line/bar/geo).
-Deferred to v7: HSL/Lab/Lch color spaces, the public sample-data export /
-`charts/static` extension, and geo beyond correctness (`GeoPath`
-bounds/centroid, `fitExtent`, the full projection catalog, TopoJSON). See
-[`docs/PLAN-v6.md`](docs/PLAN-v6.md) for the current plan,
-[`docs/PLAN-deferred.md`](docs/PLAN-deferred.md) for the consolidated backlog and
+After v7 the remaining work is maintenance, not a themed release. See
+[`docs/PLAN-v7.md`](docs/PLAN-v7.md) for the plan,
+[`docs/PLAN-v6.md`](docs/PLAN-v6.md) for the Canvas/scale work,
+[`docs/PLAN-deferred.md`](docs/PLAN-deferred.md) for the (now-closed) backlog and
 [`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.
