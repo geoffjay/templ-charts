@@ -151,6 +151,44 @@ dimensions while emitting `style="width:100%;height:auto;display:block"`, so it
 scales fluidly to its container with **zero JS and zero consumer CSS**. Defaults
 to `false` (fixed pixel size), so existing fixed-size renders are unchanged.
 
+## Canvas backend (large N)
+
+For large datasets, scatterplot and heatmap can render into a single `<canvas>`
+instead of one SVG element per mark. Opt in with `Render: theming.EngineCanvas`
+and a stable `ChartID`:
+
+```go
+scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
+    Width: 900, Height: 500,
+    Data:    bigSeries,
+    Render:  theming.EngineCanvas,
+    ChartID: "scatter1",
+})
+```
+
+How it works: the same `Use{Chart}` layout hooks that drive the SVG render feed
+a **draw-list** — an ordered sequence of primitive ops (`fillStyle`,
+`fillCircle`, `fillRect`, `fillText`, `line`, `fillPath`, …) recorded by
+`charts/canvas`. The chart emits a wrapper `<div>` with the marks as a
+`<canvas>` + a JSON draw-list, layered between SVG panes for grid (behind) and
+axes/legends (in front). A tiny dependency-free replay script paints the
+draw-list into the 2D context, HiDPI-scaled and repainted on resize — include it
+once per page:
+
+```go
+@canvas.CanvasScriptTag()   // alongside interact.ScriptTag()
+```
+
+Notes:
+
+- The default engine is SVG; Canvas is purely opt-in, so existing renders are
+  byte-identical.
+- The draw-list is deterministic data — it golden-tests as JSON, and a future
+  server-side PNG rasterizer could consume the same list.
+- Hover uses the `UseMesh` overlay (there is no per-mark DOM to hover on Canvas).
+- At 20k points a scatterplot's payload is ~4.4× smaller than SVG (2.3 MB →
+  0.5 MB) and emits ~1.8× faster; see the demo app's `/benchmark` page.
+
 ## Accessibility
 
 Every chart renders `role="img"` by default and accepts:

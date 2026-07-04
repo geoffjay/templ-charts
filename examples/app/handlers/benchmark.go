@@ -10,6 +10,8 @@ import (
 	"github.com/geoffjay/templ-charts/charts/bar"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/render"
+	"github.com/geoffjay/templ-charts/charts/scatterplot"
+	"github.com/geoffjay/templ-charts/charts/theming"
 	"github.com/geoffjay/templ-charts/examples/app/templates"
 )
 
@@ -64,9 +66,107 @@ func (a *App) Benchmark(w http.ResponseWriter, r *http.Request) {
 	b.WriteString(`<h3>Showcase — N = 500</h3>`)
 	b.WriteString(`<div class="chart">` + showcase + `</div>`)
 
+	if err := writeCanvasShowcase(&b); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	a.renderPage(w,
 		templates.LayoutProps{Title: "benchmark — templ-charts demo", Nav: "benchmark"},
 		templ.Raw(b.String()))
+}
+
+// canvasShowcaseSizes is the large-N sweep for the SVG-vs-Canvas comparison.
+var canvasShowcaseSizes = []int{1000, 5000, 20000}
+
+// writeCanvasShowcase appends the large-N Canvas story: a table contrasting the
+// SVG and Canvas backends' payload size and server render time for a
+// scatterplot as the point count grows, plus one live Canvas scatterplot
+// rendering thousands of points into a single <canvas> (docs/PLAN-v6.md §8).
+func writeCanvasShowcase(b *strings.Builder) error {
+	const iters = 3
+
+	b.WriteString(`<h2>Canvas backend — large N</h2>`)
+	b.WriteString(`<p>The Canvas engine (<code>Render: theming.EngineCanvas</code>) draws the data marks into a ` +
+		`single <code>&lt;canvas&gt;</code> draw-list instead of one SVG node per point, while grid and axes ` +
+		`stay SVG. Below, the same scatterplot is rendered with each backend at increasing point counts — ` +
+		`compare the payload size and server render time.</p>`)
+	b.WriteString(`<table style="border-collapse:collapse" cellpadding="6" border="1">`)
+	b.WriteString(`<thead><tr><th>points (N)</th><th>SVG bytes</th><th>Canvas bytes</th>` +
+		`<th>SVG render (ms)</th><th>Canvas render (ms)</th></tr></thead><tbody>`)
+
+	for _, n := range canvasShowcaseSizes {
+		svgProps := showcaseScatterProps(n, theming.EngineSVG)
+		canvasProps := showcaseScatterProps(n, theming.EngineCanvas)
+
+		svg, err := render.String(scatterplot.ScatterPlot(svgProps))
+		if err != nil {
+			return err
+		}
+		cv, err := render.String(scatterplot.ScatterPlot(canvasProps))
+		if err != nil {
+			return err
+		}
+		svgMs := timeRender(iters, func() error {
+			_, e := render.String(scatterplot.ScatterPlot(svgProps))
+			return e
+		})
+		cvMs := timeRender(iters, func() error {
+			_, e := render.String(scatterplot.ScatterPlot(canvasProps))
+			return e
+		})
+		fmt.Fprintf(b,
+			`<tr><td style="text-align:right">%d</td><td style="text-align:right">%d</td>`+
+				`<td style="text-align:right">%d</td><td style="text-align:right">%.3f</td>`+
+				`<td style="text-align:right">%.3f</td></tr>`,
+			n, len(svg), len(cv), svgMs, cvMs)
+	}
+	b.WriteString(`</tbody></table>`)
+
+	// Live Canvas showcase: 5000 points in one <canvas>.
+	live, err := render.String(scatterplot.ScatterPlot(showcaseScatterProps(5000, theming.EngineCanvas)))
+	if err != nil {
+		return err
+	}
+	b.WriteString(`<h3>Live Canvas scatterplot — N = 5000</h3>`)
+	b.WriteString(`<p>Five thousand points painted into a single canvas element (view source: one ` +
+		`<code>&lt;canvas&gt;</code> + a JSON draw-list, no per-point DOM).</p>`)
+	b.WriteString(`<div class="chart">` + live + `</div>`)
+	return nil
+}
+
+// timeRender averages fn over iters runs and returns the mean in milliseconds.
+func timeRender(iters int, fn func() error) float64 {
+	start := time.Now()
+	for i := 0; i < iters; i++ {
+		if err := fn(); err != nil {
+			return 0
+		}
+	}
+	return float64(time.Since(start).Microseconds()) / float64(iters) / 1000.0
+}
+
+// showcaseScatterProps builds a deterministic single-series scatterplot of n
+// points for the given backend.
+func showcaseScatterProps(n int, engine theming.Engine) scatterplot.ScatterPlotProps {
+	data := make([]scatterplot.ScatterPlotDatum, n)
+	for i := 0; i < n; i++ {
+		data[i] = scatterplot.ScatterPlotDatum{
+			X: float64((i*37)%1000) + 1,
+			Y: float64((i*53)%1000) + 1,
+		}
+	}
+	return scatterplot.ScatterPlotProps{
+		Width: 900, Height: 460,
+		Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
+		Data:        []scatterplot.ScatterPlotSerie{{ID: "points", Data: data}},
+		EnableGridX: true,
+		EnableGridY: true,
+		NodeSize:    4,
+		Render:      engine,
+		ChartID:     "benchmark-canvas-scatter",
+		Responsive:  true,
+	}
 }
 
 // benchmarkBarProps builds a deterministic stacked-bar props value with n index

@@ -69,7 +69,8 @@ cover:
 ## because timings are environment-sensitive. Override the scope with
 ## `make bench BENCH_PKGS='./internal/d3/force ./charts/bar'`.
 BENCH_PKGS ?= ./internal/d3/force ./internal/d3/delaunay ./internal/d3/hierarchy \
-	./internal/d3/sankey ./charts/bar ./charts/line ./charts/heatmap ./charts/network
+	./internal/d3/sankey ./charts/bar ./charts/line ./charts/heatmap ./charts/network \
+	./charts/scatterplot
 bench:
 	go test -run '^$$' -bench=. -benchmem $(BENCH_PKGS)
 

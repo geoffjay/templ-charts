@@ -117,9 +117,11 @@ func buildNetworkTheta(n int, theta float64) *Simulation {
 
 // BenchmarkSimulationBarnesHut times the same run with the O(n log n) Barnes–Hut
 // charge — compare against BenchmarkSimulation to see the asymptotic win at
-// large n (the two diverge as n grows).
+// large n (the two diverge as n grows). The 10k/50k cases have no exact
+// counterpart on purpose: the O(n²) all-pairs charge is infeasible at that
+// scale (2.5e9 pair-evals/tick at 50k), which is exactly why Barnes–Hut exists.
 func BenchmarkSimulationBarnesHut(b *testing.B) {
-	for _, n := range []int{50, 100, 500, 1000, 5000} {
+	for _, n := range []int{50, 100, 500, 1000, 5000, 10000, 50000} {
 		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
 			b.ReportAllocs()
 			b.ResetTimer()

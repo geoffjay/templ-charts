@@ -46,5 +46,23 @@ svg, _ := render.String(heatmap.HeatMap(heatmap.HeatMapProps{
 			p.Animate = animate
 			return render.String(heatmap.HeatMap(p))
 		},
+		CanvasRender: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
+			v := func(f float64) *float64 { return &f }
+			p := heatmap.HeatMapProps{
+				Width: 720, Height: 440, Responsive: true,
+				Data: []heatmap.HeatMapSerie{
+					{ID: "Japan", Data: []heatmap.HeatMapDatum{
+						{X: "Train", Y: v(42)}, {X: "Bus", Y: v(18)},
+					}},
+					{ID: "France", Data: []heatmap.HeatMapDatum{
+						{X: "Train", Y: v(33)}, {X: "Bus", Y: v(51)},
+					}},
+				},
+				Theme:   theme,
+				Render:  theming.EngineCanvas,
+				ChartID: "detail-heatmap-canvas",
+			}
+			return render.String(heatmap.HeatMap(p))
+		},
 	})
 }

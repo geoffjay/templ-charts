@@ -270,9 +270,19 @@ plumbing:
    `canvas.CanvasScriptTag()` loaded in the app layout. `make ci` green, `make
    golden` idempotent, no existing golden moved. Tranches 2–3 (network/swarmplot/
    voronoi; line/bar/geo) remain. See `docs/NOTES.md` (v6 Phase 5).
-6. **Benchmarks + large-N demo + docs** (§7–§8): `make bench` large-N cases,
-   the showcase page, `README`/`USAGE`/`NOTES` updates, `make golden` idempotent,
-   `make ci` green.
+6. [x] **Benchmarks + large-N demo + docs** (§7–§8) — done. `make bench` gained
+   large-N cases: Barnes–Hut force `Tick` at 10k/50k (no exact counterpart — the
+   O(n²) charge is infeasible there, which is the point), Delaunator triangulation
+   + voronoi at 10k/50k, and an SVG-vs-Canvas emit comparison for scatterplot and
+   heatmap (payload bytes + time). Measured: at 20k scatter points the Canvas
+   payload is ~4.4× smaller (2.3 MB → 0.5 MB) and ~1.8× faster to emit. The
+   `/benchmark` page gained a "Canvas backend — large N" section (SVG-vs-Canvas
+   table + a live 5k-point Canvas scatterplot); Canvas-capable detail pages
+   (scatterplot, heatmap) gained an `engine` switcher (`?engine=canvas`, via a new
+   optional `ChartEntry.CanvasRender` that leaves the other 26 entries untouched).
+   README (intro + Status + a Canvas usage section) and USAGE (Canvas backend
+   section) updated; `charts/scatterplot` added to `BENCH_PKGS`. `make ci` green,
+   `make golden` idempotent. See `docs/NOTES.md` (v6 Phase 6).
 
 ## 10. Scope summary for v6
 

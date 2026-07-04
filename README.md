@@ -10,10 +10,13 @@ plot**, **bump**, **marimekko**, **parallel-coordinates**, **polar-bar**,
 **voronoi**, **network**, **swarmplot**, **sankey**, **chord**, and **geo**
 (GeoMap + Choropleth) — a hybrid interactivity layer, responsive + accessible
 output, and a runnable demo app. This is **full nivo SVG chart parity**: every
-SVG chart type nivo ships has a templ-charts equivalent (Canvas rendering
-remains out of scope).
+SVG chart type nivo ships has a templ-charts equivalent. A **Canvas backend**
+(v6, opt-in) additionally renders scatterplot and heatmap into a `<canvas>`
+draw-list for large-N datasets.
 
-- **Render** charts as SVG strings from Go — no Canvas, no JS bundle.
+- **Render** charts as SVG strings from Go — no JS bundle required. An opt-in
+  Canvas backend (`Render: theming.EngineCanvas`) is available for large-N
+  scatterplot/heatmap.
 - **Interact** with a hybrid model: ephemeral hover (tooltips, crosshair,
   nearest-point hit-testing) runs client-side from `data-*` attributes via a
   tiny dependency-free script (`charts/interact`); state changes (series
@@ -126,6 +129,34 @@ byte-stable) plus `MotionStagger float64`. When on, marks play a SMIL enter
 transition — fade-in for rects/arcs/lines/cells, radius-scale for circles —
 staggered by `MotionStagger` seconds. No JS: the animation is native SMIL
 `<animate>` in the SVG.
+
+### Canvas backend (large N)
+
+Scatterplot and heatmap can render into a `<canvas>` instead of one SVG node per
+mark — for datasets where thousands of DOM elements are too many. Set
+`Render: theming.EngineCanvas` and give the chart a stable `ChartID`:
+
+```go
+import (
+    "github.com/geoffjay/templ-charts/charts/scatterplot"
+    "github.com/geoffjay/templ-charts/charts/theming"
+)
+
+scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
+    Width: 900, Height: 500,
+    Data:    bigSeries,             // thousands of points
+    Render:  theming.EngineCanvas,  // draw marks into a <canvas>
+    ChartID: "scatter1",            // unique per canvas on the page
+})
+```
+
+The chart emits a wrapper `<div>` layering the marks (a `<canvas>` + a JSON
+draw-list) between SVG panes for grid (below) and axes/legends (above), so it
+lines up exactly with the SVG version. Include the replay script once per page —
+`@canvas.CanvasScriptTag()` (a sibling of `interact.ScriptTag()`) — to paint the
+draw-list; it HiDPI-scales and repaints on resize, with no server round-trip.
+The default engine stays SVG, so existing output is unchanged. Hover on Canvas
+goes through the `UseMesh` overlay (there is no per-mark DOM to hover).
 
 ### Accessibility & responsiveness
 
@@ -255,29 +286,28 @@ make ci
 
 ## Status
 
-v5 complete: **fidelity & finish**. On top of v3's full nivo SVG chart parity
-and v4's consumability work, v5 closes the last mile of the SVG story so every
-chart is *correct*, *complete*, and *animated*:
+v6 in progress: **scale**. On top of v5's *fidelity & finish*, v6 adds the
+large-N performance foundations and a Canvas rendering path:
 
-- **Correct azimuthal geo** — ported d3-geo's `clipCircle` + `clipExtent`, so
-  orthographic/gnomonic/stereographic/azimuthal projections now render only the
-  visible hemisphere (they previously drew the whole sphere).
-- **Animation across every chart** — a wired `Animate` (default off,
-  byte-stable) threaded through all ~25 v2/v3 charts via shared SMIL primitives.
-- **Partial charts finished** — waffle `areas` layer, calendar month-outline
-  border, sankey link gradients (each opt-in / default-off).
-- **Interactivity** — unified hover-highlight (chord/sankey/network), client
-  hierarchy zoom (icicle/treemap/circle-packing/sunburst), the line
-  per-mousemove server fallback retired in favour of the client path, and an
-  opt-in `ResizeObserver` re-fetch.
+- **Faster force layouts** — `internal/d3/quadtree` port backing an opt-in
+  Barnes–Hut many-body (`ForceManyBody().Theta(θ)`, ~2.2× at n=1000, ~7× at
+  n=5000) and a quadtree-pruned collision pass (`ForceCollide().UseQuadtree()`).
+- **O(n log n) Delaunay** — the `internal/d3/delaunay` core is now a Delaunator
+  sweep-hull (was O(n²) Bowyer–Watson); near-linear scaling, identical output.
+- **Canvas backend** (`charts/canvas`) — a compact, deterministic draw-list
+  recorded from the same layout hooks and replayed into a `<canvas>` by a small
+  dependency-free script. Opt-in per chart via `Render: theming.EngineCanvas`;
+  **scatterplot** and **heatmap** are wired (tranche 1). At 20k points a
+  scatterplot's payload drops ~4.4× (2.3 MB SVG → 0.5 MB Canvas). See the
+  `/benchmark` page and the `engine` switcher on those charts' detail pages.
 
-Every new behaviour defaults off/opt-in, so all pre-existing goldens stayed
-byte-stable; new on-variant goldens lock the new markup.
+Both force fast-paths and the Canvas engine are opt-in with SVG as the default,
+so all pre-existing goldens stayed byte-stable; new goldens lock the draw-lists.
 
-Still SVG-only — **the Canvas rendering path + large-N performance (Barnes–Hut,
-delaunator, streaming render) are the largest remaining nivo gap and the natural
-v6 theme.** Other deferrals: HSL/Lab/Lch color spaces, the public sample-data
-export / `charts/static` extension, and geo beyond correctness (`GeoPath`
+Remaining v6: Canvas tranches 2–3 (network/swarmplot/voronoi; line/bar/geo).
+Deferred to v7: HSL/Lab/Lch color spaces, the public sample-data export /
+`charts/static` extension, and geo beyond correctness (`GeoPath`
 bounds/centroid, `fitExtent`, the full projection catalog, TopoJSON). See
+[`docs/PLAN-v6.md`](docs/PLAN-v6.md) for the current plan,
 [`docs/PLAN-deferred.md`](docs/PLAN-deferred.md) for the consolidated backlog and
 [`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.

@@ -22,6 +22,12 @@ type ChartEntry struct {
 	// palette-driven), and animate flag (true enables the chart's SMIL enter
 	// animation; default off) and returns the SVG string.
 	Render func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error)
+
+	// CanvasRender, when non-nil, renders the chart with the Canvas backend
+	// (charts/canvas) instead of SVG — set only for Canvas-capable charts
+	// (scatterplot, heatmap). The detail page shows an engine switcher and uses
+	// this on ?engine=canvas. Same signature as Render.
+	CanvasRender func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error)
 }
 
 // registry maps slug → entry, populated by each chart file's init().

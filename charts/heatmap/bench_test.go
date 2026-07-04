@@ -8,6 +8,7 @@ import (
 
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
+	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
 // benchHeatMapData builds a deterministic n×n grid: n series (rows), each with
@@ -50,6 +51,33 @@ func BenchmarkHeatMap(b *testing.B) {
 					b.Fatal(err)
 				}
 			}
+		})
+	}
+}
+
+// BenchmarkHeatMapCanvas measures the Canvas-backend emit cost and payload for
+// the same n×n grid — one FillRect op per cell into a compact draw-list, versus
+// BenchmarkHeatMap's one <g><rect> per cell. Run with `make bench`.
+func BenchmarkHeatMapCanvas(b *testing.B) {
+	for _, n := range []int{10, 30, 60} {
+		props := benchHeatMapProps(n)
+		props.Render = theming.EngineCanvas
+		props.ChartID = "bench"
+		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
+			var sb strings.Builder
+			if err := heatmap.HeatMap(props).Render(context.Background(), &sb); err != nil {
+				b.Fatal(err)
+			}
+			bytes := sb.Len()
+			b.ReportAllocs()
+			b.ResetTimer()
+			for i := 0; i < b.N; i++ {
+				sb.Reset()
+				if err := heatmap.HeatMap(props).Render(context.Background(), &sb); err != nil {
+					b.Fatal(err)
+				}
+			}
+			b.ReportMetric(float64(bytes), "payload_B")
 		})
 	}
 }

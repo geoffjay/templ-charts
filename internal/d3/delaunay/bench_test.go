@@ -23,7 +23,7 @@ func benchPoints(n int) [][2]float64 {
 // BenchmarkNewDelaunayFrom times the Delaunator sweep-hull triangulation
 // (O(n log n)) over n deterministic points.
 func BenchmarkNewDelaunayFrom(b *testing.B) {
-	for _, n := range []int{50, 100, 500, 1000} {
+	for _, n := range []int{50, 100, 500, 1000, 10000, 50000} {
 		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
 			pts := benchPoints(n)
 			b.ReportAllocs()
@@ -38,7 +38,7 @@ func BenchmarkNewDelaunayFrom(b *testing.B) {
 // BenchmarkVoronoi times Voronoi cell generation from a prebuilt triangulation.
 func BenchmarkVoronoi(b *testing.B) {
 	bounds := [4]float64{0, 0, 1000, 1000}
-	for _, n := range []int{50, 100, 500, 1000} {
+	for _, n := range []int{50, 100, 500, 1000, 10000, 50000} {
 		b.Run(fmt.Sprintf("n=%d", n), func(b *testing.B) {
 			d := NewDelaunayFrom(benchPoints(n))
 			b.ReportAllocs()
