@@ -2,31 +2,34 @@
 // registry mapping chart types to their components/defaults/runtime-props, a
 // RenderChart dispatcher that applies static defaults + chart defaults +
 // user props + whitelisted overrides and renders to an SVG string, and a
-// Samples map of demo data for bar/line/pie.
+// Samples map of ready-to-render demo data for every chart family.
+//
+// The per-family wiring (ChartType constants, ChartsMapping entries, and the
+// Samples registry) lives in registry.go; this file holds the generic
+// reflection-based adapter that every family shares. Rather than a hand-written
+// component per chart, one reflectComponent forces the static flags
+// (animate/isInteractive off, default theme), applies a default margin, and
+// applies the whitelisted overrides by field name — set-if-assignable, so a
+// family whose Colors field is a bespoke type (heatmap, calendar) simply skips
+// the generic `colors` override. The only per-family code is a one-line render
+// closure that type-asserts the props and calls the templ constructor.
 package static
 
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/a-h/templ"
-	"github.com/geoffjay/templ-charts/charts/bar"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
-	"github.com/geoffjay/templ-charts/charts/line"
-	"github.com/geoffjay/templ-charts/charts/pie"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
-// ChartType enumerates the supported chart types.
+// ChartType names a supported chart family. The concrete constants live in
+// registry.go.
 type ChartType string
-
-const (
-	ChartTypeBar  ChartType = "bar"
-	ChartTypeLine ChartType = "line"
-	ChartTypePie  ChartType = "pie"
-)
 
 // ChartComponent is the render interface every chart type implements. Render
 // applies static defaults + chart defaults + user props + whitelisted overrides
@@ -44,31 +47,9 @@ type Mapping struct {
 	Defaults     map[string]any
 }
 
-// ChartsMapping maps each ChartType to its Mapping. Mirrors @nivo/static
-// chartsMapping.
-var ChartsMapping = map[ChartType]Mapping{
-	ChartTypeBar: {
-		Component:    barComponent{},
-		RuntimeProps: []string{"width", "height", "colors", "groupMode"},
-		Defaults: map[string]any{
-			"margin": map[string]any{"top": 40, "right": 50, "bottom": 40, "left": 50},
-		},
-	},
-	ChartTypeLine: {
-		Component:    lineComponent{},
-		RuntimeProps: []string{"width", "height", "colors"},
-		Defaults: map[string]any{
-			"margin": map[string]any{"top": 40, "right": 50, "bottom": 40, "left": 50},
-		},
-	},
-	ChartTypePie: {
-		Component:    pieComponent{},
-		RuntimeProps: []string{"width", "height", "colors", "groupMode"},
-		Defaults: map[string]any{
-			"margin": map[string]any{"top": 40, "right": 50, "bottom": 40, "left": 50},
-		},
-	},
-}
+// defaultMargin is the static-render margin applied to any family whose Margin
+// prop is left zero (matches the legacy bar/line/pie behaviour).
+var defaultMargin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}
 
 // staticProps mirrors nivo's staticProps: the base overrides applied to every
 // static render (no animation, no interactivity, no wrapper, empty theme).
@@ -81,64 +62,146 @@ var staticProps = map[string]any{
 
 // RenderChart mirrors @nivo/static renderChart: applies staticProps +
 // chart.defaults + props + whitelisted override, renders to SVG string.
-// `chartType` selects the chart; `props` is the chart-specific props struct
-// (bar.BarProps, line.LineProps, or pie.PieProps); `override` is a map of
-// runtime-overridable props (only keys in Mapping.RuntimeProps are applied).
+// `chartType` selects the chart; `props` is the chart-specific props struct;
+// `override` is a map of runtime-overridable props (only keys in
+// Mapping.RuntimeProps are applied).
 func RenderChart(chartType ChartType, props any, override map[string]any) (string, error) {
 	mapping, ok := ChartsMapping[chartType]
 	if !ok {
 		return "", fmt.Errorf("static: unknown chart type %q", chartType)
 	}
-
-	// Apply whitelisted overrides.
 	over := map[string]any{}
 	if override != nil {
 		over = pick(override, mapping.RuntimeProps)
 	}
-
 	return mapping.Component.Render(props, over)
 }
 
-// mergeProps overlays `overlay` onto `base`. If base is a map[string]any, the
-// overlay is merged key-by-key (recursive for nested maps). If base is a
-// struct (bar.BarProps etc.), the overlay is applied via reflection where
-// possible; otherwise base is returned as-is (the chart's applyDefaults
-// handles the struct-level defaults).
-//
-// For the struct case, we convert the struct to a map, merge, and pass the map
-// to the component's Render (which knows how to interpret it). In practice,
-// the static package passes chart-specific props structs directly and relies
-// on the component's applyDefaults for the rest; staticProps/defaults are
-// applied as map overlays only when the base is already a map.
-func mergeProps(base any, overlay map[string]any) any {
-	if overlay == nil {
-		return base
-	}
-	// If base is a map, merge recursively.
-	if bm, ok := base.(map[string]any); ok {
-		out := make(map[string]any, len(bm)+len(overlay))
-		for k, v := range bm {
-			out[k] = v
-		}
-		for k, v := range overlay {
-			if existing, ok := out[k]; ok {
-				if em, ok1 := existing.(map[string]any); ok1 {
-					if vm, ok2 := v.(map[string]any); ok2 {
-						out[k] = mergeProps(em, vm)
-						continue
-					}
-				}
+// reflectComponent is the shared, reflection-based ChartComponent. `render`
+// type-asserts the (defaults-applied) props and constructs the templ component.
+type reflectComponent struct {
+	render func(props any) (templ.Component, error)
+}
+
+// Render applies the static overrides + default margin + whitelisted overrides
+// to a copy of props (via reflection), then renders.
+func (rc reflectComponent) Render(props any, override map[string]any) (string, error) {
+	nv, ok := mutableCopy(props)
+	if ok {
+		// Force static flags.
+		setBoolField(nv, "Animate", false)
+		setBoolField(nv, "Interactive", false)
+		setThemeField(nv, "Theme", &theming.DefaultTheme)
+		// Default margin when unset.
+		if mf := nv.FieldByName("Margin"); mf.IsValid() && mf.CanSet() {
+			if m, ok := mf.Interface().(core.Margin); ok && m == (core.Margin{}) {
+				mf.Set(reflect.ValueOf(defaultMargin))
 			}
-			out[k] = v
 		}
-		return out
+		// Whitelisted overrides.
+		for k, v := range override {
+			applyOverride(nv, k, v)
+		}
+		props = nv.Interface()
 	}
-	// If base is a struct, we can't easily merge a map onto it without
-	// reflection. The chart components handle defaults internally via
-	// applyDefaults, so we return the base as-is. The staticProps
-	// (animate=false, isInteractive=false) are handled by passing them as
-	// override fields that the component respects.
-	return base
+	comp, err := rc.render(props)
+	if err != nil {
+		return "", err
+	}
+	return renderComponent(comp), nil
+}
+
+// mutableCopy returns an addressable copy of a struct value so its fields can
+// be set via reflection. Returns ok=false for non-structs.
+func mutableCopy(props any) (reflect.Value, bool) {
+	v := reflect.ValueOf(props)
+	if v.Kind() == reflect.Pointer {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return reflect.Value{}, false
+	}
+	nv := reflect.New(v.Type()).Elem()
+	nv.Set(v)
+	return nv, true
+}
+
+// applyOverride maps a runtime-prop key to a struct field and sets it when the
+// value is assignable. The `colors` key is parsed into an ordinal color config
+// first (skipped for families whose Colors field is a bespoke type).
+func applyOverride(v reflect.Value, key string, val any) {
+	switch key {
+	case "width":
+		setFloatField(v, "Width", val)
+	case "height":
+		setFloatField(v, "Height", val)
+	case "colors":
+		if cfg, err := colors.ParseOrdinalColorScaleConfig(val); err == nil {
+			setAssignableField(v, "Colors", reflect.ValueOf(cfg))
+		}
+	default:
+		setAssignableField(v, capitalize(key), reflect.ValueOf(val))
+	}
+}
+
+// setAssignableField sets field `name` to rv when the field exists, is
+// settable, and rv is assignable to it (otherwise it is silently skipped).
+func setAssignableField(v reflect.Value, name string, rv reflect.Value) {
+	f := v.FieldByName(name)
+	if !f.IsValid() || !f.CanSet() || !rv.IsValid() {
+		return
+	}
+	if rv.Type().AssignableTo(f.Type()) {
+		f.Set(rv)
+	}
+}
+
+func setBoolField(v reflect.Value, name string, b bool) {
+	f := v.FieldByName(name)
+	if f.IsValid() && f.CanSet() && f.Kind() == reflect.Bool {
+		f.SetBool(b)
+	}
+}
+
+func setThemeField(v reflect.Value, name string, theme *theming.Theme) {
+	f := v.FieldByName(name)
+	if f.IsValid() && f.CanSet() {
+		rv := reflect.ValueOf(theme)
+		if rv.Type().AssignableTo(f.Type()) {
+			f.Set(rv)
+		}
+	}
+}
+
+func setFloatField(v reflect.Value, name string, val any) {
+	f := v.FieldByName(name)
+	if !f.IsValid() || !f.CanSet() {
+		return
+	}
+	if fv, ok := asFloat(val); ok && f.Kind() == reflect.Float64 {
+		f.SetFloat(fv)
+	}
+}
+
+func asFloat(v any) (float64, bool) {
+	switch x := v.(type) {
+	case float64:
+		return x, true
+	case float32:
+		return float64(x), true
+	case int:
+		return float64(x), true
+	case int64:
+		return float64(x), true
+	}
+	return 0, false
+}
+
+func capitalize(s string) string {
+	if s == "" {
+		return s
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
 
 // pick returns a new map containing only the keys from `src` that are listed
@@ -151,113 +214,6 @@ func pick(src map[string]any, allowed []string) map[string]any {
 		}
 	}
 	return out
-}
-
-// --- chart component adapters ---
-
-// barComponent adapts bar.Bar to the ChartComponent interface.
-type barComponent struct{}
-
-func (barComponent) Render(props any, override map[string]any) (string, error) {
-	bp, ok := props.(bar.BarProps)
-	if !ok {
-		return "", fmt.Errorf("static: bar render expects bar.BarProps, got %T", props)
-	}
-	// Force static overrides.
-	bp.Animate = false
-	bp.Interactive = false
-	bp.Theme = &theming.DefaultTheme
-	// Apply chart defaults (margin).
-	if bp.Margin == (core.Margin{}) {
-		bp.Margin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}
-	}
-	// Apply whitelisted overrides.
-	if v, ok := override["width"]; ok {
-		bp.Width = toFloat(v)
-	}
-	if v, ok := override["height"]; ok {
-		bp.Height = toFloat(v)
-	}
-	if v, ok := override["groupMode"]; ok {
-		if gm, ok := v.(bar.GroupMode); ok {
-			bp.GroupMode = gm
-		}
-	}
-	if v, ok := override["colors"]; ok {
-		if cfg, err := colors.ParseOrdinalColorScaleConfig(v); err == nil {
-			bp.Colors = cfg
-		}
-	}
-	return renderComponent(bar.Bar(bp)), nil
-}
-
-// lineComponent adapts line.Line to the ChartComponent interface.
-type lineComponent struct{}
-
-func (lineComponent) Render(props any, override map[string]any) (string, error) {
-	lp, ok := props.(line.LineProps)
-	if !ok {
-		return "", fmt.Errorf("static: line render expects line.LineProps, got %T", props)
-	}
-	lp.Animate = false
-	lp.Interactive = false
-	lp.Theme = &theming.DefaultTheme
-	if lp.Margin == (core.Margin{}) {
-		lp.Margin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}
-	}
-	if v, ok := override["width"]; ok {
-		lp.Width = toFloat(v)
-	}
-	if v, ok := override["height"]; ok {
-		lp.Height = toFloat(v)
-	}
-	if v, ok := override["colors"]; ok {
-		if cfg, err := colors.ParseOrdinalColorScaleConfig(v); err == nil {
-			lp.Colors = cfg
-		}
-	}
-	return renderComponent(line.Line(lp)), nil
-}
-
-// pieComponent adapts pie.Pie to the ChartComponent interface.
-type pieComponent struct{}
-
-func (pieComponent) Render(props any, override map[string]any) (string, error) {
-	pp, ok := props.(pie.PieProps)
-	if !ok {
-		return "", fmt.Errorf("static: pie render expects pie.PieProps, got %T", props)
-	}
-	pp.Animate = false
-	pp.Interactive = false
-	pp.Theme = &theming.DefaultTheme
-	if pp.Margin == (core.Margin{}) {
-		pp.Margin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}
-	}
-	if v, ok := override["width"]; ok {
-		pp.Width = toFloat(v)
-	}
-	if v, ok := override["height"]; ok {
-		pp.Height = toFloat(v)
-	}
-	if v, ok := override["colors"]; ok {
-		if cfg, err := colors.ParseOrdinalColorScaleConfig(v); err == nil {
-			pp.Colors = cfg
-		}
-	}
-	return renderComponent(pie.Pie(pp)), nil
-}
-
-// toFloat coerces an any to float64.
-func toFloat(v any) float64 {
-	switch x := v.(type) {
-	case float64:
-		return x
-	case int:
-		return float64(x)
-	case int64:
-		return float64(x)
-	}
-	return 0
 }
 
 // renderComponent renders a templ.Component to a string.
