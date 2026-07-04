@@ -10,10 +10,14 @@
 // small-circle preclip that hides the far hemisphere) and clipExtent (the
 // rectangular screen-space postclip), so every projection — cylindrical,
 // pseudocylindrical, and azimuthal (orthographic/gnomonic/stereographic/
-// azimuthal*) — renders correctly. Still deferred (GeoMap/Choropleth don't need
-// them): GeoPath bounds/area/centroid and fitExtent/fitSize; projections beyond
-// the ~10 nivo exposes; TopoJSON (callers supply GeoJSON). See docs/PLAN-v5.md
-// §3 and NOTES.md.
+// azimuthal*) — renders correctly.
+//
+// v7 adds the geo-measurement completeness pieces: GeoPath.Bounds/Area/Centroid
+// (planar stream sinks; see path_measure.go), Projection.FitExtent/FitSize/
+// FitWidth/FitHeight (fit.go), the conic projection family — conicConformal/
+// conicEqualArea/conicEquidistant with standard-parallels support (conic.go) —
+// and an opt-in TopoJSON decoder (topojson.go; callers may still supply GeoJSON
+// directly). See docs/PLAN-v5.md §3, docs/PLAN-v7.md §5, and NOTES.md.
 package geo
 
 import "math"

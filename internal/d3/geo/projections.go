@@ -195,6 +195,12 @@ func ProjectionByType(name string) *Projection {
 		return GeoTransverseMercator()
 	case "naturalEarth1":
 		return GeoNaturalEarth1()
+	case "conicConformal":
+		return GeoConicConformal()
+	case "conicEqualArea":
+		return GeoConicEqualArea()
+	case "conicEquidistant":
+		return GeoConicEquidistant()
 	case "mercator":
 		fallthrough
 	default:

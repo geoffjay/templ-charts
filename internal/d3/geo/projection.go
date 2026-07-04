@@ -26,6 +26,12 @@ type Projection struct {
 	projectTransform       transform
 	projectRotateTransform transform
 	projectResample        func(Sink) Sink
+
+	// Conic projections only: rawFactory rebuilds the raw projection from the
+	// two standard parallels; phi0/phi1 are those parallels in radians. nil
+	// rawFactory ⇒ a non-conic projection and Parallels is a no-op.
+	rawFactory func(phi0, phi1 float64) transform
+	phi0, phi1 float64
 }
 
 func newProjection(project transform) *Projection {
@@ -154,6 +160,26 @@ func (p *Projection) ClipExtent(x0, y0, x1, y1 float64) *Projection {
 func (p *Projection) ClearClipExtent() *Projection {
 	p.postclip = identityStream
 	return p
+}
+
+// Parallels sets the two standard parallels (degrees) for a conic projection,
+// rebuilding the raw projection. It is a no-op for non-conic projections.
+// Mirrors d3-geo conicProjection.parallels.
+func (p *Projection) Parallels(deg0, deg1 float64) *Projection {
+	if p.rawFactory == nil {
+		return p
+	}
+	p.phi0 = deg0 * radians
+	p.phi1 = deg1 * radians
+	p.project = p.rawFactory(p.phi0, p.phi1)
+	p.recenter()
+	return p
+}
+
+// ParallelsValue returns the current standard parallels in degrees (0,0 for a
+// non-conic projection).
+func (p *Projection) ParallelsValue() (float64, float64) {
+	return p.phi0 * degrees, p.phi1 * degrees
 }
 
 // ScaleValue / TranslateValue expose the current parameters (getters).
