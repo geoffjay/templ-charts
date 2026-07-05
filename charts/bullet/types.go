@@ -4,8 +4,8 @@
 // charts/axes (the per-item axis), charts/colors (sequential color scales for
 // ranges/measures/markers) and charts/theming.
 //
-// v2 scope: SVG only, static render. The interactive hover tooltip arrives with
-// the Phase 5 client layer.
+// SVG only, static render. The interactive hover tooltip arrives with
+// the charts/interact client layer.
 package bullet
 
 import (

@@ -418,7 +418,7 @@ func createTimeScale(spec ScaleTimeSpec, data ComputedSerieAxis, size float64) S
 	useUTC := spec.UseUTC
 	if useUTC {
 		// d3 scaleUtc not in port; use local time scale with UTC-normalized
-		// instants. For v1 charts this is acceptable.
+		// instants. This is acceptable for chart use.
 	}
 	s := d3scale.NewTime().SetUseUTC(useUTC)
 	s.SetRange(0, size)
@@ -465,7 +465,7 @@ func GetScaleTicks(scale Scale, spec TicksSpec) []any {
 		return nil
 	}
 	if spec.HasInterval {
-		// v1: time-interval parsing is simplified — return default ticks.
+		// time-interval parsing is simplified — return default ticks.
 		return si.Ticks(10)
 	}
 	count := 10

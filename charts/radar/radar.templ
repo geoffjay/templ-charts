@@ -4,7 +4,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 
 // Radar renders a complete radar SVG: dimensions → UseRadar → layer pipeline
 // (grid → layers → dots → legends) → SvgWrapper. Mirrors @nivo/radar Radar.
-// Static render (the interactive slices layer arrives with the Phase 5 client
+// Static render (the interactive slices layer arrives with the charts/interact client
 // layer).
 templ Radar(props RadarProps) {
 	{{ props = applyDefaults(props) }}

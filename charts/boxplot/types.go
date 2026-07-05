@@ -5,8 +5,8 @@
 // scale), charts/axes (grid + axes), charts/colors (ordinal color), charts/legends
 // and charts/theming.
 //
-// v2 scope: SVG only, static render. The interactive hover tooltip arrives with
-// the Phase 5 client layer.
+// SVG only, static render. The interactive hover tooltip arrives with
+// the charts/interact client layer.
 package boxplot
 
 import (

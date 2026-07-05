@@ -4,10 +4,9 @@
 // edges), cells (Voronoi polygons), points, and bounding rectangle. It reuses
 // charts/scales (linear x/y), charts/core (SvgWrapper) and charts/theming.
 //
-// v3 scope: SVG only, static render with optional per-cell client-side hover
-// tooltips (charts/interact) via Interactive. The same delaunay port powers the
-// accurate voronoi-mesh hover retrofitted into line/scatterplot/bump/tree
-// (docs/PLAN-v3.md §4.3).
+// SVG only, static render with optional per-cell client-side hover tooltips
+// (charts/interact) via Interactive. The same delaunay port powers the accurate
+// voronoi-mesh hover retrofitted into line/scatterplot/bump/tree.
 package voronoi
 
 import (

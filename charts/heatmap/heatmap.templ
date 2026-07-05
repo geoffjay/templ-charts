@@ -9,7 +9,7 @@ import (
 
 // HeatMap renders a complete heatmap SVG: dimensions → UseHeatMap → layer
 // pipeline (grid → axes → cells → legends) → SvgWrapper. Mirrors @nivo/heatmap
-// HeatMap. Static render (interactivity arrives with the Phase 5 client layer).
+// HeatMap. Static render (interactivity arrives with the charts/interact client layer).
 templ HeatMap(props HeatMapProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

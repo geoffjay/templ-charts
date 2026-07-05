@@ -12,7 +12,7 @@
 // SVG only; the layout is deterministic, so goldens are byte-stable. Interactive
 // enables per-node/link hover tooltips (charts/interact) plus a chord-style
 // hover-highlight (scoped CSS :has() — dims others, re-lights the connected
-// node/links). Enter animation is available via Animate (v5).
+// node/links). Enter animation is available via Animate.
 package sankey
 
 import (

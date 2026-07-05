@@ -1,10 +1,8 @@
 # Using templ-charts
 
-A practical guide to consuming the library. For the design/rationale see
-[`PLAN.md`](PLAN.md) (v1), [`PLAN-v2.md`](PLAN-v2.md) (v2),
-[`PLAN-v3.md`](PLAN-v3.md) (v3), and [`PLAN-v4.md`](PLAN-v4.md) (v4). Every chart
-package also ships a runnable `ExampleXxx` (visible on pkg.go.dev and under
-`go test`).
+A practical guide to consuming the library. For port-by-port implementation
+notes see [`NOTES.md`](NOTES.md). Every chart package also ships a runnable
+`ExampleXxx` (visible on pkg.go.dev and under `go test`).
 
 ## Install
 
@@ -51,8 +49,8 @@ helpers are a convenience, not a requirement.
 
 ## Anatomy of a chart's props
 
-Props follow a consistent v1/v2/v3 shape. Common fields present on (nearly)
-every chart:
+Props follow a consistent shape across chart families. Common fields present on
+(nearly) every chart:
 
 - **Geometry** — `Width`, `Height float64` and `Margin core.Margin`.
 - **Data + mapping** — a `Data` field plus accessor fields (`IndexBy`, `Keys`,

@@ -5,8 +5,8 @@
 // border/label colors), the internal/d3/shape Area + Line generators and
 // charts/theming.
 //
-// v2 scope: SVG only, static render. The interactive hover tooltip arrives with
-// the Phase 5 client layer; annotations are deferred.
+// SVG only, static render. The interactive hover tooltip arrives with
+// the charts/interact client layer; annotations are deferred.
 package funnel
 
 import (

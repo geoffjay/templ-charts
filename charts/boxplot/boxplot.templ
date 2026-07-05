@@ -5,7 +5,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 // BoxPlot renders a complete box-plot SVG: dimensions → UseBoxPlot → layer
 // pipeline (grid → axes → boxPlots → legends) → SvgWrapper. Mirrors
 // @nivo/boxplot BoxPlot. Static render (the interactive hover tooltip arrives
-// with the Phase 5 client layer).
+// with the charts/interact client layer).
 templ BoxPlot(props BoxPlotProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

@@ -59,7 +59,7 @@ func applyDefaults(p NetworkProps) NetworkProps {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. Annotations
-// are deferred (no network annotation specs in v3).
+// are deferred (no network annotation specs).
 func renderLayers(props NetworkProps, result NetworkResult) string {
 	// When interactive (and not routing hover through the mesh overlay), a scoped
 	// <style> block drives the chord/sankey-style hover-highlight via CSS :has().
@@ -77,7 +77,7 @@ func renderLayers(props NetworkProps, result NetworkResult) string {
 		case NetworkLayerMesh:
 			b.WriteString(renderMeshLayer(props, result))
 		case NetworkLayerAnnotations:
-			// annotations: deferred in v3.
+			// annotations: deferred.
 		}
 	}
 	return b.String()

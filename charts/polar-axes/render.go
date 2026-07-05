@@ -178,7 +178,7 @@ func animateOpacity(animate bool) string {
 // rotation from rawAngle-90 back to the target... we instead render the final
 // transform and fade in (simpler, still matches "enter" intent).
 func animateRotate(animate bool, finalRotation float64) string {
-	// Reserved for a future faithful rotate-from-0; v1 scaffold uses fade.
+	// Reserved for a future faithful rotate-from-0; scaffold uses fade.
 	_ = animate
 	_ = finalRotation
 	return ""

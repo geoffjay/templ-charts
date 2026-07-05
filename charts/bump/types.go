@@ -9,9 +9,9 @@
 // color per serie), charts/core (SvgWrapper, DotsItem), charts/legends,
 // charts/theming, and internal/d3/shape (the line generator + curveBumpX/Y).
 //
-// v3 scope: SVG only. Direct point hover is available via Interactive (the
-// charts/interact client layer); the accurate voronoi-mesh layer arrives with
-// the Phase 3 d3-delaunay port (see docs/PLAN-v3.md §4.3).
+// SVG only. Direct point hover is available via Interactive (the
+// charts/interact client layer), with an accurate voronoi-mesh layer backed by
+// the internal/d3/delaunay port.
 package bump
 
 import (

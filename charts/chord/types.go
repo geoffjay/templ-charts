@@ -11,7 +11,7 @@
 // charts/core (SvgWrapper + dimensions), charts/legends, charts/theming and
 // charts/interact (optional client-side hover tooltips).
 //
-// v3 scope: SVG only, static render. The layout is deterministic, so goldens
+// SVG only, static render. The layout is deterministic, so goldens
 // are byte-stable. HTMX active-arc/ribbon dimming and animated transitions are
 // deferred; per-arc/ribbon hover tooltips are available via Interactive.
 package chord

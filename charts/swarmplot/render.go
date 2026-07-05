@@ -72,7 +72,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. Annotations
-// are deferred (no swarmplot annotation specs in v3).
+// are deferred (no swarmplot annotation specs).
 func renderLayers(props SwarmPlotProps, result SwarmPlotResult, dims core.Dimensions, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -86,7 +86,7 @@ func renderLayers(props SwarmPlotProps, result SwarmPlotResult, dims core.Dimens
 		case SwarmPlotLayerMesh:
 			b.WriteString(renderMeshLayer(props, result, dims))
 		case SwarmPlotLayerAnnotations:
-			// annotations: deferred in v3.
+			// annotations: deferred.
 		}
 	}
 	return b.String()

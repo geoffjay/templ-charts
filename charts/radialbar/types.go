@@ -10,8 +10,8 @@
 // converted to radians and handed to the d3-shape arc generator (which places
 // angle 0 at the top).
 //
-// v2 scope: SVG only, static render. The interactive hover tooltip arrives with
-// the Phase 5 client-side layer.
+// SVG only, static render. The interactive hover tooltip arrives with
+// the charts/interact client-side layer.
 package radialbar
 
 import (

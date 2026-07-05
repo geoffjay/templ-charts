@@ -10,17 +10,17 @@ import (
 // is enabled by the caller, so a chart rendered with Animate=false is
 // byte-identical to the un-animated output (keeping goldens stable).
 //
-// The five geometry families reuse these as follows (see docs/PLAN-v5.md §4):
+// The five geometry families reuse these as follows:
 //   - rects / cells / paths → SMILFadeIn (opacity 0→1), optionally staggered
 //   - circles               → SMILAnimate("r", "0", size)
 //   - arcs                  → SMILAnimate("d", collapsedPath, finalPath)
 //   - lines / areas         → SMILAnimate("d", collapsedPath, finalPath)
 //
-// The enter duration and easing match the v1 bar/line/pie animations (600ms,
+// The enter duration and easing match the bar/line/pie animations (600ms,
 // fill="freeze").
 
 const (
-	// AnimateDuration is the enter-animation length (matches v1 bar/line/pie).
+	// AnimateDuration is the enter-animation length (matches bar/line/pie).
 	AnimateDuration = "0.6s"
 	// AnimateBegin is the default start offset.
 	AnimateBegin = "0s"

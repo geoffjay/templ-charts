@@ -186,7 +186,7 @@ func (a *App) Palettes(w http.ResponseWriter, r *http.Request) {
 }
 
 // Heatmap handles GET /heatmap: the heatmap demos page. Heatmaps render
-// statically (no HTMX) in v2 — interactivity arrives with the Phase 5 client
+// statically (no HTMX) — interactivity arrives with the charts/interact client
 // layer.
 func (a *App) Heatmap(w http.ResponseWriter, r *http.Request) {
 	demos := demos.HeatmapDemos()

@@ -6,18 +6,18 @@
 //
 // Scope: all ten projection types nivo exposes are present, adaptive resampling
 // and antimeridian clipping are faithful ports, and GeoPath emits SVG path
-// strings. As of v5 the clip machinery also includes clipCircle (the azimuthal
+// strings. The clip machinery also includes clipCircle (the azimuthal
 // small-circle preclip that hides the far hemisphere) and clipExtent (the
 // rectangular screen-space postclip), so every projection — cylindrical,
 // pseudocylindrical, and azimuthal (orthographic/gnomonic/stereographic/
 // azimuthal*) — renders correctly.
 //
-// v7 adds the geo-measurement completeness pieces: GeoPath.Bounds/Area/Centroid
-// (planar stream sinks; see path_measure.go), Projection.FitExtent/FitSize/
-// FitWidth/FitHeight (fit.go), the conic projection family — conicConformal/
-// conicEqualArea/conicEquidistant with standard-parallels support (conic.go) —
-// and an opt-in TopoJSON decoder (topojson.go; callers may still supply GeoJSON
-// directly). See docs/PLAN-v5.md §3, docs/PLAN-v7.md §5, and NOTES.md.
+// The geo-measurement completeness pieces are also present:
+// GeoPath.Bounds/Area/Centroid (planar stream sinks; see path_measure.go),
+// Projection.FitExtent/FitSize/FitWidth/FitHeight (fit.go), the conic projection
+// family — conicConformal/conicEqualArea/conicEquidistant with standard-parallels
+// support (conic.go) — and an opt-in TopoJSON decoder (topojson.go; callers may
+// still supply GeoJSON directly). See NOTES.md for implementation notes.
 package geo
 
 import "math"

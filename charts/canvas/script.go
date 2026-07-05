@@ -13,8 +13,8 @@ package canvas
 // (unlike charts/interact's opt-in data-tc-observe re-fetch). Path ops are drawn
 // through Path2D, so SVG "d" strings emitted by the existing shape builders
 // render unchanged. Interactivity (hover/tooltip/nearest-point) is layered
-// separately by charts/interact over a transparent hit-surface (docs/PLAN-v6.md
-// §4.3); this module only paints.
+// separately by charts/interact over a transparent hit-surface; this module
+// only paints.
 //
 // Loaded once per page via CanvasScriptTag (or by inlining Script). Safe on
 // pages with no canvases — it simply finds none.

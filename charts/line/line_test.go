@@ -245,7 +245,7 @@ func TestLine_ClientHoverSlices(t *testing.T) {
 }
 
 func TestLine_ClientHoverIsDefault(t *testing.T) {
-	// v5 retired the per-mousemove server round-trip: with a ChartID set but no
+	// the per-mousemove server round-trip is retired: with a ChartID set but no
 	// ServerHover, mesh/slice hover defaults to the client path (data-tc-*), not
 	// the htmx round-trip.
 	mesh := renderChart(t, line.LineProps{

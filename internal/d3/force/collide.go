@@ -6,7 +6,7 @@
 //
 // UseQuadtree() switches to d3's quadtree-pruned pass (internal/d3/quadtree),
 // which skips whole cells that are too far to overlap — O(n log n) for the
-// large-N Canvas charts (docs/PLAN-v6.md §3.2). The per-pair impulse is the same
+// large-N Canvas charts. The per-pair impulse is the same
 // math, but (a) the traversal sums in a different order (not bit-identical) and
 // (b), exactly like d3, a coincident-point leaf only collides via its head
 // datum — so the pruned pass is opt-in, not the default. Strength defaults to 1;

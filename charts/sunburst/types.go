@@ -8,7 +8,7 @@
 // The partition runs on [2π, r²]; each node's arc is
 // {startAngle:x0, endAngle:x1, innerRadius:√y0, outerRadius:√y1}.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
+// SVG only, static render with optional client-side hover tooltips
 // per arc (charts/interact) via Interactive.
 package sunburst
 

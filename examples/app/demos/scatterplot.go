@@ -29,7 +29,7 @@ func ScatterPlotDemos() []ScatterPlotDemo {
 		{
 			ID:          "scatter-basic",
 			Title:       "Two series",
-			Description: "Two groups on linear x/y scales with grid, axes, and per-point dots (direct point hover arrives with the Phase 5 client layer).",
+			Description: "Two groups on linear x/y scales with grid, axes, and per-point dots (direct point hover arrives with the charts/interact client layer).",
 			Props: scatterplot.ScatterPlotProps{
 				Width: commonChartWidth, Height: commonChartHeight,
 				Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},

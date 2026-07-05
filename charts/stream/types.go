@@ -4,8 +4,8 @@
 // charts/axes (grid + axes), charts/colors (ordinal color per layer), the
 // internal/d3/shape Stack + Area generators, charts/legends and charts/theming.
 //
-// v2 scope: SVG only, static render. The interactive slices/dots layers arrive
-// with the Phase 5 client layer; dots default to off in nivo anyway.
+// SVG only, static render. The interactive slices/dots layers arrive
+// with the charts/interact client layer; dots default to off in nivo anyway.
 package stream
 
 import (

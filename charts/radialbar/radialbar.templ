@@ -5,7 +5,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 // RadialBar renders a complete radial-bar SVG: dimensions → UseRadialBar →
 // layer pipeline (grid → tracks → bars → labels → legends) → SvgWrapper.
 // Mirrors @nivo/radial-bar RadialBar. Static render (the interactive hover
-// tooltip arrives with the Phase 5 client layer).
+// tooltip arrives with the charts/interact client layer).
 templ RadialBar(props RadialBarProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

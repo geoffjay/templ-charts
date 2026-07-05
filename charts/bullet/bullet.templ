@@ -5,7 +5,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 // Bullet renders a complete bullet SVG: dimensions → UseBullet → one <g> per
 // row (ranges → measures → axis → markers → title) → SvgWrapper. Mirrors
 // @nivo/bullet Bullet. Static render (the interactive hover tooltip arrives
-// with the Phase 5 client layer).
+// with the charts/interact client layer).
 templ Bullet(props BulletProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

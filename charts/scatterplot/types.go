@@ -4,9 +4,10 @@
 // charts/colors (ordinal color per serie), charts/core (DotsItem, cartesian
 // markers, SvgWrapper), charts/legends and charts/theming.
 //
-// v2 scope: SVG only, static render with direct point hit-testing deferred to
-// the Phase 5 client layer. nivo's voronoi-mesh hover needs d3-delaunay and is
-// deferred to v3 (see docs/PLAN-v2.md §11).
+// Hover uses the charts/interact client layer via Interactive, with nivo's
+// voronoi-mesh hit-testing backed by the internal/d3/delaunay port. An opt-in
+// Canvas backend (Render: theming.EngineCanvas) renders the marks into a
+// <canvas> draw-list for large-N datasets.
 package scatterplot
 
 import (

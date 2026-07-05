@@ -3,7 +3,7 @@
 // functions, and the Pie/Arcs/ArcLinkLabels/ArcLabels/PieLegends/PieTooltip
 // templ components.
 //
-// v1 renders server-side SVG only (no Canvas). Interactivity (hover/click
+// Renders server-side SVG only (no Canvas). Interactivity (hover/click
 // active-arc highlight, series toggle) is routed through charts/htmx.
 //
 // Angle convention: user-facing startAngle/endAngle/padAngle are in degrees
@@ -96,7 +96,7 @@ var DefaultLayers = []PieLayerId{
 	PieLayerArcs, PieLayerArcLinkLabels, PieLayerArcLabels, PieLayerLegends,
 }
 
-// TransitionMode mirrors @nivo/arcs ArcTransitionMode. v1 supports
+// TransitionMode mirrors @nivo/arcs ArcTransitionMode. templ-charts supports
 // "innerRadius" (grow outer radius from innerRadius).
 type TransitionMode string
 
@@ -197,7 +197,7 @@ type PieProps struct {
 	ChartID string
 }
 
-// PieSvgProps is an alias of PieProps (nivo splits common/svg; v1 unifies).
+// PieSvgProps is an alias of PieProps (nivo splits common/svg; this unifies them).
 type PieSvgProps = PieProps
 
 // PieResult is the output of the compute pipeline: normalized data, arcs,

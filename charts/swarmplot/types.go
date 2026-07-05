@@ -5,7 +5,7 @@
 // group scale), charts/axes (grid + axes), charts/colors (ordinal color per
 // group or id), charts/core, charts/interact (voronoi-mesh hover) and charts/theming.
 //
-// v3 scope: SVG only, static render. The layout is deterministic (phyllotaxis
+// SVG only, static render. The layout is deterministic (phyllotaxis
 // seeding + d3's LCG + a fixed SimulationIterations count), so goldens are
 // byte-stable. Annotations are deferred.
 package swarmplot

@@ -4,7 +4,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 
 // Funnel renders a complete funnel SVG: dimensions → UseFunnel → layer pipeline
 // (separators → parts → labels) → SvgWrapper. Mirrors @nivo/funnel Funnel.
-// Static render (the interactive hover tooltip arrives with the Phase 5 client
+// Static render (the interactive hover tooltip arrives with the charts/interact client
 // layer).
 templ Funnel(props FunnelProps) {
 	{{ props = applyDefaults(props) }}

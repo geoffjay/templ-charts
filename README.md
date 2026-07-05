@@ -10,8 +10,8 @@ plot**, **bump**, **marimekko**, **parallel-coordinates**, **polar-bar**,
 **voronoi**, **network**, **swarmplot**, **sankey**, **chord**, and **geo**
 (GeoMap + Choropleth) — a hybrid interactivity layer, responsive + accessible
 output, and a runnable demo app. This is **full nivo SVG chart parity**: every
-SVG chart type nivo ships has a templ-charts equivalent. A **Canvas backend**
-(v6, opt-in) additionally renders scatterplot and heatmap into a `<canvas>`
+SVG chart type nivo ships has a templ-charts equivalent. An opt-in **Canvas
+backend** additionally renders scatterplot and heatmap into a `<canvas>`
 draw-list for large-N datasets.
 
 - **Render** charts as SVG strings from Go — no JS bundle required. An opt-in
@@ -29,16 +29,8 @@ draw-list for large-N datasets.
   d3-color / d3-hierarchy / d3-delaunay / d3-force / d3-sankey / d3-chord /
   d3-geo to pure Go under `internal/d3/` (golden-tested against d3 output).
 
-See [`docs/PLAN.md`](docs/PLAN.md) for the v1 design,
-[`docs/PLAN-v2.md`](docs/PLAN-v2.md) for the v2 chart catalog + interactivity
-and accessibility work, [`docs/PLAN-v3.md`](docs/PLAN-v3.md) for the v3 push to
-full nivo SVG parity (the five deferred d3 ports and the fifteen charts they
-unblock), and [`docs/PLAN-v4.md`](docs/PLAN-v4.md) for the v4 consumability &
-showcase work (render helpers, docs/examples, benchmarks, and the per-chart
-detail pages), and [`docs/PLAN-v5.md`](docs/PLAN-v5.md) for the v5 fidelity &
-finish work (correct azimuthal geo, animation across every chart, hierarchy
-zoom, unified hover-highlight, and the partial-chart completions). The remaining
-backlog lives in [`docs/PLAN-deferred.md`](docs/PLAN-deferred.md).
+See [`docs/USAGE.md`](docs/USAGE.md) for the full consumer guide and
+[`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.
 
 ## Quickstart
 
@@ -243,15 +235,7 @@ internal/golden small snapshot-test helper
 examples/app/   runnable demo app (stdlib net/http); handlers/entries holds the
                 per-chart detail-page definitions (one file per chart)
 docs/USAGE.md   consumer guide (render, colors, interactivity, a11y, theming)
-docs/PLAN.md    v1 implementation plan
-docs/PLAN-v2.md v2 plan (chart catalog, interactivity, a11y)
-docs/PLAN-v3.md v3 plan (five d3 ports, fifteen charts, full SVG parity)
-docs/PLAN-v4.md v4 plan (consumability & showcase)
-docs/PLAN-v5.md v5 plan (fidelity & finish: geo clip, animation, zoom, hover)
-docs/PLAN-v6.md v6 plan (scale: quadtree/Barnes–Hut, Delaunator, Canvas backend)
-docs/PLAN-v7.md v7 plan (completeness & ergonomics: color spaces, samples/static,
-                geo measurement/fit/conics/TopoJSON) — the final themed release
-docs/PLAN-deferred.md consolidated backlog of deferred work
+docs/PALETTES.md the full color-palette catalog (ids + metadata)
 docs/NOTES.md   port-by-port implementation notes
 contrib/nivo/   upstream nivo clone (gitignored, reference only)
 ```
@@ -310,35 +294,29 @@ make ci
 
 ## Status
 
-**v7 — completeness & ergonomics — is the final themed release.** It closes the
-three opportunistic items that outlived every prior release, all additive and
-all leaving the existing goldens byte-stable:
+templ-charts has **full nivo SVG chart parity** — all twenty-eight SVG chart
+families are implemented, backed by pure-Go ports of the d3 modules they need.
+Beyond the core charts:
 
-- **Perceptual color spaces** — `internal/d3/color` gains **HSL, Lab, and Lch**
-  alongside RGB (faithful d3-color conversions + in-space interpolation).
+- **Perceptual color spaces** — `internal/d3/color` implements **HSL, Lab, and
+  Lch** alongside RGB (faithful d3-color conversions + in-space interpolation).
   Sequential/diverging scales and palette sampling take an opt-in `Space`
   selector (default RGB), and lightness modifiers can apply in Lab. See the
   **color space** switcher on the heatmap detail page.
 - **Consumption surface** — a public typed **`charts/samples`** package (one
-  ready-to-render dataset per chart family), the **`charts/static`** registry
-  extended from 3 to **all 28** chart families through one reflective adapter,
-  and one unifying **`colors.Set(...)`** API over the existing color-config
-  shapes.
+  ready-to-render dataset per chart family), a **`charts/static`** registry
+  covering **all 28** chart families through one reflective adapter, and a
+  unifying **`colors.Set(...)`** API over the color-config shapes.
 - **Geo completeness** — `GeoPath` **bounds/area/centroid**, projection
   **`FitExtent`/`FitSize`/`FitWidth`/`FitHeight`**, the **conic** projection
   family (conformal/equal-area/equidistant with standard parallels), and an
   opt-in **TopoJSON** decoder (GeoJSON is still the default input). See the
   auto-fit choropleth on the geo detail page.
+- **Canvas backend (large N)** — scatterplot and heatmap can render into a
+  `<canvas>` draw-list (~4.4× smaller payload than SVG at n=20000), backed by
+  the `d3-quadtree`/Barnes–Hut and Delaunator ports.
 
-This builds on v1–v3 (full nivo SVG parity, 28 families), v4 (consumability),
-v5 (fidelity & finish: geo clip, animation, zoom, hover), and v6 (scale: the
-`d3-quadtree`/Barnes–Hut and Delaunator ports plus the Canvas backend). Every
-v7 addition defaults to prior behavior, so all pre-existing goldens stayed
-byte-stable; new goldens/tests lock the new surface, validated against
-d3-color / d3-geo / topojson-client.
-
-After v7 the remaining work is maintenance, not a themed release. See
-[`docs/PLAN-v7.md`](docs/PLAN-v7.md) for the plan,
-[`docs/PLAN-v6.md`](docs/PLAN-v6.md) for the Canvas/scale work,
-[`docs/PLAN-deferred.md`](docs/PLAN-deferred.md) for the (now-closed) backlog and
+The Canvas engine and the color-space, TopoJSON, and conic additions are all
+opt-in and default to prior behavior, so static SVG output is byte-stable across
+releases. See [`docs/USAGE.md`](docs/USAGE.md) for the consumer guide and
 [`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.

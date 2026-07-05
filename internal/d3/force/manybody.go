@@ -3,8 +3,8 @@
 // chart-scale node counts the O(n²) cost is negligible and the result is exact,
 // and this is the path the network/swarmplot goldens encode. Calling Theta(θ)
 // with θ>0 switches to d3's Barnes–Hut quadtree approximation (internal/d3/
-// quadtree), which is O(n log n) for the large-N Canvas charts (docs/PLAN-v6.md
-// §3.2). The exact path stays the default so existing goldens are byte-stable —
+// quadtree), which is O(n log n) for the large-N Canvas charts. The exact path
+// stays the default so existing goldens are byte-stable —
 // a tree traversal sums forces in a different order than the all-pairs loop, so
 // the two are not bit-identical even at θ=0. The per-pair math (coincident-node
 // jiggle, distanceMin/Max clamping, strength/alpha/l falloff) matches d3 in

@@ -11,7 +11,7 @@
 // band/linear range constructors), charts/colors (ordinal color per key),
 // charts/legends, charts/theming and charts/core.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
+// SVG only, static render with optional client-side hover tooltips
 // per arc (charts/interact) via Interactive.
 package polarbar
 

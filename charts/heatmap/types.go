@@ -3,9 +3,10 @@
 // a continuous (sequential/diverging) color scale. Reuses charts/scales,
 // charts/axes, charts/colors, charts/legends, charts/theming, and charts/core.
 //
-// v2 scope: SVG only, static render (no Canvas, interactivity arrives with the
-// Phase 5 client-side layer). Band-scale paddings other than 0 (nivo's
-// xInnerPadding/…) are not yet supported.
+// SVG by default with an opt-in Canvas backend (Render: theming.EngineCanvas)
+// for large-N grids; hover tooltips come from the charts/interact client layer
+// via Interactive. Band-scale paddings other than 0 (nivo's xInnerPadding/…)
+// are not yet supported.
 package heatmap
 
 import (
@@ -53,7 +54,7 @@ type ComputedCell struct {
 // HeatMapColorConfig selects the continuous color scale used to map cell
 // values to colors. Type is "sequential" (default) or "diverging". Scheme is
 // an interpolator id (default "brown_blueGreen"). Mirrors the subset of
-// @nivo/heatmap's `colors` we support in v2.
+// @nivo/heatmap's `colors` we support.
 type HeatMapColorConfig struct {
 	Type      string // "sequential" | "diverging"
 	Scheme    string

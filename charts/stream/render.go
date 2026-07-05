@@ -66,8 +66,8 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. The dots and
-// slices layers are omitted in the v2 static pipeline (dots default to off;
-// slices are interactive — Phase 5).
+// slices layers are omitted in the static pipeline (dots default to off;
+// slices are interactive).
 func renderLayers(props StreamProps, result StreamResult, dims core.Dimensions, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -81,7 +81,7 @@ func renderLayers(props StreamProps, result StreamResult, dims core.Dimensions, 
 		case StreamLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
 		case StreamLayerDots, StreamLayerSlices:
-			// dots: default off; slices: interactive (Phase 5).
+			// dots: default off; slices: interactive.
 		}
 	}
 	return b.String()

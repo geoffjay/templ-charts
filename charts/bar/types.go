@@ -3,7 +3,7 @@
 // (grouped/stacked/legends/totals), the UseBar orchestrator, and the
 // Bar/BarItem/BarTotals/BarAnnotations/BarLegends templ components.
 //
-// v1 renders server-side SVG only (no Canvas). Interactivity is routed
+// Renders server-side SVG only (no Canvas). Interactivity is routed
 // through charts/htmx (HTMX attrs emitted on bars/legend items).
 package bar
 
@@ -214,7 +214,7 @@ type BarProps struct {
 	HoveredKey string
 }
 
-// BarSvgProps is an alias of BarProps (nivo splits common/svg; v1 unifies).
+// BarSvgProps is an alias of BarProps (nivo splits common/svg; this unifies them).
 type BarSvgProps = BarProps
 
 // BarResult is the output of UseBar: the computed bars, scales, color/label

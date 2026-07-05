@@ -4,7 +4,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 
 // Stream renders a complete stream SVG: dimensions → UseStream → layer pipeline
 // (grid → axes → layers → legends) → SvgWrapper. Mirrors @nivo/stream Stream.
-// Static render (the interactive slices/dots layers arrive with the Phase 5
+// Static render (the interactive slices/dots layers arrive with the charts/interact
 // client layer).
 templ Stream(props StreamProps) {
 	{{ props = applyDefaults(props) }}

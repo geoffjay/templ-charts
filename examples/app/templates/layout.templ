@@ -11,7 +11,7 @@ import (
 // body.
 //
 // The CSS is hand-written and minimal (~80 lines). The htmx script is loaded
-// from the CDN per docs/PLAN.md §7.
+// from the CDN (no Go dependency).
 templ Layout(props LayoutProps, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">

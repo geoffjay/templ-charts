@@ -1,7 +1,7 @@
 // Package htmx implements the server-side interactivity layer for templ-charts.
 //
-// It mirrors the island pattern described in docs/PLAN.md §6: a stateful
-// Registry of ChartInstance entries keyed by instance id, and an http.Handler
+// It mirrors an island pattern: a stateful Registry of ChartInstance entries
+// keyed by instance id, and an http.Handler
 // (Handler) exposing the endpoints the chart components already emit on their
 // hx-* attributes:
 //
@@ -12,9 +12,9 @@
 //   - POST /charts/{id}/click?bar=k&verb=activate  bar activation toggle
 //   - POST /charts/{id}/toggle?series=id   re-render full SVG with series toggled
 //
-// State lives in the Registry; the documented trade-off (PLAN §6) is that this
-// is fine for demos / small apps and would be moved to a session/cookie store
-// for horizontal scaling.
+// State lives in the Registry; the documented trade-off is that this is fine
+// for demos / small apps and would be moved to a session/cookie store for
+// horizontal scaling.
 package htmx
 
 import (

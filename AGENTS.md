@@ -1,6 +1,6 @@
 # AGENTS.md — templ-charts
 
-A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts as [templ](https://github.com/a-h/templ) components generating server-side SVG. v1 ships bar, line, and pie charts plus an HTMX-backed interactivity layer and a runnable demo app. See `docs/PLAN.md` for the full implementation plan.
+A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts as [templ](https://github.com/a-h/templ) components generating server-side SVG. It ships twenty-eight chart families (full nivo SVG parity) plus a hybrid interactivity layer (client-side hover + HTMX state changes), an opt-in Canvas backend for large-N scatterplot/heatmap, and a runnable demo app. See `docs/USAGE.md` for the consumer guide and `docs/NOTES.md` for port-by-port implementation notes.
 
 ## Build & test commands
 
@@ -22,10 +22,10 @@ A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts a
 
 ### Golden snapshots
 
-Golden SVG snapshots live under each chart package's `testdata/golden/`
-(`charts/{bar,line,pie}/testdata/golden/`) and arc path strings under
-`charts/arcs/testdata/golden/`. Tests compare rendered output against these
-committed files via `internal/golden.Assert`.
+Golden SVG snapshots live under each chart package's `testdata/golden/`, arc
+path strings under `charts/arcs/testdata/golden/`, and the ported-geometry path
+strings under `internal/d3/*/testdata/golden/`. Tests compare rendered output
+against these committed files via `internal/golden.Assert`.
 
 When a render change is **intentional**, regenerate and commit the updated
 snapshots:
@@ -40,8 +40,8 @@ don't reject the flag.
 
 ## Layout
 
-- `charts/` — library packages (mirrors nivo package names; see `docs/PLAN.md` §3)
-- `internal/d3/` — vendored pure-Go ports of d3-shape, d3-scale, d3-array, d3-format, d3-time-format, d3-color
+- `charts/` — library packages (mirror nivo package names): the 28 chart families plus core, theming, scales, colors, axes, arcs, text, tooltip, legends, annotations, interact, static, grid, polar-axes, htmx, canvas, samples, render
+- `internal/d3/` — vendored pure-Go ports of d3-shape, d3-scale, d3-array, d3-format, d3-time-format, d3-color, d3-hierarchy, d3-delaunay, d3-force, d3-sankey, d3-chord, d3-geo, d3-quadtree
 - `internal/golden/` — small snapshot-test helper (`Assert` + `-update` flag) used by the golden SVG/path tests
 - `examples/app/` — runnable demo app (stdlib `net/http`, run via `make run-demo` → http://localhost:8000)
 - `contrib/nivo/` — upstream nivo clone (gitignored, reference only; do NOT modify)
@@ -50,7 +50,7 @@ don't reject the flag.
 
 - Go 1.26.4 (matches `go.mod`).
 - templ components live in `.templ` files; generated `templ_*.go` files are committed alongside sources. The `make templ` target pins the CLI to the version in `go.mod` (currently v0.3.1020).
-- No Canvas rendering in v1 — SVG only.
+- SVG is the default renderer; an opt-in Canvas backend (`charts/canvas`, `Render: theming.EngineCanvas`) is available for large-N scatterplot/heatmap.
 - Interactivity via [htmx.org](https://htmx.org) (loaded via CDN in the demo); see `charts/htmx`.
 - Animation via SMIL `<animate>` + CSS keyframes, gated by an `Animate bool` prop.
 - Tests are standard `go test`; golden SVG snapshots regenerate via `make golden` (or `go test ./charts/{bar,line,pie,arcs} -update`).
@@ -63,4 +63,4 @@ don't reject the flag.
 ## Reference
 
 - Upstream nivo: `contrib/nivo/packages/*` (read-only; the design source of truth for types, defaults, compute logic)
-- Full plan: `docs/PLAN.md`
+- Consumer guide: `docs/USAGE.md`; implementation notes: `docs/NOTES.md`

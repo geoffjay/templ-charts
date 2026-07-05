@@ -235,7 +235,7 @@ func setMonthZero(t *time.Time) { *t = time.Date(t.Year(), 1, 1, 0, 0, 0, 0, t.L
 // internal/d3/timeformat.
 func parseTimeFormat(s, spec string, useUTC bool) (time.Time, error) {
 	// d3-time-format parsing is not implemented in the port (only formatting).
-	// For v1 we support RFC3339 and common Go reference layouts as a fallback.
+	// We support RFC3339 and common Go reference layouts as a fallback.
 	if t, err := time.Parse(time.RFC3339, s); err == nil {
 		return t, nil
 	}

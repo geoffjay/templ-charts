@@ -87,7 +87,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. Markers and
-// annotations are deferred in the v2 static pipeline.
+// annotations are deferred in the static pipeline.
 func renderLayers(props BoxPlotProps, result BoxPlotResult, dims core.Dimensions, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -101,7 +101,7 @@ func renderLayers(props BoxPlotProps, result BoxPlotResult, dims core.Dimensions
 		case BoxPlotLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
 		case BoxPlotLayerMarkers, BoxPlotLayerAnnotations:
-			// Deferred in v2.
+			// Deferred.
 		}
 	}
 	return b.String()

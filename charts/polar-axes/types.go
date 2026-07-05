@@ -1,6 +1,6 @@
 // Package polaraxes provides the polar-axis scaffolding (CircularAxis,
 // RadialAxis, PolarGrid + their grid components) ported from @nivo/polar-axes.
-// It is scaffold-only in v1 — pie does its own layout and no v1 chart uses
+// It is scaffold-only — pie does its own layout and no chart uses
 // these — but the components are fully implemented so future radar/chord/
 // sunburst chart types plug in without rework.
 //
@@ -95,7 +95,7 @@ type RadialAxisTickProps struct {
 
 // PolarGridProps mirrors @nivo/polar-axes PolarGridProps. nivo derives the
 // inner/outer radius from radiusScale.range(); our scales.Scale interface
-// doesn't expose the range, so v1 callers pass InnerRadius/OuterRadius
+// doesn't expose the range, so callers pass InnerRadius/OuterRadius
 // explicitly (typically 0 and the chart's outer radius).
 type PolarGridProps struct {
 	Center             [2]float64

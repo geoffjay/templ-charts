@@ -1,8 +1,8 @@
 // Package interact provides the client-side interactivity layer for
-// templ-charts v2: a small vanilla-JS hover/tooltip/crosshair module (Script /
+// templ-charts: a small vanilla-JS hover/tooltip/crosshair module (Script /
 // ScriptTag) plus helpers for charts to emit the data-tc-* attributes it reads.
 //
-// The design (docs/PLAN-v2.md §5) is hybrid: ephemeral cursor-tracking
+// The design is hybrid: ephemeral cursor-tracking
 // interactions (tooltip show/position, crosshair, nearest-point hit-testing)
 // run entirely client-side off data-* attributes with no server round-trip,
 // while state-changing interactions (series toggle, active-arc) stay on the

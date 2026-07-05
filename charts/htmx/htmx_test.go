@@ -425,7 +425,7 @@ func TestHeatmapFullRenderEmitsHoverAttrs(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RenderFull: %v", err)
 	}
-	// v2 routes heatmap hover through the client interactivity layer
+	// heatmap hover is routed through the client interactivity layer
 	// (charts/interact): the 3 data cells emit a data-tc-tooltip, the nil cell
 	// (USA.Car) does not, and no per-cell server round-trip is emitted.
 	if got := strings.Count(out, "data-tc-tooltip"); got != 3 {

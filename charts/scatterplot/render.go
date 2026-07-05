@@ -57,8 +57,8 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. The
-// interactive "mesh" layer is omitted in the v2 static pipeline; annotations
-// are deferred (no scatterplot annotation specs in v2).
+// interactive "mesh" layer is omitted in the static pipeline; annotations
+// are deferred (no scatterplot annotation specs).
 func renderLayers(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -76,7 +76,7 @@ func renderLayers(props ScatterPlotProps, result ScatterPlotResult, dims core.Di
 		case ScatterPlotLayerMesh:
 			b.WriteString(renderMeshLayer(props, result, dims))
 		case ScatterPlotLayerAnnotations:
-			// annotations: deferred in v2 (no scatterplot annotation specs).
+			// annotations: deferred (no scatterplot annotation specs).
 		}
 	}
 	return b.String()
@@ -140,7 +140,7 @@ func recordNodes(rec *canvas.Recorder, result ScatterPlotResult) {
 // renderCanvasOverlay renders the SVG panes drawn on top of the canvas marks:
 // every layer except grid (drawn behind, via renderGridLayer) and nodes (which
 // became the canvas draw-list). The mesh layer here is the transparent hover
-// hit-surface over the canvas (docs/PLAN-v6.md §4.3).
+// hit-surface over the canvas.
 func renderCanvasOverlay(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {

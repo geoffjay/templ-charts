@@ -3,7 +3,7 @@
 // from a quantized value scale, and month/year legends. Reuses charts/core,
 // charts/theming, and the ported date math (no d3-time dependency).
 //
-// v2 scope: SVG only, static render. Day cells, day borders, month/year
+// SVG only, static render. Day cells, day borders, month/year
 // text legends, and the per-month outline-path border are supported.
 package calendar
 

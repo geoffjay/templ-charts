@@ -1,5 +1,5 @@
 // Package force is a port of the subset of d3-force that templ-charts needs to
-// lay out the network and swarmplot charts server-side (docs/PLAN-v3.md §3.3).
+// lay out the network and swarmplot charts server-side.
 //
 // It implements d3's velocity-Verlet integrator and the five forces those two
 // charts use — ForceLink, ForceManyBody, ForceCenter, ForceX/ForceY and

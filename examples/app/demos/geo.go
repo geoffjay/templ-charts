@@ -75,7 +75,7 @@ func GeoMapDemos() []GeoMapDemo {
 	natural.EnableGraticule = true
 
 	// Orthographic globe: an azimuthal projection whose clipCircle preclip hides
-	// the far hemisphere (the v5 correctness fix). Rotated to center on Africa;
+	// the far hemisphere. Rotated to center on Africa;
 	// the graticule and borders end cleanly at the visible limb instead of
 	// wrapping the whole sphere.
 	globe := base()
@@ -109,7 +109,7 @@ func GeoMapDemos() []GeoMapDemo {
 		{
 			ID:          "geomap-globe",
 			Title:       "Orthographic globe",
-			Description: "projectionType:'orthographic' — an azimuthal projection. internal/d3/geo's clipCircle preclip hides the far hemisphere, so only the visible cap renders and the graticule ends cleanly at the limb (before v5 the whole sphere drew, overlaying far-side geometry).",
+			Description: "projectionType:'orthographic' — an azimuthal projection. internal/d3/geo's clipCircle preclip hides the far hemisphere, so only the visible cap renders and the graticule ends cleanly at the limb (before the clipCircle fix the whole sphere drew, overlaying far-side geometry).",
 			Props:       globe,
 		},
 		{

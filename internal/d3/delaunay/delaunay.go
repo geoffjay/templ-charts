@@ -2,7 +2,7 @@
 // Delaunator) that templ-charts needs: a Delaunay triangulation of a 2-D point
 // set, its Voronoi dual clipped to a rectangle, nearest-site location, and SVG
 // path rendering. It powers the voronoi chart and the accurate voronoi-mesh
-// hover retrofitted into line/scatterplot/bump/tree (docs/PLAN-v3.md §3.2, §4.3).
+// hover retrofitted into line/scatterplot/bump/tree.
 //
 // The triangulation uses the classic Bowyer–Watson incremental algorithm with a
 // bounding super-triangle: O(n²) worst case, which is ample for chart-scale

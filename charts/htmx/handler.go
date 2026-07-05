@@ -176,8 +176,8 @@ func (h *Handler) handleZoom(w http.ResponseWriter, r *http.Request, inst *Chart
 	_, _ = w.Write([]byte(out))
 }
 
-// handleClick toggles bar activation. v1 supports verb=activate which simply
-// records the hovered key as the active key (no visual change in v1 bar);
+// handleClick toggles bar activation. It supports verb=activate which simply
+// records the hovered key as the active key (no visual change in bar);
 // future verbs (select, etc.) can extend this. The response is the full SVG.
 func (h *Handler) handleClick(w http.ResponseWriter, r *http.Request, inst *ChartInstance) {
 	if inst.Kind != KindBar {
@@ -422,7 +422,7 @@ func pieHoverTooltip(inst *ChartInstance, arcID string, setActive bool) (string,
 		if d.ID == arcID {
 			if setActive {
 				// Toggle active off when hovering the same arc again is the
-				// nivo mouseleave behaviour; v1 sets active on enter and the
+				// nivo mouseleave behaviour; it sets active on enter and the
 				// demo clears it via a separate mouseleave htmx call. For the
 				// simple case we just set it.
 				inst.setActive(arcID)

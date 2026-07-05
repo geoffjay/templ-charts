@@ -1,8 +1,8 @@
 // Package quadtree is a port of d3-quadtree: a two-dimensional recursive spatial
 // subdivision used to accelerate spatial queries. templ-charts needs it as the
 // shared index behind the Barnes–Hut many-body approximation and the pruned
-// collision force in internal/d3/force (docs/PLAN-v6.md §3.1) — the O(n log n)
-// replacements for the current exact O(n²) charge/collide loops.
+// collision force in internal/d3/force — the O(n log n) replacements for the
+// exact O(n²) charge/collide loops.
 //
 // The structure mirrors d3-quadtree exactly so its output is bit-comparable:
 // each node is either an internal node with up to four children (indexed

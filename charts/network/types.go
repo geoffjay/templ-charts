@@ -3,11 +3,11 @@
 // for a fixed iteration count). It reuses charts/core (SvgWrapper), charts/interact
 // (optional per-node hover tooltips) and charts/theming.
 //
-// v3 scope: SVG only, static render. The layout is deterministic (phyllotaxis
+// SVG only, static render. The layout is deterministic (phyllotaxis
 // seeding + d3's LCG, a fixed Iterations count), so goldens are byte-stable.
 // Annotations are deferred. Interactive adds per-node hover tooltips and (unless
 // UseMesh routes hover through the voronoi overlay) a chord/sankey-style
-// hover-highlight via scoped CSS :has(); Animate (v5) adds a radius enter
+// hover-highlight via scoped CSS :has(); Animate adds a radius enter
 // transition.
 package network
 

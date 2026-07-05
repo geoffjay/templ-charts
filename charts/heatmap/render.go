@@ -83,7 +83,7 @@ func renderLayers(props HeatMapProps, result HeatMapResult, dims core.Dimensions
 		case HeatMapLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result, dims))
 		case HeatMapLayerAnnotations:
-			// Annotations deferred (no heatmap annotation specs in v2).
+			// Annotations deferred (no heatmap annotation specs).
 		}
 	}
 	return b.String()
@@ -262,7 +262,7 @@ func renderCellsLayer(props HeatMapProps, result HeatMapResult) string {
 		if props.Animate {
 			cp.AnimateBegin = core.StaggerBegin(i, props.MotionStagger)
 		}
-		// Only cells with data are hoverable. v2 routes hover through the
+		// Only cells with data are hoverable. hover is routed through the
 		// client interactivity layer (charts/interact) — no server round-trip.
 		if interactive && cell.Value != nil {
 			cp.Tooltip = interact.TooltipHTML(cell.Color, cell.SerieID+" - "+cell.X, cell.FormattedValue)

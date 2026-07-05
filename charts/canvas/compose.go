@@ -2,7 +2,7 @@
 // (drawn into a <canvas>) between two SVG panes — one below for content that
 // must sit behind the marks (grid), one above for content that sits in front
 // and/or handles pointer events (axes, legends, and the charts/interact mesh
-// hit-surface, docs/PLAN-v6.md §4.3). Everything shares one outer coordinate
+// hit-surface). Everything shares one outer coordinate
 // space: the canvas draw-list and both SVG panes translate their inner content
 // by the chart margin, so a Canvas chart lines up exactly with its SVG twin.
 //

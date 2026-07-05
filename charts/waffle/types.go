@@ -3,7 +3,7 @@
 // charts/grid layout primitives (GenerateGrid) plus charts/colors ordinal
 // scales, charts/legends, charts/theming, and charts/core.
 //
-// v2 scope: SVG only, static render. The cells + legends layers are on by
+// SVG only, static render. The cells + legends layers are on by
 // default; the polygon "areas" layer (one union-outline polygon per datum,
 // instead of per-cell rects) is a supported opt-in layer via props.Layers.
 package waffle

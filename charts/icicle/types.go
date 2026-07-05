@@ -3,9 +3,9 @@
 // It reuses internal/d3/hierarchy (Hierarchy + Partition), charts/colors,
 // charts/core and charts/theming.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
-// per node (charts/interact) via Interactive. Interactive zoom is deferred
-// (see docs/PLAN-v3.md §9).
+// SVG only, with optional client-side hover tooltips per node (charts/interact)
+// via Interactive and opt-in click-to-zoom drill-down via EnableZooming +
+// ChartID (through the charts/htmx server-round-trip layer).
 package icicle
 
 import (

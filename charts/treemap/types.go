@@ -4,9 +4,9 @@
 // (Hierarchy + Treemap), charts/colors (ordinal color, grouped by the depth-1
 // ancestor), charts/core (SvgWrapper) and charts/theming.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
-// per node (charts/interact) via Interactive. Interactive zoom is deferred
-// (see docs/PLAN-v3.md §9).
+// SVG only, with optional client-side hover tooltips per node (charts/interact)
+// via Interactive and opt-in click-to-zoom drill-down via EnableZooming +
+// ChartID (through the charts/htmx server-round-trip layer).
 package treemap
 
 import (

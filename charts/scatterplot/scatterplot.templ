@@ -8,7 +8,7 @@ import (
 // ScatterPlot renders a complete scatterplot SVG: dimensions → UseScatterPlot →
 // layer pipeline (grid → axes → nodes → markers → legends) → SvgWrapper.
 // Mirrors @nivo/scatterplot ScatterPlot. Static render (the interactive
-// mesh/point hover arrives with the Phase 5 client layer).
+// mesh/point hover arrives with the charts/interact client layer).
 templ ScatterPlot(props ScatterPlotProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

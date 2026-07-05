@@ -61,13 +61,13 @@ Then open <http://localhost:8000>.
 
 ## Interactivity
 
-The interactivity is **hybrid** (see `docs/PLAN-v2.md` §5):
+The interactivity is **hybrid**:
 
 - **Client-side** (`charts/interact`, loaded once in the layout): ephemeral
   hover — tooltips, the line crosshair, and nearest-point hit-testing — runs
   entirely in the browser off `data-tc-*` attributes, with no server
-  round-trip. Most charts and `line`'s mesh/slice hover use this path; v3's
-  d3-delaunay port backs true voronoi-mesh hover on
+  round-trip. Most charts and `line`'s mesh/slice hover use this path; the
+  `internal/d3/delaunay` port backs true voronoi-mesh hover on
   line/scatterplot/bump/swarmplot/tree.
 - **Server-side** (HTMX): *state changes* that alter what is rendered. Bar and
   pie demos register a chart instance with `charts/htmx.Registry` and mount the
@@ -84,9 +84,8 @@ The interactivity is **hybrid** (see `docs/PLAN-v2.md` §5):
 | `/charts/{id}/toggle?series=id`| POST  | Series hide/show (re-render SVG)         |
 
 State (hidden series, active arc) lives in the in-memory `Registry`; the
-documented trade-off (see `docs/PLAN.md` §6) is that this is fine for demos /
-small apps and would be moved to a session/cookie store for horizontal
-scaling.
+documented trade-off is that this is fine for demos / small apps and would be
+moved to a session/cookie store for horizontal scaling.
 
 ## Structure
 

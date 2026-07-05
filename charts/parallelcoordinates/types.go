@@ -11,7 +11,7 @@
 // (one Axis per variable), charts/colors (ordinal color per datum),
 // charts/core (SvgWrapper), charts/legends and charts/theming.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
+// SVG only, static render with optional client-side hover tooltips
 // per line (charts/interact) via Interactive.
 package parallelcoordinates
 

@@ -329,7 +329,7 @@ func filterNaNs(vs []float64) []float64 {
 // math/rand's default. (Used rarely; included for completeness since the
 // nivo generators package consumes it.)
 //
-// Not currently used by templ-charts v1; preserved as a helper for any
+// Not currently used by templ-charts; preserved as a helper for any
 // future synthetic data generator.
 func Shuffle(vs []float64, rand func(n int) int) []float64 {
 	out := make([]float64, len(vs))

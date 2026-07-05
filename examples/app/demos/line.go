@@ -80,7 +80,7 @@ func LineDemos() []Demo {
 		{
 			ID:          "line-mesh",
 			Title:       "Mesh hover + crosshair",
-			Description: "useMesh=true with the client interactivity layer: nearest-point tooltip + crosshair tracked in the browser (resolves the v1 per-mousemove round-trip).",
+			Description: "useMesh=true with the client interactivity layer: nearest-point tooltip + crosshair tracked in the browser (resolves the per-mousemove round-trip).",
 			Kind:        htmx.KindLine,
 			Props: line.LineProps{
 				Width:           commonChartWidth,

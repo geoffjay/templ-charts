@@ -5,7 +5,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 // Tree renders a complete tree/dendrogram SVG: dimensions → UseTree → links +
 // nodes + labels → SvgWrapper. Mirrors @nivo/tree. Static render; per-node
 // hover tooltips are available via Interactive (charts/interact); the accurate
-// voronoi-mesh hover layer arrives with the Phase 3 d3-delaunay port.
+// voronoi-mesh hover layer arrives with the internal/d3/delaunay port.
 templ Tree(props TreeProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

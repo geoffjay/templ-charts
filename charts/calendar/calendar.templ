@@ -8,7 +8,7 @@ import (
 
 // Calendar renders a complete calendar heatmap SVG: dimensions → UseCalendar →
 // day cells + month/year legends → SvgWrapper. Mirrors @nivo/calendar Calendar.
-// Static render (interactivity arrives with the Phase 5 client layer).
+// Static render (interactivity arrives with the charts/interact client layer).
 templ Calendar(props CalendarProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}

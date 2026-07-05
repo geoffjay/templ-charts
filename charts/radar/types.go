@@ -10,8 +10,8 @@
 // rotation + i·angleStep, projected to cartesian via positionFromAngle with a
 // -π/2 offset so index 0 is at the top and indices proceed clockwise.
 //
-// v2 scope: SVG only, static render. The interactive "slices" layer (hover
-// tooltip) arrives with the Phase 5 client-side layer, so it is omitted here
+// SVG only, static render. The interactive "slices" layer (hover
+// tooltip) arrives with the charts/interact client-side layer, so it is omitted here
 // even though it is in nivo's default layer list.
 package radar
 
@@ -33,7 +33,7 @@ const (
 )
 
 // RadarLayerId enumerates the render layers. Mirrors @nivo/radar RadarLayerId.
-// The "slices" layer is interactive-only and not rendered in the v2 static
+// The "slices" layer is interactive-only and not rendered in the static
 // pipeline.
 type RadarLayerId string
 

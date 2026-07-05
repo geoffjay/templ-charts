@@ -66,7 +66,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. Annotations
-// are deferred in the v2 static pipeline.
+// are deferred in the static pipeline.
 func renderLayers(props FunnelProps, result FunnelResult, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -80,7 +80,7 @@ func renderLayers(props FunnelProps, result FunnelResult, theme *theming.Theme) 
 				b.WriteString(renderLabelsLayer(props, result, theme))
 			}
 		case FunnelLayerAnnotations:
-			// Deferred in v2.
+			// Deferred.
 		}
 	}
 	return b.String()

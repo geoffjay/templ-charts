@@ -18,7 +18,7 @@ type BarTotalsTheme struct {
 }
 
 // BarTotals renders the totals labels above/beside the bars. Mirrors
-// @nivo/bar BarTotals (minus spring animation — v1 emits static <text>).
+// @nivo/bar BarTotals (minus spring animation — emits static <text>).
 templ BarTotals(props BarTotalsProps) {
 	for _, t := range props.Data {
 		<text

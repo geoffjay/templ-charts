@@ -1,4 +1,4 @@
-// Package canvas is templ-charts' Canvas rendering backend (docs/PLAN-v6.md §4).
+// Package canvas is templ-charts' Canvas rendering backend.
 //
 // A Go library cannot draw pixels in the browser, but the chart hooks already
 // *compute* every mark's geometry server-side. This package captures that

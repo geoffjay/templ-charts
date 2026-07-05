@@ -82,7 +82,7 @@ var canvasShowcaseSizes = []int{1000, 5000, 20000}
 // writeCanvasShowcase appends the large-N Canvas story: a table contrasting the
 // SVG and Canvas backends' payload size and server render time for a
 // scatterplot as the point count grows, plus one live Canvas scatterplot
-// rendering thousands of points into a single <canvas> (docs/PLAN-v6.md §8).
+// rendering thousands of points into a single <canvas>.
 func writeCanvasShowcase(b *strings.Builder) error {
 	const iters = 3
 

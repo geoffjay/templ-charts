@@ -82,7 +82,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 }
 
 // renderLayers renders the enabled layers as an inner SVG string. The
-// interactive "slices" layer is omitted in the v2 static pipeline.
+// interactive "slices" layer is omitted in the static pipeline.
 func renderLayers(props RadarProps, result RadarResult, theme *theming.Theme) string {
 	var b strings.Builder
 	for _, layer := range props.Layers {
@@ -98,7 +98,7 @@ func renderLayers(props RadarProps, result RadarResult, theme *theming.Theme) st
 		case RadarLayerLegends:
 			b.WriteString(renderLegendsLayer(props, result))
 		case RadarLayerSlices:
-			// Interactive-only; arrives with the Phase 5 client layer.
+			// Interactive-only; arrives with the charts/interact client layer.
 		}
 	}
 	return b.String()

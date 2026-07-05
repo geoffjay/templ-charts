@@ -18,6 +18,9 @@ $(HOME)/go/bin/templ:
 ## Generate Go code from .templ files
 templ: $(HOME)/go/bin/templ
 	@ if [ -n "$(TEMPL_SOURCES)" ]; then templ generate; else echo "no .templ files yet"; fi
+	@ # Detach the "templ: version:" comment from the package clause so it does
+	@ # not become package documentation on pkg.go.dev (repeats once per file).
+	@ find . -name '*_templ.go' -exec perl -0pi -e 's{(^// templ: version:.*\n)(package )}{$$1\n$$2}m' {} +
 
 generate: templ
 

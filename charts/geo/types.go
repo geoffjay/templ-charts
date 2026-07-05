@@ -9,12 +9,10 @@
 // color scale (nivo's default scheme "PuBuGn" maps to this repo's
 // "purple_blue_green" sequential scheme).
 //
-// v3 scope (see docs/PLAN-v3.md §3.6 and NOTES.md): SVG only, static render.
-// Cylindrical/pseudocylindrical projections (mercator, equirectangular,
-// transverseMercator, naturalEarth1, equalEarth) are fully correct;
-// azimuthal-family projections render the whole sphere (clipCircle is
-// deferred). Per-feature hover tooltips are available via Interactive; HTMX
-// hover-others dimming and interactive zoom/pan are deferred.
+// SVG only, static render. All projections render correctly, including the
+// azimuthal family (clipCircle hides the far hemisphere). Per-feature hover
+// tooltips are available via Interactive; HTMX hover-others dimming and
+// interactive zoom/pan are deferred. See NOTES.md for implementation notes.
 package geo
 
 import (

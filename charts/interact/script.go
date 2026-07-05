@@ -2,7 +2,7 @@ package interact
 
 // Script is the templ-charts client-side interactivity layer: a small,
 // dependency-free vanilla-JS module that handles the *ephemeral* hover
-// interactions the v2 plan moves off the server (docs/PLAN-v2.md §5):
+// interactions off the server:
 //
 //   - Element tooltips: any SVG element carrying a data-tc-tooltip attribute
 //     (or whose ancestor does) inside a .tc-chart container shows a tooltip

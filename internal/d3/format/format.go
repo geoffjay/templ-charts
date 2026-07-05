@@ -3,7 +3,7 @@
 //
 // d3-format's full grammar (fill, align, sign, symbol, zero, comma, width,
 // precision, trim, type, plus locale) is large; this implementation supports
-// the subset that matters for templ-charts v1 charts:
+// the subset that matters for templ-charts charts:
 //
 //	[[fill]align][sign][symbol][0][width][,.][precision][~][type]
 //

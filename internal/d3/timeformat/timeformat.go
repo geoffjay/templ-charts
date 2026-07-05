@@ -30,7 +30,7 @@
 // Any other character is emitted verbatim. Unknown directives fall back
 // to emitting the directive character (e.g. "%Q" -> "Q").
 //
-// Parsing (Parse) is not implemented in v1 — chart axes only need
+// Parsing (Parse) is not implemented — chart axes only need
 // formatting for tick labels. Time-scale input is expected as a time.Time.
 package d3timeformat
 

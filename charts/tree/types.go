@@ -4,9 +4,9 @@
 // internal/d3/hierarchy (Hierarchy + Tree/Cluster), charts/colors, charts/core
 // and charts/theming.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
-// per node (charts/interact) via Interactive. The accurate voronoi-mesh hover
-// layer arrives with the Phase 3 d3-delaunay port (docs/PLAN-v3.md §4.3).
+// SVG only, static render with optional client-side hover tooltips per node
+// (charts/interact) via Interactive, plus an accurate voronoi-mesh hover layer
+// backed by the internal/d3/delaunay port.
 package tree
 
 import (

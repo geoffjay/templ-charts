@@ -79,7 +79,7 @@ func applyLineState(props *line.LineProps, id string, st State) {
 	props.Interactive = true
 	// The htmx registry IS the server-round-trip path, so it opts into the
 	// legacy per-mousemove server hover (mesh/slice hx-get endpoints); the
-	// standalone default is now the client path (v5 retired the fallback).
+	// standalone default is now the client path (the fallback is retired).
 	props.ServerHover = true
 	props.InitialHiddenIDs = st.HiddenIDs
 	props.HoverX = st.HoverX

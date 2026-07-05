@@ -3,7 +3,7 @@
 // It reuses internal/d3/hierarchy (Hierarchy + Pack — deterministic via the
 // ported LCG), charts/colors (colored by depth), charts/core and charts/theming.
 //
-// v3 scope: SVG only, static render with optional client-side hover tooltips
+// SVG only, static render with optional client-side hover tooltips
 // per node (charts/interact) via Interactive. Interactive zoom is deferred.
 package circlepacking
 

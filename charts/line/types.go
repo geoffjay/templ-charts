@@ -3,7 +3,7 @@
 // generators, points, slices), and the Line/Lines/LinesItem/Areas/Points/
 // Slices/SlicesItem/Mesh/PointTooltip/SliceTooltip templ components.
 //
-// v1 renders server-side SVG only (no Canvas). Interactivity (point/slice/
+// Renders server-side SVG only (no Canvas). Interactivity (point/slice/
 // mesh modes) is routed through charts/htmx; crosshair is rendered server-side
 // from the current hover state.
 package line
@@ -222,9 +222,8 @@ type LineProps struct {
 	// ServerHover opts back into the legacy htmx per-mousemove server round-trip
 	// for mesh/slice hover (a full server SVG re-render on every throttled
 	// mousemove), for the genuinely-JS-limited case where htmx is present but the
-	// charts/interact client script is not. Default false: v5 retires the
-	// per-mousemove fallback and makes the client path the default (the v1
-	// NOTES.md item). Requires ChartID.
+	// charts/interact client script is not. Default false: the per-mousemove
+	// fallback is retired and the client path is the default. Requires ChartID.
 	ServerHover          bool
 	UseMesh              bool
 	EnableSlices         EnableSlices
@@ -272,7 +271,7 @@ type LineProps struct {
 	HasHover bool
 }
 
-// LineSvgProps is an alias of LineProps (nivo splits common/svg; v1 unifies).
+// LineSvgProps is an alias of LineProps (nivo splits common/svg; this unifies them).
 type LineSvgProps = LineProps
 
 // LineResult is the output of UseLine: the computed series, points, slices,

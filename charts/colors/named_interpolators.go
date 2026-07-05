@@ -9,7 +9,7 @@ import (
 // lookup table; turbo/cividis use their d3 polynomial formulas; warm/cool/
 // cubehelixDefault use a cubehelix interpolation; rainbow/sinebow use their
 // trig formulas. inferno/magma/plasma are approximated via RGB-basis over
-// their known endpoint gradients (v1 fidelity is sufficient for chart use).
+// their known endpoint gradients (sufficient for chart use).
 
 // interpolateTurbo mirrors d3-scale-chromatic's turbo polynomial formula.
 func interpolateTurbo(t float64) string {
@@ -61,7 +61,7 @@ func stepRamp(colors []string, t float64) string {
 // interpolateWarm / interpolateCool / cubehelixDefault use cubehelix
 // interpolation (d3-color cubehelix + interpolateCubehelixLong). The Go
 // port approximates cubehelix via direct RGB interpolation in HCL space
-// using the d3-color cubehelix → RGB conversion. For v1, we use a simple
+// using the d3-color cubehelix → RGB conversion. We use a simple
 // linear RGB interpolation between known endpoint samples; this is
 // perceptually close enough for chart gradients.
 var warmColors = []string{

@@ -5,7 +5,7 @@ import "github.com/geoffjay/templ-charts/charts/core"
 // Bump renders a complete bump SVG: dimensions → UseBump → layer pipeline
 // (grid → axes → labels → lines → points) → SvgWrapper. Mirrors @nivo/bump
 // Bump. Static render; direct point hover is available via Interactive and the
-// accurate voronoi-mesh layer arrives with the Phase 3 d3-delaunay port.
+// accurate voronoi-mesh layer arrives with the internal/d3/delaunay port.
 templ Bump(props BumpProps) {
 	{{ props = applyDefaults(props) }}
 	{{ dims := core.UseDimensions(props.Width, props.Height, props.Margin) }}
