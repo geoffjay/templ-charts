@@ -173,6 +173,19 @@ func resolveSchemeColors(scheme string, size int) []string {
 		}
 		return m[size]
 	}
+	// Interpolator-only schemes (viridis, turbo, the curated gradients, …) have
+	// no stepped arrays: sample the gradient at `size` evenly-spaced stops so
+	// ordinal use works as Palette.Ordinal documents.
+	if interp, ok := ColorInterpolators[scheme]; ok {
+		if size < 2 || size > 11 {
+			size = 9
+		}
+		out := make([]string, size)
+		for i := range out {
+			out[i] = interp(float64(i) / float64(size-1))
+		}
+		return out
+	}
 	return CategoricalColorSchemes["nivo"]
 }
 

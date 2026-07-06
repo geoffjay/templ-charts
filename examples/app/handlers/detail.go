@@ -20,24 +20,10 @@ import (
 	"github.com/geoffjay/templ-charts/examples/app/templates"
 )
 
-// paletteChoice is one option in the palette switcher.
-type paletteChoice struct {
-	ID    colors.PaletteID
-	Label string
-}
-
-// paletteChoices is the curated set of categorical palettes offered by the
-// palette switcher (categorical because most charts color series ordinally).
-var paletteChoices = []paletteChoice{
-	{colors.PaletteNivo, "nivo"},
-	{colors.PaletteCategory10, "category10"},
-	{colors.PaletteTableau10, "tableau10"},
-	{colors.PaletteSet2, "set2"},
-	{colors.PalettePaired, "paired"},
-	{colors.PaletteDark2, "dark2"},
-	{colors.PaletteObservable10, "observable10"},
-	{colors.PaletteOkabeIto, "okabe-ito"},
-}
+// paletteKinds orders the optgroups of the palette dropdown. Every catalog
+// palette is offered: sequential/diverging gradients are sampled into discrete
+// steps by the ordinal scheme machinery, so they work on categorical charts too.
+var paletteKinds = []colors.PaletteKind{colors.KindCategorical, colors.KindSequential, colors.KindDiverging}
 
 // resolveSpace maps a ?space= name to a color-interpolation space, defaulting
 // to RGB. Returns the space and its canonical name.
@@ -171,44 +157,75 @@ func (a *App) zoomableChart(slug string, theme *theming.Theme, palette colors.Pa
 func icicleSample() icicle.IcicleNode {
 	return icicle.IcicleNode{ID: "root", Children: []icicle.IcicleNode{
 		{ID: "analytics", Children: []icicle.IcicleNode{
-			{ID: "charts", Children: []icicle.IcicleNode{{ID: "icicle", Value: 8}, {ID: "sunburst", Value: 6}}},
-			{ID: "dashboards", Value: 12},
+			{ID: "charts", Children: []icicle.IcicleNode{{ID: "icicle", Value: 8}, {ID: "sunburst", Value: 6}, {ID: "treemap", Value: 7}, {ID: "bar", Value: 11}}},
+			{ID: "dashboards", Children: []icicle.IcicleNode{{ID: "sales", Value: 9}, {ID: "ops", Value: 5}}},
+			{ID: "exports", Value: 6},
 		}},
-		{ID: "billing", Children: []icicle.IcicleNode{{ID: "invoices", Value: 10}, {ID: "reports", Value: 5}}},
-		{ID: "support", Value: 9},
+		{ID: "billing", Children: []icicle.IcicleNode{
+			{ID: "invoices", Children: []icicle.IcicleNode{{ID: "drafts", Value: 4}, {ID: "sent", Value: 7}}},
+			{ID: "reports", Value: 5},
+			{ID: "payments", Value: 8},
+		}},
+		{ID: "support", Children: []icicle.IcicleNode{{ID: "tickets", Value: 10}, {ID: "chat", Value: 6}, {ID: "kb", Value: 4}}},
+		{ID: "auth", Children: []icicle.IcicleNode{{ID: "sso", Value: 5}, {ID: "sessions", Value: 7}}},
+		{ID: "search", Value: 9},
+		{ID: "notifications", Value: 6},
+		{ID: "storage", Children: []icicle.IcicleNode{{ID: "blobs", Value: 8}, {ID: "cache", Value: 3}}},
+		{ID: "admin", Value: 5},
 	}}
 }
 
 func treemapSample() treemap.TreemapNode {
 	return treemap.TreemapNode{ID: "root", Children: []treemap.TreemapNode{
 		{ID: "viz", Children: []treemap.TreemapNode{
-			{ID: "charts", Children: []treemap.TreemapNode{{ID: "bar", Value: 14}, {ID: "line", Value: 9}}},
-			{ID: "maps", Value: 11},
+			{ID: "charts", Children: []treemap.TreemapNode{{ID: "bar", Value: 14}, {ID: "line", Value: 9}, {ID: "pie", Value: 6}, {ID: "radar", Value: 4}}},
+			{ID: "maps", Children: []treemap.TreemapNode{{ID: "choropleth", Value: 7}, {ID: "tiles", Value: 4}}},
+			{ID: "tables", Value: 6},
 		}},
-		{ID: "colors", Children: []treemap.TreemapNode{{ID: "categorical", Value: 12}, {ID: "sequential", Value: 7}}},
-		{ID: "layout", Value: 10},
+		{ID: "colors", Children: []treemap.TreemapNode{{ID: "categorical", Value: 12}, {ID: "sequential", Value: 7}, {ID: "diverging", Value: 5}}},
+		{ID: "layout", Children: []treemap.TreemapNode{{ID: "grid", Value: 8}, {ID: "flex", Value: 5}}},
+		{ID: "interact", Children: []treemap.TreemapNode{{ID: "tooltip", Value: 9}, {ID: "zoom", Value: 6}, {ID: "brush", Value: 3}}},
+		{ID: "data", Children: []treemap.TreemapNode{{ID: "loaders", Value: 7}, {ID: "transforms", Value: 10}}},
+		{ID: "themes", Value: 8},
+		{ID: "legends", Value: 6},
+		{ID: "axes", Value: 9},
 	}}
 }
 
 func cpSample() cp.CirclePackingNode {
 	return cp.CirclePackingNode{ID: "root", Children: []cp.CirclePackingNode{
-		{ID: "A", Children: []cp.CirclePackingNode{
-			{ID: "A1", Children: []cp.CirclePackingNode{{ID: "A1a", Value: 8}, {ID: "A1b", Value: 5}}},
-			{ID: "A2", Value: 10},
+		{ID: "north", Children: []cp.CirclePackingNode{
+			{ID: "n-web", Children: []cp.CirclePackingNode{{ID: "n-web-a", Value: 8}, {ID: "n-web-b", Value: 5}, {ID: "n-web-c", Value: 3}}},
+			{ID: "n-mobile", Value: 10},
+			{ID: "n-api", Value: 6},
 		}},
-		{ID: "B", Children: []cp.CirclePackingNode{{ID: "B1", Value: 12}, {ID: "B2", Value: 6}}},
-		{ID: "C", Value: 9},
+		{ID: "south", Children: []cp.CirclePackingNode{{ID: "s-web", Value: 12}, {ID: "s-mobile", Value: 6}, {ID: "s-api", Value: 4}}},
+		{ID: "east", Children: []cp.CirclePackingNode{
+			{ID: "e-web", Children: []cp.CirclePackingNode{{ID: "e-web-a", Value: 7}, {ID: "e-web-b", Value: 4}}},
+			{ID: "e-api", Value: 9},
+		}},
+		{ID: "west", Children: []cp.CirclePackingNode{{ID: "w-web", Value: 11}, {ID: "w-api", Value: 5}}},
+		{ID: "central", Value: 9},
+		{ID: "nordics", Children: []cp.CirclePackingNode{{ID: "no-web", Value: 6}, {ID: "no-mobile", Value: 4}}},
+		{ID: "apac", Value: 7},
+		{ID: "latam", Value: 5},
 	}}
 }
 
 func sunburstSample() sunburst.SunburstNode {
 	return sunburst.SunburstNode{ID: "root", Children: []sunburst.SunburstNode{
 		{ID: "fruit", Children: []sunburst.SunburstNode{
-			{ID: "citrus", Children: []sunburst.SunburstNode{{ID: "orange", Value: 8}, {ID: "lemon", Value: 4}}},
-			{ID: "berry", Value: 10},
+			{ID: "citrus", Children: []sunburst.SunburstNode{{ID: "orange", Value: 8}, {ID: "lemon", Value: 4}, {ID: "lime", Value: 3}}},
+			{ID: "berry", Children: []sunburst.SunburstNode{{ID: "strawberry", Value: 6}, {ID: "blueberry", Value: 4}}},
+			{ID: "stone", Value: 5},
 		}},
-		{ID: "veg", Children: []sunburst.SunburstNode{{ID: "root-veg", Value: 9}, {ID: "leafy", Value: 6}}},
-		{ID: "grain", Value: 7},
+		{ID: "veg", Children: []sunburst.SunburstNode{{ID: "root-veg", Value: 9}, {ID: "leafy", Value: 6}, {ID: "squash", Value: 4}}},
+		{ID: "grain", Children: []sunburst.SunburstNode{{ID: "wheat", Value: 7}, {ID: "rice", Value: 6}, {ID: "oats", Value: 3}}},
+		{ID: "dairy", Children: []sunburst.SunburstNode{{ID: "milk", Value: 5}, {ID: "cheese", Value: 7}}},
+		{ID: "protein", Children: []sunburst.SunburstNode{{ID: "fish", Value: 6}, {ID: "beans", Value: 4}, {ID: "nuts", Value: 3}}},
+		{ID: "spice", Value: 4},
+		{ID: "herbs", Value: 3},
+		{ID: "oils", Value: 5},
 	}}
 }
 
@@ -250,12 +267,32 @@ func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette 
 	}
 	b.WriteString(`</div>`)
 
-	// Palette switcher (a "default" reset plus the curated categorical set).
+	// Palette switcher: a dropdown over the full palette catalog, grouped by
+	// kind, navigating on change (each option's value is the page URL for that
+	// palette). A swatch strip previews the selected palette.
 	b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">palette</span>`)
-	b.WriteString(switchLink(fmt.Sprintf("/chart/%s?theme=%s%s", e.Slug, themeName, sharedSuffix), "default", palette == ""))
-	for _, pc := range paletteChoices {
-		href := fmt.Sprintf("/chart/%s?theme=%s&palette=%s%s", e.Slug, themeName, pc.ID, sharedSuffix)
-		b.WriteString(switchLink(href, pc.Label, palette == pc.ID))
+	b.WriteString(`<select class="tc-select" onchange="location.href=this.value">`)
+	fmt.Fprintf(&b, `<option value="%s"%s>default (theme colors)</option>`,
+		fmt.Sprintf("/chart/%s?theme=%s%s", e.Slug, themeName, sharedSuffix), selectedAttr(palette == ""))
+	for _, kind := range paletteKinds {
+		fmt.Fprintf(&b, `<optgroup label="%s">`, kind)
+		for _, p := range colors.PalettesByKind(kind) {
+			href := fmt.Sprintf("/chart/%s?theme=%s&palette=%s%s", e.Slug, themeName, p.ID, sharedSuffix)
+			label := p.Name
+			if p.ColorblindSafe {
+				label += " · colorblind-safe"
+			}
+			fmt.Fprintf(&b, `<option value="%s"%s>%s</option>`, href, selectedAttr(palette == p.ID), html.EscapeString(label))
+		}
+		b.WriteString(`</optgroup>`)
+	}
+	b.WriteString(`</select>`)
+	if p, ok := colors.LookupPalette(palette); ok {
+		b.WriteString(`<span class="tc-swatch-strip">`)
+		for _, c := range p.Swatch(8) {
+			fmt.Fprintf(&b, `<span style="background:%s"></span>`, html.EscapeString(c))
+		}
+		b.WriteString(`</span>`)
 	}
 	b.WriteString(`</div>`)
 
@@ -298,11 +335,22 @@ func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette 
 	// Full-width chart (static wrapper or zoomable htmx.Mount container).
 	b.WriteString(chartHTML)
 
-	// Code snippet.
+	// Code snippet, with a copy-to-clipboard button.
 	b.WriteString(`<h3>Code</h3>`)
+	b.WriteString(`<div class="tc-snippet-wrap">`)
+	b.WriteString(`<button type="button" class="tc-copy" onclick="navigator.clipboard.writeText(this.nextElementSibling.textContent).then(()=>{this.textContent='copied';setTimeout(()=>{this.textContent='copy'},1200)})">copy</button>`)
 	b.WriteString(`<pre class="tc-snippet"><code>` + html.EscapeString(e.Snippet) + `</code></pre>`)
+	b.WriteString(`</div>`)
 
 	return b.String()
+}
+
+// selectedAttr returns the selected attribute when active (for <option> tags).
+func selectedAttr(active bool) string {
+	if active {
+		return ` selected`
+	}
+	return ""
 }
 
 // switchLink renders one switcher option as an anchor, marked active when
@@ -323,6 +371,12 @@ const detailCSS = `<style>
 .tc-chip{display:inline-block;padding:.15rem .55rem;border:1px solid #ccc;border-radius:999px;font-size:.85rem;text-decoration:none;color:#333}
 .tc-chip:hover{border-color:#888}
 .tc-chip-active{background:#333;color:#fff;border-color:#333}
-.tc-detail-chart{max-width:100%;margin:1rem 0;border:1px solid #eee;border-radius:6px;padding:.5rem}
-.tc-snippet{background:#f6f8fa;border:1px solid #e1e4e8;border-radius:6px;padding:1rem;overflow:auto;font-size:.85rem;line-height:1.4}
+.tc-select{font:inherit;font-size:.85rem;padding:.2rem .4rem;border:1px solid #ccc;border-radius:6px;background:#fff;color:#333;max-width:100%}
+.tc-swatch-strip{display:inline-flex;height:18px;border:1px solid #ddd;border-radius:4px;overflow:hidden}
+.tc-swatch-strip span{width:16px;height:100%}
+.tc-detail-chart{max-width:760px;margin:1rem 0;border:1px solid #eee;border-radius:6px;padding:.5rem}
+.tc-snippet-wrap{position:relative;max-width:760px}
+.tc-copy{position:absolute;top:.5rem;right:.5rem;font:inherit;font-size:.75rem;padding:.15rem .55rem;border:1px solid #ccc;border-radius:6px;background:#fff;color:#333;cursor:pointer}
+.tc-copy:hover{border-color:#888}
+.tc-snippet{background:#f6f8fa;border:1px solid #e1e4e8;border-radius:6px;padding:1rem;overflow:auto;font-size:.85rem;line-height:1.4;margin:0}
 </style>`
