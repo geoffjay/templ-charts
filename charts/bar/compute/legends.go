@@ -41,7 +41,7 @@ func getLegendDataForKeys(
 		}
 		data = append(data, LegendData{
 			ID:     b.Data.ID,
-			Label:  getLabel(b.Data.Data),
+			Label:  getLabel(legendLabelDatum(b)),
 			Hidden: b.Data.Hidden,
 			Color:  color,
 		})
@@ -74,7 +74,7 @@ func getLegendDataForIndexes(
 		}
 		data = append(data, LegendData{
 			ID:     id,
-			Label:  getLabel(b.Data.Data),
+			Label:  getLabel(legendLabelDatum(b)),
 			Hidden: b.Data.Hidden,
 			Color:  color,
 		})
@@ -83,6 +83,21 @@ func getLegendDataForIndexes(
 		reverseLegendData(data)
 	}
 	return data
+}
+
+// legendLabelDatum builds the map handed to the legend-label accessor,
+// mirroring the fields nivo exposes on ComputedDatum (bar.data): the raw
+// datum stays nested under "data", so the default accessors ("id",
+// "indexValue") and custom paths like "data.<field>" both resolve.
+func legendLabelDatum(b ComputedBarDatum) map[string]any {
+	return map[string]any{
+		"id":             b.Data.ID,
+		"value":          b.Data.Value,
+		"formattedValue": b.Data.FormattedValue,
+		"hidden":         b.Data.Hidden,
+		"indexValue":     b.Data.IndexValue,
+		"data":           b.Data.Data,
+	}
 }
 
 func reverseLegendData(d []LegendData) {

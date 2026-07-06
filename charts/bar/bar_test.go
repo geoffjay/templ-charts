@@ -246,6 +246,46 @@ func TestBar_Legends(t *testing.T) {
 	}
 }
 
+// TestBar_LegendLabelsAndHiddenKeys guards two dataFrom=keys legend
+// regressions: (1) items must be labeled with the key — the label accessor
+// receives the computed datum ({id, indexValue, …}), not the raw datum map,
+// which has no "id" field and rendered "<nil>"; (2) a hidden key must stay in
+// the legend (dimmed at opacity 0.4) so it can be toggled back on — hidden
+// keys generate no bars, so legend data must come from the key list.
+func TestBar_LegendLabelsAndHiddenKeys(t *testing.T) {
+	props := bar.BarProps{
+		Width: 500, Height: 300,
+		Keys:             []string{"value1", "value2"},
+		InitialHiddenIDs: []string{"value2"},
+		Data: []bar.BarDatum{
+			{"id": "one", "value1": float64(10), "value2": float64(20)},
+		},
+		Legends: []bar.BarLegendProps{
+			{
+				LegendProps: legends.LegendProps{
+					Anchor:    legends.LegendAnchorTopRight,
+					Direction: legends.LegendDirectionColumn,
+					ItemWidth: 80, ItemHeight: 20,
+				},
+				DataFrom: "keys",
+			},
+		},
+	}
+	out := renderChart(t, props)
+	if strings.Contains(out, "&lt;nil&gt;") || strings.Contains(out, "<nil>") {
+		t.Errorf("legend labels rendered <nil>")
+	}
+	if !strings.Contains(out, ">value1</text>") {
+		t.Errorf("expected legend item labeled value1")
+	}
+	if !strings.Contains(out, ">value2</text>") {
+		t.Errorf("expected hidden key value2 to remain in the legend")
+	}
+	if !strings.Contains(out, `opacity="0.4"`) {
+		t.Errorf("expected the hidden legend item to render dimmed (opacity 0.4)")
+	}
+}
+
 func TestBar_ValueScale(t *testing.T) {
 	props := bar.BarProps{
 		Width: 500, Height: 300,
