@@ -1,8 +1,8 @@
 # templ-charts — Deferred Backlog
 
 A single living backlog of everything **not** yet built, consolidated from the
-`§11 "Explicitly deferred"` sections of [`PLAN.md`](PLAN.md),
-[`PLAN-v2.md`](PLAN-v2.md), [`PLAN-v3.md`](PLAN-v3.md), and the v4 audit (which
+`§11 "Explicitly deferred"` sections of [`v1.md`](v1.md),
+[`v2.md`](v2.md), [`v3.md`](v3.md), and the v4 audit (which
 verified each item is genuinely absent in the code, with citations). It is
 captured here so nothing discovered is lost and a future release can be scoped
 from one place.
@@ -15,7 +15,7 @@ it's still absent, and its likely future home.
 Every item below is now scoped into a themed release. The sections stay
 documented (with their code evidence) and are struck as they land.
 
-**Done — v5 ("fidelity & finish", see [`PLAN-v5.md`](PLAN-v5.md)), which
+**Done — v5 ("fidelity & finish", see [`v5.md`](v5.md)), which
 finished the SVG story:**
 
 - ~~**§3 Animation parity** → v5 §4 (wired `MotionProps` across the ~25 v2/v3 charts)~~ — **done**
@@ -26,13 +26,13 @@ finished the SVG story:**
 - ~~**§6 d3-geo `clipCircle`/`clipExtent`** → v5 §3 (the one *correctness* fix)~~ — **done**
 - ~~**§9 Test depth** → v5 §7 (network's second golden + the new variant goldens)~~ — **done**
 
-**Scoped — v6 ("scale", see [`PLAN-v6.md`](PLAN-v6.md)), the Canvas + large-N
+**Scoped — v6 ("scale", see [`v6.md`](v6.md)), the Canvas + large-N
 theme:**
 
 - **§1 Canvas rendering path** → v6 §4 (client draw-list backend)
 - **§2 Large-N performance** → v6 §3 (`d3-quadtree` port + Barnes–Hut, Delaunator sweep-hull)
 
-**Scoped — v7 ("completeness & ergonomics", see [`PLAN-v7.md`](PLAN-v7.md)), the
+**Scoped — v7 ("completeness & ergonomics", see [`v7.md`](v7.md)), the
 final opportunistic release:**
 
 - **§7 Color spaces** → v7 §3 (HSL/Lab/Lch)
@@ -193,10 +193,10 @@ A rough ordering if these were to be scoped into future releases:
 2. ~~**High-value features**: animation parity (§3), interactive zoom + unified
    hover-others (§4), the partial-chart completions (§5).~~ → **v5 §4–6.**
 3. **The big theme (next)**: Canvas (§1) + large-N performance (§2), together —
-   the **v6** theme ([`PLAN-v6.md`](PLAN-v6.md)). v5's animation/layout output is
+   the **v6** theme ([`v6.md`](v6.md)). v5's animation/layout output is
    reused by the Canvas backend, and the quadtree/Delaunator perf ports land
    first so Canvas has scaled layout to render.
 4. **Final completeness**: color spaces (§7), the consumption surface (§8 —
    sample-data export, `charts/static` → 28, unified color API), and the geo
-   remainder (§6) — the **v7** theme ([`PLAN-v7.md`](PLAN-v7.md)), the last
+   remainder (§6) — the **v7** theme ([`v7.md`](v7.md)), the last
    planned release. (Test depth §9 folded into v5 §7.)
