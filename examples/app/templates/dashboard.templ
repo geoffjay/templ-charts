@@ -1,0 +1,108 @@
+package templates
+
+import "github.com/geoffjay/templ-charts/charts/htmx"
+
+// DashboardKPICard is one KPI tile at the top of the dashboard page.
+type DashboardKPICard struct {
+	Label   string
+	Value   string
+	Delta   string
+	DeltaUp bool
+	SVG     string
+}
+
+// DashboardPageProps is the input to the DashboardPage: pre-rendered SVGs for
+// every panel plus the htmx instance ids of the interactive charts.
+type DashboardPageProps struct {
+	KPIs      []DashboardKPICard
+	MainID    string
+	MainSVG   string
+	DonutID   string
+	DonutSVG  string
+	BarID     string
+	BarSVG    string
+	BulletSVG string
+}
+
+// dashCSS is the dashboard page's scoped styling: a dark shell with card
+// panels, laid out with CSS grid. Scoped under .dash so the rest of the demo
+// app keeps its light styling.
+const dashCSS = `
+.dash { background:#0f172a; margin:-24px; padding:24px; border-radius:0; }
+.dash, .dash * { box-sizing:border-box; }
+.dash-grid { max-width:1400px; margin:0 auto; display:grid; gap:16px; }
+.dash-title { color:#e2e8f0; font-size:18px; font-weight:600; margin:0; }
+.dash-sub { color:#64748b; font-size:13px; margin:2px 0 8px; }
+.dash-card { background:#1e293b; border:1px solid #334155; border-radius:12px; padding:16px; }
+.dash-card h3 { margin:0 0 2px; font-size:14px; font-weight:600; color:#e2e8f0; }
+.dash-card .hint { margin:0 0 10px; font-size:12px; color:#64748b; }
+.dash-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; }
+.dash-kpi .label { font-size:12px; color:#94a3b8; margin:0; }
+.dash-kpi .row { display:flex; align-items:baseline; justify-content:space-between; margin:2px 0 10px; }
+.dash-kpi .value { font-size:26px; font-weight:700; color:#f1f5f9; }
+.dash-kpi .delta { font-size:12px; font-weight:600; }
+.dash-kpi .delta.up { color:#34d399; }
+.dash-kpi .delta.down { color:#f87171; }
+.dash-main { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+.dash-side { display:grid; grid-template-rows:1fr 1fr; gap:16px; }
+@media (max-width: 1000px) { .dash-main { grid-template-columns:1fr; } }
+.dash .chart svg { width:100%; height:auto; display:block; }
+.dash .tc-chart-tooltip { background:rgba(15,23,42,0.95); border-color:#334155; color:#e2e8f0; }
+`
+
+// DashboardPage renders the /dashboard page: a dark, composed, real-world
+// layout — KPI sparkline cards, a large interactive trend chart, a donut +
+// stacked-bar side column, and a goal-tracking bullet row.
+templ DashboardPage(props DashboardPageProps) {
+	@templ.Raw("<style>" + dashCSS + "</style>")
+	<div class="dash">
+		<div class="dash-grid">
+			<div>
+				<p class="dash-title">Revenue overview</p>
+				<p class="dash-sub">Every panel is a templ-charts component (or a hand-composed Use* hook) sharing one dark theme and palette. Hover the trend, donut, bars, and bullets.</p>
+			</div>
+			<div class="dash-kpis">
+				for _, k := range props.KPIs {
+					<div class="dash-card dash-kpi">
+						<p class="label">{ k.Label }</p>
+						<div class="row">
+							<span class="value">{ k.Value }</span>
+							if k.DeltaUp {
+								<span class="delta up">{ k.Delta }</span>
+							} else {
+								<span class="delta down">{ k.Delta }</span>
+							}
+						</div>
+						@templ.Raw(k.SVG)
+					</div>
+				}
+			</div>
+			<div class="dash-main">
+				<div class="dash-card">
+					<h3>Monthly recurring revenue</h3>
+					<p class="hint">by segment, $k — hover for the nearest point (client-side mesh)</p>
+					@htmx.Mount(htmx.MountProps{ID: props.MainID, SVG: props.MainSVG, Interactive: true, Class: "chart"})
+				</div>
+				<div class="dash-side">
+					<div class="dash-card">
+						<h3>Revenue share</h3>
+						<p class="hint">this quarter — hover an arc</p>
+						@htmx.Mount(htmx.MountProps{ID: props.DonutID, SVG: props.DonutSVG, Interactive: true, Class: "chart"})
+					</div>
+					<div class="dash-card">
+						<h3>Weekly revenue</h3>
+						<p class="hint">last six weeks, stacked</p>
+						@htmx.Mount(htmx.MountProps{ID: props.BarID, SVG: props.BarSVG, Interactive: true, Class: "chart"})
+					</div>
+				</div>
+			</div>
+			<div class="dash-card">
+				<h3>Quarterly goals</h3>
+				<p class="hint">measure vs. target (marker), qualitative ranges behind</p>
+				<div class="chart">
+					@templ.Raw(props.BulletSVG)
+				</div>
+			</div>
+		</div>
+	</div>
+}

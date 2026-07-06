@@ -209,6 +209,30 @@ templ Layout(props LayoutProps, content templ.Component) {
 						}
 					>geo</a>
 					<a
+						href="/styling"
+						if props.Nav == "styling" {
+							class="active"
+						}
+					>styling</a>
+					<a
+						href="/legends"
+						if props.Nav == "legends" {
+							class="active"
+						}
+					>legends</a>
+					<a
+						href="/composition"
+						if props.Nav == "composition" {
+							class="active"
+						}
+					>composition</a>
+					<a
+						href="/dashboard"
+						if props.Nav == "dashboard" {
+							class="active"
+						}
+					>dashboard</a>
+					<a
 						href="/palettes"
 						if props.Nav == "palettes" {
 							class="active"

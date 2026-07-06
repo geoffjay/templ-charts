@@ -259,5 +259,7 @@ demo `/themes` page for default/dark/custom side by side.
 - **Runnable examples** — `ExampleXxx` in every `charts/<chart>` package
   (pkg.go.dev or `go test -run Example ./charts/...`).
 - **The demo app** — [`examples/app`](../examples/app): a page per chart family
-  plus `/palettes` and `/themes`. Run with `make run-demo`.
+  plus `/styling` (gradients/patterns/match rules), `/legends`,
+  `/composition` (build-your-own charts from the `Use*` hooks), `/dashboard`,
+  `/palettes`, and `/themes`. Run with `make run-demo`.
 - **Package docs** — `go doc github.com/geoffjay/templ-charts/charts/<chart>`.

@@ -72,6 +72,15 @@ func NewApp() *App {
 	for _, d := range demos.HeatmapDemos() {
 		r.Register(d.ID, d.Kind, d.Props)
 	}
+	for _, d := range demos.StylingDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
+	for _, d := range demos.LegendsDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
+	for _, d := range demos.DashboardDemos() {
+		r.Register(d.ID, d.Kind, d.Props)
+	}
 	return app
 }
 
@@ -116,6 +125,10 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/chart/sankey", Title: "Sankey", Description: "Flow diagram (d3-sankey): node breadths + relaxation, variable-thickness monotone-curve ribbons."},
 			{Href: "/chart/chord", Title: "Chord", Description: "Radial flow diagram (d3-chord): entity arcs sized by total flow, ribbons spanning each directed sub-flow; hover an entity to highlight it."},
 			{Href: "/chart/geo", Title: "Geo", Description: "GeoJSON maps (d3-geo): GeoMap + value-bound Choropleth, ten projections, optional graticule and continuous legend."},
+			{Href: "/styling", Title: "Styling", Description: "Gradients, pattern fills, conditional match rules, and blend modes via the Defs + Fill props."},
+			{Href: "/legends", Title: "Legends", Description: "Symbol shapes, anchors/directions, symbol borders, the continuous color legend, and an HTML legend outside the SVG."},
+			{Href: "/composition", Title: "Composition", Description: "Build-your-own charts from the Use* hooks + sub-components: custom point symbols, direct labels, sparkline KPI cards."},
+			{Href: "/dashboard", Title: "Dashboard", Description: "A composed real-world dashboard: KPI sparklines, gradient trend chart, donut, stacked bars, and bullet goals under one dark theme."},
 			{Href: "/palettes", Title: "Palettes", Description: "The full color-palette catalog (categorical, sequential, diverging) applied to bars, with swatches."},
 			{Href: "/themes", Title: "Themes", Description: "Bar / line / pie under default, dark, and custom themes."},
 			{Href: "/benchmark", Title: "Benchmark", Description: "Server-side render time + SVG size for a bar chart across dataset sizes (load/scaling showcase)."},
@@ -154,6 +167,103 @@ func (a *App) Pie(w http.ResponseWriter, r *http.Request) {
 	a.renderPage(w, templates.LayoutProps{Title: "Pie charts", Nav: "pie"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Pie chart demos. Hover an arc to pop it (active highlight); click a legend item to toggle a slice.",
 		Cards: cards,
+	}))
+}
+
+// Styling handles GET /styling: gradients, patterns, match rules, and blend
+// modes via the Defs + Fill props.
+func (a *App) Styling(w http.ResponseWriter, r *http.Request) {
+	demos := demos.StylingDemos()
+	a.ensureRegistered(demos)
+	cards := a.demoCards(demos)
+	a.renderPage(w, templates.LayoutProps{Title: "Styling", Nav: "styling"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Visual styling via SVG defs: linear gradients, dot/line patterns, and conditional fills bound with match rules (Defs []core.Def + Fill []core.DefRule, mirroring nivo's Patterns & Gradients guide), plus CSS mix-blend-mode on line areas. Colors marked \"inherit\" in a def resolve to each mark's own series color.",
+		Cards: cards,
+	}))
+}
+
+// Legends handles GET /legends: legend customization — symbol shapes,
+// anchors/directions, symbol borders, the continuous color legend, and an
+// HTML legend living outside the SVG.
+func (a *App) Legends(w http.ResponseWriter, r *http.Request) {
+	ds := demos.LegendsDemos()
+	a.ensureRegistered(ds)
+	cards := a.demoCards(ds)
+	for i := range cards {
+		if cards[i].ID == demos.HTMLLegendDemoID {
+			cards[i].FooterHTML = demos.HTMLLegendFooter()
+		}
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Legends", Nav: "legends"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Legend customization: the four symbol shapes across the four corner anchors, a bottom row legend with bordered symbols, the continuous color legend for value→color scales, and a legend built as plain HTML outside the SVG — same data, same HTMX toggle endpoint. Every legend here toggles its series on click.",
+		Cards: cards,
+	}))
+}
+
+// Composition handles GET /composition: charts assembled by hand from the
+// Use* hooks + exported sub-components + custom SVG marks (static tiles).
+func (a *App) Composition(w http.ResponseWriter, r *http.Request) {
+	ds, err := demos.CompositionDemos()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	cards := make([]templates.ChartCardProps, 0, len(ds))
+	for _, d := range ds {
+		cards = append(cards, templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: d.SVG, Interactive: false,
+		})
+	}
+	a.renderPage(w, templates.LayoutProps{Title: "Composition", Nav: "composition"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Build-your-own charts: every chart package exports its Use* hook (the layout math) and its layer sub-components, so a custom chart is plain Go — call line.UseLine for scales/series/generators, reuse axes.Grid/axes.Axes/line.Lines for the standard layers, and write SVG for the marks you want to own. These tiles are the d3-style escape hatch: custom point symbols, direct labels, and sparkline KPI cards, all composed without a top-level chart component.",
+		Cards: cards,
+	}))
+}
+
+// Dashboard handles GET /dashboard: a composed real-world dashboard — KPI
+// sparkline cards, an interactive trend chart, a donut + stacked-bar side
+// column, and a bullet goal row, all sharing one dark theme + palette.
+func (a *App) Dashboard(w http.ResponseWriter, r *http.Request) {
+	ds := demos.DashboardDemos()
+	a.ensureRegistered(ds)
+	svgs := make(map[string]string, len(ds))
+	for _, d := range ds {
+		svg, err := a.handler.RenderFull(d.ID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		svgs[d.ID] = svg
+	}
+
+	kpis, err := demos.DashboardKPIs()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	cards := make([]templates.DashboardKPICard, 0, len(kpis))
+	for _, k := range kpis {
+		cards = append(cards, templates.DashboardKPICard{
+			Label: k.Label, Value: k.Value, Delta: k.Delta, DeltaUp: k.DeltaUp, SVG: k.SVG,
+		})
+	}
+
+	var bb strings.Builder
+	if err := bullet.Bullet(demos.DashboardBulletProps()).Render(r.Context(), &bb); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	a.renderPage(w, templates.LayoutProps{Title: "Dashboard", Nav: "dashboard"}, templates.DashboardPage(templates.DashboardPageProps{
+		KPIs:      cards,
+		MainID:    demos.DashboardMainID,
+		MainSVG:   svgs[demos.DashboardMainID],
+		DonutID:   demos.DashboardDonutID,
+		DonutSVG:  svgs[demos.DashboardDonutID],
+		BarID:     demos.DashboardBarID,
+		BarSVG:    svgs[demos.DashboardBarID],
+		BulletSVG: bb.String(),
 	}))
 }
 

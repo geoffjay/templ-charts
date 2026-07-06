@@ -131,7 +131,7 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 			b.WriteString(renderAxesLayer(props, result, dims, theme))
 		case LineLayerAreas:
 			if props.EnableArea {
-				b.WriteString(renderAreasLayer(props, result))
+				b.WriteString(renderAreasLayer(props, result, bound))
 			}
 		case LineLayerCrosshair:
 			b.WriteString(renderCrosshairLayer(props, result, dims, theme))
@@ -184,13 +184,21 @@ func renderAxesLayer(props LineProps, result LineResult, dims core.Dimensions, t
 	})
 }
 
-func renderAreasLayer(props LineProps, result LineResult) string {
+func renderAreasLayer(props LineProps, result LineResult, bound core.SvgDefsAndFill) string {
+	var fills []string
+	if len(bound.FillByNodeIndex) > 0 {
+		fills = make([]string, len(result.Series))
+		for i := range result.Series {
+			fills[i] = bound.FillByNodeIndex[i]
+		}
+	}
 	return renderAreas(AreasProps{
 		Series:        result.Series,
 		AreaGenerator: result.AreaGenerator,
 		AreaOpacity:   props.AreaOpacity,
 		AreaBlendMode: string(props.AreaBlendMode),
 		Animate:       props.Animate,
+		Fills:         fills,
 	})
 }
 

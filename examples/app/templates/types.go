@@ -40,6 +40,12 @@ code { background:#eef; padding:1px 4px; border-radius:3px; font-size:13px; }
 .tag-cb { color:#0a7d4b; background:#e3f5ec; }
 .swatches { display:flex; flex-wrap:wrap; gap:0; border-radius:4px; overflow:hidden; margin:0 0 14px; border:1px solid var(--border); }
 .swatch { flex:1 1 0; min-width:14px; height:22px; }
+.html-legend { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.html-legend button { display:inline-flex; align-items:center; gap:7px; font:inherit; font-size:13px; color:var(--fg); background:var(--card); border:1px solid var(--border); border-radius:16px; padding:4px 12px; cursor:pointer; transition:opacity .15s; }
+.html-legend button:hover { border-color:var(--accent); }
+.html-legend button.off { opacity:.35; }
+.html-legend .dot { width:10px; height:10px; border-radius:50%; display:inline-block; }
+.html-legend .val { color:var(--muted); font-variant-numeric:tabular-nums; }
 `
 
 // js is a small inline script that positions the hover tooltip at the cursor
