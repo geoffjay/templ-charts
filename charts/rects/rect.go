@@ -94,7 +94,11 @@ func clampCorners(c BorderRadiusCorners, w, h float64) BorderRadiusCorners {
 
 // fmtR formats a float for path output (3 dp, trimmed).
 func fmtR(v float64) string {
-	return strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
+	s := strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
+	if s == "-0" { // normalize -0 (tiny negatives rounded to zero) for cross-platform-stable output
+		s = "0"
+	}
+	return s
 }
 
 // BuildRoundedRectPath returns an SVG path-data string for a rounded rectangle

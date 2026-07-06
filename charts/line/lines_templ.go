@@ -37,6 +37,9 @@ func fmtL(v float64) string {
 	if len(s) > 1 && s[len(s)-1] == '.' {
 		s = s[:len(s)-1]
 	}
+	if s == "-0" { // normalize -0 (tiny negatives rounded to zero) for cross-platform-stable output
+		s = "0"
+	}
 	return s
 }
 

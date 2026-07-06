@@ -308,5 +308,9 @@ func extent(xs []float64) (min, max float64) {
 
 // fmtF formats a float for SVG output (3 dp, trimmed).
 func fmtF(v float64) string {
-	return strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
+	s := strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
+	if s == "-0" { // normalize -0 (tiny negatives rounded to zero) for cross-platform-stable output
+		s = "0"
+	}
+	return s
 }

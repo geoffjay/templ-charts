@@ -189,5 +189,9 @@ func legendDim(v, fallback float64) float64 {
 
 // fmtF formats a float rounded to 3 decimals (matching the d3-path serializer).
 func fmtF(v float64) string {
-	return strconv.FormatFloat(math.Round(v*1000)/1000, 'g', -1, 64)
+	r := math.Round(v*1000) / 1000
+	if r == 0 {
+		r = 0 // normalize -0 to +0 for cross-platform-stable output
+	}
+	return strconv.FormatFloat(r, 'g', -1, 64)
 }

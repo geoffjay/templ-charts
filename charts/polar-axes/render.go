@@ -40,7 +40,11 @@ func fmtN(v float64) string {
 	if math.IsNaN(v) || math.IsInf(v, 0) {
 		return "0"
 	}
-	return strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
+	s := strings.TrimSuffix(strings.TrimRight(fmt.Sprintf("%.3f", v), "0"), ".")
+	if s == "-0" { // normalize -0 (tiny negatives rounded to zero) for cross-platform-stable output
+		s = "0"
+	}
+	return s
 }
 
 // strokeFromExtra reads a stroke color from a theme line's Extra map.
