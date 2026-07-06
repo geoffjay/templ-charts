@@ -6,12 +6,12 @@ import (
 )
 
 // Layout renders the HTML shell: doctype, head (title + inline CSS), the
-// htmx.org CDN script, the header nav, the main content, and a footer. The
-// page content is passed as a templ.Component so each page composes its own
-// body.
+// htmx.org CDN script, a slim header, a grouped side nav (see NavGroups), the
+// main content, and a footer. The page content is passed as a templ.Component
+// so each page composes its own body.
 //
-// The CSS is hand-written and minimal (~80 lines). The htmx script is loaded
-// from the CDN (no Go dependency).
+// The CSS is hand-written and minimal. The htmx script is loaded from the CDN
+// (no Go dependency).
 templ Layout(props LayoutProps, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -33,228 +33,23 @@ templ Layout(props LayoutProps, content templ.Component) {
 		<body>
 			<header>
 				<h1><a href="/">templ-charts demo</a></h1>
-				<nav>
-					<a
-						href="/"
-						if props.Nav == "home" {
-							class="active"
-						}
-					>home</a>
-					<a
-						href="/bar"
-						if props.Nav == "bar" {
-							class="active"
-						}
-					>bar</a>
-					<a
-						href="/line"
-						if props.Nav == "line" {
-							class="active"
-						}
-					>line</a>
-					<a
-						href="/pie"
-						if props.Nav == "pie" {
-							class="active"
-						}
-					>pie</a>
-					<a
-						href="/heatmap"
-						if props.Nav == "heatmap" {
-							class="active"
-						}
-					>heatmap</a>
-					<a
-						href="/waffle"
-						if props.Nav == "waffle" {
-							class="active"
-						}
-					>waffle</a>
-					<a
-						href="/calendar"
-						if props.Nav == "calendar" {
-							class="active"
-						}
-					>calendar</a>
-					<a
-						href="/radar"
-						if props.Nav == "radar" {
-							class="active"
-						}
-					>radar</a>
-					<a
-						href="/radial-bar"
-						if props.Nav == "radial-bar" {
-							class="active"
-						}
-					>radial-bar</a>
-					<a
-						href="/scatterplot"
-						if props.Nav == "scatterplot" {
-							class="active"
-						}
-					>scatterplot</a>
-					<a
-						href="/stream"
-						if props.Nav == "stream" {
-							class="active"
-						}
-					>stream</a>
-					<a
-						href="/bullet"
-						if props.Nav == "bullet" {
-							class="active"
-						}
-					>bullet</a>
-					<a
-						href="/funnel"
-						if props.Nav == "funnel" {
-							class="active"
-						}
-					>funnel</a>
-					<a
-						href="/boxplot"
-						if props.Nav == "boxplot" {
-							class="active"
-						}
-					>boxplot</a>
-					<a
-						href="/bump"
-						if props.Nav == "bump" {
-							class="active"
-						}
-					>bump</a>
-					<a
-						href="/marimekko"
-						if props.Nav == "marimekko" {
-							class="active"
-						}
-					>marimekko</a>
-					<a
-						href="/parallel-coordinates"
-						if props.Nav == "parallel-coordinates" {
-							class="active"
-						}
-					>parallel-coordinates</a>
-					<a
-						href="/polar-bar"
-						if props.Nav == "polar-bar" {
-							class="active"
-						}
-					>polar-bar</a>
-					<a
-						href="/treemap"
-						if props.Nav == "treemap" {
-							class="active"
-						}
-					>treemap</a>
-					<a
-						href="/sunburst"
-						if props.Nav == "sunburst" {
-							class="active"
-						}
-					>sunburst</a>
-					<a
-						href="/icicle"
-						if props.Nav == "icicle" {
-							class="active"
-						}
-					>icicle</a>
-					<a
-						href="/circle-packing"
-						if props.Nav == "circle-packing" {
-							class="active"
-						}
-					>circle-packing</a>
-					<a
-						href="/tree"
-						if props.Nav == "tree" {
-							class="active"
-						}
-					>tree</a>
-					<a
-						href="/voronoi"
-						if props.Nav == "voronoi" {
-							class="active"
-						}
-					>voronoi</a>
-					<a
-						href="/network"
-						if props.Nav == "network" {
-							class="active"
-						}
-					>network</a>
-					<a
-						href="/swarmplot"
-						if props.Nav == "swarmplot" {
-							class="active"
-						}
-					>swarmplot</a>
-					<a
-						href="/sankey"
-						if props.Nav == "sankey" {
-							class="active"
-						}
-					>sankey</a>
-					<a
-						href="/chord"
-						if props.Nav == "chord" {
-							class="active"
-						}
-					>chord</a>
-					<a
-						href="/geo"
-						if props.Nav == "geo" {
-							class="active"
-						}
-					>geo</a>
-					<a
-						href="/styling"
-						if props.Nav == "styling" {
-							class="active"
-						}
-					>styling</a>
-					<a
-						href="/legends"
-						if props.Nav == "legends" {
-							class="active"
-						}
-					>legends</a>
-					<a
-						href="/composition"
-						if props.Nav == "composition" {
-							class="active"
-						}
-					>composition</a>
-					<a
-						href="/dashboard"
-						if props.Nav == "dashboard" {
-							class="active"
-						}
-					>dashboard</a>
-					<a
-						href="/palettes"
-						if props.Nav == "palettes" {
-							class="active"
-						}
-					>palettes</a>
-					<a
-						href="/themes"
-						if props.Nav == "themes" {
-							class="active"
-						}
-					>themes</a>
-					<a
-						href="/benchmark"
-						if props.Nav == "benchmark" {
-							class="active"
-						}
-					>benchmark</a>
-				</nav>
 			</header>
-			<main>
-				@content
-			</main>
+			<div class="layout">
+				<nav class="sidenav">
+					<a href="/" class={ "overview", templ.KV("active", props.Nav == "home") }>Overview</a>
+					for _, g := range NavGroups() {
+						<div class="group">
+							<h2>{ g.Title }</h2>
+							for _, it := range g.Items {
+								<a href={ templ.URL(it.Href) } class={ templ.KV("active", props.Nav == it.Slug) }>{ it.Label }</a>
+							}
+						</div>
+					}
+				</nav>
+				<main>
+					@content
+				</main>
+			</div>
 			<footer>
 				templ-charts — server-rendered SVG charts via <code>templ</code> + HTMX
 			</footer>

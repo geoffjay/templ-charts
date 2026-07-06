@@ -7,6 +7,74 @@ type LayoutProps struct {
 	Nav   string
 }
 
+// NavItem is one side-nav link: the route, the nav slug the page handlers
+// pass as LayoutProps.Nav (for active highlighting), and the display label.
+type NavItem struct {
+	Href  string
+	Slug  string
+	Label string
+}
+
+// NavGroup is one titled section of the side nav.
+type NavGroup struct {
+	Title string
+	Items []NavItem
+}
+
+// NavGroups returns the side-nav structure: the chart families grouped by
+// shape, plus the feature/showcase pages.
+func NavGroups() []NavGroup {
+	return []NavGroup{
+		{Title: "Cartesian", Items: []NavItem{
+			{"/bar", "bar", "Bar"},
+			{"/line", "line", "Line"},
+			{"/scatterplot", "scatterplot", "Scatterplot"},
+			{"/heatmap", "heatmap", "Heatmap"},
+			{"/stream", "stream", "Stream"},
+			{"/boxplot", "boxplot", "Box plot"},
+			{"/bump", "bump", "Bump"},
+			{"/swarmplot", "swarmplot", "Swarmplot"},
+			{"/marimekko", "marimekko", "Marimekko"},
+			{"/parallel-coordinates", "parallel-coordinates", "Parallel coordinates"},
+		}},
+		{Title: "Circular & polar", Items: []NavItem{
+			{"/pie", "pie", "Pie"},
+			{"/radar", "radar", "Radar"},
+			{"/radial-bar", "radial-bar", "Radial bar"},
+			{"/polar-bar", "polar-bar", "Polar bar"},
+		}},
+		{Title: "Hierarchical", Items: []NavItem{
+			{"/treemap", "treemap", "Treemap"},
+			{"/sunburst", "sunburst", "Sunburst"},
+			{"/icicle", "icicle", "Icicle"},
+			{"/circle-packing", "circle-packing", "Circle packing"},
+			{"/tree", "tree", "Tree"},
+		}},
+		{Title: "Flow & network", Items: []NavItem{
+			{"/sankey", "sankey", "Sankey"},
+			{"/chord", "chord", "Chord"},
+			{"/network", "network", "Network"},
+			{"/voronoi", "voronoi", "Voronoi"},
+		}},
+		{Title: "Specialized", Items: []NavItem{
+			{"/waffle", "waffle", "Waffle"},
+			{"/calendar", "calendar", "Calendar"},
+			{"/bullet", "bullet", "Bullet"},
+			{"/funnel", "funnel", "Funnel"},
+			{"/geo", "geo", "Geo"},
+		}},
+		{Title: "Showcase", Items: []NavItem{
+			{"/styling", "styling", "Styling"},
+			{"/legends", "legends", "Legends"},
+			{"/composition", "composition", "Composition"},
+			{"/dashboard", "dashboard", "Dashboard"},
+			{"/palettes", "palettes", "Palettes"},
+			{"/themes", "themes", "Themes"},
+			{"/benchmark", "benchmark", "Benchmark"},
+		}},
+	}
+}
+
 // css is the hand-written minimal CSS for the demo app (~80 lines). Kept
 // inline so the app has zero external CSS deps.
 const css = `
@@ -18,10 +86,19 @@ a:hover { text-decoration:underline; }
 header { background:var(--bg); border-bottom:1px solid var(--border); padding:14px 24px; }
 header h1 { margin:0; font-size:18px; font-weight:600; display:inline-block; }
 header h1 a { color:var(--fg); }
-nav { display:inline-block; margin-left:24px; }
-nav a { margin-right:16px; color:var(--muted); }
-nav a.active { color:var(--fg); font-weight:600; }
-main { max-width:1920px; margin:0 auto; padding:24px; }
+.layout { display:flex; align-items:flex-start; }
+.sidenav { width:216px; flex:none; position:sticky; top:0; max-height:100vh; overflow-y:auto; padding:14px 10px 28px; background:var(--bg); border-right:1px solid var(--border); }
+.sidenav a { display:block; padding:4px 10px; border-radius:6px; color:#3f4753; font-size:13px; }
+.sidenav a:hover { background:#f1f3f7; text-decoration:none; }
+.sidenav a.active { background:#e8effc; color:var(--accent); font-weight:600; }
+.sidenav .group h2 { margin:16px 10px 4px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); }
+main { flex:1; min-width:0; max-width:1920px; padding:24px; }
+@media (max-width: 820px) {
+  .layout { display:block; }
+  .sidenav { position:static; width:auto; max-height:none; border-right:none; border-bottom:1px solid var(--border); display:flex; flex-wrap:wrap; gap:0 28px; padding:10px 16px 16px; }
+  .sidenav .group { min-width:150px; }
+  .sidenav .overview { width:100%; }
+}
 .intro { color:var(--muted); margin:0 0 24px; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(480px,1fr)); gap:20px; }
 .card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:18px; position:relative; }
