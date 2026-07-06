@@ -217,6 +217,23 @@ swatch := p.Swatch(8)                      // preview colors (samples gradients)
 See [`docs/PALETTES.md`](docs/PALETTES.md) for the full list of palette ids,
 and the `/palettes` page in the demo app for a visual gallery.
 
+## Agent skills
+
+The repo ships [agent skills](https://skills.sh) under [`skills/`](skills)
+that teach coding agents (Claude Code, Cursor, …) how to use the library.
+Install them into your own project with:
+
+```sh
+npx skills add geoffjay/templ-charts
+```
+
+Four skills are included: `templ-charts` (core usage + a data-shape reference
+for all 28 chart families), `templ-charts-interactivity` (hover, HTMX wiring,
+zoom, Canvas backend), `templ-charts-theming` (colors, palettes, themes,
+legends, gradients/patterns), and `templ-charts-composition` (build-your-own
+charts from the `Use*` hooks). Every code snippet in the skills is
+compile-checked against the library.
+
 ## Build and Test
 
 | Task | Command |
