@@ -17,7 +17,7 @@
 // Projection.FitExtent/FitSize/FitWidth/FitHeight (fit.go), the conic projection
 // family — conicConformal/conicEqualArea/conicEquidistant with standard-parallels
 // support (conic.go) — and an opt-in TopoJSON decoder (topojson.go; callers may
-// still supply GeoJSON directly). See NOTES.md for implementation notes.
+// still supply GeoJSON directly).
 package geo
 
 import "math"

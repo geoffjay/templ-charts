@@ -12,7 +12,7 @@
 // SVG only, static render. All projections render correctly, including the
 // azimuthal family (clipCircle hides the far hemisphere). Per-feature hover
 // tooltips are available via Interactive; HTMX hover-others dimming and
-// interactive zoom/pan are deferred. See NOTES.md for implementation notes.
+// interactive zoom/pan are deferred.
 package geo
 
 import (

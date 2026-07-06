@@ -19,7 +19,7 @@
 // sum (equivalent to a Barnes–Hut θ of 0) rather than d3's quadtree
 // approximation; for chart-scale node counts this is both cheaper to reason
 // about and more accurate, at the cost of not being bit-identical to d3's
-// approximated charge. See NOTES.md for the golden-test strategy.
+// approximated charge.
 package force
 
 import "math"

@@ -1,6 +1,6 @@
 # AGENTS.md — templ-charts
 
-A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts as [templ](https://github.com/a-h/templ) components generating server-side SVG. It ships twenty-eight chart families (full nivo SVG parity) plus a hybrid interactivity layer (client-side hover + HTMX state changes), an opt-in Canvas backend for large-N scatterplot/heatmap, and a runnable demo app. See `docs/USAGE.md` for the consumer guide and `docs/NOTES.md` for port-by-port implementation notes.
+A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts as [templ](https://github.com/a-h/templ) components generating server-side SVG. It ships twenty-eight chart families (full nivo SVG parity) plus a hybrid interactivity layer (client-side hover + HTMX state changes), an opt-in Canvas backend for large-N scatterplot/heatmap, and a runnable demo app. See `docs/USAGE.md` for the consumer guide.
 
 ## Build & test commands
 
@@ -63,4 +63,4 @@ don't reject the flag.
 ## Reference
 
 - Upstream nivo: `contrib/nivo/packages/*` (read-only; the design source of truth for types, defaults, compute logic)
-- Consumer guide: `docs/USAGE.md`; implementation notes: `docs/NOTES.md`
+- Consumer guide: `docs/USAGE.md`

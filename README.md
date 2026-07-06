@@ -1,18 +1,18 @@
 # templ-charts
 
-A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart
-concepts as [templ](https://github.com/a-h/templ) components generating
-**server-side SVG**. It ships **twenty-eight** chart families — **bar**,
-**line**, **pie**, **heatmap**, **waffle**, **calendar**, **radar**,
-**radial-bar**, **scatterplot**, **stream**, **bullet**, **funnel**, **box
-plot**, **bump**, **marimekko**, **parallel-coordinates**, **polar-bar**,
-**treemap**, **sunburst**, **icicle**, **circle-packing**, **tree**,
-**voronoi**, **network**, **swarmplot**, **sankey**, **chord**, and **geo**
-(GeoMap + Choropleth) — a hybrid interactivity layer, responsive + accessible
-output, and a runnable demo app. This is **full nivo SVG chart parity**: every
-SVG chart type nivo ships has a templ-charts equivalent. An opt-in **Canvas
-backend** additionally renders scatterplot and heatmap into a `<canvas>`
-draw-list for large-N datasets.
+A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts
+as [templ](https://github.com/a-h/templ) components generating **server-side
+SVG**. It ships **twenty-eight** chart families — **bar**, **line**, **pie**,
+**heatmap**, **waffle**, **calendar**, **radar**, **radial-bar**,
+**scatterplot**, **stream**, **bullet**, **funnel**, **box plot**, **bump**,
+**marimekko**, **parallel-coordinates**, **polar-bar**, **treemap**,
+**sunburst**, **icicle**, **circle-packing**, **tree**, **voronoi**,
+**network**, **swarmplot**, **sankey**, **chord**, and **geo** (GeoMap +
+Choropleth) — a hybrid interactivity layer, responsive + accessible output, and
+a runnable demo app. This is **full nivo SVG chart parity**: every SVG chart
+type nivo ships has a templ-charts equivalent. An opt-in **Canvas backend**
+additionally renders scatterplot and heatmap into a `<canvas>` draw-list for
+large-N datasets.
 
 - **Render** charts as SVG strings from Go — no JS bundle required. An opt-in
   Canvas backend (`Render: theming.EngineCanvas`) is available for large-N
@@ -29,8 +29,7 @@ draw-list for large-N datasets.
   d3-color / d3-hierarchy / d3-delaunay / d3-force / d3-sankey / d3-chord /
   d3-geo to pure Go under `internal/d3/` (golden-tested against d3 output).
 
-See [`docs/USAGE.md`](docs/USAGE.md) for the full consumer guide and
-[`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.
+See [`docs/USAGE.md`](docs/USAGE.md) for the full consumer guide.
 
 ## Quickstart
 
@@ -215,32 +214,7 @@ swatch := p.Swatch(8)                      // preview colors (samples gradients)
 See [`docs/PALETTES.md`](docs/PALETTES.md) for the full list of palette ids,
 and the `/palettes` page in the demo app for a visual gallery.
 
-## Repository layout
-
-```
-charts/         library packages (mirror nivo names): core, theming, scales,
-                colors, axes, rects, arcs, text, tooltip, legends,
-                annotations, interact, static (render any of the 28 families by
-                id), grid, polar-axes, htmx, canvas, samples (typed per-chart
-                demo data), render (convenience String/To helpers), and the
-                chart types: bar, line, pie, heatmap, waffle, calendar, radar,
-                radialbar, scatterplot, stream, bullet, funnel, boxplot, bump,
-                marimekko, parallelcoordinates, polarbar, treemap, sunburst,
-                icicle, circlepacking, tree, voronoi, network, swarmplot,
-                sankey, chord, geo
-internal/d3/    pure-Go ports of d3-shape, d3-scale, d3-array, d3-format,
-                d3-time-format, d3-color, d3-hierarchy, d3-delaunay, d3-force,
-                d3-sankey, d3-chord, d3-geo
-internal/golden small snapshot-test helper
-examples/app/   runnable demo app (stdlib net/http); handlers/entries holds the
-                per-chart detail-page definitions (one file per chart)
-docs/USAGE.md   consumer guide (render, colors, interactivity, a11y, theming)
-docs/PALETTES.md the full color-palette catalog (ids + metadata)
-docs/NOTES.md   port-by-port implementation notes
-contrib/nivo/   upstream nivo clone (gitignored, reference only)
-```
-
-## Build & test
+## Build and Test
 
 | Task | Command |
 |---|---|
@@ -318,5 +292,4 @@ Beyond the core charts:
 
 The Canvas engine and the color-space, TopoJSON, and conic additions are all
 opt-in and default to prior behavior, so static SVG output is byte-stable across
-releases. See [`docs/USAGE.md`](docs/USAGE.md) for the consumer guide and
-[`docs/NOTES.md`](docs/NOTES.md) for port-by-port implementation notes.
+releases. See [`docs/USAGE.md`](docs/USAGE.md) for the consumer guide.

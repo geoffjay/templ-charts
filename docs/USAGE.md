@@ -1,8 +1,7 @@
 # Using templ-charts
 
-A practical guide to consuming the library. For port-by-port implementation
-notes see [`NOTES.md`](NOTES.md). Every chart package also ships a runnable
-`ExampleXxx` (visible on pkg.go.dev and under `go test`).
+A practical guide to consuming the library. Every chart package also ships a
+runnable `ExampleXxx` (visible on pkg.go.dev and under `go test`).
 
 ## Install
 

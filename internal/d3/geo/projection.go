@@ -7,7 +7,7 @@ import "math"
 // resampling, and a preclip stage (antimeridian by default). It is a stream
 // transform — Stream(sink) returns a Sink that projects incoming (lon,lat)
 // degrees into plane coordinates. Ported from d3-geo src/projection/index.js
-// (angle/reflect and clipExtent omitted — see NOTES.md).
+// (angle/reflect and clipExtent omitted).
 type Projection struct {
 	project transform // raw projection (radians → unit plane)
 
