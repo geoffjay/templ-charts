@@ -144,7 +144,11 @@ func renderBreadcrumb(chartID string, crumbs []Crumb, fill string, fontSize floa
 }
 
 func fmtF(v float64) string {
-	return strconv.FormatFloat(math.Round(v*1000)/1000, 'g', -1, 64)
+	r := math.Round(v*1000) / 1000
+	if r == 0 {
+		r = 0 // normalize -0 to +0 for cross-platform-stable output
+	}
+	return strconv.FormatFloat(r, 'g', -1, 64)
 }
 
 func renderArcLabels(props SunburstProps, result SunburstResult, theme *theming.Theme) string {

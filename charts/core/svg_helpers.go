@@ -15,6 +15,11 @@ func fmtFloat(v float64) string {
 	s := fmt.Sprintf("%.3f", v)
 	s = strings.TrimRight(s, "0")
 	s = strings.TrimRight(s, ".")
+	if s == "-0" {
+		// Normalize -0 (tiny negatives rounded to zero) so output is
+		// stable across platforms (arm64 vs amd64).
+		s = "0"
+	}
 	return s
 }
 
