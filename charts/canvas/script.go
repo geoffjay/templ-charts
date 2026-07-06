@@ -6,10 +6,13 @@ package canvas
 //
 // For each `canvas.tc-canvas` on the page it reads the paired
 // `script[type=application/json]` (referenced by the canvas's data-tc-canvas id)
-// as an array of `[opcode, args…]` ops, HiDPI-scales the canvas backing store to
-// devicePixelRatio, and replays the ops into the 2D context. It re-renders on
-// window resize and devicePixelRatio changes (moving a window between displays),
-// so the raster stays crisp — this is all client-side, with no server round-trip
+// as an array of `[opcode, args…]` ops, sizes the backing store to the canvas's
+// displayed size × devicePixelRatio, maps the chart coordinate space
+// (data-tc-w/h) onto it, and replays the ops into the 2D context. It re-renders
+// on window resize, on the canvas's own box resizing (ResizeObserver — the
+// wrapper scales down in narrow containers), and on devicePixelRatio changes
+// (moving a window between displays), so the raster stays crisp and never
+// overflows its container — this is all client-side, with no server round-trip
 // (unlike charts/interact's opt-in data-tc-observe re-fetch). Path ops are drawn
 // through Path2D, so SVG "d" strings emitted by the existing shape builders
 // render unchanged. Interactivity (hover/tooltip/nearest-point) is layered
@@ -49,20 +52,24 @@ const Script = `(function () {
     }
   }
 
-  // render sizes the backing store to CSS-size × devicePixelRatio, resets the
-  // transform to that scale, clears, and replays.
+  // render sizes the backing store to displayed-size × devicePixelRatio and
+  // maps the chart coordinate space (data-tc-w/h — what the draw-list was
+  // recorded in) onto it, so the chart scales down with its container (the
+  // wrapper is max-width:100% with an aspect-ratio) while staying crisp.
   function render(canvas, ops) {
-    var cssW = parseFloat(canvas.getAttribute('data-tc-w')) || canvas.clientWidth || 0;
-    var cssH = parseFloat(canvas.getAttribute('data-tc-h')) || canvas.clientHeight || 0;
+    var chartW = parseFloat(canvas.getAttribute('data-tc-w')) || canvas.clientWidth || 0;
+    var chartH = parseFloat(canvas.getAttribute('data-tc-h')) || canvas.clientHeight || 0;
+    if (!chartW || !chartH) return;
+    var rect = canvas.getBoundingClientRect();
+    var dispW = rect.width || chartW;
+    var dispH = rect.height || chartH;
     var dpr = window.devicePixelRatio || 1;
-    canvas.width = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-    canvas.style.width = cssW + 'px';
-    canvas.style.height = cssH + 'px';
+    canvas.width = Math.round(dispW * dpr);
+    canvas.height = Math.round(dispH * dpr);
     var ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, cssW, cssH);
+    ctx.setTransform(dpr * dispW / chartW, 0, 0, dpr * dispH / chartH, 0, 0);
+    ctx.clearRect(0, 0, chartW, chartH);
     replay(ctx, ops);
   }
 
@@ -74,7 +81,12 @@ const Script = `(function () {
   }
 
   var painted = [];
+  // ro repaints a canvas when its own box resizes (container-driven size
+  // changes the window resize event misses). One shared observer; entries map
+  // back to their ops via the painted list.
+  var ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onResize) : null;
   function scan() {
+    if (ro) ro.disconnect();
     painted = [];
     var canvases = document.querySelectorAll('canvas.tc-canvas[data-tc-canvas]');
     for (var i = 0; i < canvases.length; i++) {
@@ -83,6 +95,7 @@ const Script = `(function () {
       if (!ops) continue;
       painted.push({ canvas: c, ops: ops });
       render(c, ops);
+      if (ro) ro.observe(c);
     }
   }
 

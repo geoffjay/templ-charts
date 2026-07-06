@@ -111,7 +111,9 @@ func TestMarkupShape(t *testing.T) {
 		`data-tc-canvas="chart1-ops"`,
 		`data-tc-w="300" data-tc-h="200"`,
 		`width="300" height="200"`,
-		`style="width:300px;height:200px"`,
+		// The canvas fills its wrapper (which carries the intrinsic size +
+		// aspect-ratio), so it scales down with the container.
+		`style="display:block;width:100%;height:100%"`,
 		`<script type="application/json" class="tc-canvas-ops" id="chart1-ops">`,
 		`</script>`,
 	} {

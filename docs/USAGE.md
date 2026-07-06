@@ -207,8 +207,10 @@ a **draw-list** — an ordered sequence of primitive ops (`fillStyle`,
 `charts/canvas`. The chart emits a wrapper `<div>` with the marks as a
 `<canvas>` + a JSON draw-list, layered between SVG panes for grid (behind) and
 axes/legends (in front). A tiny dependency-free replay script paints the
-draw-list into the 2D context, HiDPI-scaled and repainted on resize — include it
-once per page:
+draw-list into the 2D context, HiDPI-scaled and repainted on resize; the
+wrapper is capped at `max-width:100%` with a CSS `aspect-ratio`, so the whole
+chart scales down proportionally in containers narrower than its intrinsic
+width instead of overflowing. Include the script once per page:
 
 ```go
 @canvas.CanvasScriptTag()   // alongside interact.ScriptTag()
