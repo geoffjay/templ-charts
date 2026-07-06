@@ -10,17 +10,21 @@ type AreasProps struct {
 	AreaOpacity   float64
 	AreaBlendMode string
 	Animate       bool
+	// Fills holds per-series fill overrides ("url(#id)" from bound defs),
+	// parallel to Series. Empty entries (or a nil slice) fall back to the
+	// series color.
+	Fills []string
 }
 
 // Areas renders all area paths (reversed). Mirrors @nivo/line Areas.
 templ Areas(props AreasProps) {
 	<g>
 		{{ reversed := reverseSeries(props.Series) }}
-		for _, s := range reversed {
+		for i, s := range reversed {
 			{{ path := props.AreaGenerator(seriesPoints(s)) }}
 			<path
 				d={ path }
-				fill={ s.Color }
+				fill={ areaFill(props, len(reversed)-1-i, s) }
 				fill-opacity={ fmtA(props.AreaOpacity) }
 				stroke-width="0"
 				if props.AreaBlendMode != "" && props.AreaBlendMode != "normal" {
@@ -33,6 +37,15 @@ templ Areas(props AreasProps) {
 			</path>
 		}
 	</g>
+}
+
+// areaFill returns the fill for the series at the given original index: the
+// bound-def override when present, else the series color.
+func areaFill(props AreasProps, origIndex int, s ComputedSeries) string {
+	if origIndex >= 0 && origIndex < len(props.Fills) && props.Fills[origIndex] != "" {
+		return props.Fills[origIndex]
+	}
+	return s.Color
 }
 
 // fmtA formats an opacity float for SVG output.

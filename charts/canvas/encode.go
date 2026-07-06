@@ -141,13 +141,15 @@ func writeJSONString(b *strings.Builder, s string) {
 	b.WriteByte('"')
 }
 
-// Markup returns the HTML for a Canvas-rendered chart: a <canvas> sized to
-// width×height CSS pixels paired (by id) with a <script type="application/json">
-// carrying its draw-list. The replay script (CanvasScriptTag) finds each canvas,
-// reads its ops, HiDPI-scales the backing store, and renders it. The width/height
-// attributes double as a no-JS fallback size, and the ops script keeps the
-// (potentially large) draw-list out of an HTML attribute so it needs no
-// attribute-escaping.
+// Markup returns the HTML for a Canvas-rendered chart: a <canvas> filling its
+// wrapper (which carries the chart's intrinsic width×height + aspect-ratio)
+// paired (by id) with a <script type="application/json"> carrying its
+// draw-list. data-tc-w/data-tc-h record the chart coordinate space; the
+// replay script (CanvasScriptTag) finds each canvas, reads its ops, sizes the
+// backing store to displayed-size × devicePixelRatio, scales chart space onto
+// it, and renders. The width/height attributes double as a no-JS fallback
+// size, and the ops script keeps the (potentially large) draw-list out of an
+// HTML attribute so it needs no attribute-escaping.
 func Markup(id string, width, height float64, ops []Op) string {
 	w := formatNum(width)
 	h := formatNum(height)
@@ -165,11 +167,7 @@ func Markup(id string, width, height float64, ops []Op) string {
 	b.WriteString(w)
 	b.WriteString(`" height="`)
 	b.WriteString(h)
-	b.WriteString(`" style="width:`)
-	b.WriteString(w)
-	b.WriteString(`px;height:`)
-	b.WriteString(h)
-	b.WriteString(`px"></canvas><script type="application/json" class="tc-canvas-ops" id="`)
+	b.WriteString(`" style="display:block;width:100%;height:100%"></canvas><script type="application/json" class="tc-canvas-ops" id="`)
 	b.WriteString(attrEscape(opsID))
 	b.WriteString(`">`)
 	b.WriteString(EncodeJSON(ops))

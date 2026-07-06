@@ -30,9 +30,13 @@ svg, _ := render.String(boxplot.BoxPlot(boxplot.BoxPlotProps{
 }))`,
 		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			var data []boxplot.BoxPlotDatum
-			for _, g := range []string{"Alpha", "Beta"} {
-				for i := 0; i < 8; i++ {
-					data = append(data, boxplot.BoxPlotDatum{Group: g, Value: float64((i*7)%20) + 20})
+			groups := []string{"Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta"}
+			for gi, g := range groups {
+				base := 20.0 + float64(gi*7)
+				spread := 14.0 + float64((gi*5)%11)
+				for i := 0; i < 14; i++ {
+					v := base + float64((i*17+gi*13)%29)/28.0*spread
+					data = append(data, boxplot.BoxPlotDatum{Group: g, Value: v})
 				}
 			}
 			p := boxplot.BoxPlotProps{

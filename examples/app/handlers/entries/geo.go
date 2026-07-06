@@ -2,9 +2,11 @@ package entries
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/geo"
 	"github.com/geoffjay/templ-charts/charts/render"
 	"github.com/geoffjay/templ-charts/charts/theming"
+	"github.com/geoffjay/templ-charts/examples/app/demos"
 )
 
 func init() {
@@ -31,41 +33,30 @@ svg, _ := render.String(geo.Choropleth(geo.ChoroplethProps{
     GeoBase:  geo.GeoBase{Width: 400, Height: 300, Fit: true},
 }))`,
 		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
-			features := []geo.Feature{
-				{
-					Type: "Feature",
-					ID:   "AAA",
-					Geometry: geo.Geometry{
-						Type: geo.TypePolygon,
-						Coordinates: [][][2]float64{{
-							{0, 0}, {10, 0}, {10, 10}, {0, 10}, {0, 0},
-						}},
-					},
-				},
-				{
-					Type: "Feature",
-					ID:   "BBB",
-					Geometry: geo.Geometry{
-						Type: geo.TypePolygon,
-						Coordinates: [][][2]float64{{
-							{20, 20}, {30, 20}, {30, 30}, {20, 30}, {20, 20},
-						}},
-					},
-				},
-			}
+			// The real embedded world map with deterministic per-country values —
+			// a much better palette showcase than abstract polygons.
+			features := demos.WorldFeatures()
 			p := geo.ChoroplethProps{
 				Features: features,
-				Data: []geo.ChoroplethDatum{
-					{ID: "AAA", Value: 10},
-					{ID: "BBB", Value: 90},
-				},
+				Data:     demos.WorldChoroplethData(features),
 				GeoBase: geo.GeoBase{
-					Width: 400, Height: 300, Responsive: true,
-					Fit:         true,
-					BorderWidth: 0.4,
-					BorderColor: "#152238",
-					Theme:       theme,
+					Width: 720, Height: 440, Responsive: true,
+					Margin: core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
+					// Explicit Natural Earth projection spanning the inner width
+					// (Fit/fitExtent NaNs on the world MultiPolygons; the /geo demo
+					// page uses this same explicit-scale approach).
+					ProjectionType:  "naturalEarth1",
+					ProjectionScale: (720 - 20) / (2 * 2.73),
+					BorderWidth:     0.4,
+					BorderColor:     "#152238",
+					Theme:           theme,
 				},
+				ValueFormat: ",.0f",
+			}
+			// Colors is a quantize scheme id: gradient palettes map directly onto
+			// it; categorical picks keep the default scheme.
+			if pal, ok := colors.LookupPalette(palette); ok && pal.Kind != colors.KindCategorical {
+				p.Colors = string(palette)
 			}
 			p.Animate = animate
 			return render.String(geo.Choropleth(p))

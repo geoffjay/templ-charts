@@ -13,20 +13,28 @@ package canvas
 
 import "strings"
 
-// Compose returns the full Canvas-chart markup: a positioned wrapper div sized
-// to outerW×outerH (carrying the chart background) containing, bottom to top,
-// the underlay SVG pane (e.g. grid), the <canvas> of marks, and the overlay SVG
-// pane (e.g. axes/legends/mesh). Each SVG pane wraps its inner content in a
-// <g transform="translate(marginLeft,marginTop)"> so it aligns with the
-// margin-translated draw-list; empty panes are omitted. The draw-list itself is
-// responsible for the same margin translation (record a Translate first).
+// Compose returns the full Canvas-chart markup: a positioned wrapper div with
+// an intrinsic size of outerW×outerH (carrying the chart background)
+// containing, bottom to top, the underlay SVG pane (e.g. grid), the <canvas>
+// of marks, and the overlay SVG pane (e.g. axes/legends/mesh). Each SVG pane
+// wraps its inner content in a <g transform="translate(marginLeft,marginTop)">
+// so it aligns with the margin-translated draw-list; empty panes are omitted.
+// The draw-list itself is responsible for the same margin translation (record
+// a Translate first).
+//
+// The wrapper is capped at max-width:100% with a CSS aspect-ratio, so in a
+// container narrower than outerW the whole chart (panes + canvas) scales down
+// proportionally instead of overflowing — the panes scale via their viewBox
+// and the replay script maps the chart-space draw-list onto the canvas's
+// displayed size.
 func Compose(id string, outerW, outerH, marginLeft, marginTop float64, background string, ops []Op, underlaySVG, overlaySVG string) string {
 	var b strings.Builder
 	b.WriteString(`<div class="tc-canvas-chart" style="position:relative;width:`)
 	b.WriteString(formatNum(outerW))
-	b.WriteString(`px;height:`)
+	b.WriteString(`px;max-width:100%;aspect-ratio:`)
+	b.WriteString(formatNum(outerW))
+	b.WriteString(` / `)
 	b.WriteString(formatNum(outerH))
-	b.WriteString(`px`)
 	if background != "" {
 		b.WriteString(`;background:`)
 		b.WriteString(background)
@@ -35,7 +43,7 @@ func Compose(id string, outerW, outerH, marginLeft, marginTop float64, backgroun
 	if underlaySVG != "" {
 		writePane(&b, outerW, outerH, marginLeft, marginTop, underlaySVG)
 	}
-	b.WriteString(`<div class="tc-canvas-marks" style="position:absolute;left:0;top:0">`)
+	b.WriteString(`<div class="tc-canvas-marks" style="position:absolute;left:0;top:0;width:100%;height:100%">`)
 	b.WriteString(Markup(id, outerW, outerH, ops))
 	b.WriteString(`</div>`)
 	if overlaySVG != "" {
@@ -46,8 +54,9 @@ func Compose(id string, outerW, outerH, marginLeft, marginTop float64, backgroun
 }
 
 // writePane emits one absolutely-positioned SVG pane wrapping inner in a
-// margin-translate group. panes are transparent (no background), so lower
-// layers show through.
+// margin-translate group. Panes are transparent (no background), so lower
+// layers show through. width/height 100% + the viewBox keep the pane glued to
+// the wrapper's (possibly scaled-down) box.
 func writePane(b *strings.Builder, w, h, mx, my float64, inner string) {
 	b.WriteString(`<svg class="tc-canvas-pane" xmlns="http://www.w3.org/2000/svg" width="`)
 	b.WriteString(formatNum(w))
@@ -57,7 +66,7 @@ func writePane(b *strings.Builder, w, h, mx, my float64, inner string) {
 	b.WriteString(formatNum(w))
 	b.WriteByte(' ')
 	b.WriteString(formatNum(h))
-	b.WriteString(`" style="position:absolute;left:0;top:0;overflow:visible"><g transform="translate(`)
+	b.WriteString(`" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible"><g transform="translate(`)
 	b.WriteString(formatNum(mx))
 	b.WriteByte(',')
 	b.WriteString(formatNum(my))

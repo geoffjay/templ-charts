@@ -11,6 +11,9 @@ type ChartCardProps struct {
 	Description string
 	SVG         string
 	Interactive bool
+	// FooterHTML is optional raw HTML rendered below the chart (used by the
+	// legends page for an HTML legend living outside the SVG).
+	FooterHTML string
 }
 
 // ChartCard renders one demo card: the visual chrome (card box, heading,
@@ -30,6 +33,9 @@ templ ChartCard(props ChartCardProps) {
 			Interactive: props.Interactive,
 			Class:       "chart",
 		})
+		if props.FooterHTML != "" {
+			@templ.Raw(props.FooterHTML)
+		}
 	</div>
 }
 

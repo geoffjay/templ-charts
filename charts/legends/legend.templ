@@ -51,12 +51,8 @@ templ LegendSvgItem(props LegendSvgItemProps) {
 			hx-swap="innerHTML"
 			style="cursor: pointer"
 		}
-		if d.Hidden {
-			opacity="0.4"
-		}
-		else
-		if p.ItemOpacity > 0 && p.ItemOpacity < 1 {
-			opacity={ fmtN(p.ItemOpacity) }
+		if legendItemOpacity(p, d) != "" {
+			opacity={ legendItemOpacity(p, d) }
 		}
 	>
 		@LegendSymbol(p, d)
@@ -67,6 +63,20 @@ templ LegendSvgItem(props LegendSvgItemProps) {
 			dominant-baseline="central"
 		>{ d.Label }</text>
 	</g>
+}
+
+// legendItemOpacity returns the item's opacity attribute value: hidden items
+// dim to 0.4, otherwise a sub-1 ItemOpacity applies, and "" means the
+// attribute is omitted entirely. (Conditional attributes don't support
+// else-chaining in templ, so the branching lives here.)
+func legendItemOpacity(p LegendProps, d Datum) string {
+	if d.Hidden {
+		return "0.4"
+	}
+	if p.ItemOpacity > 0 && p.ItemOpacity < 1 {
+		return fmtN(p.ItemOpacity)
+	}
+	return ""
 }
 
 // LegendSymbol renders the symbol shape for a legend item.

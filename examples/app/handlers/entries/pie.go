@@ -29,9 +29,15 @@ svg, _ := render.String(pie.Pie(pie.PieProps{
 			p := pie.PieProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []any{
-					map[string]any{"id": "Go", "value": 40.0},
-					map[string]any{"id": "Rust", "value": 25.0},
-					map[string]any{"id": "Python", "value": 35.0},
+					map[string]any{"id": "Go", "value": 34.0},
+					map[string]any{"id": "Python", "value": 29.0},
+					map[string]any{"id": "TypeScript", "value": 24.0},
+					map[string]any{"id": "Rust", "value": 18.0},
+					map[string]any{"id": "Java", "value": 15.0},
+					map[string]any{"id": "C#", "value": 11.0},
+					map[string]any{"id": "Kotlin", "value": 8.0},
+					map[string]any{"id": "Swift", "value": 6.0},
+					map[string]any{"id": "Ruby", "value": 4.0},
 				},
 				Theme: theme,
 			}

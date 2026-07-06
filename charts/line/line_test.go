@@ -429,6 +429,36 @@ func TestLine_Golden_Area(t *testing.T) {
 	golden.Assert(t, "line-area", out)
 }
 
+// TestLine_DefsFillAreas verifies that Defs + Fill rules bind to the area
+// paths: the gradient def is emitted in <defs> and each area's fill is the
+// url(#…) override (with "inherit" stops expanded per series color).
+func TestLine_DefsFillAreas(t *testing.T) {
+	props := line.LineProps{
+		Width: 500, Height: 300,
+		EnableArea:  true,
+		AreaOpacity: 1,
+		Data:        sampleData(),
+		Defs: []core.Def{
+			core.LinearGradientDef("areaGrad", []core.GradientStop{
+				{Offset: 0, Color: "inherit", Opacity: 1},
+				{Offset: 100, Color: "inherit", Opacity: 0.05},
+			}, nil),
+		},
+		Fill: []core.DefRule{{ID: "areaGrad", Match: "*"}},
+	}
+	out := renderChart(t, props)
+	if !strings.Contains(out, "<linearGradient") {
+		t.Errorf("expected a <linearGradient> def, not found")
+	}
+	if !strings.Contains(out, `fill="url(#areaGrad.`) {
+		t.Errorf("expected area fill url(#areaGrad.…) override, not found in output")
+	}
+	// Line strokes must not pick up the fill override.
+	if !strings.Contains(out, `fill="none"`) {
+		t.Errorf("expected line paths to keep fill=\"none\"")
+	}
+}
+
 func minLen(s string) int {
 	if len(s) < 50 {
 		return len(s)

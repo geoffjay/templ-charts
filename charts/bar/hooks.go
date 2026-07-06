@@ -198,10 +198,13 @@ func UseBar(props BarProps) BarResult {
 				}
 			}
 		}
-		// build the source bars slice (with hidden flags) for getLegendData.
+		// Build the source bars slice for getLegendData. For dataFrom=keys,
+		// mirror nivo's legendData useMemo: one bar-like entry per key —
+		// including hidden keys, which have no generated bars — so a toggled-
+		// off series stays in the legend (dimmed) and can be toggled back on.
 		srcBars := bars
 		if from == "keys" {
-			srcBars = withHiddenBars(bars, legendData)
+			srcBars = legendBarsForKeys(keys, bars, legendData)
 		}
 		data := compute.GetLegendData(srcBars, from, string(legend.Direction), groupModeStr, layoutStr, reverse, legendLabel)
 		legendsWithData = append(legendsWithData, LegendWithData{Props: legend, Data: data})
@@ -260,20 +263,27 @@ func buildLegendDataForKeys(keys []string, bars []ComputedBarDatum, hidden []str
 	return out
 }
 
-// withHiddenBars clones bars, setting Data.Hidden per legendData for keys.
-func withHiddenBars(bars []ComputedBarDatum, legendData []LegendData) []ComputedBarDatum {
-	out := make([]ComputedBarDatum, len(bars))
-	hidden := map[string]bool{}
-	for _, ld := range legendData {
-		if ld.Hidden {
-			hidden[ld.ID] = true
+// legendBarsForKeys mirrors nivo's legendData useMemo: one bar-like entry per
+// key, in key order. Visible keys copy their first generated bar (so the raw
+// datum stays available to custom LegendLabel accessors); hidden keys — which
+// have no generated bars — get a synthetic entry carrying just the id, hidden
+// flag, and legend color, keeping them present (and toggleable) in the legend.
+func legendBarsForKeys(keys []string, bars []ComputedBarDatum, legendData []LegendData) []ComputedBarDatum {
+	out := make([]ComputedBarDatum, 0, len(keys))
+	for i, key := range keys {
+		var entry ComputedBarDatum
+		for j := range bars {
+			if bars[j].Data.ID == key {
+				entry = bars[j]
+				break
+			}
 		}
-	}
-	for i, b := range bars {
-		if hidden[b.Data.ID] {
-			b.Data.Hidden = true
+		entry.Data.ID = key
+		if i < len(legendData) {
+			entry.Data.Hidden = legendData[i].Hidden
+			entry.Color = legendData[i].Color
 		}
-		out[i] = b
+		out = append(out, entry)
 	}
 	return out
 }

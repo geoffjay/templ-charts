@@ -42,7 +42,10 @@ Browse a page per chart family — `/bar`, `/line`, `/pie`, `/heatmap`,
 `/bullet`, `/funnel`, `/boxplot`, `/bump`, `/marimekko`,
 `/parallel-coordinates`, `/polar-bar`, `/treemap`, `/sunburst`, `/icicle`,
 `/circle-packing`, `/tree`, `/voronoi`, `/network`, `/swarmplot`, `/sankey`,
-`/chord`, `/geo` — plus `/palettes` and `/themes`. Hover any mark for a
+`/chord`, `/geo` — plus `/styling` (gradients, patterns, match rules),
+`/legends`, `/composition` (build-your-own charts from the `Use*` hooks),
+`/dashboard` (a composed dark-theme dashboard), `/palettes`, and `/themes`.
+Hover any mark for a
 tooltip (client-side); click a legend item to toggle a series (HTMX). The
 `/palettes` page is the full color-palette catalog applied to bars.
 

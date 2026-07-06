@@ -56,6 +56,10 @@ Then open <http://localhost:8000>.
 | `/sankey`      | Flow diagram (d3-sankey), monotone-curve ribbons             |
 | `/chord`       | Radial flow diagram (d3-chord), entity arcs + ribbons        |
 | `/geo`         | GeoMap + Choropleth (d3-geo), projections, graticule, legend |
+| `/styling`     | Gradients, pattern fills, match rules, blend modes (`Defs` + `Fill`) |
+| `/legends`     | Symbol shapes, anchors, borders, continuous legend, HTML legend outside the SVG |
+| `/composition` | Build-your-own charts from the `Use*` hooks + sub-components |
+| `/dashboard`   | Composed dark-theme dashboard: KPI sparklines, gradient trend, donut, stacked bars, bullets |
 | `/palettes`    | The full color-palette catalog applied to bars               |
 | `/themes`      | bar / line / pie under default, dark, and custom themes      |
 

@@ -30,8 +30,12 @@ svg, _ := render.String(funnel.Funnel(funnel.FunnelProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data: []funnel.FunnelDatum{
 					{ID: "sent", Label: "Sent", Value: 60000},
+					{ID: "delivered", Label: "Delivered", Value: 52000},
 					{ID: "viewed", Label: "Viewed", Value: 38000},
 					{ID: "clicked", Label: "Clicked", Value: 22000},
+					{ID: "signed-up", Label: "Signed up", Value: 12000},
+					{ID: "trial", Label: "Trial started", Value: 6500},
+					{ID: "purchased", Label: "Purchased", Value: 2800},
 				},
 				Theme: theme,
 			}

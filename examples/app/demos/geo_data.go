@@ -91,6 +91,18 @@ func decodeGeometry(rg rawGeometry) (geo.Geometry, bool) {
 // [0, 1_000_000] derived from its id (stable across runs), matching the style
 // of nivo's choropleth demo (which uses random values). A handful of ids are
 // left out so the demo also shows the unknownColor path.
+// WorldFeatures exposes the embedded world GeoJSON to other demo consumers
+// (the /chart/geo detail page). Nil on decode error.
+func WorldFeatures() []geo.Feature {
+	f, _ := worldCountries()
+	return f
+}
+
+// WorldChoroplethData exposes the deterministic per-country demo values.
+func WorldChoroplethData(features []geo.Feature) []geo.ChoroplethDatum {
+	return syntheticChoroplethData(features)
+}
+
 func syntheticChoroplethData(features []geo.Feature) []geo.ChoroplethDatum {
 	skip := map[string]bool{"ATA": true, "GRL": true} // Antarctica, Greenland → unknown
 	data := make([]geo.ChoroplethDatum, 0, len(features))
