@@ -63,8 +63,10 @@ golden:
 		-update
 
 ## Run tests with coverage, writing a coverage profile + HTML report.
+## Scoped to the library packages (charts + internal); examples/ is a demo
+## app and would skew the number.
 cover:
-	go test -coverprofile=coverage.out ./...
+	go test -coverprofile=coverage.out ./charts/... ./internal/...
 	go tool cover -html=coverage.out -o coverage.html
 	@ echo "coverage: coverage.out (text) + coverage.html (html)"
 
