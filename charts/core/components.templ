@@ -159,11 +159,10 @@ templ DotsItem(props DotsItemProps) {
 // CartesianMarkers renders all cartesian markers (lines + optional legend
 // labels). Mirrors nivo's CartesianMarkers + CartesianMarkersItem.
 templ CartesianMarkers(props CartesianMarkersProps) {
-	if len(props.Markers) == 0 {
-		return
-	}
-	for _, m := range props.Markers {
-		@cartesianMarkersItem(m, props.Width, props.Height, props.XScale, props.YScale)
+	if len(props.Markers) > 0 {
+		for _, m := range props.Markers {
+			@cartesianMarkersItem(m, props.Width, props.Height, props.XScale, props.YScale)
+		}
 	}
 }
 

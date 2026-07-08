@@ -260,7 +260,7 @@ func applyDefaults(p BarProps) BarProps {
 	if p.Padding == 0 {
 		p.Padding = Defaults.Padding
 	}
-	if p.ValueScale == (scales.ScaleLinearSpec{}) {
+	if p.ValueScale == nil {
 		p.ValueScale = Defaults.ValueScale
 	}
 	if p.IndexScale == (scales.ScaleBandSpec{}) {

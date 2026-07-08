@@ -252,6 +252,35 @@ func ComputeScale(spec ScaleSpec, data ComputedSerieAxis, size float64, axis Sca
 	return nil
 }
 
+// SpecReverse reports whether a continuous scale spec (linear/log/symlog) has
+// Reverse set. Discrete spec types (band/point/time) return false. Lets code
+// that holds a ScaleSpec interface read Reverse without a type switch.
+func SpecReverse(spec ScaleSpec) bool {
+	switch s := spec.(type) {
+	case ScaleLinearSpec:
+		return s.Reverse
+	case ScaleLogSpec:
+		return s.Reverse
+	case ScaleSymlogSpec:
+		return s.Reverse
+	}
+	return false
+}
+
+// SpecMinIsAuto reports whether a continuous scale spec's Min is the "auto"
+// sentinel. Discrete spec types report true (they carry no explicit floor).
+func SpecMinIsAuto(spec ScaleSpec) bool {
+	switch s := spec.(type) {
+	case ScaleLinearSpec:
+		return s.Min.Auto
+	case ScaleLogSpec:
+		return s.Min.Auto
+	case ScaleSymlogSpec:
+		return s.Min.Auto
+	}
+	return true
+}
+
 func axisRange(size float64, axis ScaleAxis) (float64, float64) {
 	if axis == ScaleAxisX {
 		return 0, size

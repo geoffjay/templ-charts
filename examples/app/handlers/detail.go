@@ -71,6 +71,9 @@ func (a *App) Detail(w http.ResponseWriter, r *http.Request) {
 	// Color-space toggle — honored only for charts with a SpaceRender (a
 	// sequential/diverging scale). Defaults to RGB, so other charts are unaffected.
 	space, spaceName := resolveSpace(r.URL.Query().Get("space"))
+	// Value-scale toggle — honored only for charts with a ScaleRender (a
+	// continuous value axis). Defaults to linear, so other charts are unaffected.
+	logScale := r.URL.Query().Get("scale") == "log"
 
 	// The four hierarchy charts are click-to-zoom: register a zoomable instance
 	// with the htmx registry and mount it (so hx-get="/charts/<id>/zoom" +
@@ -97,6 +100,8 @@ func (a *App) Detail(w http.ResponseWriter, r *http.Request) {
 		switch {
 		case canvasEngine:
 			svg, err = entry.CanvasRender(theme, palette, animate)
+		case entry.ScaleRender != nil:
+			svg, err = entry.ScaleRender(theme, palette, animate, logScale)
 		case entry.SpaceRender != nil:
 			svg, err = entry.SpaceRender(theme, palette, animate, space)
 		default:
@@ -109,7 +114,7 @@ func (a *App) Detail(w http.ResponseWriter, r *http.Request) {
 		chartHTML = `<div class="tc-detail-chart chart">` + svg + `</div>`
 	}
 
-	html := buildDetailHTML(entry, chartHTML, themeName, palette, animate, canvasEngine, spaceName)
+	html := buildDetailHTML(entry, chartHTML, themeName, palette, animate, canvasEngine, spaceName, logScale)
 	a.renderPage(w,
 		templates.LayoutProps{Title: entry.Title + " — templ-charts demo"},
 		templ.Raw(html))
@@ -232,7 +237,7 @@ func sunburstSample() sunburst.SunburstNode {
 // buildDetailHTML assembles the detail page body: switchers, the full-width
 // chart, and the code snippet. chartHTML is the ready-to-inject chart block
 // (a static SVG wrapper, or the htmx.Mount container for zoomable charts).
-func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette colors.PaletteID, animate, canvasEngine bool, spaceName string) string {
+func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette colors.PaletteID, animate, canvasEngine bool, spaceName string, logScale bool) string {
 	var b strings.Builder
 
 	// animateSuffix / engineSuffix carry the current animate + engine selections
@@ -252,8 +257,13 @@ func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette 
 	if e.SpaceRender != nil && spaceName != "rgb" {
 		spaceSuffix = "&space=" + spaceName
 	}
-	// sharedSuffix preserves animate + engine + space on the theme/palette hrefs.
-	sharedSuffix := animateSuffix + engineSuffix + spaceSuffix
+	// scaleSuffix carries a non-default value scale (only for ScaleRender charts).
+	scaleSuffix := ""
+	if e.ScaleRender != nil && logScale {
+		scaleSuffix = "&scale=log"
+	}
+	// sharedSuffix preserves animate + engine + space + scale on the theme/palette hrefs.
+	sharedSuffix := animateSuffix + engineSuffix + spaceSuffix + scaleSuffix
 
 	b.WriteString(detailCSS)
 	fmt.Fprintf(&b, `<p><a href="/">← all charts</a></p>`)
@@ -304,31 +314,42 @@ func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette 
 	}
 
 	// Animate switcher: off (no animate param) / on (&animate=1). Hrefs preserve
-	// theme + palette + engine + space.
+	// theme + palette + engine + space + scale.
 	b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">animate</span>`)
-	b.WriteString(switchLink(baseTP+engineSuffix+spaceSuffix, "off", !animate))
-	b.WriteString(switchLink(baseTP+"&animate=1"+engineSuffix+spaceSuffix, "on", animate))
+	b.WriteString(switchLink(baseTP+engineSuffix+spaceSuffix+scaleSuffix, "off", !animate))
+	b.WriteString(switchLink(baseTP+"&animate=1"+engineSuffix+spaceSuffix+scaleSuffix, "on", animate))
 	b.WriteString(`</div>`)
 
 	// Engine switcher: only for Canvas-capable charts (scatterplot, heatmap).
 	// svg (default, no engine param) / canvas. Hrefs preserve theme + palette +
-	// animate + space.
+	// animate + space + scale.
 	if e.CanvasRender != nil {
 		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">engine</span>`)
-		b.WriteString(switchLink(baseTP+animateSuffix+spaceSuffix, "svg", !canvasEngine))
-		b.WriteString(switchLink(baseTP+animateSuffix+"&engine=canvas"+spaceSuffix, "canvas", canvasEngine))
+		b.WriteString(switchLink(baseTP+animateSuffix+spaceSuffix+scaleSuffix, "svg", !canvasEngine))
+		b.WriteString(switchLink(baseTP+animateSuffix+"&engine=canvas"+spaceSuffix+scaleSuffix, "canvas", canvasEngine))
 		b.WriteString(`</div>`)
 	}
 
 	// Color-space switcher: only for charts with a SpaceRender (sequential/
 	// diverging scale). rgb (default) / lab / lch. Hrefs preserve theme +
-	// palette + animate + engine.
+	// palette + animate + engine + scale.
 	if e.SpaceRender != nil {
-		ae := animateSuffix + engineSuffix
+		aes := animateSuffix + engineSuffix + scaleSuffix
 		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">color space</span>`)
-		b.WriteString(switchLink(baseTP+ae, "rgb", spaceName == "rgb"))
-		b.WriteString(switchLink(baseTP+ae+"&space=lab", "lab", spaceName == "lab"))
-		b.WriteString(switchLink(baseTP+ae+"&space=lch", "lch", spaceName == "lch"))
+		b.WriteString(switchLink(baseTP+aes, "rgb", spaceName == "rgb"))
+		b.WriteString(switchLink(baseTP+aes+"&space=lab", "lab", spaceName == "lab"))
+		b.WriteString(switchLink(baseTP+aes+"&space=lch", "lch", spaceName == "lch"))
+		b.WriteString(`</div>`)
+	}
+
+	// Value-scale switcher: only for charts with a ScaleRender (a continuous
+	// value axis). linear (default) / log. Hrefs preserve theme + palette +
+	// animate + engine + space.
+	if e.ScaleRender != nil {
+		aes := animateSuffix + engineSuffix + spaceSuffix
+		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">value scale</span>`)
+		b.WriteString(switchLink(baseTP+aes, "linear", !logScale))
+		b.WriteString(switchLink(baseTP+aes+"&scale=log", "log", logScale))
 		b.WriteString(`</div>`)
 	}
 

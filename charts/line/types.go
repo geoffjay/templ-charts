@@ -163,9 +163,11 @@ type LineProps struct {
 	// size. See core.SvgWrapperProps.Responsive.
 	Responsive bool
 
-	// Scales.
+	// Scales. YScale accepts any continuous scale spec — a
+	// scales.ScaleLinearSpec (the default), scales.ScaleLogSpec, or
+	// scales.ScaleSymlogSpec. A nil value falls back to the linear default.
 	XScale  scales.ScaleSpec
-	YScale  scales.ScaleLinearSpec
+	YScale  scales.ScaleSpec
 	XFormat core.ValueFormat[any]
 	YFormat core.ValueFormat[any]
 

@@ -1,8 +1,11 @@
 package demos
 
 import (
+	"math"
+
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
+	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -80,4 +83,40 @@ func ScatterPlotDemos() []ScatterPlotDemo {
 			},
 		},
 	}
+}
+
+// ScatterPlotScaleDemo returns the value-scale demo tile (id "scatter-scale"):
+// four latency-percentile series in different magnitude bands (~2ms to ~21s),
+// rendered on a linear or log Y axis so the toggle can compare both.
+func ScatterPlotScaleDemo(logScale bool) ScatterPlotDemo {
+	bands := []struct {
+		id   string
+		base float64
+	}{
+		{"p50", 2.2}, {"p90", 40}, {"p99", 900}, {"max", 21000},
+	}
+	series := make([]scatterplot.ScatterPlotSerie, len(bands))
+	for si, band := range bands {
+		pts := make([]scatterplot.ScatterPlotDatum, 10)
+		for i := range pts {
+			mult := 1 + 0.4*math.Sin(float64(i)*1.3+float64(si))
+			pts[i] = scatterplot.ScatterPlotDatum{
+				X: float64(i)*10 + 5,
+				Y: math.Round(band.base*mult*10) / 10,
+			}
+		}
+		series[si] = scatterplot.ScatterPlotSerie{ID: band.id, Data: pts}
+	}
+	p := scatterplot.ScatterPlotProps{
+		Width: commonChartWidth, Height: commonChartHeight,
+		Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
+		Data:        series,
+		EnableGridX: true,
+		EnableGridY: true,
+	}
+	if logScale {
+		p.YScale = scales.ScaleLogSpec{Base: 10, Min: scales.AutoFloat(), Max: scales.AutoFloat()}
+	}
+	desc := "Latency percentiles spanning ~1ms to ~30s. A log Y axis separates the bands a linear axis crushes to the floor."
+	return ScatterPlotDemo{ID: "scatter-scale", Title: "Value scale (linear / log)", Description: desc, Props: p}
 }

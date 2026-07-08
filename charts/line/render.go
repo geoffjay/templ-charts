@@ -396,7 +396,7 @@ func applyDefaults(p LineProps) LineProps {
 	if p.XScale == nil {
 		p.XScale = Defaults.XScale
 	}
-	if p.YScale == (scales.ScaleLinearSpec{}) {
+	if p.YScale == nil {
 		p.YScale = Defaults.YScale
 	}
 	if p.Curve == "" {

@@ -38,7 +38,7 @@ func UseBar(props BarProps) BarResult {
 	}
 	innerPadding := props.InnerPadding
 	valueScale := props.ValueScale
-	if valueScale == (scales.ScaleLinearSpec{}) {
+	if valueScale == nil {
 		valueScale = Defaults.ValueScale
 	}
 	indexScale := props.IndexScale
@@ -173,7 +173,7 @@ func UseBar(props BarProps) BarResult {
 	// nivo builds legendData from the keys+bars, then per-legend calls
 	// getLegendData with dataFrom/direction/groupMode/layout/reverse.
 	legendData := buildLegendDataForKeys(keys, bars, initialHidden)
-	reverse := valueScale.Reverse
+	reverse := scales.SpecReverse(valueScale)
 	legendsWithData := make([]LegendWithData, 0, len(props.Legends))
 	for _, legend := range props.Legends {
 		from := legend.DataFrom
@@ -219,7 +219,7 @@ func UseBar(props BarProps) BarResult {
 	}
 
 	// --- label layout ---
-	computeLabelLayout := compute.ComputeLabelLayout(layoutStr, valueScale.Reverse, string(labelPosition), props.LabelOffset)
+	computeLabelLayout := compute.ComputeLabelLayout(layoutStr, scales.SpecReverse(valueScale), string(labelPosition), props.LabelOffset)
 
 	return BarResult{
 		Bars:               bars,

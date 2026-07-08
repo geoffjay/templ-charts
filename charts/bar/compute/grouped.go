@@ -24,7 +24,7 @@ type GroupedParams struct {
 	Height          float64
 	Padding         float64
 	InnerPadding    float64
-	ValueScale      scales.ScaleLinearSpec
+	ValueScale      scales.ScaleSpec
 	IndexScale      scales.ScaleBandSpec
 	GetIndex        func(map[string]any) string
 	GetColor        func(ComputedDatum) string
@@ -53,8 +53,10 @@ func GenerateGroupedBars(p GroupedParams) GenerateGroupedBarsResult {
 	ixScale := indexScale.(IndexScaleWithDomain)
 
 	// Gather all values, compute min/max, clamp min to 0 when valueScale.min=="auto".
+	// Log scales can't include 0 in their domain, so the clamp is skipped for
+	// them (the smallest nonzero value becomes the floor instead).
 	clampMin := func(v float64) float64 { return v }
-	if p.ValueScale.Min.Auto {
+	if scales.SpecMinIsAuto(p.ValueScale) && p.ValueScale.ScaleType() != scales.ScaleTypeLog {
 		clampMin = clampToZero
 	}
 	values := []float64{}
@@ -93,11 +95,12 @@ func GenerateGroupedBars(p GroupedParams) GenerateGroupedBarsResult {
 
 	var bars []ComputedBarDatum
 	if bw > 0 {
-		reverse := p.ValueScale.Reverse
+		reverse := scales.SpecReverse(p.ValueScale)
+		baseline := valueBaseline(valueScale, axis, valueAxisSize)
 		if p.Layout == "vertical" {
-			bars = generateVerticalGroupedBars(p, data, keys, xScale, yScale, ixScale, bw, reverse, valueScale.Call(0))
+			bars = generateVerticalGroupedBars(p, data, keys, xScale, yScale, ixScale, bw, reverse, baseline)
 		} else {
-			bars = generateHorizontalGroupedBars(p, data, keys, xScale, yScale, ixScale, bw, reverse, valueScale.Call(0))
+			bars = generateHorizontalGroupedBars(p, data, keys, xScale, yScale, ixScale, bw, reverse, baseline)
 		}
 	}
 
@@ -295,6 +298,33 @@ func valuesToAny(xs []float64) []any {
 		out[i] = x
 	}
 	return out
+}
+
+// valueBaseline returns the pixel position of the value-axis baseline where
+// bars start. For linear/symlog scales that is scale(0). Log scales have no 0
+// in their domain, so scale(0) is non-finite; there the baseline is the axis
+// origin — the bottom of a vertical (Y) range or the left of a horizontal (X)
+// range — so bars grow up/right from the smallest value.
+func valueBaseline(s scales.Scale, axis scales.ScaleAxis, valueAxisSize float64) float64 {
+	b := s.Call(0)
+	if math.IsInf(b, 0) || math.IsNaN(b) {
+		if axis == scales.ScaleAxisY {
+			return valueAxisSize
+		}
+		return 0
+	}
+	return b
+}
+
+// callOrBaseline maps v through the scale, falling back to baseline when the
+// result is non-finite (e.g. a log scale applied to 0 at the bottom of a
+// stack). Keeps computed bar geometry finite for any scale type.
+func callOrBaseline(s scales.Scale, v, baseline float64) float64 {
+	r := s.Call(v)
+	if math.IsInf(r, 0) || math.IsNaN(r) {
+		return baseline
+	}
+	return r
 }
 
 // filterZerosIfLog mirrors nivo's filterZerosIfLog (log scales can't handle 0).

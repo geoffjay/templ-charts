@@ -152,19 +152,23 @@ func interpolateSinebow(t float64) string {
 	return rgbToHex((xr * xr), (xg * xg), (xb * xb))
 }
 
-// cubehelixToRGB converts a cubehelix (h, s, l) to an RGB hex string.
-// h in degrees, s and l in [0,1]-ish (d3 allows >1). Approximates d3-color
-// cubehelix.
+// cubehelixToRGB converts a cubehelix (h, s, l) to an RGB hex string. h is in
+// degrees, s and l in [0,1]-ish (d3 allows >1). Mirrors d3-color's
+// Cubehelix.rgb() exactly, including the +120° hue offset and the fixed
+// channel coefficients (A..E).
 func cubehelixToRGB(hDeg, s, l float64) string {
-	h := hDeg * math.Pi / 180
+	const (
+		coefA, coefB = -0.14861, 1.78277
+		coefC, coefD = -0.29227, -0.90649
+		coefE        = 1.97294
+	)
+	h := (hDeg + 120) * math.Pi / 180
 	a := s * l * (1 - l)
-	cos := func(x float64) float64 {
-		return math.Cos(x+math.Pi/2)*3/2 - 1
-	}
-	_ = cos
-	r := l + a*cos(h+0/3*math.Pi*2)
-	g := l + a*cos(h+1/3*math.Pi*2)
-	b := l + a*cos(h+2/3*math.Pi*2)
+	cosh := math.Cos(h)
+	sinh := math.Sin(h)
+	r := l + a*(coefA*cosh+coefB*sinh)
+	g := l + a*(coefC*cosh+coefD*sinh)
+	b := l + a*(coefE*cosh)
 	return rgbToHex(r, g, b)
 }
 

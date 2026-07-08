@@ -128,8 +128,10 @@ type BarProps struct {
 	Padding      float64
 	InnerPadding float64
 
-	// Scales.
-	ValueScale scales.ScaleLinearSpec
+	// Scales. ValueScale accepts any continuous scale spec — a
+	// scales.ScaleLinearSpec (the default), scales.ScaleLogSpec, or
+	// scales.ScaleSymlogSpec. A nil value falls back to the linear default.
+	ValueScale scales.ScaleSpec
 	IndexScale scales.ScaleBandSpec
 
 	// Grid.

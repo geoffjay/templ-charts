@@ -28,7 +28,7 @@ type StackedParams struct {
 	Height          float64
 	Padding         float64
 	InnerPadding    float64
-	ValueScale      scales.ScaleLinearSpec
+	ValueScale      scales.ScaleSpec
 	IndexScale      scales.ScaleBandSpec
 	GetIndex        func(map[string]any) string
 	GetColor        func(ComputedDatum) string
@@ -87,14 +87,18 @@ func GenerateStackedBars(p StackedParams) GenerateStackedBarsResult {
 
 	innerPadding := p.InnerPadding
 	bandwidth := ixScale.Bandwidth()
-	reverse := p.ValueScale.Reverse
+	reverse := scales.SpecReverse(p.ValueScale)
 
 	var bars []ComputedBarDatum
 	if bandwidth > 0 {
+		// baseline keeps geometry finite when the value scale can't map 0 (log):
+		// the bottom stack segment's lo=0 falls back to the axis origin instead
+		// of the log scale's non-finite scale(0).
+		baseline := valueBaseline(valueScale, axis, valueAxisSize)
 		if p.Layout == "vertical" {
-			bars = generateVerticalStackedBars(p, stackedData, ixScale, xScale, yScale, bandwidth, innerPadding, reverse)
+			bars = generateVerticalStackedBars(p, stackedData, ixScale, xScale, yScale, bandwidth, innerPadding, reverse, baseline)
 		} else {
-			bars = generateHorizontalStackedBars(p, stackedData, ixScale, xScale, yScale, bandwidth, innerPadding, reverse)
+			bars = generateHorizontalStackedBars(p, stackedData, ixScale, xScale, yScale, bandwidth, innerPadding, reverse, baseline)
 		}
 	}
 
@@ -108,6 +112,7 @@ func generateVerticalStackedBars(
 	xScale, yScale scales.Scale,
 	bandwidth, innerPadding float64,
 	reverse bool,
+	baseline float64,
 ) []ComputedBarDatum {
 	domain := ixScale.Domain()
 	bars := []ComputedBarDatum{}
@@ -115,14 +120,14 @@ func generateVerticalStackedBars(
 		for i, index := range domain {
 			d := si.Stats[i]
 			x := xScale.Call(index)
-			y := yScale.Call(d.Hi)
+			y := callOrBaseline(yScale, d.Hi, baseline)
 			if reverse {
-				y = yScale.Call(d.Lo)
+				y = callOrBaseline(yScale, d.Lo, baseline)
 			}
 			y += innerPadding * 0.5
-			barHeight := (yScale.Call(d.Lo) - y)
+			barHeight := (callOrBaseline(yScale, d.Lo, baseline) - y)
 			if reverse {
-				barHeight = yScale.Call(d.Hi) - y
+				barHeight = callOrBaseline(yScale, d.Hi, baseline) - y
 			}
 			barHeight -= innerPadding
 			rawValue, value := CoerceValue(d.Data.(map[string]any)[si.Key])
@@ -160,6 +165,7 @@ func generateHorizontalStackedBars(
 	xScale, yScale scales.Scale,
 	bandwidth, innerPadding float64,
 	reverse bool,
+	baseline float64,
 ) []ComputedBarDatum {
 	domain := ixScale.Domain()
 	bars := []ComputedBarDatum{}
@@ -167,14 +173,14 @@ func generateHorizontalStackedBars(
 		for i, index := range domain {
 			d := si.Stats[i]
 			y := yScale.Call(index)
-			x := xScale.Call(d.Lo)
+			x := callOrBaseline(xScale, d.Lo, baseline)
 			if reverse {
-				x = xScale.Call(d.Hi)
+				x = callOrBaseline(xScale, d.Hi, baseline)
 			}
 			x += innerPadding * 0.5
-			barWidth := xScale.Call(d.Hi) - x
+			barWidth := callOrBaseline(xScale, d.Hi, baseline) - x
 			if reverse {
-				barWidth = xScale.Call(d.Lo) - x
+				barWidth = callOrBaseline(xScale, d.Lo, baseline) - x
 			}
 			barWidth -= innerPadding
 			rawValue, value := CoerceValue(d.Data.(map[string]any)[si.Key])

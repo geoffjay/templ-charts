@@ -12,6 +12,7 @@ import (
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/samples"
+	"github.com/geoffjay/templ-charts/charts/scales"
 )
 
 // Demo describes one chart instance on a page: the htmx instance id, a human
@@ -150,4 +151,32 @@ func BarDemos() []Demo {
 func barData() []bar.BarDatum {
 	d, _ := samples.Bar()
 	return d
+}
+
+// BarScaleDemo returns the value-scale demo card (id "bar-scale"): one series
+// spanning five orders of magnitude, rendered on a linear or log value axis.
+// The page toggles logScale so the same data can be compared under both scales.
+func BarScaleDemo(logScale bool) Demo {
+	p := bar.BarProps{
+		Width:     commonChartWidth,
+		Height:    commonChartHeight,
+		IndexBy:   "tier",
+		Keys:      []string{"requests"},
+		GroupMode: bar.GroupModeGrouped,
+		Margin:    defaultMargin(),
+		Data: []bar.BarDatum{
+			{"tier": "cache", "requests": 1200000.0},
+			{"tier": "cdn", "requests": 340000.0},
+			{"tier": "app", "requests": 42000.0},
+			{"tier": "db", "requests": 3800.0},
+			{"tier": "queue", "requests": 210.0},
+			{"tier": "audit", "requests": 12.0},
+		},
+	}
+	desc := "Requests/day per tier, spanning ~12 to ~1.2M. On a linear axis the small tiers vanish; on a log axis every tier stays readable."
+	if logScale {
+		// Min pinned to 1 (not auto) so the smallest tier clears the baseline.
+		p.ValueScale = scales.ScaleLogSpec{Base: 10, Min: scales.FloatVal(1), Max: scales.AutoFloat()}
+	}
+	return Demo{ID: "bar-scale", Title: "Value scale (linear / log)", Description: desc, Kind: htmx.KindBar, Props: p}
 }

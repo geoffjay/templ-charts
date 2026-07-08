@@ -35,6 +35,15 @@ type ChartEntry struct {
 	// switcher and uses this on ?space=lab|lch, illustrating the perceptual
 	// difference. Same signature as Render plus the space.
 	SpaceRender func(theme *theming.Theme, palette colors.PaletteID, animate bool, space colors.Space) (string, error)
+
+	// ScaleRender, when non-nil, renders the chart with its value axis on either
+	// a linear or log scale — set only for charts with a continuous value axis
+	// (bar, line, scatterplot, swarmplot). The detail page shows a "value scale"
+	// switcher and passes logScale=true on ?scale=log. These charts use a dataset
+	// spanning several orders of magnitude, so the toggle shows how a log scale
+	// keeps small values readable where a linear scale flattens them. Same
+	// signature as Render plus the logScale flag.
+	ScaleRender func(theme *theming.Theme, palette colors.PaletteID, animate bool, logScale bool) (string, error)
 }
 
 // registry maps slug → entry, populated by each chart file's init().

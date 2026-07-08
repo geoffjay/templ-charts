@@ -1368,16 +1368,12 @@ func CartesianMarkers(props CartesianMarkersProps) templ.Component {
 			templ_7745c5c3_Var77 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		if len(props.Markers) == 0 {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 107, "return ")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		for _, m := range props.Markers {
-			templ_7745c5c3_Err = cartesianMarkersItem(m, props.Width, props.Height, props.XScale, props.YScale).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+		if len(props.Markers) > 0 {
+			for _, m := range props.Markers {
+				templ_7745c5c3_Err = cartesianMarkersItem(m, props.Width, props.Height, props.XScale, props.YScale).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
 		return nil

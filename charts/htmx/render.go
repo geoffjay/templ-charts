@@ -183,7 +183,7 @@ func icicleParent(n icicle.IcicleNode, parentID, target string) string {
 			return parentID
 		}
 		if childHasIcicle(c, target) {
-			return icicleParent(c, n.ID, target)
+			return icicleParent(c, c.ID, target)
 		}
 	}
 	return ""
@@ -204,7 +204,7 @@ func treemapParent(n treemap.TreemapNode, parentID, target string) string {
 			return parentID
 		}
 		if childHasTreemap(c, target) {
-			return treemapParent(c, n.ID, target)
+			return treemapParent(c, c.ID, target)
 		}
 	}
 	return ""
@@ -225,7 +225,7 @@ func cpParent(n cp.CirclePackingNode, parentID, target string) string {
 			return parentID
 		}
 		if childHasCP(c, target) {
-			return cpParent(c, n.ID, target)
+			return cpParent(c, c.ID, target)
 		}
 	}
 	return ""
@@ -246,7 +246,7 @@ func sunburstParent(n sunburst.SunburstNode, parentID, target string) string {
 			return parentID
 		}
 		if childHasSunburst(c, target) {
-			return sunburstParent(c, n.ID, target)
+			return sunburstParent(c, c.ID, target)
 		}
 	}
 	return ""

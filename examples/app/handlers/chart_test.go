@@ -3,6 +3,7 @@ package handlers_test
 import (
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -20,6 +21,8 @@ func newServer(t *testing.T) (http.Handler, *handlers.App) {
 	mux.HandleFunc("/bar", app.Bar)
 	mux.HandleFunc("/line", app.Line)
 	mux.HandleFunc("/pie", app.Pie)
+	mux.HandleFunc("/scatterplot", app.ScatterPlot)
+	mux.HandleFunc("/swarmplot", app.SwarmPlot)
 	mux.HandleFunc("/themes", app.Themes)
 	mux.HandleFunc("/benchmark", app.Benchmark)
 	mux.HandleFunc("/chart/", app.Detail)
@@ -110,11 +113,43 @@ func TestPages_ReturnHTML(t *testing.T) {
 	}
 }
 
-func TestBarPage_HasFiveCards(t *testing.T) {
+func TestBarPage_HasSixCards(t *testing.T) {
+	// Five bar demos plus the appended value-scale (linear/log) demo card.
 	h, _ := newServer(t)
 	rec := do(t, h, http.MethodGet, "/bar")
-	if got := strings.Count(rec.Body.String(), `class="card"`); got != 5 {
-		t.Errorf("/bar card count = %d, want 5", got)
+	if got := strings.Count(rec.Body.String(), `class="card"`); got != 6 {
+		t.Errorf("/bar card count = %d, want 6", got)
+	}
+}
+
+// TestValueScaleToggle checks the linear/log switcher added to the continuous
+// value-axis demo pages: the control is present, defaults to linear, and
+// ?scale=log both marks the log chip active and changes the rendered output.
+func TestValueScaleToggle(t *testing.T) {
+	// chipActive reports whether the chip anchor linking to href carries the
+	// active (dark background) inline style, regardless of style-attr ordering.
+	chipActive := func(body, href string) bool {
+		re := regexp.MustCompile(`<a href="` + regexp.QuoteMeta(href) + `"[^>]*background:#333[^>]*>`)
+		return re.MatchString(body)
+	}
+	for _, page := range []string{"/bar", "/line", "/scatterplot", "/swarmplot"} {
+		h, _ := newServer(t)
+		lin := do(t, h, http.MethodGet, page).Body.String()
+		if !strings.Contains(lin, "value scale") {
+			t.Errorf("%s: missing value-scale toggle", page)
+		}
+		// On the default page the linear chip is active, the log chip is not.
+		if !chipActive(lin, page) || chipActive(lin, page+"?scale=log") {
+			t.Errorf("%s: linear should be the active chip by default", page)
+		}
+		log := do(t, h, http.MethodGet, page+"?scale=log").Body.String()
+		if lin == log {
+			t.Errorf("%s: ?scale=log did not change the render", page)
+		}
+		// On ?scale=log the active chip flips to log.
+		if !chipActive(log, page+"?scale=log") || chipActive(log, page) {
+			t.Errorf("%s: log should be the active chip under ?scale=log", page)
+		}
 	}
 }
 

@@ -196,7 +196,7 @@ func UseLine(props LineProps) LineResult {
 		xScaleSpec = Defaults.XScale
 	}
 	yScaleSpec := props.YScale
-	if yScaleSpec == (scales.ScaleLinearSpec{}) {
+	if yScaleSpec == nil {
 		yScaleSpec = Defaults.YScale
 	}
 	colorsCfg := props.Colors

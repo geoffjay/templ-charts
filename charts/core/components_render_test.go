@@ -228,8 +228,10 @@ func TestDotsItem_DefaultLabelAnchor(t *testing.T) {
 
 func TestCartesianMarkers_Empty(t *testing.T) {
 	out := render(t, core.CartesianMarkers(core.CartesianMarkersProps{Width: 100, Height: 50}))
-	if strings.Contains(out, "<g") || strings.Contains(out, "<line") {
-		t.Errorf("no markers should render no elements, got %q", out)
+	// An empty marker list must render nothing at all — not even the stray
+	// literal "return " that a bare `return` inside a templ block used to emit.
+	if out != "" {
+		t.Errorf("no markers should render empty output, got %q", out)
 	}
 }
 

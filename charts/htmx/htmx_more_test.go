@@ -189,11 +189,10 @@ func TestHandler_LineMeshHover_NoPoints(t *testing.T) {
 // --- zoom: deep nodes resolve their real parent -----------------------------------
 
 // assertDeepZoomOut focuses a depth-2 node and re-clicks it: the focus must
-// move off the deep node to one of its ancestors, exercising the recursive
-// parent walk (childHas* + the recursive parent call). The exact ancestor is
-// not pinned: the current resolvers land on the grandparent for depth-2 nodes,
-// so the depth-1 parent and the root id are both accepted.
-func assertDeepZoomOut(t *testing.T, h *htmx.Handler, id, deepID string, ancestors ...string) {
+// move off the deep node to its immediate parent, exercising the recursive
+// parent walk (childHas* + the recursive parent call). The parent is pinned
+// exactly — a depth-2 node's parent is its depth-1 ancestor, not the root.
+func assertDeepZoomOut(t *testing.T, h *htmx.Handler, id, deepID, wantParent string) {
 	t.Helper()
 	rec := do(t, h, http.MethodGet, "/charts/"+id+"/zoom?node="+deepID)
 	if rec.Code != http.StatusOK {
@@ -206,23 +205,15 @@ func assertDeepZoomOut(t *testing.T, h *htmx.Handler, id, deepID string, ancesto
 	if rec.Code != http.StatusOK {
 		t.Fatalf("zoom out status = %d", rec.Code)
 	}
-	got := h.Registry().Get(id).State().FocusID
-	ok := false
-	for _, a := range ancestors {
-		if got == a {
-			ok = true
-			break
-		}
-	}
-	if !ok {
-		t.Errorf("focus after zoom-out = %q, want one of %v", got, ancestors)
+	if got := h.Registry().Get(id).State().FocusID; got != wantParent {
+		t.Errorf("focus after zoom-out = %q, want %q (immediate parent)", got, wantParent)
 	}
 }
 
 func TestHandler_IcicleDeepZoomOut(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterIcicle("ic", icicle.IcicleProps{Width: 500, Height: 300, EnableZooming: true, Data: icicleData()})
-	assertDeepZoomOut(t, htmx.NewHandler(r), "ic", "a1", "A", "root", "")
+	assertDeepZoomOut(t, htmx.NewHandler(r), "ic", "a1", "A")
 }
 
 func TestHandler_TreemapDeepZoomOut(t *testing.T) {
@@ -234,7 +225,7 @@ func TestHandler_TreemapDeepZoomOut(t *testing.T) {
 			{ID: "B", Value: 10},
 		}},
 	})
-	assertDeepZoomOut(t, htmx.NewHandler(r), "tm", "a1", "A", "root", "")
+	assertDeepZoomOut(t, htmx.NewHandler(r), "tm", "a1", "A")
 }
 
 func TestHandler_CirclePackingDeepZoomOut(t *testing.T) {
@@ -246,7 +237,7 @@ func TestHandler_CirclePackingDeepZoomOut(t *testing.T) {
 			{ID: "B", Value: 6},
 		}},
 	})
-	assertDeepZoomOut(t, htmx.NewHandler(r), "cp", "a1", "A", "root", "")
+	assertDeepZoomOut(t, htmx.NewHandler(r), "cp", "a1", "A")
 }
 
 func TestHandler_SunburstDeepZoomOut(t *testing.T) {
@@ -258,7 +249,7 @@ func TestHandler_SunburstDeepZoomOut(t *testing.T) {
 			{ID: "B", Value: 6},
 		}},
 	})
-	assertDeepZoomOut(t, htmx.NewHandler(r), "sb", "a1", "A", "root", "")
+	assertDeepZoomOut(t, htmx.NewHandler(r), "sb", "a1", "A")
 }
 
 func TestHandler_ZoomEmptyNodeStaysRoot(t *testing.T) {

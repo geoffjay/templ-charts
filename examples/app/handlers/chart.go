@@ -6,6 +6,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -139,9 +140,11 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 
 // Bar handles GET /bar: the bar demos page.
 func (a *App) Bar(w http.ResponseWriter, r *http.Request) {
-	demos := demos.BarDemos()
-	a.ensureRegistered(demos)
-	cards := a.demoCards(demos)
+	ds := demos.BarDemos()
+	a.ensureRegistered(ds)
+	cards := a.demoCards(ds)
+	logScale := r.URL.Query().Get("scale") == "log"
+	cards = append(cards, a.scaleDemoCard(demos.BarScaleDemo(logScale), "/bar", logScale))
 	a.renderPage(w, templates.LayoutProps{Title: "Bar charts", Nav: "bar"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Bar chart demos. Hover a bar for a tooltip; click a legend item to toggle a series.",
 		Cards: cards,
@@ -150,9 +153,11 @@ func (a *App) Bar(w http.ResponseWriter, r *http.Request) {
 
 // Line handles GET /line: the line demos page.
 func (a *App) Line(w http.ResponseWriter, r *http.Request) {
-	demos := demos.LineDemos()
-	a.ensureRegistered(demos)
-	cards := a.demoCards(demos)
+	ds := demos.LineDemos()
+	a.ensureRegistered(ds)
+	cards := a.demoCards(ds)
+	logScale := r.URL.Query().Get("scale") == "log"
+	cards = append(cards, a.scaleDemoCard(demos.LineScaleDemo(logScale), "/line", logScale))
 	a.renderPage(w, templates.LayoutProps{Title: "Line charts", Nav: "line"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Line chart demos. The slices demo shows a per-series tooltip on vertical-slice hover.",
 		Cards: cards,
@@ -395,7 +400,7 @@ func (a *App) RadialBar(w http.ResponseWriter, r *http.Request) {
 // ScatterPlot handles GET /scatterplot: the scatterplot demos page (static SVG).
 func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 	ds := demos.ScatterPlotDemos()
-	cards := make([]templates.ChartCardProps, 0, len(ds))
+	cards := make([]templates.ChartCardProps, 0, len(ds)+1)
 	for _, d := range ds {
 		var b strings.Builder
 		if err := scatterplot.ScatterPlot(d.Props).Render(context.Background(), &b); err != nil {
@@ -404,6 +409,17 @@ func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 		}
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
+	logScale := r.URL.Query().Get("scale") == "log"
+	sd := demos.ScatterPlotScaleDemo(logScale)
+	var b strings.Builder
+	if err := scatterplot.ScatterPlot(sd.Props).Render(context.Background(), &b); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	cards = append(cards, templates.ChartCardProps{
+		ID: sd.ID, Title: sd.Title, Description: sd.Description, SVG: b.String(),
+		FooterHTML: scaleToggleHTML("/scatterplot", logScale),
+	})
 	a.renderPage(w, templates.LayoutProps{Title: "Scatterplot", Nav: "scatterplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Scatterplot demos: series of {x,y} nodes on linear scales with grid, axes, and a legend, plus a Voronoi-mesh hover tile (nearest-node detection via internal/d3/delaunay).",
 		Cards: cards,
@@ -684,7 +700,7 @@ func (a *App) Network(w http.ResponseWriter, r *http.Request) {
 // SwarmPlot handles GET /swarmplot: the swarmplot demos page (static SVG).
 func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 	ds := demos.SwarmPlotDemos()
-	cards := make([]templates.ChartCardProps, 0, len(ds))
+	cards := make([]templates.ChartCardProps, 0, len(ds)+1)
 	for _, d := range ds {
 		var b strings.Builder
 		if err := swarmplot.SwarmPlot(d.Props).Render(context.Background(), &b); err != nil {
@@ -693,6 +709,17 @@ func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 		}
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
+	logScale := r.URL.Query().Get("scale") == "log"
+	sd := demos.SwarmPlotScaleDemo(logScale)
+	var b strings.Builder
+	if err := swarmplot.SwarmPlot(sd.Props).Render(context.Background(), &b); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	cards = append(cards, templates.ChartCardProps{
+		ID: sd.ID, Title: sd.Title, Description: sd.Description, SVG: b.String(),
+		FooterHTML: scaleToggleHTML("/swarmplot", logScale),
+	})
 	a.renderPage(w, templates.LayoutProps{Title: "Swarmplot", Nav: "swarmplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Swarmplot demos: points grouped along one axis, positioned by value along the other, then relaxed with internal/d3/force (ForceX/ForceY + ForceCollide, deterministic fixed-tick). Vertical, horizontal, and voronoi-mesh hover.",
 		Cards: cards,
@@ -822,6 +849,43 @@ func (a *App) demoCards(ds []demos.Demo) []templates.ChartCardProps {
 		})
 	}
 	return cards
+}
+
+// scaleDemoCard registers and full-renders a single htmx-backed demo (bar/line)
+// and attaches a linear/log value-scale toggle below the chart. pagePath is the
+// demo page's own path (e.g. "/bar"), which the toggle links back to.
+func (a *App) scaleDemoCard(d demos.Demo, pagePath string, logScale bool) templates.ChartCardProps {
+	a.registry.Register(d.ID, d.Kind, d.Props)
+	svg, err := a.handler.RenderFull(d.ID)
+	if err != nil {
+		return templates.ChartCardProps{
+			ID: d.ID, Title: d.Title, Description: d.Description,
+			SVG: "<!-- render error: " + err.Error() + " -->",
+		}
+	}
+	return templates.ChartCardProps{
+		ID: d.ID, Title: d.Title, Description: d.Description,
+		SVG: svg, Interactive: true,
+		FooterHTML: scaleToggleHTML(pagePath, logScale),
+	}
+}
+
+// scaleToggleHTML renders a linear/log chip toggle for a value-scale demo card.
+// Styles are inlined because the demo list pages don't ship the detail page's
+// chip stylesheet. The links reload the page with (or without) ?scale=log.
+func scaleToggleHTML(pagePath string, logScale bool) string {
+	chip := func(href, label string, active bool) string {
+		style := "display:inline-block;padding:.15rem .6rem;margin-right:.4rem;border:1px solid #ccc;border-radius:999px;font-size:.85rem;text-decoration:none;color:#333"
+		if active {
+			style += ";background:#333;color:#fff;border-color:#333"
+		}
+		return fmt.Sprintf(`<a href=%q style=%q>%s</a>`, href, style, label)
+	}
+	return `<div style="margin-top:.6rem;display:flex;align-items:center;gap:.4rem">` +
+		`<span style="font-size:.72rem;color:#666;text-transform:uppercase;letter-spacing:.04em">value scale</span>` +
+		chip(pagePath, "linear", !logScale) +
+		chip(pagePath+"?scale=log", "log", logScale) +
+		`</div>`
 }
 
 // renderPage wraps the page content in the Layout and writes the HTML.
