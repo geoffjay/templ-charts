@@ -126,6 +126,7 @@ func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 			{Href: "/chart/sankey", Title: "Sankey", Description: "Flow diagram (d3-sankey): node breadths + relaxation, variable-thickness monotone-curve ribbons."},
 			{Href: "/chart/chord", Title: "Chord", Description: "Radial flow diagram (d3-chord): entity arcs sized by total flow, ribbons spanning each directed sub-flow; hover an entity to highlight it."},
 			{Href: "/chart/geo", Title: "Geo", Description: "GeoJSON maps (d3-geo): GeoMap + value-bound Choropleth, ten projections, optional graticule and continuous legend."},
+			{Href: "/scales", Title: "Scales", Description: "Linear vs log value axes on bar, line, scatterplot, and swarmplot — data spanning orders of magnitude, toggled per chart via HTMX."},
 			{Href: "/styling", Title: "Styling", Description: "Gradients, pattern fills, conditional match rules, and blend modes via the Defs + Fill props."},
 			{Href: "/legends", Title: "Legends", Description: "Symbol shapes, anchors/directions, symbol borders, the continuous color legend, and an HTML legend outside the SVG."},
 			{Href: "/composition", Title: "Composition", Description: "Build-your-own charts from the Use* hooks + sub-components: custom point symbols, direct labels, sparkline KPI cards."},
@@ -143,7 +144,6 @@ func (a *App) Bar(w http.ResponseWriter, r *http.Request) {
 	ds := demos.BarDemos()
 	a.ensureRegistered(ds)
 	cards := a.demoCards(ds)
-	cards = append(cards, a.scaleDemoCard(demos.BarScaleDemo(false), "bar"))
 	a.renderPage(w, templates.LayoutProps{Title: "Bar charts", Nav: "bar"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Bar chart demos. Hover a bar for a tooltip; click a legend item to toggle a series.",
 		Cards: cards,
@@ -155,7 +155,6 @@ func (a *App) Line(w http.ResponseWriter, r *http.Request) {
 	ds := demos.LineDemos()
 	a.ensureRegistered(ds)
 	cards := a.demoCards(ds)
-	cards = append(cards, a.scaleDemoCard(demos.LineScaleDemo(false), "line"))
 	a.renderPage(w, templates.LayoutProps{Title: "Line charts", Nav: "line"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Line chart demos. The slices demo shows a per-series tooltip on vertical-slice hover.",
 		Cards: cards,
@@ -398,7 +397,7 @@ func (a *App) RadialBar(w http.ResponseWriter, r *http.Request) {
 // ScatterPlot handles GET /scatterplot: the scatterplot demos page (static SVG).
 func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 	ds := demos.ScatterPlotDemos()
-	cards := make([]templates.ChartCardProps, 0, len(ds)+1)
+	cards := make([]templates.ChartCardProps, 0, len(ds))
 	for _, d := range ds {
 		var b strings.Builder
 		if err := scatterplot.ScatterPlot(d.Props).Render(context.Background(), &b); err != nil {
@@ -407,16 +406,6 @@ func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 		}
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
-	sd := demos.ScatterPlotScaleDemo(false)
-	var b strings.Builder
-	if err := scatterplot.ScatterPlot(sd.Props).Render(context.Background(), &b); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	cards = append(cards, templates.ChartCardProps{
-		ID: sd.ID, Title: sd.Title, Description: sd.Description, SVG: b.String(),
-		FooterHTML: scaleToggle("scatterplot", sd.ID, false, false),
-	})
 	a.renderPage(w, templates.LayoutProps{Title: "Scatterplot", Nav: "scatterplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Scatterplot demos: series of {x,y} nodes on linear scales with grid, axes, and a legend, plus a Voronoi-mesh hover tile (nearest-node detection via internal/d3/delaunay).",
 		Cards: cards,
@@ -697,7 +686,7 @@ func (a *App) Network(w http.ResponseWriter, r *http.Request) {
 // SwarmPlot handles GET /swarmplot: the swarmplot demos page (static SVG).
 func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 	ds := demos.SwarmPlotDemos()
-	cards := make([]templates.ChartCardProps, 0, len(ds)+1)
+	cards := make([]templates.ChartCardProps, 0, len(ds))
 	for _, d := range ds {
 		var b strings.Builder
 		if err := swarmplot.SwarmPlot(d.Props).Render(context.Background(), &b); err != nil {
@@ -706,16 +695,6 @@ func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 		}
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
-	sd := demos.SwarmPlotScaleDemo(false)
-	var b strings.Builder
-	if err := swarmplot.SwarmPlot(sd.Props).Render(context.Background(), &b); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	cards = append(cards, templates.ChartCardProps{
-		ID: sd.ID, Title: sd.Title, Description: sd.Description, SVG: b.String(),
-		FooterHTML: scaleToggle("swarmplot", sd.ID, false, false),
-	})
 	a.renderPage(w, templates.LayoutProps{Title: "Swarmplot", Nav: "swarmplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Swarmplot demos: points grouped along one axis, positioned by value along the other, then relaxed with internal/d3/force (ForceX/ForceY + ForceCollide, deterministic fixed-tick). Vertical, horizontal, and voronoi-mesh hover.",
 		Cards: cards,
@@ -847,26 +826,69 @@ func (a *App) demoCards(ds []demos.Demo) []templates.ChartCardProps {
 	return cards
 }
 
-// scaleDemoCard registers and full-renders a single htmx-backed demo (bar/line)
-// and attaches a linear/log value-scale toggle below the chart. chartKey names
-// the demo ("bar", "line", …) that the toggle's htmx requests carry.
-func (a *App) scaleDemoCard(d demos.Demo, chartKey string) templates.ChartCardProps {
-	a.registry.Register(d.ID, d.Kind, d.Props)
-	svg, err := a.handler.RenderFull(d.ID)
-	if err != nil {
-		return templates.ChartCardProps{
-			ID: d.ID, Title: d.Title, Description: d.Description,
-			SVG: "<!-- render error: " + err.Error() + " -->",
-		}
+// Scales handles GET /scales: the value-scale showcase page. It collects the
+// linear/log demo for each continuous-value chart family (bar, line,
+// scatterplot, swarmplot); each card's toggle swaps just its chart via HTMX.
+func (a *App) Scales(w http.ResponseWriter, r *http.Request) {
+	cards := []templates.ChartCardProps{
+		a.scaleCard("bar", "Bar"),
+		a.scaleCard("line", "Line"),
+		a.scaleCard("scatterplot", "Scatterplot"),
+		a.scaleCard("swarmplot", "Swarmplot"),
 	}
-	return templates.ChartCardProps{
-		ID: d.ID, Title: d.Title, Description: d.Description,
-		SVG: svg, Interactive: true,
-		FooterHTML: scaleToggle(chartKey, d.ID, false, false),
-	}
+	a.renderPage(w, templates.LayoutProps{Title: "Scales", Nav: "scales"}, templates.DemosPage(templates.DemosPageProps{
+		Intro: "Value scales: each chart plots data spanning several orders of magnitude. Toggle linear ↔ log to see how a log axis keeps small values readable where a linear axis flattens them. The switch swaps just that chart via HTMX — no full-page reload.",
+		Cards: cards,
+	}))
 }
 
-// Scale handles GET /demo/scale?chart=<key>&scale=<linear|log>: it re-renders a
+// scaleCard builds one linear/log value-scale demo card for the /scales page.
+// bar/line go through the htmx registry (so hover + the /scale re-render stay
+// consistent with the shown scale); scatterplot/swarmplot render static SVG.
+// title is the card heading (the chart family); chartKey is what the toggle's
+// htmx requests carry. Cards render linear initially — the toggle switches them.
+func (a *App) scaleCard(chartKey, title string) templates.ChartCardProps {
+	card := func(id, desc, svg string, interactive bool) templates.ChartCardProps {
+		return templates.ChartCardProps{
+			ID: id, Title: title, Description: desc,
+			SVG: svg, Interactive: interactive,
+			FooterHTML: scaleToggle(chartKey, id, false, false),
+		}
+	}
+	registered := func(d demos.Demo) templates.ChartCardProps {
+		a.registry.Register(d.ID, d.Kind, d.Props)
+		svg, err := a.handler.RenderFull(d.ID)
+		if err != nil {
+			return card(d.ID, d.Description, "<!-- render error: "+err.Error()+" -->", false)
+		}
+		return card(d.ID, d.Description, svg, true)
+	}
+	static := func(id, desc, svg string, err error) templates.ChartCardProps {
+		if err != nil {
+			return card(id, desc, "<!-- render error: "+err.Error()+" -->", false)
+		}
+		return card(id, desc, svg, false)
+	}
+	switch chartKey {
+	case "bar":
+		return registered(demos.BarScaleDemo(false))
+	case "line":
+		return registered(demos.LineScaleDemo(false))
+	case "scatterplot":
+		d := demos.ScatterPlotScaleDemo(false)
+		var b strings.Builder
+		err := scatterplot.ScatterPlot(d.Props).Render(context.Background(), &b)
+		return static(d.ID, d.Description, b.String(), err)
+	case "swarmplot":
+		d := demos.SwarmPlotScaleDemo(false)
+		var b strings.Builder
+		err := swarmplot.SwarmPlot(d.Props).Render(context.Background(), &b)
+		return static(d.ID, d.Description, b.String(), err)
+	}
+	return templates.ChartCardProps{}
+}
+
+// Scale handles GET /scale?chart=<key>&scale=<linear|log>: it re-renders a
 // single value-scale demo chart under the requested scale and returns an htmx
 // fragment — the bare chart SVG (swapped into #chart-<id>) plus an out-of-band
 // copy of the toggle (updating the active chip). No full-page reload, so the
@@ -918,7 +940,7 @@ func (a *App) Scale(w http.ResponseWriter, r *http.Request) {
 }
 
 // scaleToggle renders the linear/log switcher for a value-scale demo card as an
-// htmx control. Each chip issues hx-get /demo/scale, swapping the fresh SVG into
+// htmx control. Each chip issues hx-get /scale, swapping the fresh SVG into
 // #chart-<chartID> (innerHTML) so only the chart updates — no page reload. The
 // response also carries this toggle again with hx-swap-oob so the active chip
 // flips. Styles are inlined; the demo list pages don't ship the detail page's
@@ -931,7 +953,7 @@ func scaleToggle(chartKey, chartID string, logScale, oob bool) string {
 		}
 		return fmt.Sprintf(
 			`<a hx-get=%q hx-target=%q hx-swap="innerHTML" style=%q>%s</a>`,
-			fmt.Sprintf("/demo/scale?chart=%s&scale=%s", chartKey, scale),
+			fmt.Sprintf("/scale?chart=%s&scale=%s", chartKey, scale),
 			"#chart-"+chartID, style, label)
 	}
 	oobAttr := ""

@@ -25,7 +25,7 @@ func main() {
 
 	// Value-scale toggle fragment endpoint (htmx): re-renders one demo chart
 	// under linear/log and swaps just that chart, no full-page reload.
-	mux.HandleFunc("/demo/scale", app.Scale)
+	mux.HandleFunc("/scale", app.Scale)
 
 	// Page routes. Using exact-match guards so /bar doesn't shadow /bar/foo.
 	mux.HandleFunc("/", app.Index)
@@ -57,6 +57,7 @@ func main() {
 	mux.HandleFunc("/sankey", app.Sankey)
 	mux.HandleFunc("/chord", app.Chord)
 	mux.HandleFunc("/geo", app.Geo)
+	mux.HandleFunc("/scales", app.Scales)
 	mux.HandleFunc("/styling", app.Styling)
 	mux.HandleFunc("/legends", app.Legends)
 	mux.HandleFunc("/composition", app.Composition)

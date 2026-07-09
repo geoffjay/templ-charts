@@ -26,7 +26,8 @@ func newServer(t *testing.T) (http.Handler, *handlers.App) {
 	mux.HandleFunc("/themes", app.Themes)
 	mux.HandleFunc("/benchmark", app.Benchmark)
 	mux.HandleFunc("/chart/", app.Detail)
-	mux.HandleFunc("/demo/scale", app.Scale)
+	mux.HandleFunc("/scales", app.Scales)
+	mux.HandleFunc("/scale", app.Scale)
 	return mux, app
 }
 
@@ -114,62 +115,71 @@ func TestPages_ReturnHTML(t *testing.T) {
 	}
 }
 
-func TestBarPage_HasSixCards(t *testing.T) {
-	// Five bar demos plus the appended value-scale (linear/log) demo card.
+func TestBarPage_HasFiveCards(t *testing.T) {
 	h, _ := newServer(t)
 	rec := do(t, h, http.MethodGet, "/bar")
-	if got := strings.Count(rec.Body.String(), `class="card"`); got != 6 {
-		t.Errorf("/bar card count = %d, want 6", got)
+	if got := strings.Count(rec.Body.String(), `class="card"`); got != 5 {
+		t.Errorf("/bar card count = %d, want 5", got)
 	}
 }
 
-// TestValueScaleToggle checks the htmx linear/log switcher on the continuous
-// value-axis demo pages: the page ships an hx-get toggle (linear active by
-// default), and GET /demo/scale?scale=log returns a fragment that targets the
-// chart container, marks the log chip active out-of-band, and differs from the
-// linear render — all without a full-page reload.
+func TestScalesPage_HasFourCards(t *testing.T) {
+	// One value-scale demo per continuous-value chart family.
+	h, _ := newServer(t)
+	rec := do(t, h, http.MethodGet, "/scales")
+	if got := strings.Count(rec.Body.String(), `class="card"`); got != 4 {
+		t.Errorf("/scales card count = %d, want 4", got)
+	}
+}
+
+// TestValueScaleToggle checks the htmx linear/log switcher on the /scales
+// showcase page: every chart's toggle is an hx-get (linear active by default)
+// targeting that chart's container, and GET /scale?scale=log returns a fragment
+// that marks the log chip active out-of-band and differs from the linear
+// render — all without a full-page reload.
 func TestValueScaleToggle(t *testing.T) {
 	// chipActive reports whether the chip whose hx-get targets scale=<scale>
 	// carries the active (dark background) inline style, regardless of attr order.
 	chipActive := func(body, chart, scale string) bool {
-		re := regexp.MustCompile(`<a hx-get="/demo/scale\?chart=` + chart + `&scale=` + scale + `"[^>]*background:#333`)
+		re := regexp.MustCompile(`<a hx-get="/scale\?chart=` + chart + `&scale=` + scale + `"[^>]*background:#333`)
 		return re.MatchString(body)
 	}
-	cases := []struct{ page, chart, container string }{
-		{"/bar", "bar", "#chart-bar-scale"},
-		{"/line", "line", "#chart-line-scale"},
-		{"/scatterplot", "scatterplot", "#chart-scatter-scale"},
-		{"/swarmplot", "swarmplot", "#chart-swarm-scale"},
+	h, _ := newServer(t)
+	scales := do(t, h, http.MethodGet, "/scales").Body.String()
+	if !strings.Contains(scales, "value scale") {
+		t.Fatal("/scales: missing value-scale toggles")
+	}
+	cases := []struct{ chart, container string }{
+		{"bar", "#chart-bar-scale"},
+		{"line", "#chart-line-scale"},
+		{"scatterplot", "#chart-scatter-scale"},
+		{"swarmplot", "#chart-swarm-scale"},
 	}
 	for _, c := range cases {
-		h, _ := newServer(t)
-		page := do(t, h, http.MethodGet, c.page).Body.String()
-		if !strings.Contains(page, "value scale") {
-			t.Errorf("%s: missing value-scale toggle", c.page)
+		// Each chart's toggle is htmx-driven (no full-page href), targets its own
+		// container, and defaults to linear.
+		if !strings.Contains(scales, `hx-target="`+c.container+`"`) {
+			t.Errorf("%s: toggle should hx-target the chart container %s", c.chart, c.container)
 		}
-		// The toggle is htmx-driven (no full-page href) and defaults to linear.
-		if !strings.Contains(page, `hx-target="`+c.container+`"`) {
-			t.Errorf("%s: toggle should hx-target the chart container %s", c.page, c.container)
-		}
-		if !chipActive(page, c.chart, "linear") || chipActive(page, c.chart, "log") {
-			t.Errorf("%s: linear should be the active chip by default", c.page)
+		if !chipActive(scales, c.chart, "linear") || chipActive(scales, c.chart, "log") {
+			t.Errorf("%s: linear should be the active chip by default", c.chart)
 		}
 
 		// Linear vs log fragments from the endpoint must differ, and the log
 		// fragment marks the log chip active (out-of-band) for the swap.
-		lin := do(t, h, http.MethodGet, "/demo/scale?chart="+c.chart+"&scale=linear").Body.String()
-		log := do(t, h, http.MethodGet, "/demo/scale?chart="+c.chart+"&scale=log").Body.String()
+		lin := do(t, h, http.MethodGet, "/scale?chart="+c.chart+"&scale=linear").Body.String()
+		log := do(t, h, http.MethodGet, "/scale?chart="+c.chart+"&scale=log").Body.String()
 		if lin == log {
-			t.Errorf("%s: /demo/scale log fragment did not differ from linear", c.page)
+			t.Errorf("%s: /scale log fragment did not differ from linear", c.chart)
 		}
 		if !strings.Contains(log, `hx-swap-oob="true"`) {
-			t.Errorf("%s: log fragment missing out-of-band toggle swap", c.page)
+			t.Errorf("%s: log fragment missing out-of-band toggle swap", c.chart)
 		}
 		if !chipActive(log, c.chart, "log") || chipActive(log, c.chart, "linear") {
-			t.Errorf("%s: log chip should be active in the log fragment", c.page)
+			t.Errorf("%s: log chip should be active in the log fragment", c.chart)
 		}
 		if !strings.Contains(log, "<svg") {
-			t.Errorf("%s: log fragment missing chart SVG", c.page)
+			t.Errorf("%s: log fragment missing chart SVG", c.chart)
 		}
 	}
 }

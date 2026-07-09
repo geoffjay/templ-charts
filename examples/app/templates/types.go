@@ -64,6 +64,7 @@ func NavGroups() []NavGroup {
 			{"/geo", "geo", "Geo"},
 		}},
 		{Title: "Showcase", Items: []NavItem{
+			{"/scales", "scales", "Scales"},
 			{"/styling", "styling", "Styling"},
 			{"/legends", "legends", "Legends"},
 			{"/composition", "composition", "Composition"},
