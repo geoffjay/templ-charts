@@ -26,6 +26,7 @@ func newServer(t *testing.T) (http.Handler, *handlers.App) {
 	mux.HandleFunc("/themes", app.Themes)
 	mux.HandleFunc("/benchmark", app.Benchmark)
 	mux.HandleFunc("/chart/", app.Detail)
+	mux.HandleFunc("/demo/scale", app.Scale)
 	return mux, app
 }
 
@@ -122,33 +123,53 @@ func TestBarPage_HasSixCards(t *testing.T) {
 	}
 }
 
-// TestValueScaleToggle checks the linear/log switcher added to the continuous
-// value-axis demo pages: the control is present, defaults to linear, and
-// ?scale=log both marks the log chip active and changes the rendered output.
+// TestValueScaleToggle checks the htmx linear/log switcher on the continuous
+// value-axis demo pages: the page ships an hx-get toggle (linear active by
+// default), and GET /demo/scale?scale=log returns a fragment that targets the
+// chart container, marks the log chip active out-of-band, and differs from the
+// linear render — all without a full-page reload.
 func TestValueScaleToggle(t *testing.T) {
-	// chipActive reports whether the chip anchor linking to href carries the
-	// active (dark background) inline style, regardless of style-attr ordering.
-	chipActive := func(body, href string) bool {
-		re := regexp.MustCompile(`<a href="` + regexp.QuoteMeta(href) + `"[^>]*background:#333[^>]*>`)
+	// chipActive reports whether the chip whose hx-get targets scale=<scale>
+	// carries the active (dark background) inline style, regardless of attr order.
+	chipActive := func(body, chart, scale string) bool {
+		re := regexp.MustCompile(`<a hx-get="/demo/scale\?chart=` + chart + `&scale=` + scale + `"[^>]*background:#333`)
 		return re.MatchString(body)
 	}
-	for _, page := range []string{"/bar", "/line", "/scatterplot", "/swarmplot"} {
+	cases := []struct{ page, chart, container string }{
+		{"/bar", "bar", "#chart-bar-scale"},
+		{"/line", "line", "#chart-line-scale"},
+		{"/scatterplot", "scatterplot", "#chart-scatter-scale"},
+		{"/swarmplot", "swarmplot", "#chart-swarm-scale"},
+	}
+	for _, c := range cases {
 		h, _ := newServer(t)
-		lin := do(t, h, http.MethodGet, page).Body.String()
-		if !strings.Contains(lin, "value scale") {
-			t.Errorf("%s: missing value-scale toggle", page)
+		page := do(t, h, http.MethodGet, c.page).Body.String()
+		if !strings.Contains(page, "value scale") {
+			t.Errorf("%s: missing value-scale toggle", c.page)
 		}
-		// On the default page the linear chip is active, the log chip is not.
-		if !chipActive(lin, page) || chipActive(lin, page+"?scale=log") {
-			t.Errorf("%s: linear should be the active chip by default", page)
+		// The toggle is htmx-driven (no full-page href) and defaults to linear.
+		if !strings.Contains(page, `hx-target="`+c.container+`"`) {
+			t.Errorf("%s: toggle should hx-target the chart container %s", c.page, c.container)
 		}
-		log := do(t, h, http.MethodGet, page+"?scale=log").Body.String()
+		if !chipActive(page, c.chart, "linear") || chipActive(page, c.chart, "log") {
+			t.Errorf("%s: linear should be the active chip by default", c.page)
+		}
+
+		// Linear vs log fragments from the endpoint must differ, and the log
+		// fragment marks the log chip active (out-of-band) for the swap.
+		lin := do(t, h, http.MethodGet, "/demo/scale?chart="+c.chart+"&scale=linear").Body.String()
+		log := do(t, h, http.MethodGet, "/demo/scale?chart="+c.chart+"&scale=log").Body.String()
 		if lin == log {
-			t.Errorf("%s: ?scale=log did not change the render", page)
+			t.Errorf("%s: /demo/scale log fragment did not differ from linear", c.page)
 		}
-		// On ?scale=log the active chip flips to log.
-		if !chipActive(log, page+"?scale=log") || chipActive(log, page) {
-			t.Errorf("%s: log should be the active chip under ?scale=log", page)
+		if !strings.Contains(log, `hx-swap-oob="true"`) {
+			t.Errorf("%s: log fragment missing out-of-band toggle swap", c.page)
+		}
+		if !chipActive(log, c.chart, "log") || chipActive(log, c.chart, "linear") {
+			t.Errorf("%s: log chip should be active in the log fragment", c.page)
+		}
+		if !strings.Contains(log, "<svg") {
+			t.Errorf("%s: log fragment missing chart SVG", c.page)
 		}
 	}
 }

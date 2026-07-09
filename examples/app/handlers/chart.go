@@ -143,8 +143,7 @@ func (a *App) Bar(w http.ResponseWriter, r *http.Request) {
 	ds := demos.BarDemos()
 	a.ensureRegistered(ds)
 	cards := a.demoCards(ds)
-	logScale := r.URL.Query().Get("scale") == "log"
-	cards = append(cards, a.scaleDemoCard(demos.BarScaleDemo(logScale), "/bar", logScale))
+	cards = append(cards, a.scaleDemoCard(demos.BarScaleDemo(false), "bar"))
 	a.renderPage(w, templates.LayoutProps{Title: "Bar charts", Nav: "bar"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Bar chart demos. Hover a bar for a tooltip; click a legend item to toggle a series.",
 		Cards: cards,
@@ -156,8 +155,7 @@ func (a *App) Line(w http.ResponseWriter, r *http.Request) {
 	ds := demos.LineDemos()
 	a.ensureRegistered(ds)
 	cards := a.demoCards(ds)
-	logScale := r.URL.Query().Get("scale") == "log"
-	cards = append(cards, a.scaleDemoCard(demos.LineScaleDemo(logScale), "/line", logScale))
+	cards = append(cards, a.scaleDemoCard(demos.LineScaleDemo(false), "line"))
 	a.renderPage(w, templates.LayoutProps{Title: "Line charts", Nav: "line"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Line chart demos. The slices demo shows a per-series tooltip on vertical-slice hover.",
 		Cards: cards,
@@ -409,8 +407,7 @@ func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 		}
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
-	logScale := r.URL.Query().Get("scale") == "log"
-	sd := demos.ScatterPlotScaleDemo(logScale)
+	sd := demos.ScatterPlotScaleDemo(false)
 	var b strings.Builder
 	if err := scatterplot.ScatterPlot(sd.Props).Render(context.Background(), &b); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -418,7 +415,7 @@ func (a *App) ScatterPlot(w http.ResponseWriter, r *http.Request) {
 	}
 	cards = append(cards, templates.ChartCardProps{
 		ID: sd.ID, Title: sd.Title, Description: sd.Description, SVG: b.String(),
-		FooterHTML: scaleToggleHTML("/scatterplot", logScale),
+		FooterHTML: scaleToggle("scatterplot", sd.ID, false, false),
 	})
 	a.renderPage(w, templates.LayoutProps{Title: "Scatterplot", Nav: "scatterplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Scatterplot demos: series of {x,y} nodes on linear scales with grid, axes, and a legend, plus a Voronoi-mesh hover tile (nearest-node detection via internal/d3/delaunay).",
@@ -709,8 +706,7 @@ func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 		}
 		cards = append(cards, templates.ChartCardProps{ID: d.ID, Title: d.Title, Description: d.Description, SVG: b.String()})
 	}
-	logScale := r.URL.Query().Get("scale") == "log"
-	sd := demos.SwarmPlotScaleDemo(logScale)
+	sd := demos.SwarmPlotScaleDemo(false)
 	var b strings.Builder
 	if err := swarmplot.SwarmPlot(sd.Props).Render(context.Background(), &b); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -718,7 +714,7 @@ func (a *App) SwarmPlot(w http.ResponseWriter, r *http.Request) {
 	}
 	cards = append(cards, templates.ChartCardProps{
 		ID: sd.ID, Title: sd.Title, Description: sd.Description, SVG: b.String(),
-		FooterHTML: scaleToggleHTML("/swarmplot", logScale),
+		FooterHTML: scaleToggle("swarmplot", sd.ID, false, false),
 	})
 	a.renderPage(w, templates.LayoutProps{Title: "Swarmplot", Nav: "swarmplot"}, templates.DemosPage(templates.DemosPageProps{
 		Intro: "Swarmplot demos: points grouped along one axis, positioned by value along the other, then relaxed with internal/d3/force (ForceX/ForceY + ForceCollide, deterministic fixed-tick). Vertical, horizontal, and voronoi-mesh hover.",
@@ -852,9 +848,9 @@ func (a *App) demoCards(ds []demos.Demo) []templates.ChartCardProps {
 }
 
 // scaleDemoCard registers and full-renders a single htmx-backed demo (bar/line)
-// and attaches a linear/log value-scale toggle below the chart. pagePath is the
-// demo page's own path (e.g. "/bar"), which the toggle links back to.
-func (a *App) scaleDemoCard(d demos.Demo, pagePath string, logScale bool) templates.ChartCardProps {
+// and attaches a linear/log value-scale toggle below the chart. chartKey names
+// the demo ("bar", "line", …) that the toggle's htmx requests carry.
+func (a *App) scaleDemoCard(d demos.Demo, chartKey string) templates.ChartCardProps {
 	a.registry.Register(d.ID, d.Kind, d.Props)
 	svg, err := a.handler.RenderFull(d.ID)
 	if err != nil {
@@ -866,25 +862,86 @@ func (a *App) scaleDemoCard(d demos.Demo, pagePath string, logScale bool) templa
 	return templates.ChartCardProps{
 		ID: d.ID, Title: d.Title, Description: d.Description,
 		SVG: svg, Interactive: true,
-		FooterHTML: scaleToggleHTML(pagePath, logScale),
+		FooterHTML: scaleToggle(chartKey, d.ID, false, false),
 	}
 }
 
-// scaleToggleHTML renders a linear/log chip toggle for a value-scale demo card.
-// Styles are inlined because the demo list pages don't ship the detail page's
-// chip stylesheet. The links reload the page with (or without) ?scale=log.
-func scaleToggleHTML(pagePath string, logScale bool) string {
-	chip := func(href, label string, active bool) string {
-		style := "display:inline-block;padding:.15rem .6rem;margin-right:.4rem;border:1px solid #ccc;border-radius:999px;font-size:.85rem;text-decoration:none;color:#333"
+// Scale handles GET /demo/scale?chart=<key>&scale=<linear|log>: it re-renders a
+// single value-scale demo chart under the requested scale and returns an htmx
+// fragment — the bare chart SVG (swapped into #chart-<id>) plus an out-of-band
+// copy of the toggle (updating the active chip). No full-page reload, so the
+// scroll position is preserved. chart is one of bar/line/scatterplot/swarmplot.
+func (a *App) Scale(w http.ResponseWriter, r *http.Request) {
+	chart := r.URL.Query().Get("chart")
+	logScale := r.URL.Query().Get("scale") == "log"
+	var (
+		svg, chartID string
+		err          error
+	)
+	switch chart {
+	case "bar":
+		d := demos.BarScaleDemo(logScale)
+		// Re-register so the interactive endpoints (hover) match the shown scale.
+		a.registry.Register(d.ID, d.Kind, d.Props)
+		chartID = d.ID
+		svg, err = a.handler.RenderFull(d.ID)
+	case "line":
+		d := demos.LineScaleDemo(logScale)
+		a.registry.Register(d.ID, d.Kind, d.Props)
+		chartID = d.ID
+		svg, err = a.handler.RenderFull(d.ID)
+	case "scatterplot":
+		d := demos.ScatterPlotScaleDemo(logScale)
+		chartID = d.ID
+		var b strings.Builder
+		if err = scatterplot.ScatterPlot(d.Props).Render(r.Context(), &b); err == nil {
+			svg = b.String()
+		}
+	case "swarmplot":
+		d := demos.SwarmPlotScaleDemo(logScale)
+		chartID = d.ID
+		var b strings.Builder
+		if err = swarmplot.SwarmPlot(d.Props).Render(r.Context(), &b); err == nil {
+			svg = b.String()
+		}
+	default:
+		http.NotFound(w, r)
+		return
+	}
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	fmt.Fprint(w, svg)
+	fmt.Fprint(w, scaleToggle(chart, chartID, logScale, true))
+}
+
+// scaleToggle renders the linear/log switcher for a value-scale demo card as an
+// htmx control. Each chip issues hx-get /demo/scale, swapping the fresh SVG into
+// #chart-<chartID> (innerHTML) so only the chart updates — no page reload. The
+// response also carries this toggle again with hx-swap-oob so the active chip
+// flips. Styles are inlined; the demo list pages don't ship the detail page's
+// chip stylesheet. chartKey names the demo ("bar", "line", …).
+func scaleToggle(chartKey, chartID string, logScale, oob bool) string {
+	chip := func(scale, label string, active bool) string {
+		style := "display:inline-block;padding:.15rem .6rem;margin-right:.4rem;border:1px solid #ccc;border-radius:999px;font-size:.85rem;cursor:pointer;color:#333"
 		if active {
 			style += ";background:#333;color:#fff;border-color:#333"
 		}
-		return fmt.Sprintf(`<a href=%q style=%q>%s</a>`, href, style, label)
+		return fmt.Sprintf(
+			`<a hx-get=%q hx-target=%q hx-swap="innerHTML" style=%q>%s</a>`,
+			fmt.Sprintf("/demo/scale?chart=%s&scale=%s", chartKey, scale),
+			"#chart-"+chartID, style, label)
 	}
-	return `<div style="margin-top:.6rem;display:flex;align-items:center;gap:.4rem">` +
+	oobAttr := ""
+	if oob {
+		oobAttr = ` hx-swap-oob="true"`
+	}
+	return fmt.Sprintf(`<div id="scale-toggle-%s"%s style="margin-top:.6rem;display:flex;align-items:center;gap:.4rem">`, chartID, oobAttr) +
 		`<span style="font-size:.72rem;color:#666;text-transform:uppercase;letter-spacing:.04em">value scale</span>` +
-		chip(pagePath, "linear", !logScale) +
-		chip(pagePath+"?scale=log", "log", logScale) +
+		chip("linear", "linear", !logScale) +
+		chip("log", "log", logScale) +
 		`</div>`
 }
 
