@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/render"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
 )
@@ -22,8 +23,8 @@ func ExampleScatterPlot() {
 				{X: 12.0, Y: 55.0}, {X: 27.0, Y: 22.0}, {X: 40.0, Y: 78.0},
 			}},
 		},
-		EnableGridX: true,
-		EnableGridY: true,
+		EnableGridX: core.BoolPtr(true),
+		EnableGridY: core.BoolPtr(true),
 	}))
 	if err != nil {
 		log.Fatal(err)

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -128,7 +129,7 @@ func renderLayers(props RadialBarProps, result RadialBarResult, theme *theming.T
 // charts/polar-axes. Mirrors @nivo/radial-bar's grid layer.
 func renderGridLayer(props RadialBarProps, result RadialBarResult, theme *theming.Theme) string {
 	var b strings.Builder
-	b.WriteString(polaraxes.RenderPolarGrid(polaraxes.PolarGridProps{
+	b.WriteString(renderComponent(polaraxes.PolarGrid(polaraxes.PolarGridProps{
 		Center:             result.Center,
 		EnableRadialGrid:   *props.EnableRadialGrid,
 		AngleScale:         result.ValueScale,
@@ -139,27 +140,27 @@ func renderGridLayer(props RadialBarProps, result RadialBarResult, theme *themin
 		InnerRadius:        result.InnerRadius,
 		OuterRadius:        result.OuterRadius,
 		Theme:              theme,
-	}))
+	})))
 	if *props.ShowRadialAxisStart {
-		b.WriteString(polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+		b.WriteString(renderComponent(polaraxes.RadialAxis(polaraxes.RadialAxisProps{
 			Center:        result.Center,
 			Angle:         math.Min(result.StartAngle, result.EndAngle),
 			Scale:         result.RadiusScale,
 			TicksPosition: polaraxes.TicksBefore,
 			Theme:         theme,
-		}))
+		})))
 	}
 	if *props.ShowRadialAxisEnd {
-		b.WriteString(polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+		b.WriteString(renderComponent(polaraxes.RadialAxis(polaraxes.RadialAxisProps{
 			Center:        result.Center,
 			Angle:         math.Max(result.StartAngle, result.EndAngle),
 			Scale:         result.RadiusScale,
 			TicksPosition: polaraxes.TicksAfter,
 			Theme:         theme,
-		}))
+		})))
 	}
 	if *props.ShowCircularAxisInner {
-		b.WriteString(polaraxes.RenderCircularAxis(polaraxes.CircularAxisProps{
+		b.WriteString(renderComponent(polaraxes.CircularAxis(polaraxes.CircularAxisProps{
 			Type:       polaraxes.CircularAxisInner,
 			Center:     result.Center,
 			Radius:     result.InnerRadius,
@@ -167,10 +168,10 @@ func renderGridLayer(props RadialBarProps, result RadialBarResult, theme *themin
 			EndAngle:   result.EndAngle,
 			Scale:      result.ValueScale,
 			Theme:      theme,
-		}))
+		})))
 	}
 	if *props.ShowCircularAxisOuter {
-		b.WriteString(polaraxes.RenderCircularAxis(polaraxes.CircularAxisProps{
+		b.WriteString(renderComponent(polaraxes.CircularAxis(polaraxes.CircularAxisProps{
 			Type:       polaraxes.CircularAxisOuter,
 			Center:     result.Center,
 			Radius:     result.OuterRadius,
@@ -178,7 +179,7 @@ func renderGridLayer(props RadialBarProps, result RadialBarResult, theme *themin
 			EndAngle:   result.EndAngle,
 			Scale:      result.ValueScale,
 			Theme:      theme,
-		}))
+		})))
 	}
 	return b.String()
 }

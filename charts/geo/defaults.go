@@ -1,13 +1,15 @@
 package geo
 
+import "github.com/geoffjay/templ-charts/charts/core"
+
 // commonDefaults mirrors @nivo/geo commonDefaultProps.
 var commonDefaults = GeoBase{
-	ProjectionType:        "mercator",
+	ProjectionType:        ProjectionMercator,
 	ProjectionScale:       100,
 	ProjectionTranslation: [2]float64{0.5, 0.5},
 	ProjectionRotation:    [3]float64{0, 0, 0},
 
-	EnableGraticule:    false,
+	EnableGraticule:    core.BoolPtr(false),
 	GraticuleLineWidth: 0.5,
 	GraticuleLineColor: "#999999",
 

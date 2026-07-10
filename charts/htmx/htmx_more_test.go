@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/legends"
@@ -212,14 +213,14 @@ func assertDeepZoomOut(t *testing.T, h *htmx.Handler, id, deepID, wantParent str
 
 func TestHandler_IcicleDeepZoomOut(t *testing.T) {
 	r := htmx.NewRegistry()
-	r.RegisterIcicle("ic", icicle.IcicleProps{Width: 500, Height: 300, EnableZooming: true, Data: icicleData()})
+	r.RegisterIcicle("ic", icicle.IcicleProps{Width: 500, Height: 300, EnableZooming: core.BoolPtr(true), Data: icicleData()})
 	assertDeepZoomOut(t, htmx.NewHandler(r), "ic", "a1", "A")
 }
 
 func TestHandler_TreemapDeepZoomOut(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterTreemap("tm", treemap.TreemapProps{
-		Width: 500, Height: 400, EnableZooming: true,
+		Width: 500, Height: 400, EnableZooming: core.BoolPtr(true),
 		Data: treemap.TreemapNode{ID: "root", Children: []treemap.TreemapNode{
 			{ID: "A", Children: []treemap.TreemapNode{{ID: "a1", Value: 12}, {ID: "a2", Value: 8}}},
 			{ID: "B", Value: 10},
@@ -231,7 +232,7 @@ func TestHandler_TreemapDeepZoomOut(t *testing.T) {
 func TestHandler_CirclePackingDeepZoomOut(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterCirclePacking("cp", cp.CirclePackingProps{
-		Width: 400, Height: 400, EnableZooming: true,
+		Width: 400, Height: 400, EnableZooming: core.BoolPtr(true),
 		Data: cp.CirclePackingNode{ID: "root", Children: []cp.CirclePackingNode{
 			{ID: "A", Children: []cp.CirclePackingNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
 			{ID: "B", Value: 6},
@@ -243,7 +244,7 @@ func TestHandler_CirclePackingDeepZoomOut(t *testing.T) {
 func TestHandler_SunburstDeepZoomOut(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterSunburst("sb", sunburst.SunburstProps{
-		Width: 400, Height: 400, EnableZooming: true,
+		Width: 400, Height: 400, EnableZooming: core.BoolPtr(true),
 		Data: sunburst.SunburstNode{ID: "root", Children: []sunburst.SunburstNode{
 			{ID: "A", Children: []sunburst.SunburstNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
 			{ID: "B", Value: 6},
@@ -254,7 +255,7 @@ func TestHandler_SunburstDeepZoomOut(t *testing.T) {
 
 func TestHandler_ZoomEmptyNodeStaysRoot(t *testing.T) {
 	r := htmx.NewRegistry()
-	r.RegisterIcicle("ic", icicle.IcicleProps{Width: 300, Height: 200, EnableZooming: true, Data: icicleData()})
+	r.RegisterIcicle("ic", icicle.IcicleProps{Width: 300, Height: 200, EnableZooming: core.BoolPtr(true), Data: icicleData()})
 	h := htmx.NewHandler(r)
 	rec := do(t, h, http.MethodGet, "/charts/ic/zoom?node=")
 	if rec.Code != http.StatusOK {

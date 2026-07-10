@@ -220,8 +220,8 @@ type Point struct {
 // NewPoint constructs a point scale with empty domain, range [0,1].
 func NewPoint() *Point {
 	p := &Point{Band: NewBand()}
-	p.Band.paddingInner = 1
-	p.Band.rescale()
+	p.paddingInner = 1
+	p.rescale()
 	return p
 }
 
@@ -253,12 +253,12 @@ func (p *Point) SetRound(r bool) *Point {
 }
 
 // Padding returns the outer padding (d3 point.padding === band.paddingOuter).
-func (p *Point) Padding() float64 { return p.Band.paddingOuter }
+func (p *Point) Padding() float64 { return p.paddingOuter }
 
 // SetPadding sets the outer padding for the point scale (d3 point.padding).
 func (p *Point) SetPadding(pad float64) *Point {
-	p.Band.paddingOuter = pad
-	p.Band.rescale()
+	p.paddingOuter = pad
+	p.rescale()
 	return p
 }
 
@@ -274,17 +274,17 @@ func (p *Point) Bandwidth() float64 { return 0 }
 // Copy returns a deep copy.
 func (p *Point) Copy() *Point {
 	c := &Point{Band: NewBand()}
-	c.Band.domain = append([]string(nil), p.Band.domain...)
-	c.Band.index = make(map[string]int, len(p.Band.domain))
-	for k, v := range p.Band.index {
-		c.Band.index[k] = v
+	c.domain = append([]string(nil), p.domain...)
+	c.index = make(map[string]int, len(p.domain))
+	for k, v := range p.index {
+		c.index[k] = v
 	}
-	c.Band.r0 = p.Band.r0
-	c.Band.r1 = p.Band.r1
-	c.Band.round = p.Band.round
-	c.Band.paddingInner = 1 // always 1 for point
-	c.Band.paddingOuter = p.Band.paddingOuter
-	c.Band.align = p.Band.align
-	c.Band.rescale()
+	c.r0 = p.r0
+	c.r1 = p.r1
+	c.round = p.round
+	c.paddingInner = 1 // always 1 for point
+	c.paddingOuter = p.paddingOuter
+	c.align = p.align
+	c.rescale()
 	return c
 }

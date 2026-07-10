@@ -7,13 +7,13 @@ import (
 	"github.com/geoffjay/templ-charts/charts/arcs"
 )
 
-// RenderRadialAxis renders a radial axis: a <g translate(center)> rotating a
+// renderRadialAxis renders a radial axis: a <g translate(center)> rotating a
 // subgroup to the axis angle, then placing one tick per scale value along
 // that rotated x-axis. Mirrors @nivo/polar-axes RadialAxis (minus
 // react-spring; SMIL fade-in when Animate).
 //
 // Returns the SVG fragment string.
-func RenderRadialAxis(props RadialAxisProps) string {
+func renderRadialAxis(props RadialAxisProps) string {
 	tickSize := props.TickSize
 	if tickSize == 0 {
 		tickSize = 5
@@ -85,7 +85,7 @@ func RenderRadialAxis(props RadialAxisProps) string {
 		if props.TickComponent != nil {
 			b.WriteString((*props.TickComponent)(tp))
 		} else {
-			b.WriteString(RenderRadialAxisTick(tp))
+			b.WriteString(renderRadialAxisTick(tp))
 		}
 	}
 
@@ -93,9 +93,9 @@ func RenderRadialAxis(props RadialAxisProps) string {
 	return b.String()
 }
 
-// RenderRadialAxisTick renders one radial-axis tick (a translated+rotated
+// renderRadialAxisTick renders one radial-axis tick (a translated+rotated
 // <g> with a tick line and label). Mirrors @nivo/polar-axes RadialAxisTick.
-func RenderRadialAxisTick(props RadialAxisTickProps) string {
+func renderRadialAxisTick(props RadialAxisTickProps) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, `<g transform="translate(%s,0) rotate(%s)"`, fmtN(props.Y), fmtN(props.Rotation))
 	if props.Animate {

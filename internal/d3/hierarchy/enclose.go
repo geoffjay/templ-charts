@@ -16,7 +16,7 @@ func nodeCircle(n *Node) circle { return circle{x: n.X, y: n.Y, r: n.R} }
 func packEncloseRandom(nodes []*Node, random func() float64) circle {
 	shuffled := shuffle(nodes, random)
 	n := len(shuffled)
-	var B []circle
+	var b []circle
 	var e circle
 	haveE := false
 	i := 0
@@ -25,8 +25,8 @@ func packEncloseRandom(nodes []*Node, random func() float64) circle {
 		if haveE && enclosesWeak(e, p) {
 			i++
 		} else {
-			B = extendBasis(B, p)
-			e = encloseBasis(B)
+			b = extendBasis(b, p)
+			e = encloseBasis(b)
 			haveE = true
 			i = 0
 		}
@@ -34,24 +34,24 @@ func packEncloseRandom(nodes []*Node, random func() float64) circle {
 	return e
 }
 
-func extendBasis(B []circle, p circle) []circle {
-	if enclosesWeakAll(p, B) {
+func extendBasis(b []circle, p circle) []circle {
+	if enclosesWeakAll(p, b) {
 		return []circle{p}
 	}
-	// B must have at least one element.
-	for i := 0; i < len(B); i++ {
-		if enclosesNot(p, B[i]) && enclosesWeakAll(encloseBasis2(B[i], p), B) {
-			return []circle{B[i], p}
+	// b must have at least one element.
+	for i := 0; i < len(b); i++ {
+		if enclosesNot(p, b[i]) && enclosesWeakAll(encloseBasis2(b[i], p), b) {
+			return []circle{b[i], p}
 		}
 	}
-	// B must have at least two elements.
-	for i := 0; i < len(B)-1; i++ {
-		for j := i + 1; j < len(B); j++ {
-			if enclosesNot(encloseBasis2(B[i], B[j]), p) &&
-				enclosesNot(encloseBasis2(B[i], p), B[j]) &&
-				enclosesNot(encloseBasis2(B[j], p), B[i]) &&
-				enclosesWeakAll(encloseBasis3(B[i], B[j], p), B) {
-				return []circle{B[i], B[j], p}
+	// b must have at least two elements.
+	for i := 0; i < len(b)-1; i++ {
+		for j := i + 1; j < len(b); j++ {
+			if enclosesNot(encloseBasis2(b[i], b[j]), p) &&
+				enclosesNot(encloseBasis2(b[i], p), b[j]) &&
+				enclosesNot(encloseBasis2(b[j], p), b[i]) &&
+				enclosesWeakAll(encloseBasis3(b[i], b[j], p), b) {
+				return []circle{b[i], b[j], p}
 			}
 		}
 	}
@@ -73,23 +73,23 @@ func enclosesWeak(a, b circle) bool {
 	return dr > 0 && dr*dr > dx*dx+dy*dy
 }
 
-func enclosesWeakAll(a circle, B []circle) bool {
-	for i := 0; i < len(B); i++ {
-		if !enclosesWeak(a, B[i]) {
+func enclosesWeakAll(a circle, b []circle) bool {
+	for i := 0; i < len(b); i++ {
+		if !enclosesWeak(a, b[i]) {
 			return false
 		}
 	}
 	return true
 }
 
-func encloseBasis(B []circle) circle {
-	switch len(B) {
+func encloseBasis(b []circle) circle {
+	switch len(b) {
 	case 1:
-		return B[0]
+		return b[0]
 	case 2:
-		return encloseBasis2(B[0], B[1])
+		return encloseBasis2(b[0], b[1])
 	case 3:
-		return encloseBasis3(B[0], B[1], B[2])
+		return encloseBasis3(b[0], b[1], b[2])
 	}
 	return circle{}
 }

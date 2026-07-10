@@ -168,17 +168,6 @@ var TimePrecisions = []TimePrecision{
 	TimePrecisionHour, TimePrecisionDay, TimePrecisionMonth, TimePrecisionYear,
 }
 
-// precisionCutOffs applies the field-zeroing for a given precision.
-var precisionCutOffs = []func(*time.Time){
-	func(t *time.Time) { t.Add(0) }, // placeholder; actual mods below
-}
-
-func init() {
-	precisionCutOffs = []func(*time.Time){
-		func(t *time.Time) { *t = t.Add(-time.Duration(t.Nanosecond())) }, // ms → 0 ns? actually set ms=0 means zero sub-ms
-	}
-}
-
 // CreateDateNormalizer mirrors @nivo/scales createDateNormalizer: given a
 // format ("native" or spec), precision, and useUTC flag, returns a func that
 // parses/rounds a value to a time.Time.

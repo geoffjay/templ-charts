@@ -48,7 +48,7 @@ func RadialBarDemos() []RadialBarDemo {
 				Margin:       core.Margin{Top: 40, Right: 180, Bottom: 40, Left: 60},
 				Data:         data,
 				CornerRadius: 4,
-				EnableLabels: radialbar.BoolPtr(true),
+				EnableLabels: core.BoolPtr(true),
 				Legends: []legends.LegendProps{
 					{Anchor: legends.LegendAnchorRight, Direction: legends.LegendDirectionColumn, TranslateX: 140},
 				},

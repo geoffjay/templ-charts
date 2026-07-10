@@ -52,10 +52,12 @@ func TestLine_RendersSVG(t *testing.T) {
 }
 
 func TestLine_PathCount(t *testing.T) {
-	// 2 series → 2 line paths.
+	// 2 series → 2 line paths. Disable grid so fill="none" counts only lines.
 	props := line.LineProps{
 		Width: 500, Height: 300,
-		Data: sampleData(),
+		Data:        sampleData(),
+		EnableGridX: core.BoolPtr(false),
+		EnableGridY: core.BoolPtr(false),
 	}
 	out := renderChart(t, props)
 	// Each line is a <path d="M…" fill="none" stroke=…>.
@@ -69,7 +71,7 @@ func TestLine_AreaEnabled(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:       sampleData(),
-		EnableArea: true,
+		EnableArea: core.BoolPtr(true),
 	}
 	out := renderChart(t, props)
 	// Areas emit <path fill="…" fill-opacity="…">. The fill-opacity attr is
@@ -83,7 +85,7 @@ func TestLine_PointsEnabled(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:         sampleData(),
-		EnablePoints: true,
+		EnablePoints: core.BoolPtr(true),
 	}
 	out := renderChart(t, props)
 	// 6 points (2 series × 3 x-values) → 6 <circle> elements.
@@ -97,11 +99,11 @@ func TestLine_PointsDisabled(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:         sampleData(),
-		EnablePoints: false,
+		EnablePoints: core.BoolPtr(false),
 	}
 	out := renderChart(t, props)
 	if strings.Contains(out, "<circle") {
-		t.Errorf("expected no <circle> when EnablePoints=false, found one")
+		t.Errorf("expected no <circle> when EnablePoints=core.BoolPtr(false), found one")
 	}
 }
 
@@ -109,8 +111,8 @@ func TestLine_GridLines(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:        sampleData(),
-		EnableGridX: true,
-		EnableGridY: true,
+		EnableGridX: core.BoolPtr(true),
+		EnableGridY: core.BoolPtr(true),
 	}
 	out := renderChart(t, props)
 	lineCount := strings.Count(out, "<line")
@@ -172,6 +174,8 @@ func TestLine_MultipleSeries(t *testing.T) {
 			{ID: "B", Data: []line.LinePointData{{X: "a", Y: float64(2)}}},
 			{ID: "C", Data: []line.LinePointData{{X: "a", Y: float64(3)}}},
 		},
+		EnableGridX: core.BoolPtr(false),
+		EnableGridY: core.BoolPtr(false),
 	}
 	out := renderChart(t, props)
 	pathCount := strings.Count(out, `fill="none"`)
@@ -367,7 +371,9 @@ func TestLine_NilValues(t *testing.T) {
 				{X: "c", Y: float64(3)},
 			}},
 		},
-		EnablePoints: true,
+		EnablePoints: core.BoolPtr(true),
+		EnableGridX:  core.BoolPtr(false),
+		EnableGridY:  core.BoolPtr(false),
 	}
 	out := renderChart(t, props)
 	// The line should still render (with a gap at the nil point).
@@ -403,7 +409,7 @@ func TestLine_Golden(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Curve:        core.CurveMonotoneX,
-		EnablePoints: true,
+		EnablePoints: core.BoolPtr(true),
 		Data:         sampleData(),
 	}
 	out := renderChart(t, props)
@@ -420,9 +426,9 @@ func TestLine_Golden_Area(t *testing.T) {
 		Width:        500,
 		Height:       300,
 		Curve:        core.CurveMonotoneX,
-		EnableArea:   true,
+		EnableArea:   core.BoolPtr(true),
 		AreaOpacity:  0.2,
-		EnablePoints: true,
+		EnablePoints: core.BoolPtr(true),
 		Data:         sampleData(),
 	}
 	out := renderChart(t, props)
@@ -435,7 +441,7 @@ func TestLine_Golden_Area(t *testing.T) {
 func TestLine_DefsFillAreas(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
-		EnableArea:  true,
+		EnableArea:  core.BoolPtr(true),
 		AreaOpacity: 1,
 		Data:        sampleData(),
 		Defs: []core.Def{

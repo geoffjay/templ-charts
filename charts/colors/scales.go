@@ -242,10 +242,14 @@ type SequentialColorScaleValues struct {
 	Min, Max float64
 }
 
-// SequentialColorScaleDefaults mirrors nivo's sequentialColorScaleDefaults.
-var SequentialColorScaleDefaults = struct {
+// SequentialColorScaleDefaultsConfig holds the default settings applied to a
+// sequential color scale when a field is left unset.
+type SequentialColorScaleDefaultsConfig struct {
 	Scheme string
-}{Scheme: "turbo"}
+}
+
+// SequentialColorScaleDefaults mirrors nivo's sequentialColorScaleDefaults.
+var SequentialColorScaleDefaults = SequentialColorScaleDefaultsConfig{Scheme: "turbo"}
 
 // GetSequentialColorScale builds a func(value float64) string for a
 // sequential config + values. Mirrors @nivo/colors getSequentialColorScale.
@@ -304,11 +308,15 @@ type DivergingColorScaleConfig struct {
 	Space Space
 }
 
-// DivergingColorScaleDefaults mirrors nivo's divergingColorScaleDefaults.
-var DivergingColorScaleDefaults = struct {
+// DivergingColorScaleDefaultsConfig holds the default settings applied to a
+// diverging color scale when a field is left unset.
+type DivergingColorScaleDefaultsConfig struct {
 	Scheme    string
 	DivergeAt float64
-}{Scheme: "red_yellow_blue", DivergeAt: 0.5}
+}
+
+// DivergingColorScaleDefaults mirrors nivo's divergingColorScaleDefaults.
+var DivergingColorScaleDefaults = DivergingColorScaleDefaultsConfig{Scheme: "red_yellow_blue", DivergeAt: 0.5}
 
 // GetDivergingColorScale builds a func(value float64) string for a diverging
 // config + values. Mirrors @nivo/colors getDivergingColorScale.
@@ -367,11 +375,15 @@ type QuantizeColorScaleConfig struct {
 	Colors []string
 }
 
-// QuantizeColorScaleDefaults mirrors nivo's quantizeColorScaleDefaults.
-var QuantizeColorScaleDefaults = struct {
+// QuantizeColorScaleDefaultsConfig holds the default settings applied to a
+// quantize color scale when a field is left unset.
+type QuantizeColorScaleDefaultsConfig struct {
 	Scheme string
 	Steps  int
-}{Scheme: "turbo", Steps: 7}
+}
+
+// QuantizeColorScaleDefaults mirrors nivo's quantizeColorScaleDefaults.
+var QuantizeColorScaleDefaults = QuantizeColorScaleDefaultsConfig{Scheme: "turbo", Steps: 7}
 
 // GetQuantizeColorScale builds a func(value float64) string for a quantize
 // config + values. Mirrors @nivo/colors getQuantizeColorScale.

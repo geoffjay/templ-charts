@@ -80,7 +80,7 @@ func TestRadar_LinearGridUsesPolygons(t *testing.T) {
 
 func TestRadar_DotsDisabled(t *testing.T) {
 	p := baseProps()
-	p.EnableDots = radar.BoolPtr(false)
+	p.EnableDots = core.BoolPtr(false)
 	out := renderChart(t, p)
 	// Only the 5 grid level circles remain.
 	if got := strings.Count(out, "<circle"); got != 5 {

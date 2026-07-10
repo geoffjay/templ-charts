@@ -180,7 +180,6 @@ func (f *ManyBodyForce) applyBarnesHut(alpha float64) {
 	})
 
 	for _, node := range f.nodes {
-		node := node
 		qt.Visit(func(n *quadtree.Node, x0, _, x1, _ float64) bool {
 			if n.Value == 0 {
 				return true

@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/render"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/scatterplot"
@@ -64,15 +65,15 @@ svg, _ := render.String(scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
             {X: 12.0, Y: 55.0}, {X: 27.0, Y: 22.0}, {X: 40.0, Y: 78.0},
         }},
     },
-    EnableGridX: true,
-    EnableGridY: true,
+    EnableGridX: core.BoolPtr(true),
+    EnableGridY: core.BoolPtr(true),
 }))`,
 		Render: func(theme *theming.Theme, palette colors.PaletteID, animate bool) (string, error) {
 			p := scatterplot.ScatterPlotProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data:        scatterDemoSeries(),
-				EnableGridX: true,
-				EnableGridY: true,
+				EnableGridX: core.BoolPtr(true),
+				EnableGridY: core.BoolPtr(true),
 				Theme:       theme,
 			}
 			if palette != "" {
@@ -85,8 +86,8 @@ svg, _ := render.String(scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
 			p := scatterplot.ScatterPlotProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data:        scatterDemoSeries(),
-				EnableGridX: true,
-				EnableGridY: true,
+				EnableGridX: core.BoolPtr(true),
+				EnableGridY: core.BoolPtr(true),
 				Theme:       theme,
 				Render:      theming.EngineCanvas,
 				ChartID:     "detail-scatterplot-canvas",
@@ -100,8 +101,8 @@ svg, _ := render.String(scatterplot.ScatterPlot(scatterplot.ScatterPlotProps{
 			p := scatterplot.ScatterPlotProps{
 				Width: 720, Height: 440, Responsive: true,
 				Data:        scatterScaleSeries(),
-				EnableGridX: true,
-				EnableGridY: true,
+				EnableGridX: core.BoolPtr(true),
+				EnableGridY: core.BoolPtr(true),
 				Theme:       theme,
 			}
 			// nil YScale defaults to linear; a log spec swaps the Y axis to base-10

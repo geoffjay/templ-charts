@@ -99,10 +99,9 @@ func smilAnimateHeight(c roundedRectComputed) string {
 	)
 }
 
-// Render returns the SVG string for a rounded rect. This is the non-templ
-// rendering path used by chart packages that compose SVG strings directly.
-// The templ component below wraps it for component-style composition.
-func Render(p RoundedRectProps) string {
+// render returns the SVG string for a rounded rect. This is the non-templ
+// rendering path used internally by the RoundedRect templ component.
+func render(p RoundedRectProps) string {
 	c := computeRoundedRect(p)
 	var b strings.Builder
 	b.WriteString(`<path d="`)
@@ -111,10 +110,10 @@ func Render(p RoundedRectProps) string {
 	b.WriteString(c.Fill)
 	b.WriteString(`"`)
 	if c.Opacity > 0 && c.Opacity < 1 {
-		b.WriteString(fmt.Sprintf(` opacity="%s"`, fmtR(c.Opacity)))
+		fmt.Fprintf(&b, ` opacity="%s"`, fmtR(c.Opacity))
 	}
 	if c.StrokeWidth > 0 && c.Stroke != "" {
-		b.WriteString(fmt.Sprintf(` stroke="%s" stroke-width="%s"`, c.Stroke, fmtR(c.StrokeWidth)))
+		fmt.Fprintf(&b, ` stroke="%s" stroke-width="%s"`, c.Stroke, fmtR(c.StrokeWidth))
 	}
 	b.WriteString(">")
 	if c.Animate {

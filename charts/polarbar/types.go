@@ -64,19 +64,28 @@ var DefaultLayers = []PolarBarLayerId{
 // PolarBarProps mirrors @nivo/polar-bar PolarBarSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type PolarBarProps struct {
-	Data    []PolarBarDatum
-	Keys    []string
+	// Data is the set of index rows, each a stacked bar in its own angular band.
+	Data []PolarBarDatum
+	// Keys are the value keys stacked radially within each band. Default
+	// ["value"].
+	Keys []string
+	// IndexBy is the datum field used as the index id. Default "id".
 	IndexBy string
 
+	// Width and Height are the outer SVG dimensions in pixels; the inner plot
+	// area is these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the inner plot area (for axes and
+	// legends), in pixels.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
 
-	StartAngle   float64 // degrees
-	EndAngle     float64 // degrees
-	InnerRadius  float64 // ratio in [0,1] of the outer radius
+	StartAngle  float64 // degrees
+	EndAngle    float64 // degrees
+	InnerRadius float64 // ratio in [0,1] of the outer radius
+	// CornerRadius rounds the arc corners, in pixels. Default 0.
 	CornerRadius float64
 	PadAngle     float64 // degrees
 	Padding      float64 // band padding between index bands
@@ -89,31 +98,51 @@ type PolarBarProps struct {
 	EnableRadialGrid   *bool
 	EnableCircularGrid *bool
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale used to color each key. Default is the
+	// "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// BorderWidth is the arc stroke width in pixels. Default 0 (no border).
 	BorderWidth float64
+	// BorderColor resolves the arc stroke color, optionally inherited from the
+	// arc fill.
 	BorderColor colors.InheritedColorConfig
 
 	// EnableArcLabels gates per-arc labels. nil → false (nivo default).
-	EnableArcLabels       *bool
-	ArcLabel              string // datum path; empty → "formattedValue"
+	EnableArcLabels *bool
+	ArcLabel        string // datum path; empty → "formattedValue"
+	// ArcLabelsRadiusOffset positions the label along the arc's radius as a
+	// ratio in [0,1] between inner and outer radius. Default 0.5.
 	ArcLabelsRadiusOffset float64
-	ArcLabelsSkipAngle    float64
+	// ArcLabelsSkipAngle hides labels on arcs whose angular span is below this
+	// many degrees. Default 0 (show all).
+	ArcLabelsSkipAngle float64
 
 	// Interactive enables per-arc client-side hover tooltips (charts/interact).
 	Interactive bool
 
+	// Legends configures zero or more legends describing the keys.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers is the ordered list of render layers; default draws grid, arcs,
+	// axes, labels then legends.
 	Layers []PolarBarLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the SVG root ARIA role. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the SVG root.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the SVG root.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the SVG root.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the SVG <title> element.
+	Title string
+	// Desc sets the SVG <desc> element.
+	Desc string
+	// IsFocusable sets tabindex/focusable on the SVG root.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// bar arc (600ms). MotionStagger delays successive arcs by that many
@@ -138,12 +167,6 @@ type PolarBarResult struct {
 	Indices      []string
 	MaxValue     float64
 }
-
-// BoolPtr returns a pointer to b — a helper for the *bool props.
-func BoolPtr(b bool) *bool { return &b }
-
-// FloatPtr returns a pointer to f — a helper for the *float64 props.
-func FloatPtr(f float64) *float64 { return &f }
 
 // RadialGridEnabled resolves EnableRadialGrid (nil → true).
 func (p PolarBarProps) RadialGridEnabled() bool {

@@ -9,7 +9,6 @@
 package d3scale
 
 import (
-	"math"
 	"time"
 )
 
@@ -118,7 +117,7 @@ func (i *Interval) Count(start, end time.Time) int {
 	e := end
 	i.floori(&s)
 	i.floori(&e)
-	return int(math.Floor(float64(i.countFn(s, e))))
+	return i.countFn(s, e)
 }
 
 // Every returns a derived interval that only fires every `step`th boundary.

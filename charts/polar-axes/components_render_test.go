@@ -1,4 +1,4 @@
-package polaraxes_test
+package polaraxes
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/a-h/templ"
 
-	polaraxes "github.com/geoffjay/templ-charts/charts/polar-axes"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
@@ -33,8 +32,8 @@ func radiusScale() scales.Scale {
 // numeric/transform content survives escaping, so assertions target those.
 
 func TestCircularAxisComponent(t *testing.T) {
-	out := render(t, polaraxes.CircularAxis(polaraxes.CircularAxisProps{
-		Type:       polaraxes.CircularAxisOuter,
+	out := render(t, CircularAxis(CircularAxisProps{
+		Type:       CircularAxisOuter,
 		Center:     [2]float64{150, 150},
 		Radius:     80,
 		StartAngle: 0,
@@ -51,11 +50,11 @@ func TestCircularAxisComponent(t *testing.T) {
 }
 
 func TestRadialAxisComponent(t *testing.T) {
-	out := render(t, polaraxes.RadialAxis(polaraxes.RadialAxisProps{
+	out := render(t, RadialAxis(RadialAxisProps{
 		Center:        [2]float64{100, 100},
 		Angle:         0,
 		Scale:         radiusScale(),
-		TicksPosition: polaraxes.TicksAfter,
+		TicksPosition: TicksAfter,
 		Theme:         &theming.DefaultTheme,
 	}))
 	if !strings.Contains(out, "translate(100,100)") {
@@ -67,7 +66,7 @@ func TestRadialAxisComponent(t *testing.T) {
 }
 
 func TestPolarGridComponent(t *testing.T) {
-	out := render(t, polaraxes.PolarGrid(polaraxes.PolarGridProps{
+	out := render(t, PolarGrid(PolarGridProps{
 		Center:             [2]float64{200, 200},
 		EnableRadialGrid:   true,
 		AngleScale:         angleScale(),
@@ -84,7 +83,7 @@ func TestPolarGridComponent(t *testing.T) {
 }
 
 func TestRadialGridComponent(t *testing.T) {
-	out := render(t, polaraxes.RadialGrid(polaraxes.RadialGridProps{
+	out := render(t, RadialGrid(RadialGridProps{
 		Scale:       angleScale(),
 		InnerRadius: 10,
 		OuterRadius: 90,
@@ -96,7 +95,7 @@ func TestRadialGridComponent(t *testing.T) {
 }
 
 func TestCircularGridComponent(t *testing.T) {
-	out := render(t, polaraxes.CircularGrid(polaraxes.CircularGridProps{
+	out := render(t, CircularGrid(CircularGridProps{
 		Scale:      radiusScale(),
 		StartAngle: 0,
 		EndAngle:   270,
@@ -110,21 +109,21 @@ func TestCircularGridComponent(t *testing.T) {
 func TestRenderRadialAxis_BranchesByPositionAndAngle(t *testing.T) {
 	tests := []struct {
 		name       string
-		pos        polaraxes.TicksPosition
+		pos        TicksPosition
 		angle      float64
 		wantAnchor string
 		wantRotate string
 	}{
-		{"before-angle-45", polaraxes.TicksBefore, 45, `text-anchor="end"`, `rotate(90)`},
-		{"before-angle-180", polaraxes.TicksBefore, 180, `text-anchor="start"`, `rotate(-90)`},
-		{"before-angle-300", polaraxes.TicksBefore, 300, `text-anchor="end"`, `rotate(90)`},
-		{"after-angle-45", polaraxes.TicksAfter, 45, `text-anchor="start"`, `rotate(90)`},
-		{"after-angle-180", polaraxes.TicksAfter, 180, `text-anchor="end"`, `rotate(-90)`},
-		{"after-angle-300", polaraxes.TicksAfter, 300, `text-anchor="start"`, `rotate(90)`},
+		{"before-angle-45", TicksBefore, 45, `text-anchor="end"`, `rotate(90)`},
+		{"before-angle-180", TicksBefore, 180, `text-anchor="start"`, `rotate(-90)`},
+		{"before-angle-300", TicksBefore, 300, `text-anchor="end"`, `rotate(90)`},
+		{"after-angle-45", TicksAfter, 45, `text-anchor="start"`, `rotate(90)`},
+		{"after-angle-180", TicksAfter, 180, `text-anchor="end"`, `rotate(-90)`},
+		{"after-angle-300", TicksAfter, 300, `text-anchor="start"`, `rotate(90)`},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			svg := polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+			svg := renderRadialAxis(RadialAxisProps{
 				Center:        [2]float64{0, 0},
 				Angle:         tc.angle,
 				Scale:         radiusScale(),
@@ -142,12 +141,12 @@ func TestRenderRadialAxis_BranchesByPositionAndAngle(t *testing.T) {
 }
 
 func TestRenderRadialAxis_TickSizeAndPadding(t *testing.T) {
-	svg := polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+	svg := renderRadialAxis(RadialAxisProps{
 		Angle:         0,
 		Scale:         radiusScale(),
-		TicksPosition: polaraxes.TicksAfter,
+		TicksPosition: TicksAfter,
 		Theme:         &theming.DefaultTheme,
-		RadialAxisConfig: polaraxes.RadialAxisConfig{
+		RadialAxisConfig: RadialAxisConfig{
 			TickSize:    10,
 			TickPadding: 4,
 		},
@@ -162,15 +161,15 @@ func TestRenderRadialAxis_TickSizeAndPadding(t *testing.T) {
 }
 
 func TestRenderRadialAxis_CustomTickComponent(t *testing.T) {
-	var custom polaraxes.RadialTickRenderer = func(props polaraxes.RadialAxisTickProps) string {
+	custom := func(props RadialAxisTickProps) string {
 		return "<!--radial-tick:" + props.Label + "-->"
 	}
-	svg := polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+	svg := renderRadialAxis(RadialAxisProps{
 		Angle:         0,
 		Scale:         radiusScale(),
-		TicksPosition: polaraxes.TicksAfter,
+		TicksPosition: TicksAfter,
 		Theme:         &theming.DefaultTheme,
-		RadialAxisConfig: polaraxes.RadialAxisConfig{
+		RadialAxisConfig: RadialAxisConfig{
 			TickComponent: &custom,
 			Ticks:         scales.TicksSpec{Count: 5, HasCount: true},
 		},
@@ -185,10 +184,10 @@ func TestRenderRadialAxis_CustomTickComponent(t *testing.T) {
 
 func TestRenderRadialAxis_BandScaleCentersTicks(t *testing.T) {
 	scale := scales.NewBandScaleWithRange([]string{"a", "b"}, 0, 100, 0, false)
-	svg := polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+	svg := renderRadialAxis(RadialAxisProps{
 		Angle:         0,
 		Scale:         scale,
-		TicksPosition: polaraxes.TicksAfter,
+		TicksPosition: TicksAfter,
 		Theme:         &theming.DefaultTheme,
 	})
 	// Bands of width 50 → tick groups at 25 and 75.
@@ -201,10 +200,10 @@ func TestRenderRadialAxis_BandScaleCentersTicks(t *testing.T) {
 }
 
 func TestRenderRadialAxis_Animate(t *testing.T) {
-	svg := polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+	svg := renderRadialAxis(RadialAxisProps{
 		Angle:         0,
 		Scale:         radiusScale(),
-		TicksPosition: polaraxes.TicksAfter,
+		TicksPosition: TicksAfter,
 		Theme:         &theming.DefaultTheme,
 		Animate:       true,
 	})
@@ -214,7 +213,7 @@ func TestRenderRadialAxis_Animate(t *testing.T) {
 }
 
 func TestRenderCircularAxis_InnerType(t *testing.T) {
-	props := polaraxes.CircularAxisProps{
+	props := CircularAxisProps{
 		Center:     [2]float64{0, 0},
 		Radius:     80,
 		StartAngle: 0,
@@ -222,10 +221,10 @@ func TestRenderCircularAxis_InnerType(t *testing.T) {
 		Scale:      angleScale(),
 		Theme:      &theming.DefaultTheme,
 	}
-	props.Type = polaraxes.CircularAxisInner
-	inner := polaraxes.RenderCircularAxis(props)
-	props.Type = polaraxes.CircularAxisOuter
-	outer := polaraxes.RenderCircularAxis(props)
+	props.Type = CircularAxisInner
+	inner := renderCircularAxis(props)
+	props.Type = CircularAxisOuter
+	outer := renderCircularAxis(props)
 
 	// Inner: text at radius - tickSize - padding = 80-5-12 = 63; the tick for
 	// value 0 sits at the top (angle -90) → dy = -63. Outer: 80+5+12 = 97.
@@ -238,17 +237,17 @@ func TestRenderCircularAxis_InnerType(t *testing.T) {
 }
 
 func TestRenderCircularAxis_CustomTickComponentAndConfig(t *testing.T) {
-	var custom polaraxes.CircularTickRenderer = func(props polaraxes.CircularAxisTickProps) string {
+	custom := func(props CircularAxisTickProps) string {
 		return "<!--circ-tick:" + props.Label + "-->"
 	}
-	svg := polaraxes.RenderCircularAxis(polaraxes.CircularAxisProps{
-		Type:       polaraxes.CircularAxisOuter,
+	svg := renderCircularAxis(CircularAxisProps{
+		Type:       CircularAxisOuter,
 		Radius:     50,
 		StartAngle: 0,
 		EndAngle:   270,
 		Scale:      angleScale(),
 		Theme:      &theming.DefaultTheme,
-		CircularAxisConfig: polaraxes.CircularAxisConfig{
+		CircularAxisConfig: CircularAxisConfig{
 			TickSize:      8,
 			TickPadding:   6,
 			TickComponent: &custom,
@@ -267,15 +266,15 @@ func TestRenderCircularAxis_CustomTickComponentAndConfig(t *testing.T) {
 }
 
 func TestRenderCircularAxis_AnimateAndFormat(t *testing.T) {
-	svg := polaraxes.RenderCircularAxis(polaraxes.CircularAxisProps{
-		Type:       polaraxes.CircularAxisOuter,
+	svg := renderCircularAxis(CircularAxisProps{
+		Type:       CircularAxisOuter,
 		Radius:     50,
 		StartAngle: 0,
 		EndAngle:   360,
 		Scale:      angleScale(),
 		Theme:      &theming.DefaultTheme,
 		Animate:    true,
-		CircularAxisConfig: polaraxes.CircularAxisConfig{
+		CircularAxisConfig: CircularAxisConfig{
 			Format: func(v any) string { return "F!" },
 		},
 	})
@@ -288,7 +287,7 @@ func TestRenderCircularAxis_AnimateAndFormat(t *testing.T) {
 }
 
 func TestRenderCircularAxisTick_EmptyThemeAndEscaping(t *testing.T) {
-	svg := polaraxes.RenderCircularAxisTick(polaraxes.CircularAxisTickProps{
+	svg := renderCircularAxisTick(CircularAxisTickProps{
 		Label: "a<b&c>d",
 		X1:    1, Y1: 2, X2: 3, Y2: 4,
 		TextX: 5, TextY: 6,
@@ -305,7 +304,7 @@ func TestRenderCircularAxisTick_EmptyThemeAndEscaping(t *testing.T) {
 }
 
 func TestRenderRadialAxisTick_EmptyTheme(t *testing.T) {
-	svg := polaraxes.RenderRadialAxisTick(polaraxes.RadialAxisTickProps{
+	svg := renderRadialAxisTick(RadialAxisTickProps{
 		Label:      "v",
 		TextAnchor: "start",
 		Y:          10,
@@ -324,7 +323,7 @@ func TestRenderRadialAxisTick_EmptyTheme(t *testing.T) {
 }
 
 func TestRenderPolarGrid_Toggles(t *testing.T) {
-	base := polaraxes.PolarGridProps{
+	base := PolarGridProps{
 		Center:      [2]float64{50, 50},
 		AngleScale:  angleScale(),
 		RadiusScale: radiusScale(),
@@ -334,7 +333,7 @@ func TestRenderPolarGrid_Toggles(t *testing.T) {
 		Theme:       &theming.DefaultTheme,
 	}
 
-	neither := polaraxes.RenderPolarGrid(base)
+	neither := renderPolarGrid(base)
 	if strings.Contains(neither, "<line") || strings.Contains(neither, "<path") {
 		t.Errorf("disabled grids should render no lines/paths: %s", neither)
 	}
@@ -344,21 +343,21 @@ func TestRenderPolarGrid_Toggles(t *testing.T) {
 
 	radialOnly := base
 	radialOnly.EnableRadialGrid = true
-	svg := polaraxes.RenderPolarGrid(radialOnly)
+	svg := renderPolarGrid(radialOnly)
 	if !strings.Contains(svg, "<line") || strings.Contains(svg, "<path") {
 		t.Errorf("radial-only grid wrong: %s", svg)
 	}
 
 	circularOnly := base
 	circularOnly.EnableCircularGrid = true
-	svg = polaraxes.RenderPolarGrid(circularOnly)
+	svg = renderPolarGrid(circularOnly)
 	if strings.Contains(svg, "<line") || !strings.Contains(svg, "<path") {
 		t.Errorf("circular-only grid wrong: %s", svg)
 	}
 }
 
 func TestRenderRadialGrid_AnimateAndEmptyTheme(t *testing.T) {
-	props := polaraxes.RadialGridProps{
+	props := RadialGridProps{
 		Scale:       angleScale(),
 		Ticks:       scales.TicksSpec{Count: 4, HasCount: true},
 		InnerRadius: 10,
@@ -366,7 +365,7 @@ func TestRenderRadialGrid_AnimateAndEmptyTheme(t *testing.T) {
 		Theme:       &theming.DefaultTheme,
 		Animate:     true,
 	}
-	svg := polaraxes.RenderRadialGrid(props)
+	svg := renderRadialGrid(props)
 	if !strings.Contains(svg, `opacity="0"`) || !strings.Contains(svg, "<animate") {
 		t.Errorf("animate branches missing: %s", svg)
 	}
@@ -379,7 +378,7 @@ func TestRenderRadialGrid_AnimateAndEmptyTheme(t *testing.T) {
 
 	props.Theme = &theming.Theme{}
 	props.Animate = false
-	svg = polaraxes.RenderRadialGrid(props)
+	svg = renderRadialGrid(props)
 	if strings.Contains(svg, "stroke=") || strings.Contains(svg, "<animate") {
 		t.Errorf("empty theme should not style rays: %s", svg)
 	}
@@ -387,7 +386,7 @@ func TestRenderRadialGrid_AnimateAndEmptyTheme(t *testing.T) {
 
 func TestRenderCircularGrid_BandScaleAndAnimate(t *testing.T) {
 	scale := scales.NewBandScaleWithRange([]string{"a", "b"}, 0, 100, 0, false)
-	svg := polaraxes.RenderCircularGrid(polaraxes.CircularGridProps{
+	svg := renderCircularGrid(CircularGridProps{
 		Scale:      scale,
 		StartAngle: 0,
 		EndAngle:   360,
@@ -416,7 +415,7 @@ func styledTickTheme() theming.AxisTheme {
 }
 
 func TestRenderCircularAxisTick_StyledText(t *testing.T) {
-	svg := polaraxes.RenderCircularAxisTick(polaraxes.CircularAxisTickProps{
+	svg := renderCircularAxisTick(CircularAxisTickProps{
 		Label: "42",
 		Theme: styledTickTheme(),
 	})
@@ -432,7 +431,7 @@ func TestRenderCircularAxisTick_StyledText(t *testing.T) {
 }
 
 func TestRenderRadialAxisTick_StyledText(t *testing.T) {
-	svg := polaraxes.RenderRadialAxisTick(polaraxes.RadialAxisTickProps{
+	svg := renderRadialAxisTick(RadialAxisTickProps{
 		Label:      "7",
 		TextAnchor: "end",
 		Theme:      styledTickTheme(),
@@ -456,8 +455,8 @@ func (plainScale) Type() scales.ScaleType { return scales.ScaleTypeLinear }
 func (plainScale) Call(v any) float64     { return 0 }
 
 func TestRenderCircularAxis_ScaleWithoutBandwidth(t *testing.T) {
-	svg := polaraxes.RenderCircularAxis(polaraxes.CircularAxisProps{
-		Type:       polaraxes.CircularAxisOuter,
+	svg := renderCircularAxis(CircularAxisProps{
+		Type:       CircularAxisOuter,
 		Radius:     50,
 		StartAngle: 0,
 		EndAngle:   360,
@@ -474,7 +473,7 @@ func TestRenderCircularAxis_ScaleWithoutBandwidth(t *testing.T) {
 }
 
 func TestRadiusScaleRange(t *testing.T) {
-	inner, outer := polaraxes.RadiusScaleRange(radiusScale(), 0.0, 100.0)
+	inner, outer := RadiusScaleRange(radiusScale(), 0.0, 100.0)
 	if inner != 0 || outer != 100 {
 		t.Errorf("RadiusScaleRange = (%v, %v), want (0, 100)", inner, outer)
 	}

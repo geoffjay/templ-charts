@@ -79,7 +79,7 @@ func TestRectLabelPosition_Horizontal(t *testing.T) {
 }
 
 func TestRender_NoAnimate(t *testing.T) {
-	s := Render(RoundedRectProps{X: 0, Y: 0, Width: 10, Height: 10, Fill: "#f00"})
+	s := render(RoundedRectProps{X: 0, Y: 0, Width: 10, Height: 10, Fill: "#f00"})
 	if !contains(s, `<path d="`) || !contains(s, `fill="#f00"`) {
 		t.Fatalf("render output missing expected attrs: %s", s)
 	}
@@ -89,14 +89,14 @@ func TestRender_NoAnimate(t *testing.T) {
 }
 
 func TestRender_Animate(t *testing.T) {
-	s := Render(RoundedRectProps{X: 0, Y: 0, Width: 10, Height: 10, Fill: "#f00", Animate: true})
+	s := render(RoundedRectProps{X: 0, Y: 0, Width: 10, Height: 10, Fill: "#f00", Animate: true})
 	if !contains(s, "<animate") {
 		t.Fatalf("expected <animate> in %s", s)
 	}
 	if !contains(s, `attributeName="height"`) {
 		t.Fatalf("vertical animate should target height: %s", s)
 	}
-	s = Render(RoundedRectProps{X: 0, Y: 0, Width: 10, Height: 10, Fill: "#f00", Animate: true, Horizontal: true})
+	s = render(RoundedRectProps{X: 0, Y: 0, Width: 10, Height: 10, Fill: "#f00", Animate: true, Horizontal: true})
 	if !contains(s, `attributeName="width"`) {
 		t.Fatalf("horizontal animate should target width: %s", s)
 	}

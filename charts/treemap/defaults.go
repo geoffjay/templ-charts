@@ -2,6 +2,7 @@ package treemap
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/treemap svgDefaultProps. Fields left zero in a
@@ -13,9 +14,9 @@ var Defaults = TreemapProps{
 	Colors:             colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 	NodeOpacity:        0.33,
 	BorderWidth:        1,
-	EnableLabel:        BoolPtr(true),
+	EnableLabel:        core.BoolPtr(true),
 	LabelSkipSize:      0,
-	EnableParentLabel:  BoolPtr(true),
+	EnableParentLabel:  core.BoolPtr(true),
 	ParentLabelSize:    20,
 	ParentLabelPadding: 6,
 	Role:               "img",

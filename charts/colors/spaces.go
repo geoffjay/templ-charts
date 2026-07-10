@@ -6,19 +6,57 @@ import (
 	d3color "github.com/geoffjay/templ-charts/internal/d3/color"
 )
 
-// Space re-exports d3color.Space so callers select an interpolation space
-// through the colors package (e.g. colors.SpaceLab). SpaceRGB is the zero
-// value, so a zero-initialized Space preserves the default gamma-sRGB
-// interpolation that every existing scale/palette golden was captured under.
-type Space = d3color.Space
+// Space identifies the color space used for interpolation and color modifiers
+// (e.g. colors.SpaceLab). It is a stable, public enum owned by this package;
+// SpaceRGB is the zero value, so a zero-initialized Space preserves the default
+// gamma-sRGB interpolation that every existing scale/palette golden was captured
+// under.
+type Space int
 
-// Interpolation-space constants, re-exported from internal/d3/color.
+// Interpolation-space constants. The numeric values mirror internal/d3/color so
+// the zero value is SpaceRGB, but this set is the package's own public API and
+// is decoupled from the internal type's shape.
 const (
-	SpaceRGB = d3color.SpaceRGB
-	SpaceHSL = d3color.SpaceHSL
-	SpaceLab = d3color.SpaceLab
-	SpaceLch = d3color.SpaceLch
+	// SpaceRGB interpolates linearly in gamma-encoded sRGB (the default, and
+	// the behavior every existing scale/palette golden was captured under).
+	SpaceRGB Space = iota
+	// SpaceHSL interpolates in HSL (hue takes the shortest angular path).
+	SpaceHSL
+	// SpaceLab interpolates in perceptually-uniform CIELAB.
+	SpaceLab
+	// SpaceLch interpolates in CIELCh (perceptual, hue shortest-path).
+	SpaceLch
 )
+
+// String returns the lowercase space name (rgb/hsl/lab/lch).
+func (s Space) String() string {
+	switch s {
+	case SpaceHSL:
+		return "hsl"
+	case SpaceLab:
+		return "lab"
+	case SpaceLch:
+		return "lch"
+	default:
+		return "rgb"
+	}
+}
+
+// toD3 maps the public Space onto the internal d3color.Space used by the color
+// conversion/interpolation port. Keeping this mapping explicit lets the public
+// enum stay frozen even if the internal representation changes.
+func (s Space) toD3() d3color.Space {
+	switch s {
+	case SpaceHSL:
+		return d3color.SpaceHSL
+	case SpaceLab:
+		return d3color.SpaceLab
+	case SpaceLch:
+		return d3color.SpaceLch
+	default:
+		return d3color.SpaceRGB
+	}
+}
 
 // interpolateInSpace returns a t→hex interpolator over the given color stops.
 //
@@ -42,7 +80,7 @@ func interpolateInSpace(cols []string, space Space) func(float64) string {
 	}
 	stops := make([]d3color.Color, n)
 	for i, c := range cols {
-		stops[i] = d3color.RGBColor(c).In(space)
+		stops[i] = d3color.RGBColor(c).In(space.toD3())
 	}
 	return func(t float64) string {
 		if t <= 0 {

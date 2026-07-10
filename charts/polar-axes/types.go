@@ -1,8 +1,8 @@
 // Package polaraxes provides the polar-axis scaffolding (CircularAxis,
 // RadialAxis, PolarGrid + their grid components) ported from @nivo/polar-axes.
-// It is scaffold-only — pie does its own layout and no chart uses
-// these — but the components are fully implemented so future radar/chord/
-// sunburst chart types plug in without rework.
+// The radialbar and polarbar charts render their grids and axes through these
+// components (pie does its own layout and does not use them). The full set is
+// implemented so future radar/chord/sunburst chart types plug in without rework.
 //
 // Angle convention (matching @nivo/polar-axes): user-facing angles are in
 // degrees, 0 = top, clockwise. Internally the -90 offset (so angle 0 maps to

@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/pie"
 	"github.com/geoffjay/templ-charts/internal/golden"
@@ -91,7 +92,7 @@ func TestPie_ArcLinkLabels(t *testing.T) {
 	props := pie.PieProps{
 		Width: 500, Height: 300,
 		Data:                sampleData(),
-		EnableArcLinkLabels: true,
+		EnableArcLinkLabels: core.BoolPtr(true),
 	}
 	out := renderChart(t, props)
 	// Arc link labels emit <path> (link) + <text> (label) per arc.
@@ -105,7 +106,7 @@ func TestPie_ArcLabels(t *testing.T) {
 	props := pie.PieProps{
 		Width: 500, Height: 300,
 		Data:            sampleData(),
-		EnableArcLabels: true,
+		EnableArcLabels: core.BoolPtr(true),
 	}
 	out := renderChart(t, props)
 	// Arc labels emit <text> with the formatted value. Default arcLabel is
@@ -119,7 +120,7 @@ func TestPie_DisableArcLinkLabels(t *testing.T) {
 	props := pie.PieProps{
 		Width: 500, Height: 300,
 		Data:                sampleData(),
-		EnableArcLinkLabels: false,
+		EnableArcLinkLabels: core.BoolPtr(false),
 	}
 	out := renderChart(t, props)
 	// Without arc link labels, the "A"/"B"/"C" text labels should not appear

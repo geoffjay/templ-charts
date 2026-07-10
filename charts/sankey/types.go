@@ -24,14 +24,20 @@ import (
 
 // SankeyInputNode is one input node, identified by ID.
 type SankeyInputNode struct {
+	// ID uniquely identifies the node; link Source/Target reference it and it is
+	// used as the node's label (see Label) and ordinal color key. Required.
 	ID string
 }
 
 // SankeyInputLink is one directed, weighted link between two node ids.
 type SankeyInputLink struct {
+	// Source is the ID of the node the flow originates from.
 	Source string
+	// Target is the ID of the node the flow terminates at.
 	Target string
-	Value  float64
+	// Value is the flow magnitude; it sets the link ribbon thickness and
+	// contributes to each connected node's total throughput (and thus size).
+	Value float64
 }
 
 // SankeyLayout is the flow orientation. Mirrors @nivo/sankey layout.
@@ -139,44 +145,87 @@ var DefaultLayers = []SankeyLayerId{SankeyLayerLinks, SankeyLayerNodes, SankeyLa
 // SankeyProps mirrors @nivo/sankey SankeySvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type SankeyProps struct {
+	// Nodes is the set of graph nodes. Required.
 	Nodes []SankeyInputNode
+	// Links is the set of directed, weighted flows between nodes. Required.
 	Links []SankeyInputLink
 
+	// Width and Height are the inner drawing dimensions in pixels (the outer svg
+	// adds Margin around them).
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the inner drawing area, e.g. for
+	// outside labels and legends.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
 
+	// Layout is the flow orientation: horizontal (left→right) or vertical
+	// (top→bottom). Empty → Defaults ("horizontal").
 	Layout SankeyLayout
-	Align  SankeyAlign
-	Sort   SankeySort
+	// Align is the node-alignment strategy across columns: center, justify,
+	// start, or end. Empty → Defaults ("center").
+	Align SankeyAlign
+	// Sort is the node/link ordering within each column: auto (d3 default),
+	// input (preserve input order), ascending, or descending by node value.
+	// Empty → Defaults ("auto").
+	Sort SankeySort
 
+	// Colors is the ordinal color scale used to color nodes by ID (links inherit
+	// their source node color). Zero value → Defaults (scheme "nivo").
 	Colors colors.OrdinalColorScaleConfig
 
-	NodeOpacity      float64
-	NodeThickness    float64
-	NodeSpacing      float64
+	// NodeOpacity is the fill opacity of node rects, 0–1. Zero → Defaults (0.75).
+	NodeOpacity float64
+	// NodeThickness is the node width (cross-flow extent) in pixels. Zero →
+	// Defaults (12).
+	NodeThickness float64
+	// NodeSpacing is the gap in pixels between nodes at the same level. Zero →
+	// Defaults (12).
+	NodeSpacing float64
+	// NodeInnerPadding is the padding in pixels subtracted from each side of a
+	// node (distance from the link), reducing the drawn node thickness. Zero →
+	// Defaults (0).
 	NodeInnerPadding float64
-	NodeBorderWidth  float64
-	NodeBorderColor  colors.InheritedColorConfig
+	// NodeBorderWidth is the node rect stroke width in pixels. Zero → Defaults
+	// (1).
+	NodeBorderWidth float64
+	// NodeBorderColor is the node border color; may inherit from the node color.
+	// Zero value → Defaults (node color darkened by 0.5).
+	NodeBorderColor colors.InheritedColorConfig
+	// NodeBorderRadius is the node rect corner radius in pixels. Zero → Defaults
+	// (0, square corners).
 	NodeBorderRadius float64
 
-	LinkOpacity   float64
-	LinkContract  float64
+	// LinkOpacity is the fill opacity of link ribbons, 0–1. Zero → Defaults
+	// (0.25).
+	LinkOpacity float64
+	// LinkContract shrinks each link ribbon by this many pixels on each side,
+	// leaving a gap between adjacent ribbons. Zero → Defaults (0).
+	LinkContract float64
+	// LinkBlendMode is the CSS mix-blend-mode applied to link ribbons (e.g.
+	// "multiply", "normal", "screen"). Empty → Defaults ("multiply").
 	LinkBlendMode string
 	// EnableLinkGradient draws each link ribbon with a per-link
 	// <linearGradient> running from the source node color to the target node
 	// color along the flow direction, instead of a flat source-color fill.
-	// Mirrors @nivo/sankey enableLinkGradient (default false).
-	EnableLinkGradient bool
+	// Mirrors @nivo/sankey enableLinkGradient (default false). nil → false.
+	EnableLinkGradient *bool
 
-	EnableLabels     *bool  // nil → true
-	Label            string // node field to use as label (only "id" supported)
-	LabelPosition    SankeyLabelPosition
-	LabelPadding     float64
+	EnableLabels *bool  // nil → true
+	Label        string // node field to use as label (only "id" supported)
+	// LabelPosition places labels inside (toward the node) or outside it. Empty
+	// → Defaults ("inside").
+	LabelPosition SankeyLabelPosition
+	// LabelPadding is the gap in pixels between a label and its node. Zero →
+	// Defaults (9).
+	LabelPadding float64
+	// LabelOrientation is the label text orientation: horizontal or vertical.
+	// Empty → Defaults ("horizontal").
 	LabelOrientation SankeyLabelOrientation
-	LabelTextColor   colors.InheritedColorConfig
+	// LabelTextColor is the label color; may inherit from the node color. Zero
+	// value → Defaults (node color darkened by 0.8).
+	LabelTextColor colors.InheritedColorConfig
 
 	ValueFormat string // d3-format spec; empty → %g
 
@@ -197,18 +246,30 @@ type SankeyProps struct {
 	LinkHoverOpacity       float64
 	LinkHoverOthersOpacity float64
 
+	// Legends are the optional legend blocks rendered from the node data.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling (fonts, colors, background). nil → the package
+	// DefaultTheme.
+	Theme *theming.Theme
+	// Layers selects which render layers to draw and in what order (links, nodes,
+	// labels, legends). Empty → Defaults (DefaultLayers, all four in order).
 	Layers []SankeyLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root svg. Empty → Defaults ("img").
+	Role string
+	// AriaLabel sets the root svg aria-label attribute.
+	AriaLabel string
+	// AriaLabelledBy sets the root svg aria-labelledby attribute.
+	AriaLabelledBy string
+	// AriaDescribedBy sets the root svg aria-describedby attribute.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the svg <title> element (accessible name).
+	Title string
+	// Desc sets the svg <desc> element (accessible description).
+	Desc string
+	// IsFocusable makes the root svg keyboard-focusable (tabindex/focusable).
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// node rect and link path (600ms). MotionStagger delays successive items by
@@ -220,6 +281,11 @@ type SankeyProps struct {
 
 // LabelsEnabled resolves EnableLabels (nil → true, matching nivo's default).
 func (p SankeyProps) LabelsEnabled() bool { return p.EnableLabels == nil || *p.EnableLabels }
+
+// LinkGradientEnabled resolves EnableLinkGradient (nil → false, nivo default).
+func (p SankeyProps) LinkGradientEnabled() bool {
+	return p.EnableLinkGradient != nil && *p.EnableLinkGradient
+}
 
 // SankeyResult is the computed model produced by UseSankey.
 type SankeyResult struct {

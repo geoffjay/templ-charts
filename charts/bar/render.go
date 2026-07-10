@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/annotations"
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -91,7 +92,7 @@ func renderBarLayers(layers []BarLayerId, props BarProps, result BarResult, dims
 		case BarLayerBars:
 			b.WriteString(renderBarsLayer(props, result, bound, theme))
 		case BarLayerTotals:
-			if props.EnableTotals {
+			if props.TotalsEnabled() {
 				b.WriteString(renderTotalsLayer(props, result, theme))
 			}
 		case BarLayerMarkers:
@@ -107,14 +108,14 @@ func renderBarLayers(layers []BarLayerId, props BarProps, result BarResult, dims
 
 func renderGridLayer(props BarProps, result BarResult, dims core.Dimensions, theme *theming.Theme) string {
 	var s strings.Builder
-	if props.EnableGridX {
+	if props.GridXEnabled() {
 		s.WriteString(renderGrid(axes.GridProps{
 			Axis: "x", Scale: result.XScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight,
 			TickValues: props.GridXValues, Theme: theme,
 		}))
 	}
-	if props.EnableGridY {
+	if props.GridYEnabled() {
 		s.WriteString(renderGrid(axes.GridProps{
 			Axis: "y", Scale: result.YScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight,
@@ -290,10 +291,8 @@ func applyDefaults(p BarProps) BarProps {
 	if len(p.Layers) == 0 {
 		p.Layers = DefaultLayers
 	}
-	// EnableLabel defaults to true; callers must set false explicitly. Since
-	// Go's bool zero value is false, we can't distinguish "unset" from "set
-	// to false" — we leave EnableLabel as the caller set it. The Bar templ
-	// component documents that EnableLabel=true is the default.
+	// EnableLabel is a *bool: nil resolves to true (nivo default) via
+	// LabelEnabled(); callers set core.BoolPtr(false) to disable labels.
 	return p
 }
 

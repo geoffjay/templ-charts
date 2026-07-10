@@ -89,22 +89,40 @@ var DefaultLayers = []MarimekkoLayerId{
 // MarimekkoProps mirrors @nivo/marimekko MarimekkoSvgProps (the supported
 // subset). Fields left zero fall back to Defaults via applyDefaults.
 type MarimekkoProps struct {
-	Data       []MarimekkoDatum
+	// Data is the set of columns; each datum's Value drives its bar thickness.
+	Data []MarimekkoDatum
+	// Dimensions are the stacked categories, drawn as segments within each bar.
 	Dimensions []MarimekkoDimension
 
+	// Width and Height are the outer SVG dimensions in pixels; the inner plot
+	// area is these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the inner plot area (for axes and
+	// legends), in pixels.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
 
-	Layout       MarimekkoLayout
-	Offset       OffsetType
+	// Layout is the bar orientation, "vertical" (default) or "horizontal".
+	Layout MarimekkoLayout
+	// Offset is the d3-shape stack offset applied to the dimension segments:
+	// none (default), expand, diverging, silhouette or wiggle.
+	Offset OffsetType
+	// OuterPadding is the gap in pixels before the first and after the last bar
+	// along the thickness axis. Default 0.
 	OuterPadding float64
+	// InnerPadding is the gap in pixels between adjacent bars. Default 3.
 	InnerPadding float64
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale used to color each dimension. Default
+	// is the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// BorderWidth is the segment rect stroke width in pixels. Default 0 (no
+	// border).
 	BorderWidth float64
+	// BorderColor resolves the segment rect stroke color, optionally inherited
+	// from the segment fill.
 	BorderColor colors.InheritedColorConfig
 
 	ValueFormat string // d3-format spec; empty → %g
@@ -119,25 +137,38 @@ type MarimekkoProps struct {
 	Animate       bool
 	MotionStagger float64
 
-	EnableGridX bool
-	EnableGridY bool
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	EnableGridX *bool // nil → false (nivo default)
+	EnableGridY *bool // nil → true (nivo default)
+	// AxisTop, AxisRight, AxisBottom and AxisLeft configure the four axes; nil
+	// disables that side.
+	AxisTop    *axes.AxisProps
+	AxisRight  *axes.AxisProps
+	AxisBottom *axes.AxisProps
+	AxisLeft   *axes.AxisProps
 
+	// Legends configures zero or more legends describing the dimensions.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers is the ordered list of render layers; default draws grid, axes,
+	// bars then legends.
 	Layers []MarimekkoLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the SVG root ARIA role. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the SVG root.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the SVG root.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the SVG root.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the SVG <title> element.
+	Title string
+	// Desc sets the SVG <desc> element.
+	Desc string
+	// IsFocusable sets tabindex/focusable on the SVG root.
+	IsFocusable bool
 }
 
 // MarimekkoResult is the computed model produced by UseMarimekko.
@@ -154,3 +185,9 @@ type MarimekkoResult struct {
 	ThicknessScale scales.Scale
 	StackScale     scales.Scale
 }
+
+// GridXEnabled resolves EnableGridX (nil → false, nivo default).
+func (p MarimekkoProps) GridXEnabled() bool { return p.EnableGridX != nil && *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p MarimekkoProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }

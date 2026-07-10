@@ -2,6 +2,7 @@ package swarmplot
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/scales"
 )
 
@@ -19,8 +20,8 @@ var Defaults = SwarmPlotProps{
 	ColorBy:              "group",
 	BorderWidth:          0,
 	BorderColor:          "rgba(0, 0, 0, 0)",
-	EnableGridX:          true,
-	EnableGridY:          true,
+	EnableGridX:          core.BoolPtr(true),
+	EnableGridY:          core.BoolPtr(true),
 	Layers:               DefaultLayers,
 	Role:                 "img",
 }

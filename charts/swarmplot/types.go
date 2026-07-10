@@ -58,13 +58,18 @@ var DefaultLayers = []SwarmPlotLayerId{
 // SwarmPlotProps mirrors @nivo/swarmplot SwarmPlotSvgProps (the supported
 // subset). Fields left zero fall back to Defaults via applyDefaults.
 type SwarmPlotProps struct {
+	// Data is the set of points to plot; each is grouped and positioned by its
+	// value, then relaxed by the force simulation.
 	Data []SwarmPlotDatum
 	// Groups fixes the group order/set; when empty it is derived from Data in
 	// first-appearance order.
 	Groups []string
 
+	// Width and Height are the overall SVG dimensions in pixels.
 	Width  float64
 	Height float64
+	// Margin reserves space around the plot area (top/right/bottom/left) in
+	// pixels, e.g. for axes.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
@@ -77,23 +82,37 @@ type SwarmPlotProps struct {
 	Layout  string  // "vertical" (default) | "horizontal"
 	Gap     float64 // extra gap between groups
 
-	ForceStrength        float64
+	// ForceStrength is the strength of the positioning force pulling nodes to
+	// their value along the value axis. Default 1.
+	ForceStrength float64
+	// SimulationIterations is the fixed number of force-simulation ticks run to
+	// relax the layout. Default 120. Higher values pack nodes more tightly at
+	// the cost of compute.
 	SimulationIterations int
 
+	// Colors is the ordinal color scale mapping nodes to colors (keyed by
+	// ColorBy). Default is the "nivo" scheme.
 	Colors  colors.OrdinalColorScaleConfig
 	ColorBy string // "group" (default) | "id"
 
+	// BorderWidth is the stroke width of each node, in pixels. Default 0.
 	BorderWidth float64
+	// BorderColor is the node border color. Default "rgba(0, 0, 0, 0)"
+	// (transparent).
 	BorderColor string
 
-	EnableGridX bool
-	EnableGridY bool
+	EnableGridX *bool // nil → true (nivo default)
+	EnableGridY *bool // nil → true (nivo default)
+	// GridXValues and GridYValues override the tick positions of the x/y grid
+	// lines; nil lets the scale choose them.
 	GridXValues []any
 	GridYValues []any
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	// AxisTop, AxisRight, AxisBottom and AxisLeft configure the four axes; a nil
+	// pointer hides that axis.
+	AxisTop    *axes.AxisProps
+	AxisRight  *axes.AxisProps
+	AxisBottom *axes.AxisProps
+	AxisLeft   *axes.AxisProps
 
 	// Interactive enables the client-side hover layer (charts/interact): each
 	// node emits a data-tc-tooltip the script shows on hover.
@@ -106,16 +125,24 @@ type SwarmPlotProps struct {
 	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
 	DetectionRadius float64
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers selects which layers are rendered and in what order. Defaults to
+	// DefaultLayers.
 	Layers []SwarmPlotLayerId
 
-	Role            string
+	// Role is the SVG root's ARIA role. Default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy and AriaDescribedBy set the matching ARIA
+	// attributes on the SVG root for accessibility.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title> and <desc> elements for accessibility.
+	Title string
+	Desc  string
+	// IsFocusable, when true, makes the SVG root keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL enter animation on each node scaling its
 	// radius from 0 to its final value (600ms). MotionStagger delays successive
@@ -131,3 +158,9 @@ type SwarmPlotResult struct {
 	XScale scales.Scale
 	YScale scales.Scale
 }
+
+// GridXEnabled resolves EnableGridX (nil → true, nivo default).
+func (p SwarmPlotProps) GridXEnabled() bool { return p.EnableGridX == nil || *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p SwarmPlotProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }

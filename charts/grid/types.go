@@ -1,6 +1,6 @@
 // Package grid provides the grid-cell layout primitives shared by heatmap,
-// waffle, and similar cell-based chart types. It is scaffold-only —
-// not exercised by bar/line/pie — but the layout math (computeCellDimensions,
+// waffle, and similar cell-based chart types. The waffle chart uses this
+// package for its cell layout; the layout math (computeCellDimensions,
 // generateGrid, bounding-box overlap, perpendicular polygon merge) is ported
 // verbatim from @nivo/grid so future chart types plug in without rework.
 //

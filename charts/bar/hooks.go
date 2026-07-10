@@ -3,7 +3,7 @@ package bar
 import (
 	"fmt"
 
-	"github.com/geoffjay/templ-charts/charts/bar/compute"
+	"github.com/geoffjay/templ-charts/charts/bar/internal/compute"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/scales"
@@ -45,7 +45,7 @@ func UseBar(props BarProps) BarResult {
 	if indexScale == (scales.ScaleBandSpec{}) {
 		indexScale = Defaults.IndexScale
 	}
-	enableLabel := props.EnableLabel || Defaults.EnableLabel
+	enableLabel := props.LabelEnabled()
 	labelSkipWidth := props.LabelSkipWidth
 	labelSkipHeight := props.LabelSkipHeight
 	labelPosition := props.LabelPosition
@@ -212,7 +212,7 @@ func UseBar(props BarProps) BarResult {
 
 	// --- totals ---
 	var barTotals []BarTotalData
-	if props.EnableTotals {
+	if props.TotalsEnabled() {
 		barTotals = compute.ComputeBarTotals(bars, xScale, yScale, layoutStr, groupModeStr, totalsOffset, func(v float64) string {
 			return formatValue(v)
 		})

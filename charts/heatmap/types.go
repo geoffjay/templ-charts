@@ -98,44 +98,76 @@ type HeatMapLegend struct {
 // HeatMapProps is the input to the HeatMap component. Mirrors @nivo/heatmap
 // HeatMapCommonProps + svgDefaultProps (fields not yet supported are omitted).
 type HeatMapProps struct {
-	Width  float64
+	// Width is the total chart width in pixels (including Margin).
+	Width float64
+	// Height is the total chart height in pixels (including Margin).
 	Height float64
+	// Margin reserves space around the grid for axes and legends.
 	Margin core.Margin
 	// Responsive makes the rendered svg scale fluidly to its container
 	// (viewBox preserved, width:100%;height:auto) instead of a fixed pixel
 	// size. See core.SvgWrapperProps.Responsive.
 	Responsive bool
-	Data       []HeatMapSerie
+	// Data is the list of series (rows); each serie is a y-axis category with
+	// its per-x cells.
+	Data []HeatMapSerie
 
+	// ForceSquare forces cells to be square, sizing the grid to the smaller
+	// axis. Default false.
 	ForceSquare bool
 
-	Colors     HeatMapColorConfig
+	// Colors is the continuous color scale mapping cell values to colors (see
+	// HeatMapColorConfig). Default is a sequential "brown_blueGreen" scale.
+	Colors HeatMapColorConfig
+	// EmptyColor is the CSS color used for cells with a nil value. Default
+	// "#000000".
 	EmptyColor string
 
-	EnableGridX bool
-	EnableGridY bool
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	EnableGridX *bool // nil → false (nivo default)
+	EnableGridY *bool // nil → false (nivo default)
+	// AxisTop configures the top axis; nil hides it.
+	AxisTop *axes.AxisProps
+	// AxisRight configures the right axis; nil hides it.
+	AxisRight *axes.AxisProps
+	// AxisBottom configures the bottom axis; nil hides it.
+	AxisBottom *axes.AxisProps
+	// AxisLeft configures the left axis; nil hides it.
+	AxisLeft *axes.AxisProps
 
-	Opacity         float64
-	ActiveOpacity   float64
+	// Opacity is the base opacity of each cell, from 0 to 1. Default 1.
+	Opacity float64
+	// ActiveOpacity is the opacity of the hovered/active cell, from 0 to 1.
+	// Default 1.
+	ActiveOpacity float64
+	// InactiveOpacity is the opacity of the non-active cells while another is
+	// hovered, from 0 to 1. Default 0.15.
 	InactiveOpacity float64
-	BorderWidth     float64
-	BorderColor     colors.InheritedColorConfig
-	BorderRadius    float64
+	// BorderWidth is the stroke width of each cell's border, in pixels. Default
+	// 0 (no border drawn).
+	BorderWidth float64
+	// BorderColor resolves each cell's border color, by default the cell fill
+	// darkened. Only applied when BorderWidth > 0.
+	BorderColor colors.InheritedColorConfig
+	// BorderRadius is the corner radius of the cells, in pixels. Default 0.
+	BorderRadius float64
 
 	// EnableLabels gates per-cell value labels. nil → true (nivo default);
 	// set to a pointer to false to disable. Modeled as a pointer so the
 	// default-on behavior survives Go's bool zero value.
-	EnableLabels   *bool
+	EnableLabels *bool
+	// LabelTextColor resolves the per-cell label color, by default the cell
+	// fill darkened.
 	LabelTextColor colors.InheritedColorConfig
 	ValueFormat    string // d3-format spec; empty → %g
 
+	// Legends configures the continuous color legends to draw.
 	Legends []HeatMapLegend
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme (colors, fonts, label styles). Nil uses
+	// the default theme.
+	Theme *theming.Theme
+	// Layers selects which render layers to draw and their order (grid, axes,
+	// cells, legends, annotations). Default DefaultLayers.
 	Layers []HeatMapLayerId
 
 	// Render selects the backend: the zero value (or theming.EngineSVG) renders
@@ -151,13 +183,20 @@ type HeatMapProps struct {
 	ChartID     string
 	HoveredKey  string
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root svg element. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the root svg element. Empty by default.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the root svg element. Empty by default.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the root svg element. Empty by default.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the svg <title> element. Empty by default.
+	Title string
+	// Desc sets the svg <desc> element. Empty by default.
+	Desc string
+	// IsFocusable makes the root svg keyboard-focusable. Defaults to false.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// cell (600ms). MotionStagger delays successive cells by that many seconds
@@ -190,6 +229,8 @@ func (p HeatMapProps) LabelsEnabled() bool {
 	return p.EnableLabels == nil || *p.EnableLabels
 }
 
-// BoolPtr returns a pointer to b — a helper for setting *bool props like
-// EnableLabels (e.g. heatmap.BoolPtr(false)).
-func BoolPtr(b bool) *bool { return &b }
+// GridXEnabled resolves EnableGridX (nil → false, nivo default).
+func (p HeatMapProps) GridXEnabled() bool { return p.EnableGridX != nil && *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → false, nivo default).
+func (p HeatMapProps) GridYEnabled() bool { return p.EnableGridY != nil && *p.EnableGridY }

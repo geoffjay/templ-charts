@@ -5,13 +5,13 @@ import (
 	"strings"
 )
 
-// RenderCircularAxis renders the full circular-axis SVG: a <g translate(center)>
+// renderCircularAxis renders the full circular-axis SVG: a <g translate(center)>
 // containing the domain arc line (an ArcLine) plus one tick per scale value.
 // Mirrors @nivo/polar-axes CircularAxis (minus react-spring; SMIL fade-in
 // when Animate).
 //
 // Returns the SVG fragment string.
-func RenderCircularAxis(props CircularAxisProps) string {
+func renderCircularAxis(props CircularAxisProps) string {
 	tickSize := props.TickSize
 	if tickSize == 0 {
 		tickSize = 5
@@ -71,7 +71,7 @@ func RenderCircularAxis(props CircularAxisProps) string {
 		if props.TickComponent != nil {
 			b.WriteString((*props.TickComponent)(tp))
 		} else {
-			b.WriteString(RenderCircularAxisTick(tp))
+			b.WriteString(renderCircularAxisTick(tp))
 		}
 	}
 
@@ -79,9 +79,9 @@ func RenderCircularAxis(props CircularAxisProps) string {
 	return b.String()
 }
 
-// RenderCircularAxisTick renders one circular-axis tick (line + label).
+// renderCircularAxisTick renders one circular-axis tick (line + label).
 // Mirrors @nivo/polar-axes CircularAxisTick.
-func RenderCircularAxisTick(props CircularAxisTickProps) string {
+func renderCircularAxisTick(props CircularAxisTickProps) string {
 	var b strings.Builder
 	b.WriteString(`<g`)
 	if props.Animate {

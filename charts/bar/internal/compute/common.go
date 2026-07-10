@@ -176,13 +176,14 @@ func ComputeLabelLayout(layout string, reverse bool, labelPosition string, label
 		}
 		if layout == "horizontal" {
 			x := width / 2
-			if labelPosition == "start" {
+			switch labelPosition {
+			case "start":
 				if reverse {
 					x = width
 				} else {
 					x = 0
 				}
-			} else if labelPosition == "end" {
+			case "end":
 				if reverse {
 					x = 0
 				} else {
@@ -201,13 +202,14 @@ func ComputeLabelLayout(layout string, reverse bool, labelPosition string, label
 		}
 		// vertical
 		y := height / 2
-		if labelPosition == "start" {
+		switch labelPosition {
+		case "start":
 			if reverse {
 				y = 0
 			} else {
 				y = height
 			}
-		} else if labelPosition == "end" {
+		case "end":
 			if reverse {
 				y = height
 			} else {

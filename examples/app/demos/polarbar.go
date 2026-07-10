@@ -48,7 +48,7 @@ func PolarBarDemos() []PolarBarDemo {
 				InnerRadius:     0.3,
 				CornerRadius:    3,
 				Padding:         0.1,
-				EnableArcLabels: polarbar.BoolPtr(true),
+				EnableArcLabels: core.BoolPtr(true),
 				Legends: []legends.LegendProps{
 					{Anchor: legends.LegendAnchorRight, Direction: legends.LegendDirectionColumn, TranslateX: 120},
 				},

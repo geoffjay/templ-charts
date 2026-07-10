@@ -19,8 +19,8 @@ func canvasSampleProps() ScatterPlotProps {
 			{ID: "group A", Data: []ScatterPlotDatum{{X: 10.0, Y: 20.0}, {X: 30.0, Y: 40.0}, {X: 55.0, Y: 12.0}}},
 			{ID: "group B", Data: []ScatterPlotDatum{{X: 15.0, Y: 60.0}, {X: 42.0, Y: 33.0}, {X: 70.0, Y: 80.0}}},
 		},
-		EnableGridX: true,
-		EnableGridY: true,
+		EnableGridX: core.BoolPtr(true),
+		EnableGridY: core.BoolPtr(true),
 	}
 }
 

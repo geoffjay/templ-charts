@@ -2,6 +2,7 @@ package marimekko
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/marimekko defaultProps. Fields left zero in a
@@ -12,8 +13,8 @@ var Defaults = MarimekkoProps{
 	OuterPadding: 0,
 	InnerPadding: 3,
 	Colors:       colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
-	EnableGridX:  false,
-	EnableGridY:  true,
+	EnableGridX:  core.BoolPtr(false),
+	EnableGridY:  core.BoolPtr(true),
 	Layers:       DefaultLayers,
 	Role:         "img",
 }

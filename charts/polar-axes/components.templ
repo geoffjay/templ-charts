@@ -1,33 +1,31 @@
 package polaraxes
 
 // CircularAxis renders the full circular axis (domain arc + ticks) as an SVG
-// fragment. The geometry/styling is computed in RenderCircularAxis; this
-// component emits the result for templ-based composition. Mirrors
-// @nivo/polar-axes CircularAxis.
+// fragment for templ-based composition. Mirrors @nivo/polar-axes CircularAxis.
 templ CircularAxis(props CircularAxisProps) {
-	{ RenderCircularAxis(props) }
+	@templ.Raw(renderCircularAxis(props))
 }
 
 // RadialAxis renders a radial axis as an SVG fragment. Mirrors
 // @nivo/polar-axes RadialAxis.
 templ RadialAxis(props RadialAxisProps) {
-	{ RenderRadialAxis(props) }
+	@templ.Raw(renderRadialAxis(props))
 }
 
 // PolarGrid renders the polar grid (radial + circular grid lines) as an SVG
 // fragment. Mirrors @nivo/polar-axes PolarGrid.
 templ PolarGrid(props PolarGridProps) {
-	{ RenderPolarGrid(props) }
+	@templ.Raw(renderPolarGrid(props))
 }
 
 // RadialGrid renders the radial grid lines as an SVG fragment. Mirrors
 // @nivo/polar-axes RadialGrid.
 templ RadialGrid(props RadialGridProps) {
-	{ RenderRadialGrid(props) }
+	@templ.Raw(renderRadialGrid(props))
 }
 
 // CircularGrid renders the circular grid lines as an SVG fragment. Mirrors
 // @nivo/polar-axes CircularGrid.
 templ CircularGrid(props CircularGridProps) {
-	{ RenderCircularGrid(props) }
+	@templ.Raw(renderCircularGrid(props))
 }

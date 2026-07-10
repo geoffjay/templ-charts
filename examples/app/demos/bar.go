@@ -139,7 +139,7 @@ func BarDemos() []Demo {
 				Keys:         []string{"hot dogs", "burgers", "sandwich", "kebab"},
 				Data:         barData(),
 				Margin:       defaultMargin(),
-				EnableTotals: true,
+				EnableTotals: core.BoolPtr(true),
 				TotalsOffset: 12,
 			},
 		},

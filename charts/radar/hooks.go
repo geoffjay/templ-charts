@@ -7,7 +7,7 @@ import (
 
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/internal/curves"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -70,7 +70,7 @@ func UseRadar(props RadarProps) RadarResult {
 	getDotBorderColor := colors.GetInheritedColorGenerator(props.DotBorderColor, theme)
 	format := valueFormatter(props.ValueFormat)
 
-	lineGen := d3shape.NewLine().Curve(core.CurveFromProp(props.Curve))
+	lineGen := d3shape.NewLine().Curve(curves.CurveFromProp(props.Curve))
 
 	series := make([]ComputedSerie, 0, len(props.Keys))
 	allPoints := make([]ComputedPoint, 0, len(props.Keys)*len(props.Data))

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/canvas"
 	"github.com/geoffjay/templ-charts/charts/colors"
@@ -160,14 +161,14 @@ func renderCanvasOverlay(props ScatterPlotProps, result ScatterPlotResult, dims 
 
 func renderGridLayer(props ScatterPlotProps, result ScatterPlotResult, dims core.Dimensions, theme *theming.Theme) string {
 	var s strings.Builder
-	if props.EnableGridX {
+	if props.GridXEnabled() {
 		s.WriteString(renderComponent(axes.Grid(axes.GridProps{
 			Axis: "x", Scale: result.XScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight,
 			TickValues: props.GridXValues, Theme: theme,
 		})))
 	}
-	if props.EnableGridY {
+	if props.GridYEnabled() {
 		s.WriteString(renderComponent(axes.Grid(axes.GridProps{
 			Axis: "y", Scale: result.YScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight,

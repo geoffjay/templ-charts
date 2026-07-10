@@ -52,51 +52,84 @@ type ComputedLayer struct {
 // StreamProps mirrors @nivo/stream StreamSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type StreamProps struct {
+	// Data holds one row per index position; each row maps a layer key to its
+	// value at that index.
 	Data []StreamDatum
+	// Keys names the layers (data keys) to stack, in stacking order.
 	Keys []string
 
+	// Width and Height are the overall SVG dimensions in pixels.
 	Width  float64
 	Height float64
+	// Margin reserves space around the plot area (top/right/bottom/left) in
+	// pixels, e.g. for axes and legends.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
 	Responsive bool
 
-	OffsetType  core.StackOffset
-	Order       core.StackOrder
-	Curve       core.CurveFactoryId
+	// OffsetType is the stack offset applied to the layers
+	// (wiggle/silhouette/expand/diverging/none). Default wiggle.
+	OffsetType core.StackOffset
+	// Order is the stacking order of the layers. Default none (input order).
+	Order core.StackOrder
+	// Curve is the interpolation used for the area outlines. Default
+	// catmullRom.
+	Curve core.CurveFactoryId
+	// ValueFormat is a d3-format spec applied to values (e.g. in tooltips);
+	// empty → %g.
 	ValueFormat string
 
 	// Interactive enables the client-side hover layer (charts/interact): each
 	// area layer emits a data-tc-tooltip. Default false keeps the static render.
 	Interactive bool
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale mapping each layer to a color. Default
+	// is the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// FillOpacity is the fill opacity of each layer area, in [0,1]. Default 1.
 	FillOpacity float64
+	// BorderWidth is the stroke width of each layer outline, in pixels.
+	// Default 0.
 	BorderWidth float64
+	// BorderColor is the layer border color, resolved via the inherited-color
+	// system. Default derives from each layer's fill darkened by 1.0.
 	BorderColor colors.InheritedColorConfig
 
-	EnableGridX bool
-	EnableGridY bool
+	EnableGridX *bool // nil → false (nivo default)
+	EnableGridY *bool // nil → true (nivo default)
+	// GridXValues and GridYValues override the tick positions of the x/y grid
+	// lines; nil lets the scale choose them.
 	GridXValues []any
 	GridYValues []any
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	// AxisTop, AxisRight, AxisBottom and AxisLeft configure the four axes; a nil
+	// pointer hides that axis.
+	AxisTop    *axes.AxisProps
+	AxisRight  *axes.AxisProps
+	AxisBottom *axes.AxisProps
+	AxisLeft   *axes.AxisProps
 
+	// Legends configures the chart legends; empty means no legend.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers selects which layers are rendered and in what order. Defaults to
+	// DefaultLayers.
 	Layers []StreamLayerId
 
-	Role            string
+	// Role is the SVG root's ARIA role. Default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy and AriaDescribedBy set the matching ARIA
+	// attributes on the SVG root for accessibility.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title> and <desc> elements for accessibility.
+	Title string
+	Desc  string
+	// IsFocusable, when true, makes the SVG root keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// stream layer area (600ms). MotionStagger delays successive layers by that
@@ -113,3 +146,9 @@ type StreamResult struct {
 	YScale     scales.Scale
 	LegendData []legends.Datum
 }
+
+// GridXEnabled resolves EnableGridX (nil → false, nivo default).
+func (p StreamProps) GridXEnabled() bool { return p.EnableGridX != nil && *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p StreamProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }

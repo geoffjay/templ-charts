@@ -14,11 +14,11 @@ import (
 // translate (inner width/height × translation fraction), and rotation. width /
 // height are the inner dimensions.
 func buildProjection(b GeoBase, width, height float64, features []Feature) *d3geo.Projection {
-	p := d3geo.ProjectionByType(b.ProjectionType).
+	p := d3geo.ProjectionByType(string(b.ProjectionType)).
 		Rotate(b.ProjectionRotation[0], b.ProjectionRotation[1], b.ProjectionRotation[2])
 	if b.Fit && len(features) > 0 {
 		// Auto-fit the features to the inner frame (d3-geo fitExtent).
-		return p.FitExtent(0, 0, width, height, features)
+		return p.FitExtent(0, 0, width, height, featuresToD3(features))
 	}
 	return p.
 		Scale(b.ProjectionScale).
@@ -35,7 +35,7 @@ func UseGeoMap(props GeoMapProps, width, height float64) GeoResult {
 	for _, f := range props.Features {
 		features = append(features, ComputedFeature{
 			ID:          f.ID,
-			Path:        path.Feature(f),
+			Path:        path.Feature(f.toD3()),
 			FillColor:   props.FillColor,
 			BorderWidth: props.BorderWidth,
 			BorderColor: props.BorderColor,
@@ -44,7 +44,7 @@ func UseGeoMap(props GeoMapProps, width, height float64) GeoResult {
 
 	return GeoResult{
 		Features:      features,
-		GraticulePath: graticulePath(props.EnableGraticule, path),
+		GraticulePath: graticulePath(props.GraticuleEnabled(), path),
 	}
 }
 
@@ -85,7 +85,7 @@ func UseChoropleth(props ChoroplethProps, width, height float64) GeoResult {
 	for _, f := range props.Features {
 		cf := ComputedFeature{
 			ID:          f.ID,
-			Path:        path.Feature(f),
+			Path:        path.Feature(f.toD3()),
 			BorderWidth: props.BorderWidth,
 			BorderColor: props.BorderColor,
 			Label:       f.ID,
@@ -109,7 +109,7 @@ func UseChoropleth(props ChoroplethProps, width, height float64) GeoResult {
 
 	return GeoResult{
 		Features:      features,
-		GraticulePath: graticulePath(props.EnableGraticule, path),
+		GraticulePath: graticulePath(props.GraticuleEnabled(), path),
 		ColorScale:    scale,
 		ValueMin:      lmin,
 		ValueMax:      lmax,

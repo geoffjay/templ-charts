@@ -77,13 +77,14 @@ func computePatternLines(d Def) patternLinesParams {
 	width := spacing
 	height := spacing
 	path := ""
-	if rotation == 0 {
+	switch rotation {
+	case 0:
 		path = fmt.Sprintf("M 0 0 L %s 0 M 0 %s L %s %s",
 			fmtFloat(width), fmtFloat(height), fmtFloat(width), fmtFloat(height))
-	} else if rotation == 90 {
+	case 90:
 		path = fmt.Sprintf("M 0 0 L 0 %s M %s 0 L %s %s",
 			fmtFloat(height), fmtFloat(width), fmtFloat(width), fmtFloat(height))
-	} else {
+	default:
 		width = math.Abs(spacing / math.Sin(degreesToRadians(rotation)))
 		height = spacing / math.Sin(degreesToRadians(90-rotation))
 		if rotation > 0 {

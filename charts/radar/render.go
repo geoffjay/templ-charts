@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -235,7 +236,7 @@ func renderDotsLayer(props RadarProps, result RadarResult) string {
 	fmt.Fprintf(&b, `<g transform="translate(%s,%s)">`, fmtR(result.CenterX), fmtR(result.CenterY))
 	for _, p := range result.Points {
 		label := ""
-		if props.EnableDotLabel {
+		if props.DotLabelEnabled() {
 			label = p.FormattedValue
 		}
 		dp := core.DotsItemProps{

@@ -111,9 +111,19 @@ func parseSpec(spec string) (*formatter, bool) {
 		f.zero = true
 		i++
 	}
+	// Cap width/precision accumulation. A spec like "62222222222229s" or
+	// "99999999999d" would otherwise integer-overflow or drive a multi-terabyte
+	// pad/format allocation. No legitimate chart format needs a field wider or
+	// more precise than this bound.
+	const maxSpecInt = 1000
 	// width (digits)
 	for i < n && spec[i] >= '0' && spec[i] <= '9' {
-		f.width = f.width*10 + int(spec[i]-'0')
+		if f.width < maxSpecInt {
+			f.width = f.width*10 + int(spec[i]-'0')
+			if f.width > maxSpecInt {
+				f.width = maxSpecInt
+			}
+		}
 		i++
 	}
 	// comma / dot (d3 allows comma before or after dot, or comma alone)
@@ -126,7 +136,12 @@ func parseSpec(spec string) (*formatter, bool) {
 		j := i
 		f.precision = 0
 		for i < n && spec[i] >= '0' && spec[i] <= '9' {
-			f.precision = f.precision*10 + int(spec[i]-'0')
+			if f.precision < maxSpecInt {
+				f.precision = f.precision*10 + int(spec[i]-'0')
+				if f.precision > maxSpecInt {
+					f.precision = maxSpecInt
+				}
+			}
 			i++
 		}
 		if i == j {
@@ -187,7 +202,7 @@ func (f *formatter) format(v float64) string {
 		body = strconv.FormatInt(iv, 10)
 		body = f.withSign(body, neg)
 		body = f.withSymbol(body)
-		body = f.applyGrouping(body, neg)
+		body = f.applyGrouping(body)
 		body = f.applyZeroPad(body, neg)
 		return pad(f, body)
 
@@ -268,11 +283,11 @@ func (f *formatter) withSymbol(body string) string {
 
 // applyGrouping inserts ',' every 3 digits in the integer portion. The
 // fractional part (if any) is preserved untouched.
-func (f *formatter) applyGrouping(body string, neg bool) string {
+func (f *formatter) applyGrouping(body string) string {
 	if !f.comma {
 		return body
 	}
-	neg = strings.HasPrefix(body, "-")
+	neg := strings.HasPrefix(body, "-")
 	body = strings.TrimPrefix(body, "-")
 	intPart, fracPart := body, ""
 	if dot := strings.IndexByte(body, '.'); dot >= 0 {
@@ -381,7 +396,7 @@ func (f *formatter) formatFixed(abs float64, neg bool) string {
 		prec = 6
 	}
 	body := strconv.FormatFloat(abs, 'f', prec, 64)
-	body = f.applyGrouping(body, neg)
+	body = f.applyGrouping(body)
 	body = f.withSign(body, neg)
 	body = f.withSymbol(body)
 	body = f.applyZeroPad(body, neg)
@@ -422,7 +437,7 @@ func (f *formatter) formatGeneral(abs float64, neg bool) string {
 		t = 'G'
 	}
 	body := strconv.FormatFloat(abs, t, sigfigs, 64)
-	body = f.applyGrouping(body, neg)
+	body = f.applyGrouping(body)
 	body = f.withSign(body, neg)
 	body = f.withSymbol(body)
 	body = f.applyZeroPad(body, neg)
@@ -451,7 +466,7 @@ func (f *formatter) formatPercent(v float64, neg bool) string {
 		}
 		body = strconv.FormatFloat(abs, 'f', prec, 64)
 	}
-	body = f.applyGrouping(body, neg)
+	body = f.applyGrouping(body)
 	body = f.withSign(body, neg)
 	body = f.withSymbol(body)
 	body = f.applyZeroPad(body, neg)
@@ -472,7 +487,7 @@ func (f *formatter) formatSI(abs float64, neg bool) string {
 	if f.trim {
 		body = trimZeros(body)
 	}
-	body = f.applyGrouping(body, neg)
+	body = f.applyGrouping(body)
 	body = f.withSign(body, neg)
 	body = f.withSymbol(body)
 	if prefix != "" {

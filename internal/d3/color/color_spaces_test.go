@@ -182,7 +182,7 @@ func TestSpaceModifiers(t *testing.T) {
 // TestInterfaceSatisfied is a runtime companion to the compile-time asserts in
 // spaces.go: every space is usable as a Color, and In(SpaceRGB) is identity.
 func TestInterfaceSatisfied(t *testing.T) {
-	var cs []Color = []Color{
+	cs := []Color{
 		RGBColor("#123456"),
 		RGBColor("#123456").HSL(),
 		RGBColor("#123456").Lab(),

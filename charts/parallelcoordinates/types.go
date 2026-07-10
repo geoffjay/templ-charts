@@ -42,7 +42,9 @@ const (
 // PCVariable describes one variable (axis). Mirrors @nivo/parallel-coordinates
 // variable spec.
 type PCVariable struct {
-	Key   string
+	// Key is the datum value key this variable's axis reads.
+	Key string
+	// Type is the variable's scale kind: "linear" or "point".
 	Type  PCScaleType
 	Label string // axis legend; empty → Key
 
@@ -54,7 +56,9 @@ type PCVariable struct {
 	Values []string
 
 	TickCount int // linear tick count hint; 0 → default
-	Padding   float64
+	// Padding is the point scale padding (fraction of step, 0..1) for point
+	// variables; ignored for linear variables.
+	Padding float64
 }
 
 // PCDatum is one record: an id (for color/tooltip) plus a value per variable
@@ -104,21 +108,35 @@ type ComputedLine struct {
 // PCProps mirrors @nivo/parallel-coordinates ParallelCoordinatesSvgProps (the
 // supported subset). Fields left zero fall back to Defaults via applyDefaults.
 type PCProps struct {
-	Data      []PCDatum
+	// Data is the set of records, each drawn as one polyline.
+	Data []PCDatum
+	// Variables define the axes; each owns its scale and layout position.
 	Variables []PCVariable
 
+	// Width and Height are the outer SVG dimensions in pixels; the inner plot
+	// area is these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the inner plot area (for axes and
+	// legends), in pixels.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
 
-	Layout            PCLayout
-	Curve             core.CurveFactoryId
-	LineWidth         float64
+	// Layout is the axis spread orientation, "horizontal" (default, vertical
+	// axes across the width) or "vertical".
+	Layout PCLayout
+	// Curve is the d3-shape curve factory used to connect a datum's points.
+	// Default linear.
+	Curve core.CurveFactoryId
+	// LineWidth is the polyline stroke width in pixels. Default 2.
+	LineWidth float64
+	// LineOpacity is the polyline stroke opacity (0..1). Default 0.5.
 	LineOpacity       float64
 	AxesTicksPosition string // "before" | "after"
 
+	// Colors is the ordinal color scale used to color each datum's line.
+	// Default is the "category10" scheme.
 	Colors colors.OrdinalColorScaleConfig
 
 	// Interactive enables per-line client-side hover tooltips (charts/interact).
@@ -134,18 +152,29 @@ type PCProps struct {
 	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
 	DetectionRadius float64
 
+	// Legends configures zero or more legends describing the data.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers is the ordered list of render layers; default draws lines, axes,
+	// mesh then legends.
 	Layers []PCLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the SVG root ARIA role. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the SVG root.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the SVG root.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the SVG root.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the SVG <title> element.
+	Title string
+	// Desc sets the SVG <desc> element.
+	Desc string
+	// IsFocusable sets tabindex/focusable on the SVG root.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// datum polyline (600ms). MotionStagger delays successive lines by that many

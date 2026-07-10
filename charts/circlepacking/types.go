@@ -33,23 +33,38 @@ type ComputedCircle struct {
 
 // CirclePackingProps mirrors @nivo/circle-packing CirclePackingSvgProps.
 type CirclePackingProps struct {
+	// Data is the root of the input hierarchy laid out as nested circles; each
+	// leaf's area is proportional to its Value.
 	Data CirclePackingNode
 
-	Width  float64
+	// Width is the total chart width in pixels (including Margin).
+	Width float64
+	// Height is the total chart height in pixels (including Margin).
 	Height float64
+	// Margin reserves space around the packed circles.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
 
+	// Padding is the space inserted between adjacent circles by the pack
+	// layout, in pixels. Default 0.
 	Padding float64
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale; each node is colored by its depth.
+	// Default is the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// BorderWidth is the stroke width of each circle's border, in pixels.
+	// Default 0 (no border drawn).
 	BorderWidth float64
+	// BorderColor resolves each circle's border color, typically inherited from
+	// the circle's fill. Only applied when BorderWidth > 0.
 	BorderColor colors.InheritedColorConfig
 
 	ValueFormat string // d3-format spec; empty → %g
 
-	EnableLabels     *bool // nil → false
+	EnableLabels *bool // nil → false
+	// LabelsSkipRadius hides a leaf's label when the circle's radius is smaller
+	// than this value, in pixels. Default 8.
 	LabelsSkipRadius float64
 
 	// Interactive enables per-node client-side hover tooltips (charts/interact).
@@ -59,9 +74,9 @@ type CirclePackingProps struct {
 	// breadcrumb when focused. It only takes effect when ChartID is also set
 	// (htmx mode): clicking a circle applies the d3 zoomable-pack transform so
 	// that node fills the viewport, via GET /charts/{ChartID}/zoom?node=<id>.
-	// Default false → the rendered SVG is byte-identical to the un-zoomable
-	// output.
-	EnableZooming bool
+	// Default false (nil → false) → the rendered SVG is byte-identical to the
+	// un-zoomable output.
+	EnableZooming *bool
 
 	// ChartID is the htmx registry instance id. When set the chart emits hx-*
 	// wiring scoped to this id, mirroring bar/line/pie. Empty for standalone
@@ -73,15 +88,24 @@ type CirclePackingProps struct {
 	// props clone; consumers normally leave it zero.
 	FocusID string
 
+	// Theme overrides the styling theme (colors, fonts, label styles). Nil uses
+	// the default theme.
 	Theme *theming.Theme
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root svg element. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the root svg element. Empty by default.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the root svg element. Empty by default.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the root svg element. Empty by default.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the svg <title> element. Empty by default.
+	Title string
+	// Desc sets the svg <desc> element. Empty by default.
+	Desc string
+	// IsFocusable makes the root svg keyboard-focusable. Defaults to false.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL enter animation on each circle scaling
 	// its radius from 0 to its final value (600ms). MotionStagger delays
@@ -105,8 +129,8 @@ type CirclePackingResult struct {
 	Breadcrumb []Crumb
 }
 
-// BoolPtr returns a pointer to b — a helper for the *bool props.
-func BoolPtr(b bool) *bool { return &b }
-
 // LabelsEnabled resolves EnableLabels (nil → false).
 func (p CirclePackingProps) LabelsEnabled() bool { return p.EnableLabels != nil && *p.EnableLabels }
+
+// ZoomingEnabled resolves EnableZooming (nil → false, nivo default).
+func (p CirclePackingProps) ZoomingEnabled() bool { return p.EnableZooming != nil && *p.EnableZooming }

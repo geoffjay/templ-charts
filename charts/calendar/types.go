@@ -68,19 +68,25 @@ const (
 // CalendarProps is the input to the Calendar component. Mirrors @nivo/calendar
 // commonDefaultProps (supported subset).
 type CalendarProps struct {
+	// Width and Height are the total SVG dimensions in pixels; the grid area is
+	// these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the grid area (for legends).
 	Margin core.Margin
 	// Responsive makes the rendered svg scale fluidly to its container
 	// (viewBox preserved, width:100%;height:auto) instead of a fixed pixel
 	// size. See core.SvgWrapperProps.Responsive.
 	Responsive bool
-	Data       []CalendarDatum
+	// Data holds one entry per day with a value; days are keyed "YYYY-MM-DD".
+	Data []CalendarDatum
 
 	// From/To bound the rendered range. When zero, derived from the data days.
 	From time.Time
 	To   time.Time
 
+	// Direction lays out weeks as columns ("horizontal", default) or rows
+	// ("vertical").
 	Direction CalendarDirection
 
 	// Interactive enables the client-side hover layer (charts/interact): each
@@ -88,17 +94,23 @@ type CalendarProps struct {
 	Interactive bool
 
 	// Colors is the quantize palette (value → bucket → color).
-	Colors     []string
+	Colors []string
+	// EmptyColor is the fill for days with no data; default "#ffffff".
 	EmptyColor string
 
 	// MinValue/MaxValue bound the color domain; nil Min → 0, nil Max → data max.
 	MinValue *float64
 	MaxValue *float64
 
+	// YearSpacing is the gap in pixels between year blocks; default 30.
+	// MonthSpacing and DaySpacing are the gaps in pixels between months and
+	// between day cells; both default 0.
 	YearSpacing  float64
 	MonthSpacing float64
 	DaySpacing   float64
 
+	// DayBorderWidth is the day cell border width in pixels; default 1.
+	// DayBorderColor is that border's color; default "#000000".
 	DayBorderWidth float64
 	DayBorderColor string
 
@@ -116,14 +128,20 @@ type CalendarProps struct {
 	EnableMonthLegends *bool
 	EnableYearLegends  *bool
 
-	Theme           *theming.Theme
-	Role            string
+	// Theme overrides chart styling; nil → theming.DefaultTheme.
+	Theme *theming.Theme
+	// Role is the root SVG ARIA role; default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy, and AriaDescribedBy set the corresponding SVG
+	// accessibility attributes.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title>/<desc> elements.
+	Title string
+	Desc  string
+	// IsFocusable makes the SVG keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// day cell (600ms). MotionStagger delays successive cells by that many
@@ -142,9 +160,6 @@ func (p CalendarProps) MonthLegendsEnabled() bool {
 func (p CalendarProps) YearLegendsEnabled() bool {
 	return p.EnableYearLegends == nil || *p.EnableYearLegends
 }
-
-// BoolPtr returns a pointer to b — a helper for the *bool props.
-func BoolPtr(b bool) *bool { return &b }
 
 // CalendarResult is the computed model produced by UseCalendar.
 type CalendarResult struct {

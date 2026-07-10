@@ -5,8 +5,8 @@ package core
 // "wobbly", "stiff" in nivo). templ-charts uses fixed 600ms ease enter
 // animations and treats MotionConfig as an opaque label.
 type MotionProps struct {
-	Animate      bool
-	MotionConfig string
+	Animate      bool   // gates SMIL enter animations (nivo default: true)
+	MotionConfig string // spring preset label, e.g. "gentle" (opaque in templ-charts)
 }
 
 // DefaultAnimate is nivo's defaultAnimate = true.

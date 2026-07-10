@@ -5,6 +5,7 @@ import (
 
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/internal/curves"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
 	d3shape "github.com/geoffjay/templ-charts/internal/d3/shape"
@@ -14,7 +15,7 @@ import (
 // produces an SVG line path-data string from a slice of {x,y} points, using
 // the given curve and honoring null positions (defined = x!=null && y!=null).
 func UseLineGenerator(curve core.CurveFactoryId) LineGenerator {
-	curveFactory := core.CurveFromProp(curve)
+	curveFactory := curves.CurveFromProp(curve)
 	gen := d3shape.NewLineTyped[PointXY](
 		func(d PointXY, _ int, _ []PointXY) float64 { return d.X },
 		func(d PointXY, _ int, _ []PointXY) float64 { return d.Y },
@@ -32,7 +33,7 @@ func UseLineGenerator(curve core.CurveFactoryId) LineGenerator {
 // produces an SVG area path from points, with the baseline at
 // yScale(areaBaselineValue).
 func UseAreaGenerator(curve core.CurveFactoryId, yScale scales.Scale, areaBaselineValue float64) AreaGenerator {
-	curveFactory := core.CurveFromProp(curve)
+	curveFactory := curves.CurveFromProp(curve)
 	baseline := yScale.Call(areaBaselineValue)
 	gen := d3shape.NewAreaTyped[PointXY](
 		func(d PointXY, _ int, _ []PointXY) float64 { return d.X },

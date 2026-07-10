@@ -30,7 +30,7 @@ func UseCalendar(props CalendarProps) CalendarResult {
 		}
 	}
 	if len(byDay) == 0 {
-		minV, maxV = 0, 0
+		maxV = 0
 	}
 	domainMin := 0.0
 	if props.MinValue != nil {

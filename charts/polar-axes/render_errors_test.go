@@ -1,4 +1,4 @@
-package polaraxes_test
+package polaraxes
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"github.com/a-h/templ"
 	templruntime "github.com/a-h/templ/runtime"
 
-	polaraxes "github.com/geoffjay/templ-charts/charts/polar-axes"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
@@ -33,26 +32,26 @@ func (w *failAfterWriter) Write(p []byte) (int, error) {
 
 func polarComponents() map[string]templ.Component {
 	return map[string]templ.Component{
-		"circular-axis": polaraxes.CircularAxis(polaraxes.CircularAxisProps{
-			Type: polaraxes.CircularAxisOuter, Radius: 80,
+		"circular-axis": CircularAxis(CircularAxisProps{
+			Type: CircularAxisOuter, Radius: 80,
 			StartAngle: 0, EndAngle: 360,
 			Scale: angleScale(), Theme: &theming.DefaultTheme,
 		}),
-		"radial-axis": polaraxes.RadialAxis(polaraxes.RadialAxisProps{
+		"radial-axis": RadialAxis(RadialAxisProps{
 			Angle: 0, Scale: radiusScale(),
-			TicksPosition: polaraxes.TicksAfter, Theme: &theming.DefaultTheme,
+			TicksPosition: TicksAfter, Theme: &theming.DefaultTheme,
 		}),
-		"polar-grid": polaraxes.PolarGrid(polaraxes.PolarGridProps{
+		"polar-grid": PolarGrid(PolarGridProps{
 			EnableRadialGrid: true, AngleScale: angleScale(),
 			EnableCircularGrid: true, RadiusScale: radiusScale(),
 			StartAngle: 0, EndAngle: 360, OuterRadius: 100,
 			Theme: &theming.DefaultTheme,
 		}),
-		"radial-grid": polaraxes.RadialGrid(polaraxes.RadialGridProps{
+		"radial-grid": RadialGrid(RadialGridProps{
 			Scale: angleScale(), InnerRadius: 10, OuterRadius: 90,
 			Theme: &theming.DefaultTheme,
 		}),
-		"circular-grid": polaraxes.CircularGrid(polaraxes.CircularGridProps{
+		"circular-grid": CircularGrid(CircularGridProps{
 			Scale: radiusScale(), StartAngle: 0, EndAngle: 360,
 			Theme: &theming.DefaultTheme,
 		}),

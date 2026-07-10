@@ -79,7 +79,7 @@ func TestSankey_VerticalGolden(t *testing.T) {
 
 func TestSankey_GradientGolden(t *testing.T) {
 	p := baseProps()
-	p.EnableLinkGradient = true
+	p.EnableLinkGradient = core.BoolPtr(true)
 	out := renderChart(t, p)
 	if !strings.Contains(out, "<linearGradient") {
 		t.Errorf("gradient sankey should emit a <linearGradient>")

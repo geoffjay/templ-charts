@@ -45,7 +45,7 @@ svg, _ := render.String(geo.Choropleth(geo.ChoroplethProps{
 					// Explicit Natural Earth projection spanning the inner width
 					// (Fit/fitExtent NaNs on the world MultiPolygons; the /geo demo
 					// page uses this same explicit-scale approach).
-					ProjectionType:  "naturalEarth1",
+					ProjectionType:  geo.ProjectionNaturalEarth1,
 					ProjectionScale: (720 - 20) / (2 * 2.73),
 					BorderWidth:     0.4,
 					BorderColor:     "#152238",

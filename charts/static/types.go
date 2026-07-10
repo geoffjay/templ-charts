@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -50,15 +51,6 @@ type Mapping struct {
 // defaultMargin is the static-render margin applied to any family whose Margin
 // prop is left zero (matches the legacy bar/line/pie behaviour).
 var defaultMargin = core.Margin{Top: 40, Right: 50, Bottom: 40, Left: 50}
-
-// staticProps mirrors nivo's staticProps: the base overrides applied to every
-// static render (no animation, no interactivity, no wrapper, empty theme).
-var staticProps = map[string]any{
-	"animate":       false,
-	"isInteractive": false,
-	"renderWrapper": false,
-	"theme":         map[string]any{},
-}
 
 // RenderChart mirrors @nivo/static renderChart: applies staticProps +
 // chart.defaults + props + whitelisted override, renders to SVG string.

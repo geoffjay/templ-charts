@@ -27,7 +27,7 @@ func StylingDemos() []Demo {
 				Curve:  core.CurveMonotoneX,
 				Data:   stylingLineData(),
 
-				EnableArea:  true,
+				EnableArea:  core.BoolPtr(true),
 				AreaOpacity: 1,
 				LineWidth:   3,
 
@@ -40,7 +40,7 @@ func StylingDemos() []Demo {
 				Fill: []core.DefRule{{ID: "lineAreaGrad", Match: "*"}},
 
 				UseMesh:         true,
-				EnableCrosshair: true,
+				EnableCrosshair: core.BoolPtr(true),
 			},
 		},
 		{
@@ -157,7 +157,7 @@ func StylingDemos() []Demo {
 				Curve:  core.CurveMonotoneX,
 				Data:   stylingLineData(),
 
-				EnableArea:    true,
+				EnableArea:    core.BoolPtr(true),
 				AreaOpacity:   0.55,
 				AreaBlendMode: core.MixBlendMultiply,
 				LineWidth:     2,

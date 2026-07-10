@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -83,13 +84,13 @@ func scaleAxes(props MarimekkoProps, result MarimekkoResult) (xScale, yScale sca
 func renderGridLayer(props MarimekkoProps, result MarimekkoResult, dims core.Dimensions, theme *theming.Theme) string {
 	xScale, yScale := scaleAxes(props, result)
 	var s strings.Builder
-	if props.EnableGridX {
+	if props.GridXEnabled() {
 		s.WriteString(renderComponent(axes.Grid(axes.GridProps{
 			Axis: "x", Scale: xScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight, Theme: theme,
 		})))
 	}
-	if props.EnableGridY {
+	if props.GridYEnabled() {
 		s.WriteString(renderComponent(axes.Grid(axes.GridProps{
 			Axis: "y", Scale: yScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight, Theme: theme,

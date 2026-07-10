@@ -445,10 +445,8 @@ func createTimeScale(spec ScaleTimeSpec, data ComputedSerieAxis, size float64) S
 		}
 	}
 	useUTC := spec.UseUTC
-	if useUTC {
-		// d3 scaleUtc not in port; use local time scale with UTC-normalized
-		// instants. This is acceptable for chart use.
-	}
+	// d3 scaleUtc not in port; use local time scale with UTC-normalized
+	// instants. This is acceptable for chart use.
 	s := d3scale.NewTime().SetUseUTC(useUTC)
 	s.SetRange(0, size)
 	if !minT.IsZero() && !maxT.IsZero() {

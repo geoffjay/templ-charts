@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 

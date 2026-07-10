@@ -56,7 +56,7 @@ func TestSunburst_Golden(t *testing.T) {
 
 func TestSunburst_GoldenArcLabels(t *testing.T) {
 	p := baseProps()
-	p.EnableArcLabels = sunburst.BoolPtr(true)
+	p.EnableArcLabels = core.BoolPtr(true)
 	golden.Assert(t, "sunburst-arc-labels", renderChart(t, p))
 }
 
@@ -106,7 +106,7 @@ func TestSunburst_ZoomOffNoZoomAttrs(t *testing.T) {
 		t.Errorf("default sunburst must not emit /zoom hx-get")
 	}
 	p := baseProps()
-	p.EnableZooming = true // no ChartID → still off
+	p.EnableZooming = core.BoolPtr(true) // no ChartID → still off
 	if strings.Contains(renderChart(t, p), "/zoom?node=") {
 		t.Errorf("sunburst with EnableZooming but no ChartID must not emit /zoom hx-get")
 	}
@@ -114,7 +114,7 @@ func TestSunburst_ZoomOffNoZoomAttrs(t *testing.T) {
 
 func TestSunburst_ZoomOnEmitsZoomTargets(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "sb1"
 	out := renderChart(t, p)
 	for _, id := range []string{"A", "B", "C", "a1", "a2", "b1"} {
@@ -129,7 +129,7 @@ func TestSunburst_ZoomOnEmitsZoomTargets(t *testing.T) {
 
 func TestSunburst_ZoomedShowsBreadcrumb(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "sb1"
 	p.FocusID = "A"
 	out := renderChart(t, p)
@@ -143,14 +143,14 @@ func TestSunburst_ZoomedShowsBreadcrumb(t *testing.T) {
 
 func TestSunburst_GoldenZoomable(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "sb1"
 	golden.Assert(t, "sunburst-zoomable", renderChart(t, p))
 }
 
 func TestSunburst_GoldenZoomed(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "sb1"
 	p.FocusID = "A"
 	golden.Assert(t, "sunburst-zoomed", renderChart(t, p))

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
@@ -45,7 +46,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 // EnableZooming plus a ChartID (htmx mode). Static/standalone renders stay
 // byte-identical.
 func zoomEnabled(props IcicleProps) bool {
-	return props.EnableZooming && props.ChartID != ""
+	return props.ZoomingEnabled() && props.ChartID != ""
 }
 
 // renderRects draws the icicle rects and optional labels.

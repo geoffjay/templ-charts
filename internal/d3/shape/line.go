@@ -15,10 +15,6 @@ import "math"
 // data type via accessor functions.
 type Point2D [2]float64
 
-// accessor default for x: p[0]
-func defaultX(p Point2D) float64 { return p[0] }
-func defaultY(p Point2D) float64 { return p[1] }
-
 // FloatAccessor extracts a float64 from a datum of type D.
 type FloatAccessor[D any] func(d D, i int, data []D) float64
 

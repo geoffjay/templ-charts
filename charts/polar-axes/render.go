@@ -11,13 +11,6 @@ import (
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
 
-// renderOpts is the resolved styling shared by the polar-axis renderers.
-type renderOpts struct {
-	axis    theming.AxisTheme
-	grid    theming.GridTheme
-	animate bool
-}
-
 // resolveAxisTheme mirrors @nivo/theming useExtendedAxisTheme: merges optional
 // overrides onto the theme's axis block (falling back to the default theme).
 func resolveAxisTheme(theme *theming.Theme, overrides *theming.PartialAxisTheme) theming.AxisTheme {

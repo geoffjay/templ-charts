@@ -42,7 +42,7 @@ func IcicleDemos() []IcicleDemo {
 				Margin:       core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
 				Data:         icicleSample(),
 				Orientation:  icicle.OrientationRight,
-				EnableLabels: icicle.BoolPtr(true),
+				EnableLabels: core.BoolPtr(true),
 			},
 		},
 	}

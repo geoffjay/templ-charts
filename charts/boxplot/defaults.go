@@ -2,6 +2,7 @@ package boxplot
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/boxplot svgDefaultProps. Fields left zero in a
@@ -14,8 +15,8 @@ var Defaults = BoxPlotProps{
 	Opacity:         1,
 	ActiveOpacity:   1,
 	InactiveOpacity: 0.25,
-	EnableGridX:     false,
-	EnableGridY:     true,
+	EnableGridX:     core.BoolPtr(false),
+	EnableGridY:     core.BoolPtr(true),
 	ColorBy:         "subGroup",
 	Colors:          colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 	BorderRadius:    0,

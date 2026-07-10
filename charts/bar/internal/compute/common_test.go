@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/geoffjay/templ-charts/charts/bar/compute"
+	"github.com/geoffjay/templ-charts/charts/bar/internal/compute"
 	"github.com/geoffjay/templ-charts/charts/scales"
 )
 

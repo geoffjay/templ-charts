@@ -73,11 +73,16 @@ var DefaultLayers = []NetworkLayerId{NetworkLayerLinks, NetworkLayerNodes, Netwo
 // NetworkProps mirrors @nivo/network NetworkSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type NetworkProps struct {
+	// Nodes are the graph nodes to lay out and draw.
 	Nodes []NetworkInputNode
+	// Links are the edges connecting nodes by their ids.
 	Links []NetworkInputLink
 
+	// Width and Height are the outer SVG dimensions in pixels; the inner layout
+	// area is these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the inner layout area, in pixels.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
@@ -92,11 +97,15 @@ type NetworkProps struct {
 	DistanceMax       float64 // 0 → +Inf
 	Iterations        int
 
-	NodeSize        float64
-	NodeColor       string // default node fill; per-node Color overrides
+	// NodeSize is the default node radius in pixels; per-node Size overrides.
+	// Default 12.
+	NodeSize  float64
+	NodeColor string // default node fill; per-node Color overrides
+	// NodeBorderWidth is the node stroke width in pixels. Default 0 (no border).
 	NodeBorderWidth float64
 	NodeBorderColor string // "" → inherit node color
 
+	// LinkThickness is the link stroke width in pixels. Default 1.
 	LinkThickness float64
 	LinkColor     string // "" → inherit source node color
 
@@ -134,16 +143,26 @@ type NetworkProps struct {
 	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
 	DetectionRadius float64
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers is the ordered list of render layers; default draws links, nodes,
+	// mesh then annotations.
 	Layers []NetworkLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the SVG root ARIA role. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the SVG root.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the SVG root.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the SVG root.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the SVG <title> element.
+	Title string
+	// Desc sets the SVG <desc> element.
+	Desc string
+	// IsFocusable sets tabindex/focusable on the SVG root.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL enter animation on each node scaling its
 	// radius from 0 to its final value (600ms). MotionStagger delays successive

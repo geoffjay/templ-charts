@@ -80,7 +80,7 @@ func DashboardDemos() []Demo {
 				Responsive: true,
 
 				LineWidth:   2.5,
-				EnableArea:  true,
+				EnableArea:  core.BoolPtr(true),
 				AreaOpacity: 1,
 				Defs: []core.Def{
 					core.LinearGradientDef("dashAreaGrad", []core.GradientStop{
@@ -91,7 +91,7 @@ func DashboardDemos() []Demo {
 				Fill: []core.DefRule{{ID: "dashAreaGrad", Match: "*"}},
 
 				UseMesh:         true,
-				EnableCrosshair: true,
+				EnableCrosshair: core.BoolPtr(true),
 				Legends: []legends.LegendProps{
 					{
 						Anchor: legends.LegendAnchorBottom, Direction: legends.LegendDirectionRow,

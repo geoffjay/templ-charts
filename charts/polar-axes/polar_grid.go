@@ -7,11 +7,11 @@ import (
 	"github.com/geoffjay/templ-charts/charts/scales"
 )
 
-// RenderPolarGrid renders the polar grid: a <g translate(center)> containing
+// renderPolarGrid renders the polar grid: a <g translate(center)> containing
 // the optional radial grid (rays from inner to outer radius at each angle
 // tick) and the optional circular grid (concentric arcs at each radius tick).
 // Mirrors @nivo/polar-axes PolarGrid.
-func RenderPolarGrid(props PolarGridProps) string {
+func renderPolarGrid(props PolarGridProps) string {
 	if props.Theme == nil {
 		return ""
 	}
@@ -19,7 +19,7 @@ func RenderPolarGrid(props PolarGridProps) string {
 	var b strings.Builder
 	fmt.Fprintf(&b, `<g transform="translate(%s,%s)">`, fmtN(props.Center[0]), fmtN(props.Center[1]))
 	if props.EnableRadialGrid {
-		b.WriteString(RenderRadialGrid(RadialGridProps{
+		b.WriteString(renderRadialGrid(RadialGridProps{
 			Scale:       props.AngleScale,
 			InnerRadius: props.InnerRadius,
 			OuterRadius: props.OuterRadius,
@@ -28,7 +28,7 @@ func RenderPolarGrid(props PolarGridProps) string {
 		}))
 	}
 	if props.EnableCircularGrid {
-		b.WriteString(RenderCircularGrid(CircularGridProps{
+		b.WriteString(renderCircularGrid(CircularGridProps{
 			Scale:      props.RadiusScale,
 			Ticks:      props.CircularGridTicks,
 			StartAngle: props.StartAngle,
@@ -41,10 +41,10 @@ func RenderPolarGrid(props PolarGridProps) string {
 	return b.String()
 }
 
-// RenderRadialGrid renders the radial grid lines: for each angle tick of
+// renderRadialGrid renders the radial grid lines: for each angle tick of
 // `scale`, a <g rotate(angle-90)> containing a horizontal <line> from
 // innerRadius to outerRadius. Mirrors @nivo/polar-axes RadialGrid.
-func RenderRadialGrid(props RadialGridProps) string {
+func renderRadialGrid(props RadialGridProps) string {
 	values := scales.GetScaleTicks(props.Scale, props.Ticks)
 	grid := resolveGridTheme(props.Theme)
 	stroke := strokeFromExtra(grid.Line.Extra)
@@ -72,10 +72,10 @@ func RenderRadialGrid(props RadialGridProps) string {
 	return b.String()
 }
 
-// RenderCircularGrid renders the circular grid lines: for each radius tick
+// renderCircularGrid renders the circular grid lines: for each radius tick
 // of `scale`, an arc path from startAngle to endAngle at that radius. Mirrors
 // @nivo/polar-axes CircularGrid (which uses @nivo/arcs ArcLine).
-func RenderCircularGrid(props CircularGridProps) string {
+func renderCircularGrid(props CircularGridProps) string {
 	values := scales.GetScaleTicks(props.Scale, props.Ticks)
 	grid := resolveGridTheme(props.Theme)
 	stroke := strokeFromExtra(grid.Line.Extra)

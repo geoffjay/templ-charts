@@ -20,14 +20,14 @@ type Def struct {
 	Colors []GradientStop
 
 	// Pattern fields shared by dots/lines/squares.
-	Background string
-	Color      string
-	Size       float64
-	Padding    float64
-	Stagger    bool
-	Spacing    float64
-	Rotation   float64
-	LineWidth  float64
+	Background string  // pattern background color; "inherit" resolves to the node color
+	Color      string  // pattern foreground color; "inherit" resolves to the node color
+	Size       float64 // dot diameter / square side length, in px (dots & squares)
+	Padding    float64 // gap between adjacent pattern elements, in px (dots & squares)
+	Stagger    bool    // when true, offsets alternating rows for a staggered layout (dots & squares)
+	Spacing    float64 // gap between adjacent lines, in px (lines)
+	Rotation   float64 // line rotation, in degrees (lines)
+	LineWidth  float64 // line stroke width, in px (lines)
 
 	// Spreading extra options (x1/x2/y1/y2 for gradients, etc.) via Raw.
 	Raw map[string]any
@@ -35,9 +35,9 @@ type Def struct {
 
 // GradientStop is a single color stop in a linearGradient.
 type GradientStop struct {
-	Offset  float64
-	Color   string
-	Opacity float64
+	Offset  float64 // stop position along the gradient, in percent (0–100)
+	Color   string  // stop color; "inherit" resolves to the node color when bound
+	Opacity float64 // stop opacity (0–1); values <= 0 render as fully opaque (1)
 }
 
 // DefType constants.
@@ -54,12 +54,15 @@ func LinearGradientDef(id string, colors []GradientStop, options map[string]any)
 	return Def{ID: id, Type: DefTypeLinearGradient, Colors: colors, Raw: options}
 }
 
+// PatternDotsDefaults holds the default props for a patternDots def.
+type PatternDotsDefaults struct {
+	Color, Background string  // default dot and background colors
+	Size, Padding     float64 // default dot diameter and inter-dot gap, in px
+	Stagger           bool    // default staggered-layout toggle
+}
+
 // PatternDotsDefDefaultProps mirrors nivo's PatternDotsDefaultProps.
-var PatternDotsDefDefaultProps = struct {
-	Color, Background string
-	Size, Padding     float64
-	Stagger           bool
-}{
+var PatternDotsDefDefaultProps = PatternDotsDefaults{
 	Color: "#000000", Background: "#ffffff", Size: 4, Padding: 4, Stagger: false,
 }
 
@@ -68,12 +71,15 @@ func PatternDotsDef(id string, options map[string]any) Def {
 	return Def{ID: id, Type: DefTypePatternDots, Raw: options}
 }
 
+// PatternLinesDefaults holds the default props for a patternLines def.
+type PatternLinesDefaults struct {
+	Spacing, Rotation float64 // default gap between lines (px) and line rotation (degrees)
+	Background, Color string  // default background and line colors
+	LineWidth         float64 // default line stroke width, in px
+}
+
 // PatternLinesDefDefaultProps mirrors nivo's PatternLinesDefaultProps.
-var PatternLinesDefDefaultProps = struct {
-	Spacing, Rotation float64
-	Background, Color string
-	LineWidth         float64
-}{
+var PatternLinesDefDefaultProps = PatternLinesDefaults{
 	Spacing: 5, Rotation: 0, Background: "#000000", Color: "#ffffff", LineWidth: 2,
 }
 
@@ -82,12 +88,15 @@ func PatternLinesDef(id string, options map[string]any) Def {
 	return Def{ID: id, Type: DefTypePatternLines, Raw: options}
 }
 
+// PatternSquaresDefaults holds the default props for a patternSquares def.
+type PatternSquaresDefaults struct {
+	Color, Background string  // default square and background colors
+	Size, Padding     float64 // default square side length and inter-square gap, in px
+	Stagger           bool    // default staggered-layout toggle
+}
+
 // PatternSquaresDefDefaultProps mirrors nivo's PatternSquaresDefaultProps.
-var PatternSquaresDefDefaultProps = struct {
-	Color, Background string
-	Size, Padding     float64
-	Stagger           bool
-}{
+var PatternSquaresDefDefaultProps = PatternSquaresDefaults{
 	Color: "#000000", Background: "#ffffff", Size: 4, Padding: 4, Stagger: false,
 }
 
@@ -100,6 +109,8 @@ func PatternSquaresDef(id string, options map[string]any) Def {
 // and the per-node fill overrides keyed by node index. Mirrors nivo's
 // bindDefs return value (mutated nodes + bound defs list).
 type SvgDefsAndFill struct {
+	// Defs is the expanded defs list to render, including any inheritance-
+	// generated variants produced while binding rules to nodes.
 	Defs []Def
 	// FillByNodeIndex maps a node index to a fill override ("url(#id)").
 	// Charts apply this to each node's fill attr when rendering.
@@ -110,8 +121,8 @@ type SvgDefsAndFill struct {
 // either "*" (match all), a func(any) bool, or a map[string]any compared by
 // equality against a subset of the node's (or node.data's) properties.
 type DefRule struct {
-	ID    string
-	Match any // "*" | func(any) bool | map[string]any
+	ID    string // id of the Def to apply to nodes matching Match
+	Match any    // "*" | func(any) bool | map[string]any
 }
 
 // BindDefs mirrors @nivo/core lib/defs.js bindDefs: given base defs, nodes,
@@ -131,9 +142,6 @@ func BindDefs(
 ) SvgDefsAndFill {
 	if colorKey == "" {
 		colorKey = "color"
-	}
-	if targetKey == "" {
-		targetKey = "fill"
 	}
 	out := SvgDefsAndFill{FillByNodeIndex: map[int]string{}}
 	if len(defs) == 0 || len(nodes) == 0 {

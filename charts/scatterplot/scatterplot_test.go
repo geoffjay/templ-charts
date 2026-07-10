@@ -26,8 +26,8 @@ func baseProps() scatterplot.ScatterPlotProps {
 		Width: 500, Height: 400,
 		Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
 		Data:        sampleData(),
-		EnableGridX: true,
-		EnableGridY: true,
+		EnableGridX: core.BoolPtr(true),
+		EnableGridY: core.BoolPtr(true),
 	}
 }
 
@@ -60,8 +60,8 @@ func TestScatterPlot_NodeCount(t *testing.T) {
 
 func TestScatterPlot_GridDisabled(t *testing.T) {
 	p := baseProps()
-	p.EnableGridX = false
-	p.EnableGridY = false
+	p.EnableGridX = core.BoolPtr(false)
+	p.EnableGridY = core.BoolPtr(false)
 	withGrid := strings.Count(renderChart(t, baseProps()), "<line")
 	noGrid := strings.Count(renderChart(t, p), "<line")
 	if noGrid >= withGrid {
@@ -76,8 +76,8 @@ func TestScatterPlot_Golden(t *testing.T) {
 
 func TestScatterPlot_GoldenNoGrid(t *testing.T) {
 	p := baseProps()
-	p.EnableGridX = false
-	p.EnableGridY = false
+	p.EnableGridX = core.BoolPtr(false)
+	p.EnableGridY = core.BoolPtr(false)
 	golden.Assert(t, "scatterplot-no-grid", renderChart(t, p))
 }
 

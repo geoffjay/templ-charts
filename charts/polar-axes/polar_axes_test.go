@@ -17,7 +17,7 @@ func mustLinearScale(t *testing.T, min, max float64, size float64) scales.Scale 
 
 func TestRenderCircularGrid_EmitsArcPaths(t *testing.T) {
 	radiusScale := mustLinearScale(t, 0, 100, 100)
-	svg := RenderCircularGrid(CircularGridProps{
+	svg := renderCircularGrid(CircularGridProps{
 		Scale:      radiusScale,
 		StartAngle: 0,
 		EndAngle:   270,
@@ -33,7 +33,7 @@ func TestRenderCircularGrid_EmitsArcPaths(t *testing.T) {
 
 func TestRenderRadialGrid_EmitsLines(t *testing.T) {
 	angleScale := mustLinearScale(t, 0, 360, 360)
-	svg := RenderRadialGrid(RadialGridProps{
+	svg := renderRadialGrid(RadialGridProps{
 		Scale:       angleScale,
 		InnerRadius: 20,
 		OuterRadius: 100,
@@ -47,7 +47,7 @@ func TestRenderRadialGrid_EmitsLines(t *testing.T) {
 func TestRenderPolarGrid_ComposesBoth(t *testing.T) {
 	angleScale := mustLinearScale(t, 0, 360, 360)
 	radiusScale := mustLinearScale(t, 0, 100, 100)
-	svg := RenderPolarGrid(PolarGridProps{
+	svg := renderPolarGrid(PolarGridProps{
 		Center:             [2]float64{200, 200},
 		EnableRadialGrid:   true,
 		AngleScale:         angleScale,
@@ -69,7 +69,7 @@ func TestRenderPolarGrid_ComposesBoth(t *testing.T) {
 
 func TestRenderCircularAxis_IncludesDomainAndTicks(t *testing.T) {
 	angleScale := mustLinearScale(t, 0, 360, 360)
-	svg := RenderCircularAxis(CircularAxisProps{
+	svg := renderCircularAxis(CircularAxisProps{
 		Type:       CircularAxisOuter,
 		Center:     [2]float64{100, 100},
 		Radius:     80,
@@ -91,7 +91,7 @@ func TestRenderCircularAxis_IncludesDomainAndTicks(t *testing.T) {
 
 func TestRenderRadialAxis_RotatesToAngle(t *testing.T) {
 	scale := mustLinearScale(t, 0, 10, 100)
-	svg := RenderRadialAxis(RadialAxisProps{
+	svg := renderRadialAxis(RadialAxisProps{
 		Center:        [2]float64{100, 100},
 		Angle:         90,
 		Scale:         scale,
@@ -107,7 +107,7 @@ func TestRenderRadialAxis_RotatesToAngle(t *testing.T) {
 }
 
 func TestRenderPolarGrid_NilThemeReturnsEmpty(t *testing.T) {
-	svg := RenderPolarGrid(PolarGridProps{Theme: nil})
+	svg := renderPolarGrid(PolarGridProps{Theme: nil})
 	if svg != "" {
 		t.Fatalf("nil theme should yield empty svg, got %q", svg)
 	}

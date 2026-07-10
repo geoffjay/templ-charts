@@ -99,7 +99,7 @@ func TestIcicle_ZoomOffNoZoomAttrs(t *testing.T) {
 		t.Errorf("default icicle must not emit /zoom hx-get")
 	}
 	p := baseProps()
-	p.EnableZooming = true // no ChartID → still off
+	p.EnableZooming = core.BoolPtr(true) // no ChartID → still off
 	if strings.Contains(renderChart(t, p), "/zoom?node=") {
 		t.Errorf("icicle with EnableZooming but no ChartID must not emit /zoom hx-get")
 	}
@@ -107,7 +107,7 @@ func TestIcicle_ZoomOffNoZoomAttrs(t *testing.T) {
 
 func TestIcicle_ZoomOnEmitsZoomTargets(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "ic1"
 	out := renderChart(t, p)
 	for _, id := range []string{"A", "B", "C", "a1", "a2", "b1"} {
@@ -122,7 +122,7 @@ func TestIcicle_ZoomOnEmitsZoomTargets(t *testing.T) {
 
 func TestIcicle_ZoomedShowsBreadcrumb(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "ic1"
 	p.FocusID = "A"
 	out := renderChart(t, p)
@@ -138,14 +138,14 @@ func TestIcicle_ZoomedShowsBreadcrumb(t *testing.T) {
 
 func TestIcicle_GoldenZoomable(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "ic1"
 	golden.Assert(t, "icicle-zoomable", renderChart(t, p))
 }
 
 func TestIcicle_GoldenZoomed(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "ic1"
 	p.FocusID = "A"
 	golden.Assert(t, "icicle-zoomed", renderChart(t, p))

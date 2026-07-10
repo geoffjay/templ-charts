@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -48,7 +49,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 // zoomEnabled reports whether click-to-zoom wiring should be emitted: gated on
 // EnableZooming plus a ChartID (htmx mode). Static renders stay byte-identical.
 func zoomEnabled(props SunburstProps) bool {
-	return props.EnableZooming && props.ChartID != ""
+	return props.ZoomingEnabled() && props.ChartID != ""
 }
 
 // renderArcs draws the sunburst arcs (and optional labels) via charts/arcs.

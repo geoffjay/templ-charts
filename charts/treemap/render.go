@@ -1,25 +1,17 @@
 package treemap
 
 import (
-	"context"
 	"math"
 	"strconv"
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/theming"
 )
-
-func renderComponent(c templ.Component) string {
-	var b strings.Builder
-	if err := c.Render(context.Background(), &b); err != nil {
-		return ""
-	}
-	return b.String()
-}
 
 // applyDefaults fills zero-valued TreemapProps fields from Defaults.
 func applyDefaults(p TreemapProps) TreemapProps {
@@ -57,7 +49,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 // zoomEnabled reports whether click-to-zoom wiring should be emitted: gated on
 // EnableZooming plus a ChartID (htmx mode). Static renders stay byte-identical.
 func zoomEnabled(props TreemapProps) bool {
-	return props.EnableZooming && props.ChartID != ""
+	return props.ZoomingEnabled() && props.ChartID != ""
 }
 
 // renderNodes draws the node rects (parents before children so children sit on

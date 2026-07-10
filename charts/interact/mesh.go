@@ -34,7 +34,7 @@ type meshPointJSON struct {
 func MeshData(points []MeshPoint) string {
 	pts := make([]meshPointJSON, len(points))
 	for i, p := range points {
-		pts[i] = meshPointJSON{X: p.X, Y: p.Y, HTML: p.HTML}
+		pts[i] = meshPointJSON(p)
 	}
 	b, err := json.Marshal(pts)
 	if err != nil {

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -90,7 +91,7 @@ func renderLayers(props PolarBarProps, result PolarBarResult, theme *theming.The
 // renderGridLayer renders the polar grid (radial rays per index angle +
 // concentric rings at radius ticks) via charts/polar-axes.
 func renderGridLayer(props PolarBarProps, result PolarBarResult, theme *theming.Theme) string {
-	return polaraxes.RenderPolarGrid(polaraxes.PolarGridProps{
+	return renderComponent(polaraxes.PolarGrid(polaraxes.PolarGridProps{
 		Center:             result.Center,
 		EnableRadialGrid:   props.RadialGridEnabled(),
 		AngleScale:         result.AngleScale,
@@ -101,14 +102,14 @@ func renderGridLayer(props PolarBarProps, result PolarBarResult, theme *theming.
 		InnerRadius:        result.InnerRadius,
 		OuterRadius:        result.OuterRadius,
 		Theme:              theme,
-	})
+	}))
 }
 
 // renderAxesLayer renders the outer circular axis (index labels) and a radial
 // axis (radius/value ticks) via charts/polar-axes.
 func renderAxesLayer(result PolarBarResult, theme *theming.Theme) string {
 	var b strings.Builder
-	b.WriteString(polaraxes.RenderCircularAxis(polaraxes.CircularAxisProps{
+	b.WriteString(renderComponent(polaraxes.CircularAxis(polaraxes.CircularAxisProps{
 		Type:       polaraxes.CircularAxisOuter,
 		Center:     result.Center,
 		Radius:     result.OuterRadius,
@@ -116,14 +117,14 @@ func renderAxesLayer(result PolarBarResult, theme *theming.Theme) string {
 		EndAngle:   result.EndAngle,
 		Scale:      result.AngleScale,
 		Theme:      theme,
-	}))
-	b.WriteString(polaraxes.RenderRadialAxis(polaraxes.RadialAxisProps{
+	})))
+	b.WriteString(renderComponent(polaraxes.RadialAxis(polaraxes.RadialAxisProps{
 		Center:        result.Center,
 		Angle:         math.Min(result.StartAngle, result.EndAngle),
 		Scale:         result.RadiusScale,
 		TicksPosition: polaraxes.TicksBefore,
 		Theme:         theme,
-	}))
+	})))
 	return b.String()
 }
 

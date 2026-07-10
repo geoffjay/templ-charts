@@ -84,7 +84,7 @@ func TestVoronoi_CellsRenderedByDefault(t *testing.T) {
 
 func TestVoronoi_LinksToggle(t *testing.T) {
 	p := baseProps()
-	p.EnableLinks = voronoi.BoolPtr(true)
+	p.EnableLinks = core.BoolPtr(true)
 	out := renderChart(t, p)
 	if !strings.Contains(out, `stroke="#bbbbbb"`) {
 		t.Errorf("expected delaunay links when enabled")
@@ -93,7 +93,7 @@ func TestVoronoi_LinksToggle(t *testing.T) {
 
 func TestVoronoi_PointsToggle(t *testing.T) {
 	p := baseProps()
-	p.EnablePoints = voronoi.BoolPtr(false)
+	p.EnablePoints = core.BoolPtr(false)
 	out := renderChart(t, p)
 	if strings.Contains(out, "<circle") {
 		t.Errorf("points disabled but circles rendered")
@@ -117,7 +117,7 @@ func TestVoronoi_GoldenCellFill(t *testing.T) {
 	// Enabling cell fill exercises the per-cell path rendering path (each cell
 	// filled with its site color) instead of the default hollow single-path cells.
 	p := baseProps()
-	p.EnableCellFill = voronoi.BoolPtr(true)
+	p.EnableCellFill = core.BoolPtr(true)
 	golden.Assert(t, "voronoi-cell-fill", renderChart(t, p))
 }
 

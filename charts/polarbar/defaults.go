@@ -2,6 +2,7 @@ package polarbar
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/polar-bar defaultProps. Fields left zero in a
@@ -13,10 +14,10 @@ var Defaults = PolarBarProps{
 	EndAngle:              360,
 	InnerRadius:           0,
 	CornerRadius:          0,
-	EnableRadialGrid:      BoolPtr(true),
-	EnableCircularGrid:    BoolPtr(true),
+	EnableRadialGrid:      core.BoolPtr(true),
+	EnableCircularGrid:    core.BoolPtr(true),
 	Colors:                colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
-	EnableArcLabels:       BoolPtr(false),
+	EnableArcLabels:       core.BoolPtr(false),
 	ArcLabel:              "formattedValue",
 	ArcLabelsRadiusOffset: 0.5,
 	Layers:                DefaultLayers,

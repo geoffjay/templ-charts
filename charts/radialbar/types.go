@@ -79,10 +79,15 @@ var DefaultLayers = []RadialBarLayerId{
 // RadialBarProps mirrors @nivo/radial-bar RadialBarSvgProps (the supported
 // subset). Fields left zero fall back to Defaults via applyDefaults.
 type RadialBarProps struct {
+	// Data is the set of series to plot: one radius band (ring) per serie, one
+	// arc per category, stacked along the value/angle scale.
 	Data []RadialBarSerie
 
+	// Width and Height are the overall SVG dimensions in pixels.
 	Width  float64
 	Height float64
+	// Margin reserves space around the plot area (top/right/bottom/left) in
+	// pixels, e.g. for axes and legends.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
@@ -92,16 +97,19 @@ type RadialBarProps struct {
 	MaxValue    *float64
 	ValueFormat string // d3-format spec; empty → %g
 
-	StartAngle   float64 // degrees
-	EndAngle     float64 // degrees
-	InnerRadius  float64 // ratio in [0,1] of the outer radius
-	Padding      float64 // band padding between series rings
-	PadAngle     float64 // degrees
+	StartAngle  float64 // degrees
+	EndAngle    float64 // degrees
+	InnerRadius float64 // ratio in [0,1] of the outer radius
+	Padding     float64 // band padding between series rings
+	PadAngle    float64 // degrees
+	// CornerRadius rounds the corners of each bar arc, in pixels. Default 0.
 	CornerRadius float64
 
 	// EnableTracks gates the background track arcs. nil → true (nivo default).
 	EnableTracks *bool
-	TracksColor  string
+	// TracksColor is the fill of the background track arcs. Default
+	// "rgba(0, 0, 0, .15)".
+	TracksColor string
 
 	// Grid toggles. nil → nivo default (radial+circular grids on; radial-start
 	// axis + circular-outer axis on; radial-end + circular-inner off).
@@ -116,29 +124,49 @@ type RadialBarProps struct {
 	// bar arc emits a data-tc-tooltip. Default false keeps the static render.
 	Interactive bool
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale mapping each category to a color.
+	// Default is the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// BorderWidth is the stroke width of each bar arc, in pixels. Default 0.
 	BorderWidth float64
+	// BorderColor is the arc border color, resolved via the inherited-color
+	// system. Default derives from each arc's fill darkened by 1.0.
 	BorderColor colors.InheritedColorConfig
 
 	// EnableLabels gates per-arc labels. nil → false (nivo default).
-	EnableLabels       *bool
-	Label              string // datum path; empty → "formattedValue"
-	LabelsSkipAngle    float64
+	EnableLabels *bool
+	Label        string // datum path; empty → "formattedValue"
+	// LabelsSkipAngle hides labels on arcs whose angular span is below this
+	// value, in degrees. Default 10.
+	LabelsSkipAngle float64
+	// LabelsRadiusOffset positions labels radially within each band, expressed
+	// as a ratio between the inner (0) and outer (1) radius. Default 0.5.
 	LabelsRadiusOffset float64
-	LabelsTextColor    colors.InheritedColorConfig
+	// LabelsTextColor is the label text color, resolved via the inherited-color
+	// system. Default is the theme's labels.text.fill.
+	LabelsTextColor colors.InheritedColorConfig
 
+	// Legends configures the chart legends; empty means no legend.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers selects which layers are rendered and in what order. Defaults to
+	// DefaultLayers.
 	Layers []RadialBarLayerId
 
-	Role            string
+	// Role is the SVG root's ARIA role. Default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy and AriaDescribedBy set the matching ARIA
+	// attributes on the SVG root for accessibility.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title> and <desc> elements for accessibility.
+	Title string
+	Desc  string
+	// IsFocusable, when true, makes the SVG root keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// bar arc (600ms). MotionStagger delays successive bars by that many
@@ -169,9 +197,3 @@ func (p RadialBarProps) TracksEnabled() bool { return p.EnableTracks == nil || *
 
 // LabelsEnabled resolves EnableLabels (nil → false).
 func (p RadialBarProps) LabelsEnabled() bool { return p.EnableLabels != nil && *p.EnableLabels }
-
-// BoolPtr returns a pointer to b — a helper for *bool props.
-func BoolPtr(b bool) *bool { return &b }
-
-// FloatPtr returns a pointer to f — a helper for *float64 props (MaxValue).
-func FloatPtr(f float64) *float64 { return &f }

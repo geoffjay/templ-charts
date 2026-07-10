@@ -22,7 +22,11 @@ func UseTree(props TreeProps) TreeResult {
 		layoutRun(props.Mode, root, props.Width, props.Height)
 	}
 
-	getColor := colors.GetOrdinalColorScale[string](props.Colors(), func(id string) string { return id })
+	colorsCfg := props.Colors
+	if colorsCfg.Type == 0 && colorsCfg.Scheme == "" && colorsCfg.Static == "" && len(colorsCfg.Colors) == 0 && colorsCfg.Func == nil && colorsCfg.DatumPath == "" {
+		colorsCfg = Defaults.Colors
+	}
+	getColor := colors.GetOrdinalColorScale[string](colorsCfg, func(id string) string { return id })
 
 	screen := make(map[*d3hierarchy.Node][2]float64)
 	nodes := make([]ComputedNode, 0)
@@ -56,15 +60,6 @@ func UseTree(props TreeProps) TreeResult {
 	}
 
 	return TreeResult{Nodes: nodes, Links: links}
-}
-
-// Colors returns the node color config (NodeColor with a scheme default).
-func (p TreeProps) Colors() colors.OrdinalColorScaleConfig {
-	c := p.NodeColor
-	if c.Type == 0 && c.Scheme == "" && c.Static == "" && len(c.Colors) == 0 && c.Func == nil && c.DatumPath == "" {
-		return Defaults.NodeColor
-	}
-	return c
 }
 
 func layoutRun(mode Mode, root *d3hierarchy.Node, dx, dy float64) {

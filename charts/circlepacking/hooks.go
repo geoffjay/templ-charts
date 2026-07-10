@@ -31,7 +31,7 @@ func UseCirclePacking(props CirclePackingProps) CirclePackingResult {
 		root.Each(func(n *d3hierarchy.Node) {
 			n.X = (n.X-fx)*k + cx
 			n.Y = (n.Y-fy)*k + cy
-			n.R = n.R * k
+			n.R *= k
 		})
 	}
 

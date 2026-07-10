@@ -2,6 +2,7 @@ package bump
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 )
 
 // Defaults mirrors @nivo/bump svgDefaultProps. Fields left zero in a BumpProps
@@ -19,8 +20,8 @@ var Defaults = BumpProps{
 	ActiveOpacity:     1,
 	InactiveOpacity:   0.3,
 
-	StartLabel: BoolPtr(false),
-	EndLabel:   BoolPtr(true),
+	StartLabel: core.BoolPtr(false),
+	EndLabel:   core.BoolPtr(true),
 
 	PointSize:         6,
 	ActivePointSize:   8,
@@ -28,8 +29,8 @@ var Defaults = BumpProps{
 
 	Colors: colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 
-	EnableGridX: true,
-	EnableGridY: true,
+	EnableGridX: core.BoolPtr(true),
+	EnableGridY: core.BoolPtr(true),
 
 	Layers: DefaultLayers,
 	Role:   "img",

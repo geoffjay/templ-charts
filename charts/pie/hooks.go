@@ -2,7 +2,6 @@ package pie
 
 import (
 	"math"
-	"sort"
 
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
@@ -304,13 +303,6 @@ func containsID(ids []DatumId, id DatumId) bool {
 		}
 	}
 	return false
-}
-
-// sortDataByValue sorts normalized data by value descending (d3-pie default).
-func sortDataByValue(data []NormalizedDatum) {
-	sort.SliceStable(data, func(i, j int) bool {
-		return data[i].Value > data[j].Value
-	})
 }
 
 // guard against unused imports during refactoring

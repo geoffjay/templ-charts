@@ -66,23 +66,23 @@ func GeoMapDemos() []GeoMapDemo {
 	// diverges toward the poles, where its graticule would shoot off-canvas —
 	// d3 avoids that with geoMercator's built-in reclip, deferred here.)
 	graticule := base()
-	graticule.ProjectionType = "equirectangular"
-	graticule.EnableGraticule = true
+	graticule.ProjectionType = geo.ProjectionEquirectangular
+	graticule.EnableGraticule = core.BoolPtr(true)
 
 	natural := base()
-	natural.ProjectionType = "naturalEarth1"
+	natural.ProjectionType = geo.ProjectionNaturalEarth1
 	natural.ProjectionScale = fitScale(innerW, 2.73)
-	natural.EnableGraticule = true
+	natural.EnableGraticule = core.BoolPtr(true)
 
 	// Orthographic globe: an azimuthal projection whose clipCircle preclip hides
 	// the far hemisphere. Rotated to center on Africa;
 	// the graticule and borders end cleanly at the visible limb instead of
 	// wrapping the whole sphere.
 	globe := base()
-	globe.ProjectionType = "orthographic"
+	globe.ProjectionType = geo.ProjectionOrthographic
 	globe.ProjectionScale = innerW / 2 // radius = scale for the unit-sphere raw
 	globe.ProjectionRotation = [3]float64{-10, -25, 0}
-	globe.EnableGraticule = true
+	globe.EnableGraticule = core.BoolPtr(true)
 
 	interactive := base()
 	interactive.Interactive = true
@@ -136,7 +136,7 @@ func ChoroplethDemos() []ChoroplethDemo {
 			Data:     data,
 			GeoBase: geo.GeoBase{
 				Width: geoW, Height: geoH, Margin: margin,
-				ProjectionType:  "naturalEarth1",
+				ProjectionType:  geo.ProjectionNaturalEarth1,
 				ProjectionScale: fitScale(innerW, 2.73),
 				BorderWidth:     0.4,
 				BorderColor:     "#152238",

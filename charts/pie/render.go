@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/arcs"
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
@@ -85,11 +86,11 @@ func renderPieLayers(layers []PieLayerId, props PieProps, result PieResult, dims
 		case PieLayerArcs:
 			b.WriteString(renderArcsLayer(props, result, theme, bound))
 		case PieLayerArcLinkLabels:
-			if props.EnableArcLinkLabels {
+			if props.ArcLinkLabelsEnabled() {
 				b.WriteString(renderArcLinkLabelsLayer(props, result, theme))
 			}
 		case PieLayerArcLabels:
-			if props.EnableArcLabels {
+			if props.ArcLabelsEnabled() {
 				b.WriteString(renderArcLabelsLayer(props, result, theme))
 			}
 		case PieLayerLegends:

@@ -81,42 +81,72 @@ var DefaultLayers = []WaffleLayerId{WaffleLayerCells, WaffleLayerLegends}
 
 // WaffleLegend configures a discrete legend.
 type WaffleLegend struct {
-	Anchor      legends.LegendAnchor
-	Direction   legends.LegendDirection
-	TranslateX  float64
-	TranslateY  float64
-	ItemWidth   float64
-	ItemHeight  float64
+	// Anchor positions the legend relative to the chart area.
+	Anchor legends.LegendAnchor
+	// Direction lays the items out in a row or column. Defaults to column.
+	Direction legends.LegendDirection
+	// TranslateX offsets the legend horizontally from its anchor, in pixels.
+	TranslateX float64
+	// TranslateY offsets the legend vertically from its anchor, in pixels.
+	TranslateY float64
+	// ItemWidth is the width of each legend item in pixels. Defaults to 100.
+	ItemWidth float64
+	// ItemHeight is the height of each legend item in pixels. Defaults to 20.
+	ItemHeight float64
+	// SymbolShape is the marker shape for each item. Defaults to square.
 	SymbolShape legends.SymbolShape
 }
 
 // WaffleProps is the input to the Waffle component. Mirrors @nivo/waffle
 // CommonProps + svgDefaultProps (supported subset).
 type WaffleProps struct {
-	Width  float64
+	// Width is the outer chart width in pixels (including Margin).
+	Width float64
+	// Height is the outer chart height in pixels (including Margin).
 	Height float64
+	// Margin is the space reserved around the grid (for legends), in pixels.
 	Margin core.Margin
 	// Responsive makes the rendered svg scale fluidly to its container
 	// (viewBox preserved, width:100%;height:auto) instead of a fixed pixel
 	// size. See core.SvgWrapperProps.Responsive.
 	Responsive bool
-	Data       []WaffleDatum
+	// Data is the set of slices of the whole; each datum's Value fills a
+	// proportional run of cells.
+	Data []WaffleDatum
 
 	// Total is the value representing the full grid (rows×columns cells).
-	Total         float64
-	Rows          int
-	Columns       int
+	Total float64
+	// Rows is the number of cell rows in the grid.
+	Rows int
+	// Columns is the number of cell columns in the grid.
+	Columns int
+	// FillDirection is the order cells are filled. Defaults to top (bottom-up).
 	FillDirection grid.GridFillDirection
-	Padding       float64
+	// Padding is the gap in pixels between adjacent cells. Defaults to 1.
+	Padding float64
 
-	Colors       colors.OrdinalColorScaleConfig
-	EmptyColor   string
+	// Colors is the ordinal color scale config used to color the data cells
+	// (a datum's own Color overrides it when set).
+	Colors colors.OrdinalColorScaleConfig
+	// EmptyColor is the fill of cells not covered by any datum. Defaults to
+	// "#cccccc".
+	EmptyColor string
+	// EmptyOpacity is the fill-opacity of empty cells, in [0,1]. Defaults to 1.
 	EmptyOpacity float64
+	// BorderRadius is the corner radius of each cell in pixels. Defaults to 0.
 	BorderRadius float64
-	BorderWidth  float64
-	BorderColor  colors.InheritedColorConfig
+	// BorderWidth is the stroke width of each cell in pixels; borders are
+	// drawn only when > 0. Defaults to 0.
+	BorderWidth float64
+	// BorderColor is the inherited-color config for the cell border, resolved
+	// relative to each cell's fill color.
+	BorderColor colors.InheritedColorConfig
 
-	HiddenIDs   []string
+	// HiddenIDs lists datum ids to omit from the fill; they occupy no cells and
+	// are flagged Hidden in the legend.
+	HiddenIDs []string
+	// ValueFormat is a d3-format spec for tooltip values; empty leaves values
+	// unformatted.
 	ValueFormat string
 
 	// Interactive enables the client-side hover layer (charts/interact): each
@@ -130,18 +160,32 @@ type WaffleProps struct {
 	Animate       bool
 	MotionStagger float64
 
+	// Legends configures zero or more discrete legends drawn from the data.
 	Legends []WaffleLegend
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme (colors, fonts). Nil uses the package
+	// default theme.
+	Theme *theming.Theme
+	// Layers is the ordered list of render layers. Empty falls back to
+	// DefaultLayers (cells, legends); "areas" is an opt-in layer.
 	Layers []WaffleLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root svg element. Defaults to "img".
+	Role string
+	// AriaLabel sets the aria-label on the root svg element. Empty by default.
+	AriaLabel string
+	// AriaLabelledBy sets the aria-labelledby on the root svg element. Empty
+	// by default.
+	AriaLabelledBy string
+	// AriaDescribedBy sets the aria-describedby on the root svg element.
+	// Empty by default.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the svg <title> element. Empty by default.
+	Title string
+	// Desc sets the svg <desc> element. Empty by default.
+	Desc string
+	// IsFocusable makes the svg keyboard-focusable. Defaults to false.
+	IsFocusable bool
 }
 
 // WaffleResult is the computed model produced by UseWaffle.

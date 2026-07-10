@@ -2,6 +2,7 @@ package scatterplot
 
 import (
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/scales"
 )
 
@@ -10,8 +11,8 @@ import (
 var Defaults = ScatterPlotProps{
 	XScale:      scales.ScaleLinearSpec{Min: scales.FloatVal(0), Max: scales.AutoFloat()},
 	YScale:      scales.ScaleLinearSpec{Min: scales.FloatVal(0), Max: scales.AutoFloat()},
-	EnableGridX: true,
-	EnableGridY: true,
+	EnableGridX: core.BoolPtr(true),
+	EnableGridY: core.BoolPtr(true),
 	NodeSize:    9,
 	Colors:      colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "nivo"},
 	Layers:      DefaultLayers,

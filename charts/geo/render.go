@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 	"github.com/geoffjay/templ-charts/charts/legends"
@@ -103,7 +104,7 @@ func renderChoroplethLayers(props ChoroplethProps, result GeoResult, width, heig
 }
 
 func renderGraticule(b GeoBase, result GeoResult) string {
-	if !b.EnableGraticule || result.GraticulePath == "" {
+	if !b.GraticuleEnabled() || result.GraticulePath == "" {
 		return ""
 	}
 	var s strings.Builder

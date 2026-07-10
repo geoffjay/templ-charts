@@ -58,11 +58,6 @@ func asin(x float64) float64 {
 	}
 }
 
-func haversin(x float64) float64 {
-	x = math.Sin(x / 2)
-	return x * x
-}
-
 func sign(x float64) float64 {
 	switch {
 	case x > 0:

@@ -140,7 +140,6 @@ func (f *CollideForce) applyQuadtree() {
 			n.Value = r
 		})
 		for _, node := range f.nodes {
-			node := node
 			ri := f.radii[node.Index]
 			ri2 := ri * ri
 			xi := node.X + node.Vx

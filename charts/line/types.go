@@ -150,12 +150,18 @@ type PointXY struct {
 // LineProps mirrors @nivo/line CommonLineProps + LineSvgExtraProps (the SVG
 // subset). Fields with zero values fall back to Defaults via UseLine/Bar.
 type LineProps struct {
-	// Data.
+	// Data is the set of line series to plot; each LineSeries carries an id and
+	// its ordered list of {x,y} points.
 	Data []LineSeries
 
-	// Geometry.
-	Width  float64
+	// Width is the total outer width of the chart in pixels (plot area plus
+	// margins).
+	Width float64
+	// Height is the total outer height of the chart in pixels (plot area plus
+	// margins).
 	Height float64
+	// Margin is the space reserved around the plot area for axes, tick labels,
+	// and legends; the inner plotted area is Width/Height minus these margins.
 	Margin core.Margin
 
 	// Responsive makes the rendered svg scale fluidly to its container
@@ -166,53 +172,91 @@ type LineProps struct {
 	// Scales. YScale accepts any continuous scale spec — a
 	// scales.ScaleLinearSpec (the default), scales.ScaleLogSpec, or
 	// scales.ScaleSymlogSpec. A nil value falls back to the linear default.
-	XScale  scales.ScaleSpec
-	YScale  scales.ScaleSpec
+	XScale scales.ScaleSpec
+	YScale scales.ScaleSpec
+	// XFormat is an optional formatter applied to x values for tick labels and
+	// tooltips. Nil leaves values unformatted (stringified as-is).
 	XFormat core.ValueFormat[any]
+	// YFormat is an optional formatter applied to y values for tick labels and
+	// tooltips. Nil leaves values unformatted (stringified as-is).
 	YFormat core.ValueFormat[any]
 
-	// Line.
-	Curve     core.CurveFactoryId
+	// Curve is the interpolation used to connect points into a path (e.g.
+	// linear, monotoneX, step, cardinal, basis). Default core.CurveLinear.
+	Curve core.CurveFactoryId
+	// LineWidth is the stroke width of each series line in pixels. Default 2.
 	LineWidth float64
 
-	// Area.
-	EnableArea        bool
+	// EnableArea toggles the filled area beneath each line. nil → false (nivo
+	// default).
+	EnableArea *bool // nil → false (nivo default)
+	// AreaBaselineValue is the y data value the area fill is anchored to.
+	// Default 0.
 	AreaBaselineValue float64
-	AreaOpacity       float64
-	AreaBlendMode     core.CssMixBlendMode
+	// AreaOpacity is the fill opacity of the area, in the range 0–1. Only
+	// applies when EnableArea is true. Default 0.2.
+	AreaOpacity float64
+	// AreaBlendMode is the CSS mix-blend-mode applied to overlapping area fills.
+	// Default core.MixBlendNormal.
+	AreaBlendMode core.CssMixBlendMode
 
 	// Points.
-	EnablePoints      bool
-	PointSize         float64
-	PointColor        colors.InheritedColorConfig
-	PointBorderWidth  float64
-	PointBorderColor  colors.InheritedColorConfig
-	EnablePointLabel  bool
-	PointLabel        core.PropertyAccessor[Point, string]
+	EnablePoints *bool // nil → true (nivo default)
+	// PointSize is the diameter of each point circle in pixels. Default 6.
+	PointSize float64
+	// PointColor determines each point's fill color; by default it inherits the
+	// series color ("series.color").
+	PointColor colors.InheritedColorConfig
+	// PointBorderWidth is the stroke width of the point border in pixels.
+	// Default 0 (no visible border).
+	PointBorderWidth float64
+	// PointBorderColor determines each point's border color; by default it
+	// resolves to the theme background color.
+	PointBorderColor colors.InheritedColorConfig
+	// EnablePointLabel toggles rendering a text label next to each point.
+	// nil → false (nivo default).
+	EnablePointLabel *bool // nil → false (nivo default)
+	// PointLabel selects the value used for point labels; accepts a datum
+	// property path or a function returning the label. Default "data.yFormatted".
+	PointLabel core.PropertyAccessor[Point, string]
+	// PointLabelYOffset is the vertical offset in pixels of the point label from
+	// the point shape. Default 0.
 	PointLabelYOffset float64
 
-	// Colors.
+	// Colors configures the ordinal color scale mapping series to colors.
+	// Default is the "nivo" categorical scheme.
 	Colors colors.OrdinalColorScaleConfig
 
-	// Grid.
-	EnableGridX bool
+	// Grid. nil → true (nivo default) for both.
+	EnableGridX *bool
+	// GridXValues restricts the x grid lines to these specific x values; nil
+	// uses the x scale's default tick positions.
 	GridXValues []any
-	EnableGridY bool
+	// EnableGridY toggles horizontal grid lines. nil → true (nivo default).
+	EnableGridY *bool
+	// GridYValues restricts the y grid lines to these specific y values; nil
+	// uses the y scale's default tick positions.
 	GridYValues []any
 
-	// Axes.
-	AxisTop    *axes.AxisProps
-	AxisRight  *axes.AxisProps
+	// AxisTop configures the top axis; nil hides it (no default axis).
+	AxisTop *axes.AxisProps
+	// AxisRight configures the right axis; nil hides it (no default axis).
+	AxisRight *axes.AxisProps
+	// AxisBottom configures the bottom axis; when nil, the render path
+	// substitutes the default axis (tickSize/tickPadding 5).
 	AxisBottom *axes.AxisProps
-	AxisLeft   *axes.AxisProps
+	// AxisLeft configures the left axis; when nil, the render path substitutes
+	// the default axis (tickSize/tickPadding 5).
+	AxisLeft *axes.AxisProps
 
-	// Markers.
+	// Markers are reference lines/annotations drawn at fixed x or y values.
 	Markers []core.CartesianMarker
 
-	// Legends.
+	// Legends are the chart's legends; empty renders none.
 	Legends []legends.LegendProps
 
-	// Interactivity.
+	// Interactive enables hover interactivity (points/slices/mesh). Default
+	// true.
 	Interactive bool
 	// ClientHover is retained for compatibility: mesh/slice hover now routes
 	// through the client interactivity layer (charts/interact) by default, so
@@ -226,39 +270,66 @@ type LineProps struct {
 	// mousemove), for the genuinely-JS-limited case where htmx is present but the
 	// charts/interact client script is not. Default false: the per-mousemove
 	// fallback is retired and the client path is the default. Requires ChartID.
-	ServerHover          bool
-	UseMesh              bool
-	EnableSlices         EnableSlices
-	DebugSlices          bool
-	EnableCrosshair      bool
-	CrosshairType        tooltip.CrosshairType
-	EnableTouchCrosshair bool
-	DebugMesh            bool
+	ServerHover bool
+	// UseMesh enables a voronoi mesh for nearest-point mouse detection; requires
+	// EnableSlices to be disabled. Default false.
+	UseMesh bool
+	// EnableSlices groups points into hover slices along the "x" or "y" axis
+	// (automatically disabling the mesh). Empty string = disabled (default).
+	EnableSlices EnableSlices
+	// DebugSlices renders the slice detection rectangles for debugging. Default
+	// false.
+	DebugSlices bool
+	// EnableCrosshair toggles the crosshair lines shown on hover. nil → true
+	// (nivo default).
+	EnableCrosshair *bool // nil → true (nivo default)
+	// CrosshairType selects which crosshair lines to draw relative to the cursor
+	// (e.g. bottom-left, cross, x, y); forced to the slice axis when slices are
+	// enabled. Default tooltip.CrosshairTypeBottomLeft.
+	CrosshairType tooltip.CrosshairType
+	// EnableTouchCrosshair allows the crosshair to be dragged on touch screens.
+	// nil → false (nivo default).
+	EnableTouchCrosshair *bool // nil → false (nivo default)
+	// DebugMesh renders the voronoi mesh cells for debugging. Default false.
+	DebugMesh bool
 	// DetectionRadius, when > 0, bounds voronoi-mesh hit-testing to this pixel
 	// distance from the cursor (nivo's mesh detectionRadius). Client-hover only.
-	DetectionRadius  float64
+	DetectionRadius float64
+	// InitialHiddenIDs lists series ids that start hidden (excluded from the plot
+	// but still shown as toggleable legend entries).
 	InitialHiddenIDs []string
 
-	// Defs / fill.
+	// Defs are reusable SVG definitions (gradients/patterns) referenced by Fill.
 	Defs []core.Def
+	// Fill maps Defs to series via matching rules, letting lines/areas use a
+	// gradient or pattern fill instead of a flat color.
 	Fill []core.DefRule
 
-	// Layers.
+	// Layers sets the render order of the built-in (and any custom) line layers.
+	// Defaults to DefaultLayers.
 	Layers []LineLayerId
 
-	// Motion.
+	// MotionProps carries the shared animation settings (Animate, MotionConfig).
 	core.MotionProps
 
-	// A11y.
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root SVG element. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the root SVG element.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the root SVG element.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the root SVG element.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title is the SVG <title> element text, used for accessibility.
+	Title string
+	// Desc is the SVG <desc> element text, used for accessibility.
+	Desc string
+	// IsFocusable makes the root SVG element (and each point) focusable for
+	// keyboard navigation. Default false.
+	IsFocusable bool
 
-	// Theme.
+	// Theme overrides the chart theme (colors, fonts, axis styling); nil uses
+	// the default theme.
 	Theme *theming.Theme
 
 	// HTMX chart instance ID; when non-empty, points/slices emit hx-* attrs.
@@ -308,3 +379,26 @@ func pointXYFromPosition(d ComputedDatum) PointXY {
 
 // Compile-time check that shape import is used.
 var _ = d3shape.CurveLinear
+
+// AreaEnabled resolves EnableArea (nil → false, nivo default).
+func (p LineProps) AreaEnabled() bool { return p.EnableArea != nil && *p.EnableArea }
+
+// PointsEnabled resolves EnablePoints (nil → true, nivo default).
+func (p LineProps) PointsEnabled() bool { return p.EnablePoints == nil || *p.EnablePoints }
+
+// PointLabelEnabled resolves EnablePointLabel (nil → false, nivo default).
+func (p LineProps) PointLabelEnabled() bool { return p.EnablePointLabel != nil && *p.EnablePointLabel }
+
+// GridXEnabled resolves EnableGridX (nil → true, nivo default).
+func (p LineProps) GridXEnabled() bool { return p.EnableGridX == nil || *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p LineProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }
+
+// CrosshairEnabled resolves EnableCrosshair (nil → true, nivo default).
+func (p LineProps) CrosshairEnabled() bool { return p.EnableCrosshair == nil || *p.EnableCrosshair }
+
+// TouchCrosshairEnabled resolves EnableTouchCrosshair (nil → false, nivo default).
+func (p LineProps) TouchCrosshairEnabled() bool {
+	return p.EnableTouchCrosshair != nil && *p.EnableTouchCrosshair
+}

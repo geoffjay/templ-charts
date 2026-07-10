@@ -1,26 +1,14 @@
 package voronoi
 
 import (
-	"context"
 	"math"
 	"strconv"
 	"strings"
-
-	"github.com/a-h/templ"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
 )
-
-// renderComponent renders a templ.Component to a string.
-func renderComponent(c templ.Component) string {
-	var b strings.Builder
-	if err := c.Render(context.Background(), &b); err != nil {
-		return ""
-	}
-	return b.String()
-}
 
 // applyDefaults fills zero-valued VoronoiProps fields from Defaults.
 func applyDefaults(p VoronoiProps) VoronoiProps {

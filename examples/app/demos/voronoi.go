@@ -44,7 +44,7 @@ func VoronoiDemos() []VoronoiDemo {
 			Props: voronoi.VoronoiProps{
 				Width: side, Height: side, Margin: margin,
 				Data:        data,
-				EnableLinks: voronoi.BoolPtr(true),
+				EnableLinks: core.BoolPtr(true),
 			},
 		},
 		{
@@ -54,8 +54,8 @@ func VoronoiDemos() []VoronoiDemo {
 			Props: voronoi.VoronoiProps{
 				Width: side, Height: side, Margin: margin,
 				Data:        data,
-				EnableLinks: voronoi.BoolPtr(true),
-				EnableCells: voronoi.BoolPtr(false),
+				EnableLinks: core.BoolPtr(true),
+				EnableCells: core.BoolPtr(false),
 			},
 		},
 		{
@@ -65,7 +65,7 @@ func VoronoiDemos() []VoronoiDemo {
 			Props: voronoi.VoronoiProps{
 				Width: side, Height: side, Margin: margin,
 				Data:           data,
-				EnableCellFill: voronoi.BoolPtr(true),
+				EnableCellFill: core.BoolPtr(true),
 				Colors:         colors.OrdinalColorScaleConfig{Type: colors.OrdinalTypeScheme, Scheme: "set3"},
 				CellLineColor:  "#ffffff",
 				CellLineWidth:  2,

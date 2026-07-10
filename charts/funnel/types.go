@@ -80,10 +80,15 @@ type Separator struct {
 // FunnelProps mirrors @nivo/funnel FunnelSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type FunnelProps struct {
+	// Data is the ordered list of parts; each part's width is derived from its
+	// Value relative to its neighbors.
 	Data []FunnelDatum
 
-	Width  float64
+	// Width is the total chart width in pixels (including Margin).
+	Width float64
+	// Height is the total chart height in pixels (including Margin).
 	Height float64
+	// Margin reserves space around the funnel for labels and separators.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
@@ -93,40 +98,75 @@ type FunnelProps struct {
 	// part emits a data-tc-tooltip. Default false keeps the static render.
 	Interactive bool
 
-	Direction     FunnelDirection
+	// Direction is the funnel flow direction (vertical or horizontal). Default
+	// vertical.
+	Direction FunnelDirection
+	// Interpolation is the part-edge interpolation: smooth (curveBasis) or
+	// linear (straight trapezoids). Default smooth.
 	Interpolation FunnelInterpolation
-	Spacing       float64
+	// Spacing is the gap between successive parts, in pixels. Default 0.
+	Spacing float64
+	// ShapeBlending controls how strongly each part's edges bend toward its
+	// neighbors' widths, from 0 (angular steps) to 1 (fully blended). Default
+	// 0.66.
 	ShapeBlending float64
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale assigning a fill to each part. Default
+	// is the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// FillOpacity is the fill opacity of each part, from 0 to 1. Default 1.
 	FillOpacity float64
+	// ValueFormat is a d3-format spec for part values; empty → %g.
 	ValueFormat string
 
-	BorderWidth   float64
-	BorderColor   colors.InheritedColorConfig
+	// BorderWidth is the stroke width of each part's side borders, in pixels.
+	// Default 6.
+	BorderWidth float64
+	// BorderColor resolves each part's border color, by default inherited from
+	// the part's fill.
+	BorderColor colors.InheritedColorConfig
+	// BorderOpacity is the opacity of the part borders, from 0 to 1. Default
+	// 0.66.
 	BorderOpacity float64
 
 	// EnableLabel gates centered part labels. nil → true (nivo default).
 	EnableLabel *bool
-	LabelColor  colors.InheritedColorConfig
+	// LabelColor resolves the centered label color, by default the theme
+	// background color.
+	LabelColor colors.InheritedColorConfig
 
 	// EnableBeforeSeparators / EnableAfterSeparators gate the separator lines.
 	// nil → true (nivo default).
 	EnableBeforeSeparators *bool
-	BeforeSeparatorOffset  float64
-	EnableAfterSeparators  *bool
-	AfterSeparatorOffset   float64
+	// BeforeSeparatorOffset is the gap, in pixels, between a part and its
+	// leading (before) separator line. Default 0.
+	BeforeSeparatorOffset float64
+	EnableAfterSeparators *bool
+	// AfterSeparatorOffset is the gap, in pixels, between a part and its
+	// trailing (after) separator line. Default 0.
+	AfterSeparatorOffset float64
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme (colors, fonts, label styles). Nil uses
+	// the default theme.
+	Theme *theming.Theme
+	// Layers selects which render layers to draw and their order. Default
+	// DefaultLayers (separators, parts, labels, annotations).
 	Layers []FunnelLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root svg element. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the root svg element. Empty by default.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the root svg element. Empty by default.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the root svg element. Empty by default.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the svg <title> element. Empty by default.
+	Title string
+	// Desc sets the svg <desc> element. Empty by default.
+	Desc string
+	// IsFocusable makes the root svg keyboard-focusable. Defaults to false.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// funnel part (600ms). MotionStagger delays successive parts by that many
@@ -155,6 +195,3 @@ func (p FunnelProps) BeforeSeparatorsEnabled() bool {
 func (p FunnelProps) AfterSeparatorsEnabled() bool {
 	return p.EnableAfterSeparators == nil || *p.EnableAfterSeparators
 }
-
-// BoolPtr returns a pointer to b — a helper for *bool props.
-func BoolPtr(b bool) *bool { return &b }

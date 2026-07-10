@@ -95,7 +95,7 @@ func TestGeoMap_RendersSVG(t *testing.T) {
 
 func TestGeoMap_Graticule(t *testing.T) {
 	p := baseMap()
-	p.EnableGraticule = true
+	p.EnableGraticule = core.BoolPtr(true)
 	out := renderGeoMap(t, p)
 	if !strings.Contains(out, `fill="none"`) || !strings.Contains(out, `stroke="#999999"`) {
 		t.Errorf("expected graticule path with default line color")
@@ -107,7 +107,7 @@ func TestGeoMap_Graticule(t *testing.T) {
 }
 
 func TestGeoMap_Projections(t *testing.T) {
-	for _, proj := range []string{"mercator", "equirectangular", "naturalEarth1", "equalEarth", "orthographic"} {
+	for _, proj := range []geo.ProjectionType{geo.ProjectionMercator, geo.ProjectionEquirectangular, geo.ProjectionNaturalEarth1, geo.ProjectionEqualEarth, geo.ProjectionOrthographic} {
 		p := baseMap()
 		p.ProjectionType = proj
 		out := renderGeoMap(t, p)
@@ -206,7 +206,7 @@ func TestGeo_Animate(t *testing.T) {
 
 func TestGeoMap_Golden(t *testing.T) {
 	p := baseMap()
-	p.EnableGraticule = true
+	p.EnableGraticule = core.BoolPtr(true)
 	golden.Assert(t, "geomap-basic", renderGeoMap(t, p))
 }
 

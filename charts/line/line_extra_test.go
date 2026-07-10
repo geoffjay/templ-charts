@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
@@ -29,9 +30,9 @@ func TestLine_PointsBorderAndLabels(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:              sampleData(),
-		EnablePoints:      true,
+		EnablePoints:      core.BoolPtr(true),
 		PointBorderWidth:  2,
-		EnablePointLabel:  true,
+		EnablePointLabel:  core.BoolPtr(true),
 		PointLabelYOffset: -12,
 	}
 	out := renderChart(t, props)
@@ -56,7 +57,7 @@ func TestLine_AreaBlendModeAndAnimate(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:          sampleData(),
-		EnableArea:    true,
+		EnableArea:    core.BoolPtr(true),
 		AreaBlendMode: core.MixBlendMultiply,
 	}
 	props.Animate = true
@@ -97,7 +98,7 @@ func TestLine_CrosshairOnHover(t *testing.T) {
 		Data:            sampleData(),
 		Interactive:     true,
 		UseMesh:         true,
-		EnableCrosshair: true,
+		EnableCrosshair: core.BoolPtr(true),
 	}
 	without := renderChart(t, base)
 	withHover := base
@@ -119,14 +120,15 @@ func TestLine_CrosshairOnHover(t *testing.T) {
 func TestLine_CrosshairDebugCentre(t *testing.T) {
 	base := line.LineProps{
 		Width: 500, Height: 300,
-		Data:        sampleData(),
-		Interactive: true,
-		UseMesh:     true,
-		DebugMesh:   true,
+		Data:            sampleData(),
+		Interactive:     true,
+		UseMesh:         true,
+		DebugMesh:       true,
+		EnableCrosshair: core.BoolPtr(false),
 	}
 	without := renderChart(t, base)
 	withCross := base
-	withCross.EnableCrosshair = true
+	withCross.EnableCrosshair = core.BoolPtr(true)
 	out := renderChart(t, withCross)
 	delta := strings.Count(out, "<line") - strings.Count(without, "<line")
 	if delta != 2 {
@@ -220,6 +222,8 @@ func TestLine_HiddenSeries(t *testing.T) {
 		Width: 500, Height: 300,
 		Data:             sampleData(),
 		InitialHiddenIDs: []string{"B"},
+		EnableGridX:      core.BoolPtr(false),
+		EnableGridY:      core.BoolPtr(false),
 		Legends: []legends.LegendProps{
 			{Anchor: legends.LegendAnchorTopRight, Direction: legends.LegendDirectionColumn, ItemWidth: 80, ItemHeight: 20},
 		},
@@ -239,8 +243,8 @@ func TestLine_CustomFormats(t *testing.T) {
 	props := line.LineProps{
 		Width: 500, Height: 300,
 		Data:             sampleData(),
-		EnablePoints:     true,
-		EnablePointLabel: true,
+		EnablePoints:     core.BoolPtr(true),
+		EnablePointLabel: core.BoolPtr(true),
 		XFormat:          func(v any) string { return fmt.Sprintf("x=%v", v) },
 		YFormat:          func(v any) string { return fmt.Sprintf("y=%v", v) },
 	}

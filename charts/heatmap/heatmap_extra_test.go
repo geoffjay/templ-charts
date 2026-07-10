@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/axes"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -141,7 +143,7 @@ func TestHeatMap_ValueFormat(t *testing.T) {
 func TestHeatMap_LabelsDisabled(t *testing.T) {
 	out := renderChart(t, heatmap.HeatMapProps{
 		Width: 500, Height: 360, Data: sampleData(),
-		EnableLabels: heatmap.BoolPtr(false),
+		EnableLabels: core.BoolPtr(false),
 	})
 	if strings.Contains(out, ">10</text>") {
 		t.Errorf("expected no cell value labels when EnableLabels=false")
@@ -194,8 +196,8 @@ func TestHeatMap_GridLayers(t *testing.T) {
 	base := heatmap.HeatMapProps{Width: 500, Height: 360, Data: sampleData()}
 	without := renderChart(t, base)
 	withGrid := base
-	withGrid.EnableGridX = true
-	withGrid.EnableGridY = true
+	withGrid.EnableGridX = core.BoolPtr(true)
+	withGrid.EnableGridY = core.BoolPtr(true)
 	out := renderChart(t, withGrid)
 	if strings.Count(out, "<line") <= strings.Count(without, "<line") {
 		t.Errorf("expected grid to add <line> elements")

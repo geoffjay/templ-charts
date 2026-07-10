@@ -10,6 +10,7 @@ import (
 	"github.com/a-h/templ"
 	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/sunburst"
@@ -132,25 +133,25 @@ func (a *App) zoomableChart(slug string, theme *theming.Theme, palette colors.Pa
 	id := "detail-" + slug
 	switch slug {
 	case "icicle":
-		p := icicle.IcicleProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: icicleSample()}
+		p := icicle.IcicleProps{Width: 720, Height: 440, Responsive: true, EnableZooming: core.BoolPtr(true), Theme: theme, Data: icicleSample()}
 		if palette != "" {
 			p.Colors = scheme
 		}
 		return id, htmx.KindIcicle, p, true
 	case "treemap":
-		p := treemap.TreemapProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: treemapSample()}
+		p := treemap.TreemapProps{Width: 720, Height: 440, Responsive: true, EnableZooming: core.BoolPtr(true), Theme: theme, Data: treemapSample()}
 		if palette != "" {
 			p.Colors = scheme
 		}
 		return id, htmx.KindTreemap, p, true
 	case "circle-packing":
-		p := cp.CirclePackingProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: cpSample()}
+		p := cp.CirclePackingProps{Width: 720, Height: 440, Responsive: true, EnableZooming: core.BoolPtr(true), Theme: theme, Data: cpSample()}
 		if palette != "" {
 			p.Colors = scheme
 		}
 		return id, htmx.KindCirclePack, p, true
 	case "sunburst":
-		p := sunburst.SunburstProps{Width: 720, Height: 440, Responsive: true, EnableZooming: true, Theme: theme, Data: sunburstSample()}
+		p := sunburst.SunburstProps{Width: 720, Height: 440, Responsive: true, EnableZooming: core.BoolPtr(true), Theme: theme, Data: sunburstSample()}
 		if palette != "" {
 			p.Colors = scheme
 		}

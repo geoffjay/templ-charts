@@ -1,0 +1,75 @@
+version: "2"
+
+run:
+  # Generated templ files and vendored reference material are not linted.
+  build-tags: []
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - copyloopvar
+    - errorlint
+    - gocritic
+    - misspell
+    - nilerr
+    - revive
+    - unconvert
+    - usestdlibvars
+    - whitespace
+  settings:
+    revive:
+      rules:
+        # Keep the exported-symbol doc-comment check, but disable the
+        # "stutter" complaint: the XxxProps / XxxResult naming (bar.BarProps)
+        # is a deliberate, uniform convention across all chart families.
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - contrib
+      - '.*_templ\.go$'
+      - '.opencode'
+    rules:
+      # Test files may be less strict about exported-symbol docs and dup code.
+      - path: _test\.go
+        linters:
+          - revive
+      # Several suites verify render/encode/build determinism by calling a
+      # function twice with equal args and comparing the results. staticcheck's
+      # SA4000 (identical operands to a binary operator) is a false positive for
+      # that intentional idiom, so it is excluded in test files only.
+      - path: _test\.go
+        text: SA4000
+        linters:
+          - staticcheck
+      # The demo app is illustrative, not library code.
+      - path: examples/
+        linters:
+          - revive
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/geoffjay/templ-charts
+  exclusions:
+    generated: lax
+    paths:
+      - contrib
+      - '.*_templ\.go$'
+      - '.opencode'

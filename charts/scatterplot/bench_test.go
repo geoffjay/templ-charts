@@ -24,8 +24,8 @@ func benchScatterProps(n int, engine theming.Engine) scatterplot.ScatterPlotProp
 		Width: 900, Height: 500,
 		Margin:      core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
 		Data:        []scatterplot.ScatterPlotSerie{{ID: "s", Data: data}},
-		EnableGridX: true,
-		EnableGridY: true,
+		EnableGridX: core.BoolPtr(true),
+		EnableGridY: core.BoolPtr(true),
 		Render:      engine,
 		ChartID:     "bench",
 	}

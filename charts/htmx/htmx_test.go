@@ -8,6 +8,7 @@ import (
 
 	"github.com/geoffjay/templ-charts/charts/bar"
 	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/icicle"
@@ -508,7 +509,7 @@ func assertZoomRoundTrip(t *testing.T, h *htmx.Handler, id, childID string) {
 func TestHandler_IcicleZoom(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterIcicle("demo-icicle", icicle.IcicleProps{
-		Width: 500, Height: 300, EnableZooming: true, Data: icicleData(),
+		Width: 500, Height: 300, EnableZooming: core.BoolPtr(true), Data: icicleData(),
 	})
 	assertZoomRoundTrip(t, htmx.NewHandler(r), "demo-icicle", "A")
 }
@@ -516,7 +517,7 @@ func TestHandler_IcicleZoom(t *testing.T) {
 func TestHandler_TreemapZoom(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterTreemap("demo-treemap", treemap.TreemapProps{
-		Width: 500, Height: 400, EnableZooming: true,
+		Width: 500, Height: 400, EnableZooming: core.BoolPtr(true),
 		Data: treemap.TreemapNode{ID: "root", Children: []treemap.TreemapNode{
 			{ID: "A", Children: []treemap.TreemapNode{{ID: "a1", Value: 12}, {ID: "a2", Value: 8}}},
 			{ID: "B", Children: []treemap.TreemapNode{{ID: "b1", Value: 10}}},
@@ -529,7 +530,7 @@ func TestHandler_TreemapZoom(t *testing.T) {
 func TestHandler_CirclePackingZoom(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterCirclePacking("demo-cp", cp.CirclePackingProps{
-		Width: 400, Height: 400, EnableZooming: true,
+		Width: 400, Height: 400, EnableZooming: core.BoolPtr(true),
 		Data: cp.CirclePackingNode{ID: "root", Children: []cp.CirclePackingNode{
 			{ID: "A", Children: []cp.CirclePackingNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
 			{ID: "B", Children: []cp.CirclePackingNode{{ID: "b1", Value: 6}}},
@@ -542,7 +543,7 @@ func TestHandler_CirclePackingZoom(t *testing.T) {
 func TestHandler_SunburstZoom(t *testing.T) {
 	r := htmx.NewRegistry()
 	r.RegisterSunburst("demo-sb", sunburst.SunburstProps{
-		Width: 400, Height: 400, EnableZooming: true,
+		Width: 400, Height: 400, EnableZooming: core.BoolPtr(true),
 		Data: sunburst.SunburstNode{ID: "root", Children: []sunburst.SunburstNode{
 			{ID: "A", Children: []sunburst.SunburstNode{{ID: "a1", Value: 8}, {ID: "a2", Value: 4}}},
 			{ID: "B", Children: []sunburst.SunburstNode{{ID: "b1", Value: 6}}},

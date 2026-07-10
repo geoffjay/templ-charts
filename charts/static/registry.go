@@ -235,7 +235,7 @@ func init() {
 
 	Samples[ChartTypeScatterPlot] = Sample{Type: ChartTypeScatterPlot, Props: scatterplot.ScatterPlotProps{
 		Width: sampleW, Height: sampleH, Margin: core.Margin{Top: 20, Right: 30, Bottom: 50, Left: 60},
-		Data: samples.ScatterPlot(), EnableGridX: true, EnableGridY: true,
+		Data: samples.ScatterPlot(), EnableGridX: core.BoolPtr(true), EnableGridY: core.BoolPtr(true),
 	}}
 
 	streamData, streamKeys := samples.Stream()
@@ -277,7 +277,7 @@ func init() {
 		Colors: "purple_blue_green", Steps: 5, UnknownColor: "#dddddd", ValueFormat: ",.0f",
 		GeoBase: geo.GeoBase{
 			Width: 600, Height: 400, Margin: core.Margin{Top: 20, Right: 20, Bottom: 20, Left: 20},
-			ProjectionType: "equirectangular", ProjectionScale: 150,
+			ProjectionType: geo.ProjectionEquirectangular, ProjectionScale: 150,
 			BorderWidth: 0.5, BorderColor: "#152238",
 		},
 	}}

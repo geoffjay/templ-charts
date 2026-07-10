@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
+	"github.com/geoffjay/templ-charts/charts/internal/curves"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -28,8 +28,8 @@ func UseStream(props StreamProps) StreamResult {
 	stack := d3shape.NewStack[StreamDatum]().
 		Keys(props.Keys).
 		Value(func(d StreamDatum, key string, _ int, _ []StreamDatum) float64 { return d[key] }).
-		Offset(core.StackOffsetFromProp(props.OffsetType)).
-		Order(core.StackOrderFromProp(props.Order))
+		Offset(curves.StackOffsetFromProp(props.OffsetType)).
+		Order(curves.StackOrderFromProp(props.Order))
 
 	series := stack.Call(props.Data)
 
@@ -69,7 +69,7 @@ func UseStream(props StreamProps) StreamResult {
 		func(p streamPoint, _ int, _ []streamPoint) float64 { return p.X },
 		func(p streamPoint, _ int, _ []streamPoint) float64 { return p.Y0 },
 		func(p streamPoint, _ int, _ []streamPoint) float64 { return p.Y1 },
-	).Curve(core.CurveFromProp(props.Curve))
+	).Curve(curves.CurveFromProp(props.Curve))
 
 	layers := make([]ComputedLayer, 0, len(series))
 	for li, s := range series {

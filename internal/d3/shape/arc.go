@@ -320,7 +320,7 @@ func cornerTangents(x0, y0, x1, y1, r1, rc float64, cw bool) cornerTangent {
 	} else {
 		lo = -rc
 	}
-	lo = lo / math.Sqrt(x01*x01+y01*y01)
+	lo /= math.Sqrt(x01*x01 + y01*y01)
 	ox := lo * y01
 	oy := -lo * x01
 	x11 := x0 + ox
@@ -340,7 +340,7 @@ func cornerTangents(x0, y0, x1, y1, r1, rc float64, cw bool) cornerTangent {
 	} else {
 		d = 1
 	}
-	d = d * math.Sqrt(math.Max(0, r*r*d2-D*D))
+	d *= math.Sqrt(math.Max(0, r*r*d2-D*D))
 	cx0 := (D*dy - dx*d) / d2
 	cy0 := (-D*dx - dy*d) / d2
 	cx1 := (D*dy + dx*d) / d2

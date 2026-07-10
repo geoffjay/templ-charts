@@ -135,10 +135,8 @@ func (c *Chord) Compute(matrix [][]float64) *Result {
 	dx := 0.0
 	if k != 0 {
 		dx = c.padAngle
-	} else {
-		if n > 0 {
-			dx = tau / float64(n)
-		}
+	} else if n > 0 {
+		dx = tau / float64(n)
 	}
 
 	groups := make([]Group, n)

@@ -96,36 +96,56 @@ const (
 // BumpProps mirrors @nivo/bump BumpSvgProps (the supported subset). Fields left
 // zero fall back to Defaults via applyDefaults.
 type BumpProps struct {
+	// Data holds one BumpSerie per ranked serie, each with its per-column ranks.
 	Data []BumpSerie
 
+	// Width and Height are the total SVG dimensions in pixels; the plot area is
+	// these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the plot area (for axes/labels/legends).
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
 	Responsive bool
 
+	// Interpolation selects the line shape: "smooth" (curveBumpX, default) or
+	// "linear".
 	Interpolation Interpolation
+	// XPadding is the inner padding fraction (0..1) of the x point scale; default
+	// 0.6. XOuterPadding and YOuterPadding are the outer padding fractions of the
+	// x and y scales; both default 0.5.
 	XPadding      float64
 	XOuterPadding float64
 	YOuterPadding float64
 
+	// LineWidth is the serie line width in pixels; default 2. ActiveLineWidth
+	// (default 4) and InactiveLineWidth (default 1) apply to hovered vs.
+	// non-hovered series when Interactive.
 	LineWidth         float64
 	ActiveLineWidth   float64
 	InactiveLineWidth float64
-	Opacity           float64
-	ActiveOpacity     float64
-	InactiveOpacity   float64
+	// Opacity is the serie line/point opacity; default 1. ActiveOpacity (default
+	// 1) and InactiveOpacity (default 0.3) apply to hovered vs. non-hovered
+	// series when Interactive.
+	Opacity         float64
+	ActiveOpacity   float64
+	InactiveOpacity float64
 
 	// StartLabel / EndLabel toggle the serie-id labels at the first / last
 	// column. nil → Defaults (start off, end on).
 	StartLabel *bool
 	EndLabel   *bool
 
+	// PointSize is the rank dot diameter in pixels; default 6. ActivePointSize
+	// (default 8) and InactivePointSize (default 4) apply to hovered vs.
+	// non-hovered series when Interactive.
 	PointSize         float64
 	ActivePointSize   float64
 	InactivePointSize float64
 
+	// Colors is the ordinal color scale mapping each serie to a color; default
+	// the "nivo" scheme.
 	Colors colors.OrdinalColorScaleConfig
 
 	XFormat string // d3-format spec; empty → %g
@@ -134,28 +154,39 @@ type BumpProps struct {
 	// Interactive enables the client-side hover layer (charts/interact): each
 	// point emits a data-tc-tooltip. Default false keeps the static render.
 	Interactive bool
-	UseMesh     bool
-	DebugMesh   bool
+	// UseMesh enables the voronoi-mesh hover layer for nearest-point detection.
+	UseMesh bool
+	// DebugMesh renders the voronoi mesh cell outlines for debugging.
+	DebugMesh bool
 
-	EnableGridX bool
-	EnableGridY bool
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	EnableGridX *bool // nil → true (nivo default)
+	EnableGridY *bool // nil → true (nivo default)
+	// AxisTop/Right/Bottom/Left configure each axis; nil hides that axis.
+	AxisTop    *axes.AxisProps
+	AxisRight  *axes.AxisProps
+	AxisBottom *axes.AxisProps
+	AxisLeft   *axes.AxisProps
 
+	// Legends configures zero or more legends; empty → no legend.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides chart styling; nil → theming.DefaultTheme.
+	Theme *theming.Theme
+	// Layers sets the render order of chart layers; empty → DefaultLayers.
 	Layers []BumpLayerId
 
-	Role            string
+	// Role is the root SVG ARIA role; default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy, and AriaDescribedBy set the corresponding SVG
+	// accessibility attributes.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title>/<desc> elements.
+	Title string
+	Desc  string
+	// IsFocusable makes the SVG keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// series line (600ms). MotionStagger delays successive series by that many
@@ -173,11 +204,14 @@ type BumpResult struct {
 	LegendData []legends.Datum
 }
 
-// BoolPtr returns a pointer to b — a helper for the *bool label props.
-func BoolPtr(b bool) *bool { return &b }
-
 // StartLabelEnabled resolves StartLabel (nil → false).
 func (p BumpProps) StartLabelEnabled() bool { return p.StartLabel != nil && *p.StartLabel }
 
 // EndLabelEnabled resolves EndLabel (nil → true).
 func (p BumpProps) EndLabelEnabled() bool { return p.EndLabel == nil || *p.EndLabel }
+
+// GridXEnabled resolves EnableGridX (nil → true, nivo default).
+func (p BumpProps) GridXEnabled() bool { return p.EnableGridX == nil || *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p BumpProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }

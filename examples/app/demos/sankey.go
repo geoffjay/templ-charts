@@ -47,7 +47,7 @@ func SankeyDemos() []SankeyDemo {
 	justify.Align = sankey.SankeyAlignJustify
 
 	gradient := base()
-	gradient.EnableLinkGradient = true
+	gradient.EnableLinkGradient = core.BoolPtr(true)
 
 	interactive := base()
 	interactive.Interactive = true

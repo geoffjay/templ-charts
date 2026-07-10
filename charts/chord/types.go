@@ -69,35 +69,60 @@ type ChordProps struct {
 	Data [][]float64
 	Keys []string
 
+	// Width and Height are the total SVG dimensions in pixels; the circle area is
+	// these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the circle area (for labels/legends).
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
 
-	PadAngle          float64 // radians between adjacent group arcs
+	PadAngle float64 // radians between adjacent group arcs
+	// InnerRadiusRatio is the arc inner radius as a fraction (0..1) of the outer
+	// radius; default 0.9. InnerRadiusOffset is subtracted from that ratio to set
+	// the ribbon radius; default 0.
 	InnerRadiusRatio  float64
 	InnerRadiusOffset float64
 
+	// Colors is the ordinal color scale mapping each key to an arc color; default
+	// the "nivo" scheme.
 	Colors colors.OrdinalColorScaleConfig
 
+	// ArcOpacity is the arc fill opacity; default 1. ActiveArcOpacity (default 1)
+	// and InactiveArcOpacity (default 0.15) apply to hovered vs. non-hovered arcs
+	// when Interactive.
 	ArcOpacity         float64
 	ActiveArcOpacity   float64
 	InactiveArcOpacity float64
-	ArcBorderWidth     float64
-	ArcBorderColor     colors.InheritedColorConfig
+	// ArcBorderWidth is the arc border width in pixels; default 1. ArcBorderColor
+	// resolves the border color; default the arc color darkened.
+	ArcBorderWidth float64
+	ArcBorderColor colors.InheritedColorConfig
 
+	// RibbonOpacity is the ribbon fill opacity; default 0.5. ActiveRibbonOpacity
+	// (default 0.85) and InactiveRibbonOpacity (default 0.15) apply to hovered vs.
+	// non-hovered ribbons when Interactive.
 	RibbonOpacity         float64
 	ActiveRibbonOpacity   float64
 	InactiveRibbonOpacity float64
-	RibbonBorderWidth     float64
-	RibbonBorderColor     colors.InheritedColorConfig
-	RibbonBlendMode       string
+	// RibbonBorderWidth is the ribbon border width in pixels; default 1.
+	// RibbonBorderColor resolves the border color; default the ribbon color
+	// darkened.
+	RibbonBorderWidth float64
+	RibbonBorderColor colors.InheritedColorConfig
+	// RibbonBlendMode is the CSS mix-blend-mode applied to ribbons; default
+	// "normal".
+	RibbonBlendMode string
 
-	EnableLabel    *bool // nil → true
-	Label          string
-	LabelOffset    float64
-	LabelRotation  float64
+	EnableLabel *bool // nil → true
+	// Label selects the arc property used as the label; default "id".
+	Label string
+	// LabelOffset is the label's radial distance in pixels from the arc; default
+	// 12. LabelRotation rotates the label in degrees; default 0.
+	LabelOffset   float64
+	LabelRotation float64
+	// LabelTextColor resolves the label color; default the arc color darkened.
 	LabelTextColor colors.InheritedColorConfig
 
 	ValueFormat string // d3-format spec; empty → %g
@@ -105,18 +130,26 @@ type ChordProps struct {
 	// Interactive enables per-arc/ribbon client-side hover tooltips (charts/interact).
 	Interactive bool
 
+	// Legends configures zero or more legends; empty → no legend.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides chart styling; nil → theming.DefaultTheme.
+	Theme *theming.Theme
+	// Layers sets the render order of chart layers; empty → DefaultLayers.
 	Layers []ChordLayerId
 
-	Role            string
+	// Role is the root SVG ARIA role; default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy, and AriaDescribedBy set the corresponding SVG
+	// accessibility attributes.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title>/<desc> elements.
+	Title string
+	Desc  string
+	// IsFocusable makes the SVG keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// ribbon and arc <path> (600ms). MotionStagger delays successive items by

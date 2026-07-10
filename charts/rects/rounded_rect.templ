@@ -5,9 +5,8 @@ package rects
 // (vertical) or zero height (horizontal) to its full size. Mirrors nivo's
 // bar enter animation (600ms ease, fill="freeze").
 //
-// Chart packages that compose their SVG layer pipeline as strings should
-// prefer the Render function; this component is for templ-based composition.
+// This component composes the rounded-rect path for templ-based composition.
 templ RoundedRect(props RoundedRectProps) {
-	{{ raw := Render(props) }}
+	{{ raw := render(props) }}
 	{ raw }
 }

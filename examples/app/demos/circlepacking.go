@@ -44,7 +44,7 @@ func CirclePackingDemos() []CirclePackingDemo {
 				Data:         circlePackingSample(),
 				Padding:      3,
 				BorderWidth:  1,
-				EnableLabels: cp.BoolPtr(true),
+				EnableLabels: core.BoolPtr(true),
 			},
 		},
 	}

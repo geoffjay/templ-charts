@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/grid"
@@ -153,9 +154,9 @@ func renderAreasLayer(props WaffleProps, result WaffleResult) string {
 		if d.Len() == 0 {
 			continue
 		}
-		inner.WriteString(fmt.Sprintf(`<path d="%s" fill="%s" fill-opacity="%s"`, d.String(), cd.Color, fmtW(1)))
+		fmt.Fprintf(&inner, `<path d="%s" fill="%s" fill-opacity="%s"`, d.String(), cd.Color, fmtW(1))
 		if props.BorderWidth > 0 && cd.BorderColor != "" {
-			inner.WriteString(fmt.Sprintf(` stroke="%s" stroke-width="%s"`, cd.BorderColor, fmtW(props.BorderWidth)))
+			fmt.Fprintf(&inner, ` stroke="%s" stroke-width="%s"`, cd.BorderColor, fmtW(props.BorderWidth))
 		}
 		inner.WriteString(`></path>`)
 	}

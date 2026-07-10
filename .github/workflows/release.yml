@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Verify and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      # A library has nothing to compile into an artifact — the "release" is the
+      # tag itself, which the Go module proxy picks up automatically. This job
+      # exists to guarantee the tagged commit builds and its tests pass before a
+      # GitHub Release is published.
+      - name: Build
+        run: go build ./...
+
+      - name: Test
+        run: go test ./charts/... ./internal/...
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          # Tags containing a hyphen (v1.0.0-rc1, v1.1.0-beta2) are pre-releases.
+          prerelease: ${{ contains(github.ref_name, '-') }}

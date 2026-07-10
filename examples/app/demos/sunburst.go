@@ -43,7 +43,7 @@ func SunburstDemos() []SunburstDemo {
 				Margin:             core.Margin{Top: 10, Right: 10, Bottom: 10, Left: 10},
 				Data:               sunburstSample(),
 				CornerRadius:       2,
-				EnableArcLabels:    sunburst.BoolPtr(true),
+				EnableArcLabels:    core.BoolPtr(true),
 				ArcLabelsSkipAngle: 10,
 			},
 		},

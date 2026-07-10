@@ -13,7 +13,7 @@ func TestScript_NonEmpty(t *testing.T) {
 		t.Fatalf("Script looks too short (%d bytes)", len(interact.Script))
 	}
 	for _, want := range []string{"data-tc-tooltip", "data-tc-mesh", "tc-chart", "tc-crosshair", "getScreenCTM", "data-tc-observe", "ResizeObserver"} {
-		if !strings.Contains(interact.Script, want) {
+		if !strings.Contains(interact.Script, want) { //nolint:gocritic // argOrder false positive
 			t.Errorf("Script missing %q", want)
 		}
 	}

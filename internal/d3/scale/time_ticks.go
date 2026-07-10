@@ -97,8 +97,7 @@ func timeTicks(start, stop time.Time, count int) []time.Time {
 	if reverse {
 		start, stop = stop, start
 	}
-	var interval *Interval
-	interval = timeTickInterval(start, stop, count)
+	interval := timeTickInterval(start, stop, count)
 	if interval == nil {
 		return nil
 	}

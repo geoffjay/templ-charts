@@ -24,9 +24,10 @@ func polygonContains(polygon [][][2]float64, point [2]float64) bool {
 	winding := 0
 	sum := 0.0
 
-	if sinPhi == 1 {
+	switch sinPhi {
+	case 1:
 		phi = halfPi + epsilon
-	} else if sinPhi == -1 {
+	case -1:
 		phi = -halfPi - epsilon
 	}
 

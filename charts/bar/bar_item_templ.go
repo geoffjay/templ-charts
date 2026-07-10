@@ -11,7 +11,7 @@ import (
 
 	"github.com/a-h/templ"
 	templruntime "github.com/a-h/templ/runtime"
-	"github.com/geoffjay/templ-charts/charts/bar/compute"
+	"github.com/geoffjay/templ-charts/charts/bar/internal/compute"
 )
 
 // BarItemProps is the input to the BarItem templ component. Mirrors nivo's

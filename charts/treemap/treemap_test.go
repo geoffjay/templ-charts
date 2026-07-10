@@ -123,7 +123,7 @@ func TestTreemap_ZoomOffNoZoomAttrs(t *testing.T) {
 		t.Errorf("default treemap must not emit /zoom hx-get")
 	}
 	p := baseProps()
-	p.EnableZooming = true // no ChartID → still off
+	p.EnableZooming = core.BoolPtr(true) // no ChartID → still off
 	if strings.Contains(renderChart(t, p), "/zoom?node=") {
 		t.Errorf("treemap with EnableZooming but no ChartID must not emit /zoom hx-get")
 	}
@@ -131,7 +131,7 @@ func TestTreemap_ZoomOffNoZoomAttrs(t *testing.T) {
 
 func TestTreemap_ZoomOnEmitsZoomTargets(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "tm1"
 	out := renderChart(t, p)
 	for _, id := range []string{"A", "B", "C", "a1", "b1"} {
@@ -146,7 +146,7 @@ func TestTreemap_ZoomOnEmitsZoomTargets(t *testing.T) {
 
 func TestTreemap_ZoomedShowsBreadcrumb(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "tm1"
 	p.FocusID = "A"
 	out := renderChart(t, p)
@@ -160,14 +160,14 @@ func TestTreemap_ZoomedShowsBreadcrumb(t *testing.T) {
 
 func TestTreemap_GoldenZoomable(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "tm1"
 	golden.Assert(t, "treemap-zoomable", renderChart(t, p))
 }
 
 func TestTreemap_GoldenZoomed(t *testing.T) {
 	p := baseProps()
-	p.EnableZooming = true
+	p.EnableZooming = core.BoolPtr(true)
 	p.ChartID = "tm1"
 	p.FocusID = "A"
 	golden.Assert(t, "treemap-zoomed", renderChart(t, p))

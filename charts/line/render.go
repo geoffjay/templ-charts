@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
@@ -122,7 +123,7 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 	for _, layer := range layers {
 		switch layer {
 		case LineLayerGrid:
-			if props.EnableGridX || props.EnableGridY {
+			if props.GridXEnabled() || props.GridYEnabled() {
 				b.WriteString(renderGridLayer(props, result, dims, theme))
 			}
 		case LineLayerMarkers:
@@ -130,7 +131,7 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 		case LineLayerAxes:
 			b.WriteString(renderAxesLayer(props, result, dims, theme))
 		case LineLayerAreas:
-			if props.EnableArea {
+			if props.AreaEnabled() {
 				b.WriteString(renderAreasLayer(props, result, bound))
 			}
 		case LineLayerCrosshair:
@@ -138,7 +139,7 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 		case LineLayerLines:
 			b.WriteString(renderLinesLayer(props, result))
 		case LineLayerPoints:
-			if props.EnablePoints {
+			if props.PointsEnabled() {
 				b.WriteString(renderPointsLayer(props, result))
 			}
 		case LineLayerSlices:
@@ -158,14 +159,14 @@ func renderLineLayers(layers []LineLayerId, props LineProps, result LineResult, 
 
 func renderGridLayer(props LineProps, result LineResult, dims core.Dimensions, theme *theming.Theme) string {
 	var s strings.Builder
-	if props.EnableGridX {
+	if props.GridXEnabled() {
 		s.WriteString(renderGrid(axes.GridProps{
 			Axis: "x", Scale: result.XScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight,
 			TickValues: props.GridXValues, Theme: theme,
 		}))
 	}
-	if props.EnableGridY {
+	if props.GridYEnabled() {
 		s.WriteString(renderGrid(axes.GridProps{
 			Axis: "y", Scale: result.YScale,
 			Width: dims.InnerWidth, Height: dims.InnerHeight,
@@ -216,7 +217,7 @@ func renderPointsLayer(props LineProps, result LineResult) string {
 		Points:       result.Points,
 		Size:         props.PointSize,
 		BorderWidth:  props.PointBorderWidth,
-		EnableLabel:  props.EnablePointLabel,
+		EnableLabel:  props.PointLabelEnabled(),
 		LabelYOffset: props.PointLabelYOffset,
 		ChartID:      props.ChartID,
 	})
@@ -309,7 +310,7 @@ func buildSliceTooltips(slices []SliceData) map[string]string {
 }
 
 func renderCrosshairLayer(props LineProps, result LineResult, dims core.Dimensions, theme *theming.Theme) string {
-	if !props.EnableCrosshair {
+	if !props.CrosshairEnabled() {
 		return ""
 	}
 	// Render the crosshair when the htmx hover endpoint has flagged an active

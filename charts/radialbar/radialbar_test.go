@@ -64,7 +64,7 @@ func TestRadialBar_BarArcCount(t *testing.T) {
 func TestRadialBar_NoTracksWhenDisabled(t *testing.T) {
 	withTracks := strings.Count(renderChart(t, baseProps()), "<path")
 	p := baseProps()
-	p.EnableTracks = radialbar.BoolPtr(false)
+	p.EnableTracks = core.BoolPtr(false)
 	withoutTracks := strings.Count(renderChart(t, p), "<path")
 	if withoutTracks >= withTracks {
 		t.Errorf("disabling tracks should reduce path count: with=%d without=%d", withTracks, withoutTracks)
@@ -73,7 +73,7 @@ func TestRadialBar_NoTracksWhenDisabled(t *testing.T) {
 
 func TestRadialBar_LabelsWhenEnabled(t *testing.T) {
 	p := baseProps()
-	p.EnableLabels = radialbar.BoolPtr(true)
+	p.EnableLabels = core.BoolPtr(true)
 	out := renderChart(t, p)
 	// formattedValue labels for the 4 bars (all spans > 10° skip angle here).
 	if !strings.Contains(out, ">25<") {
@@ -88,7 +88,7 @@ func TestRadialBar_Golden(t *testing.T) {
 
 func TestRadialBar_Golden_Labels(t *testing.T) {
 	p := baseProps()
-	p.EnableLabels = radialbar.BoolPtr(true)
+	p.EnableLabels = core.BoolPtr(true)
 	p.CornerRadius = 4
 	out := renderChart(t, p)
 	golden.Assert(t, "radialbar-labels", out)

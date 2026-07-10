@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
@@ -213,7 +214,7 @@ func renderLinksLayer(props SankeyProps, result SankeyResult, cid string) string
 			nodeIdx[n.ID] = i
 		}
 	}
-	if props.EnableLinkGradient {
+	if props.LinkGradientEnabled() {
 		b.WriteString(`<defs>`)
 		for i, l := range result.Links {
 			b.WriteString(`<linearGradient id="`)
@@ -244,7 +245,7 @@ func renderLinksLayer(props SankeyProps, result SankeyResult, cid string) string
 		b.WriteString(` d="`)
 		b.WriteString(l.Path)
 		b.WriteString(`" fill="`)
-		if props.EnableLinkGradient {
+		if props.LinkGradientEnabled() {
 			b.WriteString(`url(#`)
 			b.WriteString(linkGradientID(i))
 			b.WriteString(`)`)

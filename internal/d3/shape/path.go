@@ -108,49 +108,6 @@ func (p *Path) bezierCurveTo(x1, y1, x2, y2, x, y float64) {
 	p.buf += "C" + p.fmtNum(x1) + "," + p.fmtNum(y1) + "," + p.fmtNum(x2) + "," + p.fmtNum(y2) + "," + p.fmtNum(x) + "," + p.fmtNum(y)
 }
 
-// arcTo is a port of d3-path's Path.arcTo. Included for completeness; not
-// used by line/area/arc generators (which use arc, not arcTo).
-func (p *Path) arcTo(x1, y1, x2, y2, r float64) {
-	if r < 0 {
-		panic("d3shape: negative radius")
-	}
-	x0, y0 := p.ex, p.ey
-	x21 := x2 - x1
-	y21 := y2 - y1
-	x01 := x0 - x1
-	y01 := y0 - y1
-	l01_2 := x01*x01 + y01*y01
-
-	if !p.hasStart {
-		p.moveTo(x1, y1)
-	} else if !(l01_2 > epsilon) {
-		// coincident with (x0,y0): do nothing
-	} else if !(math.Abs(y01*x21-y21*x01) > epsilon) || r == 0 {
-		p.lineTo(x1, y1)
-	} else {
-		x20 := x2 - x0
-		y20 := y2 - y0
-		l21_2 := x21*x21 + y21*y21
-		l20_2 := x20*x20 + y20*y20
-		l21 := math.Sqrt(l21_2)
-		l01 := math.Sqrt(l01_2)
-		l := r * math.Tan((pi-math.Acos((l21_2+l01_2-l20_2)/(2*l21*l01)))/2)
-		t01 := l / l01
-		t21 := l / l21
-		if math.Abs(t01-1) > epsilon {
-			p.lineTo(x1+t01*x01, y1+t01*y01)
-		}
-		cw := 0
-		if y01*x20 > x01*y20 {
-			cw = 1
-		}
-		p.ex = x1 + t21*x21
-		p.ey = y1 + t21*y21
-		p.hasStart = true
-		p.buf += "A" + p.fmtNum(r) + "," + p.fmtNum(r) + ",0,0," + intToStr(cw) + "," + p.fmtNum(p.ex) + "," + p.fmtNum(p.ey)
-	}
-}
-
 // arc is a port of d3-path's Path.arc. Draws a circular arc centered at
 // (x,y) with radius r from angle a0 to a1. ccw reverses direction.
 func (p *Path) arc(x, y, r, a0, a1 float64, ccw bool) {
@@ -200,16 +157,6 @@ func (p *Path) arc(x, y, r, a0, a1 float64, ccw bool) {
 		p.hasStart = true
 		p.buf += "A" + p.fmtNum(r) + "," + p.fmtNum(r) + ",0," + intToStr(largeArc) + "," + intToStr(cw) + "," + p.fmtNum(p.ex) + "," + p.fmtNum(p.ey)
 	}
-}
-
-// rect emits a closed rectangle (d3-path's rect).
-func (p *Path) rect(x, y, w, h float64) {
-	p.sx = x
-	p.sy = y
-	p.ex = x
-	p.ey = y
-	p.hasStart = true
-	p.buf += "M" + p.fmtNum(x) + "," + p.fmtNum(y) + "h" + p.fmtNum(w) + "v" + p.fmtNum(h) + "h" + p.fmtNum(-w) + "Z"
 }
 
 // MoveTo emits "Mx,y" and starts a new subpath. Exported wrapper around moveTo

@@ -4,8 +4,8 @@ import (
 	"math"
 
 	"github.com/geoffjay/templ-charts/charts/colors"
-	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
+	"github.com/geoffjay/templ-charts/charts/internal/curves"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/charts/theming"
@@ -55,7 +55,7 @@ func UseParallelCoordinates(props PCProps) PCResult {
 	gen.Defined(func(d d3shape.Point2D, _ int, _ []d3shape.Point2D) bool {
 		return !math.IsNaN(d[0]) && !math.IsNaN(d[1])
 	})
-	gen.Curve(core.CurveFromProp(props.Curve))
+	gen.Curve(curves.CurveFromProp(props.Curve))
 
 	lines := make([]ComputedLine, 0, len(props.Data))
 	for di, datum := range props.Data {

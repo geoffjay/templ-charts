@@ -114,7 +114,7 @@ func LegendsDemos() []Demo {
 				Curve:  core.CurveMonotoneX,
 				Data:   stylingLineData(),
 
-				EnableArea:  true,
+				EnableArea:  core.BoolPtr(true),
 				AreaOpacity: 1,
 				Defs: []core.Def{
 					core.LinearGradientDef("htmlLegendGrad", []core.GradientStop{

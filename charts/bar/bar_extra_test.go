@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/annotations"
 	"github.com/geoffjay/templ-charts/charts/axes"
 	"github.com/geoffjay/templ-charts/charts/bar"
@@ -274,7 +275,7 @@ func TestBar_TotalsHorizontalWithTheme(t *testing.T) {
 	props := bar.BarProps{
 		Width: 500, Height: 300,
 		Layout:       bar.LayoutHorizontal,
-		EnableTotals: true,
+		EnableTotals: core.BoolPtr(true),
 		Theme:        &th,
 		Data: []bar.BarDatum{
 			{"id": "one", "value": float64(10)},
@@ -368,10 +369,10 @@ func TestBar_UseBarCustomAccessors(t *testing.T) {
 		ValueFormat:     func(v float64) string { return fmt.Sprintf("%.1f!", v) },
 		Label:           func(d bar.ComputedDatum) string { return "L:" + d.ID },
 		TooltipLabel:    func(d bar.ComputedDatum) string { return "T:" + d.ID },
-		EnableLabel:     true,
+		EnableLabel:     core.BoolPtr(true),
 		LabelSkipWidth:  10,
 		LabelSkipHeight: 10,
-		EnableTotals:    true,
+		EnableTotals:    core.BoolPtr(true),
 	}
 	res := bar.UseBar(props)
 	if got := res.FormatValue(1); got != "1.0!" {
@@ -487,7 +488,7 @@ func TestBar_DefsFillBars(t *testing.T) {
 func TestBar_LabelSkipInRender(t *testing.T) {
 	props := bar.BarProps{
 		Width: 500, Height: 300,
-		EnableLabel:    true,
+		EnableLabel:    core.BoolPtr(true),
 		LabelSkipWidth: 10000, // skip everything
 		Data: []bar.BarDatum{
 			{"id": "one", "value": float64(10)},

@@ -51,8 +51,8 @@ func BumpDemos() []BumpDemo {
 				Margin:        core.Margin{Top: 30, Right: 160, Bottom: 40, Left: 60},
 				Data:          data,
 				Interpolation: bump.InterpolationLinear,
-				StartLabel:    bump.BoolPtr(false),
-				EndLabel:      bump.BoolPtr(false),
+				StartLabel:    core.BoolPtr(false),
+				EndLabel:      core.BoolPtr(false),
 				Legends: []legends.LegendProps{
 					{Anchor: legends.LegendAnchorRight, Direction: legends.LegendDirectionColumn, TranslateX: 120},
 				},

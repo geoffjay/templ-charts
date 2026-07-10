@@ -3,7 +3,7 @@ package compute_test
 import (
 	"testing"
 
-	"github.com/geoffjay/templ-charts/charts/bar/compute"
+	"github.com/geoffjay/templ-charts/charts/bar/internal/compute"
 )
 
 // legendBars builds a small bar list: keys k1/k2 across indexes A/B, in the

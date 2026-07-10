@@ -73,22 +73,33 @@ var DefaultLayers = []ScatterPlotLayerId{
 // ScatterPlotProps mirrors @nivo/scatterplot ScatterPlotSvgProps (the supported
 // subset). Fields left zero fall back to Defaults via applyDefaults.
 type ScatterPlotProps struct {
+	// Data is the set of series to plot; each serie's {x,y} points are drawn as
+	// dots sharing that serie's color.
 	Data []ScatterPlotSerie
 
+	// Width and Height are the overall SVG dimensions in pixels.
 	Width  float64
 	Height float64
+	// Margin reserves space around the plot area (top/right/bottom/left) in
+	// pixels, e.g. for axes and legends.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
 	Responsive bool
 
-	XScale  scales.ScaleSpec
-	YScale  scales.ScaleSpec
-	XFormat string // d3-format spec; empty → %g
+	// XScale and YScale configure the x/y value scales (linear, time, etc.).
+	// Both default to a linear scale over [0, auto].
+	XScale scales.ScaleSpec
+	YScale scales.ScaleSpec
+	// XFormat and YFormat are d3-format specs for the x/y values; empty → %g.
+	XFormat string
 	YFormat string
 
+	// NodeSize is the diameter of each node dot, in pixels. Default 9.
 	NodeSize float64
-	Colors   colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale mapping each serie to a color. Default
+	// is the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
 
 	// Interactive enables the client-side hover layer (charts/interact): each
 	// node emits a data-tc-tooltip the script shows on hover. Default false
@@ -104,19 +115,28 @@ type ScatterPlotProps struct {
 	// DetectionRadius, when > 0, bounds mesh hit-testing to this pixel distance.
 	DetectionRadius float64
 
-	EnableGridX bool
-	EnableGridY bool
+	EnableGridX *bool // nil → true (nivo default)
+	EnableGridY *bool // nil → true (nivo default)
+	// GridXValues and GridYValues override the tick positions of the x/y grid
+	// lines; nil lets the scale choose them.
 	GridXValues []any
 	GridYValues []any
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	// AxisTop, AxisRight, AxisBottom and AxisLeft configure the four axes; a nil
+	// pointer hides that axis. (nivo default shows bottom and left.)
+	AxisTop    *axes.AxisProps
+	AxisRight  *axes.AxisProps
+	AxisBottom *axes.AxisProps
+	AxisLeft   *axes.AxisProps
 
+	// Markers draws reference lines/regions in data space over the plot.
 	Markers []core.CartesianMarker
+	// Legends configures the chart legends; empty means no legend.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers selects which layers are rendered and in what order. Defaults to
+	// DefaultLayers.
 	Layers []ScatterPlotLayerId
 
 	// Render selects the backend: the zero value (or theming.EngineSVG) renders
@@ -129,13 +149,18 @@ type ScatterPlotProps struct {
 	// Canvas scatterplots on one page.
 	ChartID string
 
-	Role            string
+	// Role is the SVG root's ARIA role. Default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy and AriaDescribedBy set the matching ARIA
+	// attributes on the SVG root for accessibility.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title> and <desc> elements for accessibility.
+	Title string
+	Desc  string
+	// IsFocusable, when true, makes the SVG root keyboard-focusable.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL enter animation on each node scaling its
 	// radius from 0 to its final value (600ms). MotionStagger delays successive
@@ -152,3 +177,9 @@ type ScatterPlotResult struct {
 	YScale     scales.Scale
 	LegendData []legends.Datum
 }
+
+// GridXEnabled resolves EnableGridX (nil → true, nivo default).
+func (p ScatterPlotProps) GridXEnabled() bool { return p.EnableGridX == nil || *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p ScatterPlotProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }

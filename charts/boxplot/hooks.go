@@ -29,7 +29,7 @@ func UseBoxPlot(props BoxPlotProps) BoxPlotResult {
 	if subGroups == nil {
 		subGroups = uniqueFirstSeen(props.Data, func(d BoxPlotDatum) string { return d.SubGroup })
 	}
-	hasSubGroups := len(subGroups) > 0 && !(len(subGroups) == 1 && subGroups[0] == "")
+	hasSubGroups := len(subGroups) > 0 && (len(subGroups) != 1 || subGroups[0] != "")
 	nSub := len(subGroups)
 	if nSub == 0 {
 		nSub = 1

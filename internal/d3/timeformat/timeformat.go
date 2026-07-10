@@ -98,19 +98,15 @@ func tokenize(spec string) []token {
 			break
 		}
 		tok := token{pad: 0}
-		switch spec[i] {
-		case '-', '_', '0':
-			switch spec[i] {
-			case '-':
-				tok.pad = '-'
-			case '_':
-				tok.pad = '_'
-			case '0':
-				tok.pad = '0'
-			}
+		if spec[i] == '-' || spec[i] == '_' || spec[i] == '0' {
+			tok.pad = spec[i]
 			i++
 			if i >= len(spec) {
-				// trailing modifier — emit literal percent + modifier
+				// Trailing modifier with no directive char (e.g. "%0" at the end
+				// of the spec): emit the literal percent + modifier rather than
+				// reading past the end. This break exits the for loop; the former
+				// break was inside a switch and only exited the switch, then fell
+				// through to the out-of-range read at `tok.directive = spec[i]`.
 				toks = append(toks, token{literal: "%" + string(spec[i-1])})
 				break
 			}

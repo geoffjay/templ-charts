@@ -7,6 +7,7 @@ import (
 
 	"github.com/geoffjay/templ-charts/charts/bar"
 	"github.com/geoffjay/templ-charts/charts/colors"
+	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/legends"
 	"github.com/geoffjay/templ-charts/charts/scales"
 	"github.com/geoffjay/templ-charts/internal/golden"
@@ -120,7 +121,7 @@ func TestBar_DisableLabelDropsText(t *testing.T) {
 		},
 	}
 	without := with
-	without.EnableLabel = true
+	without.EnableLabel = core.BoolPtr(true)
 	outWith := renderChart(t, with)
 	outWithout := renderChart(t, without)
 	textWith := strings.Count(outWith, "<text")
@@ -191,7 +192,7 @@ func TestBar_BorderRadiusUsesPath(t *testing.T) {
 func TestBar_TotalsLayer(t *testing.T) {
 	props := bar.BarProps{
 		Width: 500, Height: 300,
-		EnableTotals: true,
+		EnableTotals: core.BoolPtr(true),
 		Data: []bar.BarDatum{
 			{"id": "one", "value": float64(10)},
 			{"id": "two", "value": float64(20)},
@@ -207,8 +208,8 @@ func TestBar_TotalsLayer(t *testing.T) {
 func TestBar_GridLines(t *testing.T) {
 	props := bar.BarProps{
 		Width: 500, Height: 300,
-		EnableGridX: true,
-		EnableGridY: true,
+		EnableGridX: core.BoolPtr(true),
+		EnableGridY: core.BoolPtr(true),
 		Data: []bar.BarDatum{
 			{"id": "one", "value": float64(10)},
 		},

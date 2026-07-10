@@ -90,20 +90,28 @@ var DefaultLayers = []BoxPlotLayerId{
 // BoxPlotProps mirrors @nivo/boxplot BoxPlotSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type BoxPlotProps struct {
+	// Data holds the raw observations; each datum is bucketed by Group/SubGroup
+	// and summarized to quantiles.
 	Data []BoxPlotDatum
 
 	// Groups / SubGroups give an explicit ordering; nil → first-seen order.
 	Groups    []string
 	SubGroups []string
+	// Quantiles are the quantile fractions computed per distribution; nil →
+	// [0.1,0.25,0.5,0.75,0.9]. Five values are required to render a glyph.
 	Quantiles []float64
 
+	// Width and Height are the total SVG dimensions in pixels; the plot area is
+	// these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the plot area (for axes/legends).
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
 	Responsive bool
 
+	// Layout orients the boxes "vertical" (default) or "horizontal".
 	Layout BoxPlotLayout
 
 	// Interactive enables the client-side hover layer (charts/interact): each
@@ -117,52 +125,82 @@ type BoxPlotProps struct {
 	Animate       bool
 	MotionStagger float64
 
+	// MinValue and MaxValue override the value-axis domain; nil → derived from
+	// the data's quantile values.
 	MinValue *float64
 	MaxValue *float64
 
+	// Padding is the fraction (0..1) of the band scale left as gaps between
+	// groups; default 0.1. InnerPadding is the gap in pixels between sub-group
+	// boxes within a group; default 6.
 	Padding      float64
 	InnerPadding float64
 
+	// Opacity is the fill opacity of each box; default 1. ActiveOpacity and
+	// InactiveOpacity are the opacities of hovered vs. non-hovered boxes when
+	// Interactive (defaults 1 and 0.25).
 	Opacity         float64
 	ActiveOpacity   float64
 	InactiveOpacity float64
 
-	EnableGridX bool
-	EnableGridY bool
-	AxisTop     *axes.AxisProps
-	AxisRight   *axes.AxisProps
-	AxisBottom  *axes.AxisProps
-	AxisLeft    *axes.AxisProps
+	EnableGridX *bool // nil → false (nivo default)
+	EnableGridY *bool // nil → true (nivo default)
+	// AxisTop/Right/Bottom/Left configure each axis; nil hides that axis. When
+	// all four are nil, bottom and left axes are shown by default.
+	AxisTop    *axes.AxisProps
+	AxisRight  *axes.AxisProps
+	AxisBottom *axes.AxisProps
+	AxisLeft   *axes.AxisProps
 
+	// ValueFormat is a format spec applied to displayed values (e.g. tooltips).
 	ValueFormat string
 
 	// ColorBy is "subGroup" (default) or "group".
 	ColorBy string
-	Colors  colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale mapping the ColorBy key to a box fill;
+	// default the "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
 
+	// BorderRadius is the corner radius of the box rect in pixels; default 0.
 	BorderRadius float64
-	BorderWidth  float64
-	BorderColor  colors.InheritedColorConfig
+	// BorderWidth is the box stroke width in pixels; default 0 (no border).
+	BorderWidth float64
+	// BorderColor resolves the box border color; default inherits the box color.
+	BorderColor colors.InheritedColorConfig
 
+	// MedianWidth is the median line stroke width in pixels; default 2.
 	MedianWidth float64
+	// MedianColor resolves the median line color; default the box color darkened.
 	MedianColor colors.InheritedColorConfig
 
-	WhiskerWidth   float64
-	WhiskerColor   colors.InheritedColorConfig
+	// WhiskerWidth is the whisker line stroke width in pixels; default 2.
+	WhiskerWidth float64
+	// WhiskerColor resolves the whisker color; default inherits the box color.
+	WhiskerColor colors.InheritedColorConfig
+	// WhiskerEndSize is the whisker cap width as a fraction (0..1) of the box
+	// width; default 0.6.
 	WhiskerEndSize float64
 
+	// Legends configures zero or more legends; empty → no legend.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides chart styling; nil → theming.DefaultTheme.
+	Theme *theming.Theme
+	// Layers sets the render order of chart layers; empty → DefaultLayers.
 	Layers []BoxPlotLayerId
 
-	Role            string
+	// Role is the root SVG ARIA role; default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy, and AriaDescribedBy set the corresponding SVG
+	// accessibility attributes.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title>/<desc> elements.
+	Title string
+	Desc  string
+	// IsFocusable makes the SVG keyboard-focusable.
+	IsFocusable bool
 }
 
 // BoxPlotResult is the computed model produced by UseBoxPlot.
@@ -175,5 +213,8 @@ type BoxPlotResult struct {
 	LegendData []legends.Datum
 }
 
-// FloatPtr returns a pointer to f — a helper for *float64 props.
-func FloatPtr(f float64) *float64 { return &f }
+// GridXEnabled resolves EnableGridX (nil → false, nivo default).
+func (p BoxPlotProps) GridXEnabled() bool { return p.EnableGridX != nil && *p.EnableGridX }
+
+// GridYEnabled resolves EnableGridY (nil → true, nivo default).
+func (p BoxPlotProps) GridYEnabled() bool { return p.EnableGridY == nil || *p.EnableGridY }

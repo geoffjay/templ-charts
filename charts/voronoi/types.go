@@ -47,10 +47,15 @@ type ComputedPoint struct {
 // VoronoiProps mirrors @nivo/voronoi VoronoiProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type VoronoiProps struct {
+	// Data is the set of input points to triangulate. Each datum's X/Y are in
+	// the user domains (see XDomain/YDomain).
 	Data []VoronoiDatum
 
-	Width  float64
+	// Width is the outer chart width in pixels (including Margin).
+	Width float64
+	// Height is the outer chart height in pixels (including Margin).
 	Height float64
+	// Margin is the space reserved around the plot area, in pixels.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container.
 	Responsive bool
@@ -59,14 +64,24 @@ type VoronoiProps struct {
 	XDomain [2]float64
 	YDomain [2]float64
 
+	// Layers is the ordered list of render layers to draw. Empty falls back to
+	// DefaultLayers (links, cells, points, bounds).
 	Layers []LayerId
 
-	EnableLinks   *bool // nil → false
+	EnableLinks *bool // nil → false
+	// LinkLineWidth is the stroke width in pixels of the Delaunay link edges.
+	// Defaults to 1.
 	LinkLineWidth float64
+	// LinkLineColor is the stroke color of the link edges. Defaults to
+	// "#bbbbbb".
 	LinkLineColor string
 
-	EnableCells   *bool // nil → true
+	EnableCells *bool // nil → true
+	// CellLineWidth is the stroke width in pixels of the Voronoi cell borders.
+	// Defaults to 2.
 	CellLineWidth float64
+	// CellLineColor is the stroke color of the cell borders. Defaults to
+	// "#000000".
 	CellLineColor string
 
 	// EnableCellFill fills each Voronoi cell with its site's color (from Colors)
@@ -80,21 +95,35 @@ type VoronoiProps struct {
 	Colors colors.OrdinalColorScaleConfig
 
 	EnablePoints *bool // nil → true
-	PointSize    float64
-	PointColor   string
+	// PointSize is the diameter in pixels of each site marker (the drawn
+	// radius is PointSize/2). Defaults to 4.
+	PointSize float64
+	// PointColor is the fill color of the site markers. Defaults to "#666666".
+	PointColor string
 
 	// Interactive enables per-cell client-side hover tooltips (charts/interact).
 	Interactive bool
 
+	// Theme overrides the styling theme (colors, fonts). Nil uses the package
+	// default theme.
 	Theme *theming.Theme
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the ARIA role of the root svg element. Defaults to "img".
+	Role string
+	// AriaLabel sets the aria-label on the root svg element. Empty by default.
+	AriaLabel string
+	// AriaLabelledBy sets the aria-labelledby on the root svg element. Empty
+	// by default.
+	AriaLabelledBy string
+	// AriaDescribedBy sets the aria-describedby on the root svg element.
+	// Empty by default.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the svg <title> element. Empty by default.
+	Title string
+	// Desc sets the svg <desc> element. Empty by default.
+	Desc string
+	// IsFocusable makes the svg keyboard-focusable. Defaults to false.
+	IsFocusable bool
 
 	// Animate emits a SMIL enter animation (600ms) — cells fade in and points
 	// scale their radius from 0 — staggered by MotionStagger seconds per item.
@@ -109,9 +138,6 @@ type VoronoiResult struct {
 	Delaunay *delaunay.Delaunay
 	Voronoi  *delaunay.Voronoi
 }
-
-// BoolPtr returns a pointer to b — a helper for the *bool props.
-func BoolPtr(b bool) *bool { return &b }
 
 // LinksEnabled resolves EnableLinks (nil → false).
 func (p VoronoiProps) LinksEnabled() bool { return p.EnableLinks != nil && *p.EnableLinks }

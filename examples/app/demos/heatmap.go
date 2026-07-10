@@ -50,7 +50,7 @@ func HeatmapDemos() []Demo {
 				Width: commonChartWidth, Height: commonChartHeight,
 				Margin:       margin,
 				Data:         heatmapData(),
-				EnableLabels: heatmap.BoolPtr(false),
+				EnableLabels: core.BoolPtr(false),
 				ForceSquare:  true,
 			},
 		},

@@ -55,12 +55,20 @@ var DefaultLayers = []RadarLayerId{
 // and one numeric value per key in Keys. Fields left zero fall back to Defaults
 // via applyDefaults.
 type RadarProps struct {
-	Data    []map[string]any
-	Keys    []string
+	// Data is the list of rows; each row holds one index value and one numeric
+	// value per key.
+	Data []map[string]any
+	// Keys are the value keys, each drawn as its own closed polygon.
+	Keys []string
+	// IndexBy is the row field used as the index (one axis ray per index).
 	IndexBy string
 
+	// Width and Height are the outer SVG dimensions in pixels; the inner plot
+	// area is these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the inner plot area (for labels and
+	// legends), in pixels.
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
@@ -73,43 +81,74 @@ type RadarProps struct {
 	// Rotation rotates the whole radar by this many degrees (clockwise).
 	Rotation    float64
 	ValueFormat string // d3-format spec for dot labels; empty → %g
-	Curve       core.CurveFactoryId
+	// Curve is the d3-shape curve factory used to connect a series' points.
+	// Default linearClosed.
+	Curve core.CurveFactoryId
 
+	// BorderWidth is the series polygon stroke width in pixels. Default 2.
 	BorderWidth float64
+	// BorderColor resolves the series polygon stroke color; by default inherits
+	// the series color.
 	BorderColor colors.InheritedColorConfig
 
-	GridLevels      int
-	GridShape       GridShape
+	// GridLevels is the number of concentric grid levels. Default 5.
+	GridLevels int
+	// GridShape is the grid level shape, "circular" (default) or "linear"
+	// (polygons).
+	GridShape GridShape
+	// GridLabelOffset is the distance in pixels between the outermost grid level
+	// and the index labels. Default 16.
 	GridLabelOffset float64
 
 	// EnableDots gates the per-point dots. nil → true (nivo default).
-	EnableDots      *bool
-	DotSize         float64
-	DotColor        colors.InheritedColorConfig
-	DotBorderWidth  float64
-	DotBorderColor  colors.InheritedColorConfig
-	EnableDotLabel  bool
+	EnableDots *bool
+	// DotSize is the dot diameter in pixels. Default 6.
+	DotSize float64
+	// DotColor resolves the dot fill color; by default inherits the series color.
+	DotColor colors.InheritedColorConfig
+	// DotBorderWidth is the dot stroke width in pixels. Default 0.
+	DotBorderWidth float64
+	// DotBorderColor resolves the dot stroke color; by default inherits the
+	// series color.
+	DotBorderColor colors.InheritedColorConfig
+	EnableDotLabel *bool // nil → false (nivo default)
+	// DotLabelYOffset is the vertical offset in pixels applied to dot labels.
+	// Default -12.
 	DotLabelYOffset float64
 
-	Colors      colors.OrdinalColorScaleConfig
+	// Colors is the ordinal color scale used to color each key. Default is the
+	// "nivo" scheme.
+	Colors colors.OrdinalColorScaleConfig
+	// FillOpacity is the series polygon fill opacity (0..1). Default 0.25.
 	FillOpacity float64
 
 	// Interactive enables the client-side hover layer (charts/interact): each
 	// dot emits a data-tc-tooltip. Default false keeps the static render.
 	Interactive bool
 
+	// Legends configures zero or more legends describing the keys.
 	Legends []legends.LegendProps
 
-	Theme  *theming.Theme
+	// Theme overrides the styling theme; nil uses the default theme.
+	Theme *theming.Theme
+	// Layers is the ordered list of render layers; default draws grid, layers,
+	// slices, dots then legends.
 	Layers []RadarLayerId
 
-	Role            string
-	AriaLabel       string
-	AriaLabelledBy  string
+	// Role is the SVG root ARIA role. Default "img".
+	Role string
+	// AriaLabel sets aria-label on the SVG root.
+	AriaLabel string
+	// AriaLabelledBy sets aria-labelledby on the SVG root.
+	AriaLabelledBy string
+	// AriaDescribedBy sets aria-describedby on the SVG root.
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title sets the SVG <title> element.
+	Title string
+	// Desc sets the SVG <desc> element.
+	Desc string
+	// IsFocusable sets tabindex/focusable on the SVG root.
+	IsFocusable bool
 
 	// Animate, when true, emits a SMIL opacity fade-in enter animation on each
 	// series polygon (600ms). MotionStagger delays successive series by that
@@ -164,8 +203,7 @@ func (p RadarProps) DotsEnabled() bool {
 	return p.EnableDots == nil || *p.EnableDots
 }
 
-// BoolPtr returns a pointer to b — a helper for *bool props like EnableDots.
-func BoolPtr(b bool) *bool { return &b }
-
-// FloatPtr returns a pointer to f — a helper for *float64 props like MaxValue.
-func FloatPtr(f float64) *float64 { return &f }
+// DotLabelEnabled resolves EnableDotLabel (nil → false, nivo default).
+func (p RadarProps) DotLabelEnabled() bool {
+	return p.EnableDotLabel != nil && *p.EnableDotLabel
+}

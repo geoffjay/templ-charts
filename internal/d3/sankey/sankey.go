@@ -256,7 +256,12 @@ func (s *Sankey) computeNodeDepths(g *Graph) {
 		}
 		x++
 		if x > n {
-			panic("sankey: circular link")
+			// More iterations than nodes means the links form a cycle. Sankey
+			// diagrams are acyclic by definition, but the input is user-supplied
+			// and not validated upstream. Rather than panic (which would take
+			// down the caller's request), stop the traversal and lay out a
+			// best-effort diagram from the depths assigned so far.
+			break
 		}
 		current = next
 	}
@@ -282,7 +287,9 @@ func (s *Sankey) computeNodeHeights(g *Graph) {
 		}
 		x++
 		if x > n {
-			panic("sankey: circular link")
+			// Cyclic input (see computeNodeDepths): stop rather than panic and
+			// lay out a best-effort diagram from the heights assigned so far.
+			break
 		}
 		current = next
 	}

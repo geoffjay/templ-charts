@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/a-h/templ"
+
 	"github.com/geoffjay/templ-charts/charts/colors"
 	"github.com/geoffjay/templ-charts/charts/core"
 	"github.com/geoffjay/templ-charts/charts/interact"
@@ -35,7 +36,7 @@ func isZeroOrdinal(c colors.OrdinalColorScaleConfig) bool {
 // zoomEnabled reports whether click-to-zoom wiring should be emitted: gated on
 // EnableZooming plus a ChartID (htmx mode). Static renders stay byte-identical.
 func zoomEnabled(props CirclePackingProps) bool {
-	return props.EnableZooming && props.ChartID != ""
+	return props.ZoomingEnabled() && props.ChartID != ""
 }
 
 // renderCircles draws the packed circles (parents behind children) and labels.

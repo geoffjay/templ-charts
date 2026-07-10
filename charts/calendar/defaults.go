@@ -1,5 +1,7 @@
 package calendar
 
+import "github.com/geoffjay/templ-charts/charts/core"
+
 // Defaults mirrors @nivo/calendar commonDefaultProps. Fields left zero in a
 // CalendarProps fall back to these via applyDefaults.
 var Defaults = CalendarProps{
@@ -16,7 +18,7 @@ var Defaults = CalendarProps{
 	// MonthBorderWidth > 0 explicitly to enable the per-month outline.
 	MonthBorderColor:   "#000000",
 	MonthBorderWidth:   0,
-	EnableMonthLegends: BoolPtr(true),
-	EnableYearLegends:  BoolPtr(true),
+	EnableMonthLegends: core.BoolPtr(true),
+	EnableYearLegends:  core.BoolPtr(true),
 	Role:               "img",
 }

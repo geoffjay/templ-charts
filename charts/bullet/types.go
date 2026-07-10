@@ -66,10 +66,14 @@ type ComputedBulletItem struct {
 // BulletProps mirrors @nivo/bullet BulletSvgProps (the supported subset).
 // Fields left zero fall back to Defaults via applyDefaults.
 type BulletProps struct {
+	// Data holds one entry per bullet row (its ranges, measures and markers).
 	Data []BulletItemDatum
 
+	// Width and Height are the total SVG dimensions in pixels; the plot area is
+	// these minus Margin.
 	Width  float64
 	Height float64
+	// Margin is the space reserved around the plot area (for axes/titles).
 	Margin core.Margin
 	// Responsive makes the svg scale fluidly to its container; see
 	// core.SvgWrapperProps.Responsive.
@@ -87,8 +91,11 @@ type BulletProps struct {
 	Animate       bool
 	MotionStagger float64
 
-	Layout  BulletLayout
+	// Layout orients the bars "horizontal" (default) or "vertical".
+	Layout BulletLayout
+	// Reverse flips the value-scale direction; default false.
 	Reverse bool
+	// Spacing is the gap in pixels between bullet rows; default 30.
 	Spacing float64
 
 	// MinValue/MaxValue bound the per-item value scale. nil → "auto" (derived
@@ -98,36 +105,45 @@ type BulletProps struct {
 
 	AxisPosition string // "before" | "after"
 
-	RangeColors   string // e.g. "seq:cool"
+	RangeColors string // e.g. "seq:cool"
+	// MeasureColors is the sequential color spec for measure bars; default
+	// "seq:red_purple". MarkerColors is the same for markers; default
+	// "seq:red_purple".
 	MeasureColors string
 	MarkerColors  string
 
+	// RangeBorderWidth is the stroke width in pixels of range rects; default 0.
 	RangeBorderWidth   float64
 	MeasureSize        float64 // ratio of item height
-	MeasureBorderWidth float64
+	MeasureBorderWidth float64 // stroke width in pixels of measure rects; default 0
 	MarkerSize         float64 // ratio of item height
 
 	TitlePosition string // "before" | "after"
 	TitleAlign    string // "start" | "middle" | "end"
+	// TitleOffsetX and TitleOffsetY shift the title in pixels from its computed
+	// position. TitleRotation rotates the title in degrees.
 	TitleOffsetX  float64
 	TitleOffsetY  float64
 	TitleRotation float64
 
+	// Theme overrides chart styling; nil → theming.DefaultTheme.
 	Theme *theming.Theme
 
-	Role            string
+	// Role is the root SVG ARIA role; default "img".
+	Role string
+	// AriaLabel, AriaLabelledBy, and AriaDescribedBy set the corresponding SVG
+	// accessibility attributes.
 	AriaLabel       string
 	AriaLabelledBy  string
 	AriaDescribedBy string
-	Title           string
-	Desc            string
-	IsFocusable     bool
+	// Title and Desc set the SVG <title>/<desc> elements.
+	Title string
+	Desc  string
+	// IsFocusable makes the SVG keyboard-focusable.
+	IsFocusable bool
 }
 
 // BulletResult is the computed model produced by UseBullet.
 type BulletResult struct {
 	Items []ComputedBulletItem
 }
-
-// FloatPtr returns a pointer to f — a helper for *float64 props.
-func FloatPtr(f float64) *float64 { return &f }
