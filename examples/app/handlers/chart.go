@@ -20,6 +20,7 @@ import (
 	cp "github.com/geoffjay/templ-charts/charts/circlepacking"
 	"github.com/geoffjay/templ-charts/charts/funnel"
 	"github.com/geoffjay/templ-charts/charts/geo"
+	"github.com/geoffjay/templ-charts/charts/heatmap"
 	"github.com/geoffjay/templ-charts/charts/htmx"
 	"github.com/geoffjay/templ-charts/charts/icicle"
 	"github.com/geoffjay/templ-charts/charts/line"
@@ -49,6 +50,10 @@ import (
 type App struct {
 	registry *htmx.Registry
 	handler  *htmx.Handler
+	// static marks the prerendered-export mode (NewStaticApp): demos render
+	// through the client interactivity path with no registry mounts, so no
+	// server-dependent hx-* wiring is emitted.
+	static bool
 }
 
 // NewApp returns an App with a fresh registry + handler and pre-registers all
@@ -191,13 +196,20 @@ func (a *App) Legends(w http.ResponseWriter, r *http.Request) {
 	ds := demos.LegendsDemos()
 	a.ensureRegistered(ds)
 	cards := a.demoCards(ds)
-	for i := range cards {
-		if cards[i].ID == demos.HTMLLegendDemoID {
-			cards[i].FooterHTML = demos.HTMLLegendFooter()
+	intro := "Legend customization: the four symbol shapes across the four corner anchors, a bottom row legend with bordered symbols, the continuous color legend for value→color scales, and a legend built as plain HTML outside the SVG — same data, same HTMX toggle endpoint. Every legend here toggles its series on click."
+	if a.static {
+		// The chips post to the /charts/ toggle endpoint, which only the live
+		// server serves; the export omits them rather than ship dead buttons.
+		intro = "Legend customization: the four symbol shapes across the four corner anchors, a bottom row legend with bordered symbols, and the continuous color legend for value→color scales. On the live demo server every legend also toggles its series on click (HTMX), plus a plain-HTML legend outside the SVG wired to the same endpoint."
+	} else {
+		for i := range cards {
+			if cards[i].ID == demos.HTMLLegendDemoID {
+				cards[i].FooterHTML = demos.HTMLLegendFooter()
+			}
 		}
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Legends", Nav: "legends"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Legend customization: the four symbol shapes across the four corner anchors, a bottom row legend with bordered symbols, the continuous color legend for value→color scales, and a legend built as plain HTML outside the SVG — same data, same HTMX toggle endpoint. Every legend here toggles its series on click.",
+		Intro: intro,
 		Cards: cards,
 	}))
 }
@@ -231,7 +243,7 @@ func (a *App) Dashboard(w http.ResponseWriter, r *http.Request) {
 	a.ensureRegistered(ds)
 	svgs := make(map[string]string, len(ds))
 	for _, d := range ds {
-		svg, err := a.handler.RenderFull(d.ID)
+		svg, err := a.renderDemo(d)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -266,6 +278,7 @@ func (a *App) Dashboard(w http.ResponseWriter, r *http.Request) {
 		BarID:     demos.DashboardBarID,
 		BarSVG:    svgs[demos.DashboardBarID],
 		BulletSVG: bb.String(),
+		Static:    a.static,
 	}))
 }
 
@@ -795,19 +808,26 @@ func (a *App) Themes(w http.ResponseWriter, r *http.Request) {
 
 // ensureRegistered idempotently registers each demo with the htmx registry.
 // Re-registering resets per-instance state (matches htmx.Registry.Register).
+// In static-export mode it is a no-op: nothing serves /charts/, so demos
+// render client-interactive instead (see renderDemo).
 func (a *App) ensureRegistered(ds []demos.Demo) {
+	if a.static {
+		return
+	}
 	for _, d := range ds {
 		a.registry.Register(d.ID, d.Kind, d.Props)
 	}
 }
 
-// demoCards renders the initial SVG for each demo (via the htmx full-render
-// path, which applies Interactive=true + ChartID) and builds a ChartCard
-// per demo.
+// demoCards renders the initial SVG for each demo and builds a ChartCard
+// per demo. Live mode uses the htmx full-render path (which applies
+// Interactive=true + ChartID); static-export mode renders each demo
+// client-interactive instead (see renderDemo), so the emitted SVG carries
+// only browser-side hover wiring and no dead hx-* endpoints.
 func (a *App) demoCards(ds []demos.Demo) []templates.ChartCardProps {
 	cards := make([]templates.ChartCardProps, 0, len(ds))
 	for _, d := range ds {
-		svg, err := a.handler.RenderFull(d.ID)
+		svg, err := a.renderDemo(d)
 		if err != nil {
 			cards = append(cards, templates.ChartCardProps{
 				ID: d.ID, Title: d.Title, Description: d.Description,
@@ -820,16 +840,76 @@ func (a *App) demoCards(ds []demos.Demo) []templates.ChartCardProps {
 			Title:       d.Title,
 			Description: d.Description,
 			SVG:         svg,
-			Interactive: true,
+			// Live: the mount wires the htmx tooltip sibling + leave reset.
+			// Static: the mount stays plain (the client layer lazily creates
+			// its tooltip), so nothing points at the absent /charts/ routes.
+			Interactive: !a.static,
 		})
 	}
 	return cards
+}
+
+// renderDemo renders one demo's SVG. Live mode goes through the htmx
+// registry (the server round-trip path: legend toggles, bar/pie hover,
+// zoom). Static-export mode renders the same props without any server
+// wiring, so the export's hover runs entirely in the browser.
+func (a *App) renderDemo(d demos.Demo) (string, error) {
+	if !a.static {
+		return a.handler.RenderFull(d.ID)
+	}
+	return renderClientInteractive(d)
+}
+
+// renderClientInteractive renders one demo for the prerendered static
+// export: the same props, minus every server round-trip.
+//
+// bar/pie keep their demo props untouched: no ChartID means no hx-* wiring
+// at all (bar/pie hover is a server interaction, so those demos simply
+// render statically). line sets Interactive so the mesh/slices hover layers
+// render — they emit data-tc-* client payloads (nearest-point + crosshair)
+// and clear their own ChartID when ServerHover is off, which the demo props
+// leave it — while its ChartID stays empty so legends emit no hx-post.
+// heatmap's cell tooltips are gated on Interactive && ChartID, so those are
+// set (heatmap emits only data-tc-tooltip, never hx-get).
+func renderClientInteractive(d demos.Demo) (string, error) {
+	var c templ.Component
+	switch d.Kind {
+	case htmx.KindBar:
+		c = bar.Bar(d.Props.(bar.BarProps))
+	case htmx.KindLine:
+		p := d.Props.(line.LineProps)
+		// Interactive gates the mesh/slices hover layers; ChartID stays empty
+		// so legends emit no hx-post toggle (mesh/slices clear their own
+		// ChartID when ServerHover is off, which the demo props leave it).
+		p.Interactive = true
+		c = line.Line(p)
+	case htmx.KindPie:
+		c = pie.Pie(d.Props.(pie.PieProps))
+	case htmx.KindHeatmap:
+		p := d.Props.(heatmap.HeatMapProps)
+		p.Interactive = true
+		if p.ChartID == "" {
+			p.ChartID = d.ID
+		}
+		c = heatmap.HeatMap(p)
+	default:
+		return "", fmt.Errorf("static export: unsupported chart kind %q", d.Kind)
+	}
+	var b strings.Builder
+	if err := c.Render(context.Background(), &b); err != nil {
+		return "", err
+	}
+	return b.String(), nil
 }
 
 // Scales handles GET /scales: the value-scale showcase page. It collects the
 // linear/log demo for each continuous-value chart family (bar, line,
 // scatterplot, swarmplot); each card's toggle swaps just its chart via HTMX.
 func (a *App) Scales(w http.ResponseWriter, r *http.Request) {
+	intro := "Value scales: each chart plots data spanning several orders of magnitude. Toggle linear ↔ log to see how a log axis keeps small values readable where a linear axis flattens them. The switch swaps just that chart via HTMX — no full-page reload."
+	if a.static {
+		intro = "Value scales: each chart plots data spanning several orders of magnitude, rendered here on a linear value axis. On the live demo server a linear ↔ log toggle swaps each chart in place via HTMX."
+	}
 	cards := []templates.ChartCardProps{
 		a.scaleCard("bar", "Bar"),
 		a.scaleCard("line", "Line"),
@@ -837,7 +917,7 @@ func (a *App) Scales(w http.ResponseWriter, r *http.Request) {
 		a.scaleCard("swarmplot", "Swarmplot"),
 	}
 	a.renderPage(w, templates.LayoutProps{Title: "Scales", Nav: "scales"}, templates.DemosPage(templates.DemosPageProps{
-		Intro: "Value scales: each chart plots data spanning several orders of magnitude. Toggle linear ↔ log to see how a log axis keeps small values readable where a linear axis flattens them. The switch swaps just that chart via HTMX — no full-page reload.",
+		Intro: intro,
 		Cards: cards,
 	}))
 }
@@ -849,13 +929,30 @@ func (a *App) Scales(w http.ResponseWriter, r *http.Request) {
 // htmx requests carry. Cards render linear initially — the toggle switches them.
 func (a *App) scaleCard(chartKey, title string) templates.ChartCardProps {
 	card := func(id, desc, svg string, interactive bool) templates.ChartCardProps {
+		footer := ""
+		if !a.static {
+			// The linear/log chips issue htmx requests to /scale, which only
+			// the live server serves — the export ships no dead controls.
+			footer = scaleToggle(chartKey, id, false, false)
+		}
 		return templates.ChartCardProps{
 			ID: id, Title: title, Description: desc,
 			SVG: svg, Interactive: interactive,
-			FooterHTML: scaleToggle(chartKey, id, false, false),
+			FooterHTML: footer,
 		}
 	}
 	registered := func(d demos.Demo) templates.ChartCardProps {
+		if a.static {
+			// No registry in the export: render client-interactive (linear
+			// scale; the live toggle is a server interaction). The mount
+			// stays plain — Interactive would wire a leave-reset hx-get to
+			// the absent /charts/ routes.
+			svg, err := renderClientInteractive(d)
+			if err != nil {
+				return card(d.ID, d.Description, "<!-- render error: "+err.Error()+" -->", false)
+			}
+			return card(d.ID, d.Description, svg, false)
+		}
 		a.registry.Register(d.ID, d.Kind, d.Props)
 		svg, err := a.handler.RenderFull(d.ID)
 		if err != nil {
@@ -970,6 +1067,7 @@ func scaleToggle(chartKey, chartID string, logScale, oob bool) string {
 // renderPage wraps the page content in the Layout and writes the HTML.
 func (a *App) renderPage(w http.ResponseWriter, props templates.LayoutProps, content templ.Component) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	props.Static = a.static
 	if err := templates.Layout(props, content).Render(context.Background(), w); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}

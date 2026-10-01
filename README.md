@@ -33,6 +33,9 @@ See [`docs/USAGE.md`](docs/USAGE.md) for the full consumer guide.
 
 ## Quickstart
 
+Browse the [live demo](https://geoffjay.github.io/templ-charts/) — a static
+export of the demo app — or run the full demo server locally:
+
 ```sh
 make run-demo    # → http://localhost:8000
 ```
@@ -47,7 +50,9 @@ Browse a page per chart family — `/bar`, `/line`, `/pie`, `/heatmap`,
 `/dashboard` (a composed dark-theme dashboard), `/palettes`, and `/themes`.
 Hover any mark for a
 tooltip (client-side); click a legend item to toggle a series (HTMX). The
-`/palettes` page is the full color-palette catalog applied to bars.
+`/palettes` page is the full color-palette catalog applied to bars. The live
+demo is static, so only the client-side hover runs there; the HTMX-backed
+interactions need the local server.
 
 ## Usage
 
@@ -247,6 +252,7 @@ compile-checked against the library.
 | Run benchmarks (d3 ports + render paths) | `make bench` |
 | CI (lint + test) | `make ci` |
 | Run the demo app | `make run-demo` |
+| Export the static demo site (GitHub Pages) | `make export` |
 | Tidy modules | `make tidy` |
 
 Golden SVG snapshots live under each chart package's `testdata/golden/`.

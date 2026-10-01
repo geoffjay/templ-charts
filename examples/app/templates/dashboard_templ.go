@@ -31,6 +31,10 @@ type DashboardPageProps struct {
 	BarID     string
 	BarSVG    string
 	BulletSVG string
+	// Static marks the prerendered export: the mounts drop the server-side
+	// htmx wiring (tooltip-sibling swap target + leave reset) since nothing
+	// serves /charts/ — the client hover layer renders its own tooltips.
+	Static bool
 }
 
 // dashCSS is the dashboard page's scoped styling: a dark shell with card
@@ -99,7 +103,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 			var templ_7745c5c3_Var2 string
 			templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(k.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 67, Col: 32}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 71, Col: 32}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 			if templ_7745c5c3_Err != nil {
@@ -112,7 +116,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(k.Value)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 69, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 73, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -130,7 +134,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(k.Delta)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 71, Col: 40}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 75, Col: 40}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -148,7 +152,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(k.Delta)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 73, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `examples/app/templates/dashboard.templ`, Line: 77, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -176,7 +180,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = htmx.Mount(htmx.MountProps{ID: props.MainID, SVG: props.MainSVG, Interactive: true, Class: "chart"}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = htmx.Mount(htmx.MountProps{ID: props.MainID, SVG: props.MainSVG, Interactive: !props.Static, Class: "chart"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -184,7 +188,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = htmx.Mount(htmx.MountProps{ID: props.DonutID, SVG: props.DonutSVG, Interactive: true, Class: "chart"}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = htmx.Mount(htmx.MountProps{ID: props.DonutID, SVG: props.DonutSVG, Interactive: !props.Static, Class: "chart"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -192,7 +196,7 @@ func DashboardPage(props DashboardPageProps) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = htmx.Mount(htmx.MountProps{ID: props.BarID, SVG: props.BarSVG, Interactive: true, Class: "chart"}).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = htmx.Mount(htmx.MountProps{ID: props.BarID, SVG: props.BarSVG, Interactive: !props.Static, Class: "chart"}).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

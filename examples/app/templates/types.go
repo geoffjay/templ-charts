@@ -1,14 +1,27 @@
 package templates
 
+// Base is the URL path prefix the demo is served under: "" for the live
+// server at /, "/templ-charts" for the GitHub Pages project site. The static
+// export (examples/app/cmd/export) sets it from its -base flag; every
+// internal link the templates render goes through URL so the HTML is
+// correct at either mount point.
+var Base string
+
+// URL prefixes a root-absolute demo path ("/bar") with Base.
+func URL(path string) string {
+	return Base + path
+}
+
 // LayoutProps is the input to the Layout templ component: the page title and
 // the active nav section (for highlighting).
 type LayoutProps struct {
 	Title string
 	Nav   string
+	// Static marks the prerendered GitHub Pages export: the layout shows a
+	// note that server-driven interactions need the live demo server.
+	Static bool
 }
 
-// NavItem is one side-nav link: the route, the nav slug the page handlers
-// pass as LayoutProps.Nav (for active highlighting), and the display label.
 type NavItem struct {
 	Href  string
 	Slug  string
@@ -87,6 +100,8 @@ a:hover { text-decoration:underline; }
 header { background:var(--bg); border-bottom:1px solid var(--border); padding:14px 24px; }
 header h1 { margin:0; font-size:18px; font-weight:600; display:inline-block; }
 header h1 a { color:var(--fg); }
+.static-note { display:inline-block; margin-left:16px; font-size:12px; color:var(--muted); font-weight:400; }
+.static-note code { font-size:11px; }
 .layout { display:flex; align-items:flex-start; }
 .sidenav { width:216px; flex:none; position:sticky; top:0; max-height:100vh; overflow-y:auto; padding:14px 10px 28px; background:var(--bg); border-right:1px solid var(--border); }
 .sidenav a { display:block; padding:4px 10px; border-radius:6px; color:#3f4753; font-size:13px; }

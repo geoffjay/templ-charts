@@ -11,7 +11,8 @@ import (
 // so each page composes its own body.
 //
 // The CSS is hand-written and minimal. The htmx script is loaded from the CDN
-// (no Go dependency).
+// (no Go dependency); the static export (props.Static) omits it and its
+// tooltip shim, since a static host serves none of the /charts/ endpoints.
 templ Layout(props LayoutProps, content templ.Component) {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -20,8 +21,10 @@ templ Layout(props LayoutProps, content templ.Component) {
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<title>{ pageTitle(props) }</title>
 			@templ.Raw("<style>" + css + "</style>")
-			<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
-			@templ.Raw("<script>" + js + "</script>")
+			if !props.Static {
+				<script src="https://unpkg.com/htmx.org@1.9.12" defer></script>
+				@templ.Raw("<script>" + js + "</script>")
+			}
 			// Client-side interactivity layer (charts/interact): element + nearest-
 			// point hover tooltips and the line crosshair, driven by data-tc-*
 			// attributes. Coexists with the htmx hover used by bar/pie.
@@ -32,16 +35,19 @@ templ Layout(props LayoutProps, content templ.Component) {
 		</head>
 		<body>
 			<header>
-				<h1><a href="/">templ-charts demo</a></h1>
+				<h1><a href={ templ.URL(URL("/")) }>templ-charts demo</a></h1>
+				if props.Static {
+					<span class="static-note">Static export: hover tooltips run in your browser; server-driven interactions (series toggles, bar/pie hover, zoom, theme switchers) need the demo server — clone <a href="https://github.com/geoffjay/templ-charts">templ-charts</a> and run <code>make run-demo</code>.</span>
+				}
 			</header>
 			<div class="layout">
 				<nav class="sidenav">
-					<a href="/" class={ "overview", templ.KV("active", props.Nav == "home") }>Overview</a>
+					<a href={ templ.URL(URL("/")) } class={ "overview", templ.KV("active", props.Nav == "home") }>Overview</a>
 					for _, g := range NavGroups() {
 						<div class="group">
 							<h2>{ g.Title }</h2>
 							for _, it := range g.Items {
-								<a href={ templ.URL(it.Href) } class={ templ.KV("active", props.Nav == it.Slug) }>{ it.Label }</a>
+								<a href={ templ.URL(URL(it.Href)) } class={ templ.KV("active", props.Nav == it.Slug) }>{ it.Label }</a>
 							}
 						</div>
 					}

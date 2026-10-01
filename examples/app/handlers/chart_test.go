@@ -10,25 +10,12 @@ import (
 	"github.com/geoffjay/templ-charts/examples/app/handlers"
 )
 
-// do runs a request against the app's mux-less handler set. We build a tiny
-// mux mirroring main.go so the page handlers can be exercised.
+// newServer returns the app's production route table (App.Mux — the same mux
+// main.go serves) so the page handlers and htmx endpoints can be exercised.
 func newServer(t *testing.T) (http.Handler, *handlers.App) {
 	t.Helper()
 	app := handlers.NewApp()
-	mux := http.NewServeMux()
-	mux.Handle("/charts/", app.Handler())
-	mux.HandleFunc("/", app.Index)
-	mux.HandleFunc("/bar", app.Bar)
-	mux.HandleFunc("/line", app.Line)
-	mux.HandleFunc("/pie", app.Pie)
-	mux.HandleFunc("/scatterplot", app.ScatterPlot)
-	mux.HandleFunc("/swarmplot", app.SwarmPlot)
-	mux.HandleFunc("/themes", app.Themes)
-	mux.HandleFunc("/benchmark", app.Benchmark)
-	mux.HandleFunc("/chart/", app.Detail)
-	mux.HandleFunc("/scales", app.Scales)
-	mux.HandleFunc("/scale", app.Scale)
-	return mux, app
+	return app.Mux(), app
 }
 
 func TestDetailPage(t *testing.T) {

@@ -7,3 +7,6 @@ coverage.html
 docs/NOTES.md
 
 tmp/
+
+# static demo export (make export, Pages workflow)
+site/

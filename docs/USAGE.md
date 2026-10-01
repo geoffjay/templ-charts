@@ -263,5 +263,6 @@ demo `/themes` page for default/dark/custom side by side.
 - **The demo app** — [`examples/app`](../examples/app): a page per chart family
   plus `/styling` (gradients/patterns/match rules), `/legends`,
   `/composition` (build-your-own charts from the `Use*` hooks), `/dashboard`,
-  `/palettes`, and `/themes`. Run with `make run-demo`.
+  `/palettes`, and `/themes`. Run with `make run-demo`, or browse the
+  [live demo](https://geoffjay.github.io/templ-charts/) (a static export).
 - **Package docs** — `go doc github.com/geoffjay/templ-charts/charts/<chart>`.

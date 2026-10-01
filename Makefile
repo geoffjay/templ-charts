@@ -1,4 +1,4 @@
-.PHONY: all templ build test lint vet fmt run-demo generate tidy clean golden cover bench ci
+.PHONY: all templ build test lint vet fmt run-demo export generate tidy clean golden cover bench ci
 
 TEMPL_PKG := github.com/a-h/templ/cmd/templ
 TEMPL_VERSION := v0.3.1020
@@ -86,6 +86,12 @@ ci: lint test
 ## Run the demo app
 run-demo:
 	go run ./examples/app
+
+## Export the demo to static HTML for GitHub Pages (writes site/). The Pages
+## workflow adds -base /<repo>; without it the site previews from a server
+## root, e.g. `python3 -m http.server -d site`.
+export:
+	go run ./examples/app/cmd/export site
 
 ## Tidy modules
 tidy:

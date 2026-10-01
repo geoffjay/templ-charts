@@ -22,6 +22,10 @@ type DashboardPageProps struct {
 	BarID     string
 	BarSVG    string
 	BulletSVG string
+	// Static marks the prerendered export: the mounts drop the server-side
+	// htmx wiring (tooltip-sibling swap target + leave reset) since nothing
+	// serves /charts/ — the client hover layer renders its own tooltips.
+	Static bool
 }
 
 // dashCSS is the dashboard page's scoped styling: a dark shell with card
@@ -81,18 +85,18 @@ templ DashboardPage(props DashboardPageProps) {
 				<div class="dash-card">
 					<h3>Monthly recurring revenue</h3>
 					<p class="hint">by segment, $k — hover for the nearest point (client-side mesh)</p>
-					@htmx.Mount(htmx.MountProps{ID: props.MainID, SVG: props.MainSVG, Interactive: true, Class: "chart"})
+					@htmx.Mount(htmx.MountProps{ID: props.MainID, SVG: props.MainSVG, Interactive: !props.Static, Class: "chart"})
 				</div>
 				<div class="dash-side">
 					<div class="dash-card">
 						<h3>Revenue share</h3>
 						<p class="hint">this quarter — hover an arc</p>
-						@htmx.Mount(htmx.MountProps{ID: props.DonutID, SVG: props.DonutSVG, Interactive: true, Class: "chart"})
+						@htmx.Mount(htmx.MountProps{ID: props.DonutID, SVG: props.DonutSVG, Interactive: !props.Static, Class: "chart"})
 					</div>
 					<div class="dash-card">
 						<h3>Weekly revenue</h3>
 						<p class="hint">last six weeks, stacked</p>
-						@htmx.Mount(htmx.MountProps{ID: props.BarID, SVG: props.BarSVG, Interactive: true, Class: "chart"})
+						@htmx.Mount(htmx.MountProps{ID: props.BarID, SVG: props.BarSVG, Interactive: !props.Static, Class: "chart"})
 					</div>
 				</div>
 			</div>

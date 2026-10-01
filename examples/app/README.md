@@ -21,6 +21,32 @@ go run ./examples/app
 
 Then open <http://localhost:8000>.
 
+## Static export (GitHub Pages)
+
+The [live demo](https://geoffjay.github.io/templ-charts/) is a static export
+of this app, published by the `Pages` workflow (`.github/workflows/pages.yml`)
+on every push to `main`. To build and preview it locally:
+
+```
+make export                        # writes site/
+python3 -m http.server -d site     # → http://localhost:8000
+```
+
+`cmd/export` renders every page through the app's real `Mux` in static mode
+(`handlers.NewStaticApp`) and writes each route as a directory index
+(`site/bar/index.html`, `site/chart/bar/index.html`, …), so the clean URLs keep
+working. `-base /templ-charts` (set by the workflow) prefixes every internal
+link for the Pages project path. The export fails if a page returns non-200,
+still carries an `hx-get`/`hx-post` attribute, or — with `-base` — links to a
+root-absolute path outside the base.
+
+Static mode keeps everything that runs in the browser: `charts/interact` hover
+tooltips, the line mesh/crosshair, hover-highlight, and canvas replay. It drops
+what needs the server: the HTMX endpoints (bar/pie hover, legend series toggle,
+bar click, hierarchy zoom), the `/scales` linear ↔ log toggle, and the detail
+pages' theme/palette/engine switchers. `/benchmark` shows the timings measured
+on the machine that ran the export.
+
 ## Pages
 
 | Route            | Contents                                                     |
@@ -95,7 +121,8 @@ moved to a session/cookie store for horizontal scaling.
 
 ```
 examples/app/
-  main.go                  – http.ServeMux wiring (one route per chart family)
+  main.go                  – serves handlers.NewApp().Mux() on :8000
+  cmd/export/              – static GitHub Pages export (make export)
   demos/                   – one *.go per family with demo props + data
                              (bar, line, pie, heatmap, waffle, calendar, radar,
                              radialbar, scatterplot, stream, bullet, funnel,
@@ -104,6 +131,7 @@ examples/app/
                              tree, voronoi, network, swarmplot, sankey, chord,
                              geo, palettes, themes; geo bundles a sample
                              world-countries GeoJSON)
+  handlers/server.go       – page route table + Mux (shared by server and export)
   handlers/chart.go        – page handlers + htmx wiring
   templates/               – layout + chart-card templ components
     layout.templ           – loads htmx + the charts/interact client script

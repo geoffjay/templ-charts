@@ -16,6 +16,7 @@ A Go library that wraps [nivo](https://github.com/plouc/nivo)'s chart concepts a
 | Regenerate golden snapshots | `make golden` |
 | CI (lint + test) | `make ci` |
 | Run the demo app | `make run-demo` |
+| Export the static demo site (GitHub Pages) | `make export` |
 | Tidy modules | `make tidy` |
 
 **Always run `make lint` and `make test` after non-trivial Go/templ changes.**
@@ -43,7 +44,7 @@ don't reject the flag.
 - `charts/` — library packages (mirror nivo package names): the 28 chart families plus core, theming, scales, colors, axes, arcs, text, tooltip, legends, annotations, interact, static, grid, polar-axes, htmx, canvas, samples, render
 - `internal/d3/` — vendored pure-Go ports of d3-shape, d3-scale, d3-array, d3-format, d3-time-format, d3-color, d3-hierarchy, d3-delaunay, d3-force, d3-sankey, d3-chord, d3-geo, d3-quadtree
 - `internal/golden/` — small snapshot-test helper (`Assert` + `-update` flag) used by the golden SVG/path tests
-- `examples/app/` — runnable demo app (stdlib `net/http`, run via `make run-demo` → http://localhost:8000)
+- `examples/app/` — runnable demo app (stdlib `net/http`, run via `make run-demo` → http://localhost:8000); `examples/app/cmd/export` prerenders it to static HTML (`make export`), which `.github/workflows/pages.yml` publishes to GitHub Pages
 - `contrib/nivo/` — upstream nivo clone (gitignored, reference only; do NOT modify)
 
 ## Conventions

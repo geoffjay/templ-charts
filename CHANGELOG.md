@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Static export of the demo app (`examples/app/cmd/export`, `make export`), published to
+  GitHub Pages at <https://geoffjay.github.io/templ-charts/> by the new `Pages` workflow.
+  Client-side hover works on the static site; the HTMX-backed interactions need the demo
+  server.
+
 ## [1.0.0]
 
 First stable release. From this release on, the public API under `github.com/geoffjay/templ-charts/charts/...`

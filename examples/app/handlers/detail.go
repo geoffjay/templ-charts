@@ -79,23 +79,28 @@ func (a *App) Detail(w http.ResponseWriter, r *http.Request) {
 	// The four hierarchy charts are click-to-zoom: register a zoomable instance
 	// with the htmx registry and mount it (so hx-get="/charts/<id>/zoom" +
 	// breadcrumb round-trip through the existing handler), instead of a static
-	// SVG. Every other chart keeps its plain static detail render.
+	// SVG. Every other chart keeps its plain static detail render. The
+	// prerendered export skips the zoom mount (nothing serves /charts/) and
+	// renders the static chart.
 	var chartHTML string
-	if id, kind, props, ok := a.zoomableChart(slug, theme, palette); ok {
-		a.registry.Register(id, kind, props)
-		svg, err := a.handler.RenderFull(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+	if !a.static {
+		if id, kind, props, ok := a.zoomableChart(slug, theme, palette); ok {
+			a.registry.Register(id, kind, props)
+			svg, err := a.handler.RenderFull(id)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			var b strings.Builder
+			if err := htmx.Mount(htmx.MountProps{ID: id, SVG: svg, Interactive: true, Class: "tc-detail-chart chart"}).
+				Render(context.Background(), &b); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			chartHTML = b.String()
 		}
-		var b strings.Builder
-		if err := htmx.Mount(htmx.MountProps{ID: id, SVG: svg, Interactive: true, Class: "tc-detail-chart chart"}).
-			Render(context.Background(), &b); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		chartHTML = b.String()
-	} else {
+	}
+	if chartHTML == "" {
 		var svg string
 		var err error
 		switch {
@@ -115,7 +120,7 @@ func (a *App) Detail(w http.ResponseWriter, r *http.Request) {
 		chartHTML = `<div class="tc-detail-chart chart">` + svg + `</div>`
 	}
 
-	html := buildDetailHTML(entry, chartHTML, themeName, palette, animate, canvasEngine, spaceName, logScale)
+	html := buildDetailHTML(entry, chartHTML, themeName, palette, animate, canvasEngine, spaceName, logScale, a.static)
 	a.renderPage(w,
 		templates.LayoutProps{Title: entry.Title + " — templ-charts demo"},
 		templ.Raw(html))
@@ -238,7 +243,9 @@ func sunburstSample() sunburst.SunburstNode {
 // buildDetailHTML assembles the detail page body: switchers, the full-width
 // chart, and the code snippet. chartHTML is the ready-to-inject chart block
 // (a static SVG wrapper, or the htmx.Mount container for zoomable charts).
-func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette colors.PaletteID, animate, canvasEngine bool, spaceName string, logScale bool) string {
+// static marks the prerendered export, where the switchers are omitted —
+// they navigate to query-param URLs only the live server can render.
+func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette colors.PaletteID, animate, canvasEngine bool, spaceName string, logScale, static bool) string {
 	var b strings.Builder
 
 	// animateSuffix / engineSuffix carry the current animate + engine selections
@@ -267,91 +274,95 @@ func buildDetailHTML(e entries.ChartEntry, chartHTML, themeName string, palette 
 	sharedSuffix := animateSuffix + engineSuffix + spaceSuffix + scaleSuffix
 
 	b.WriteString(detailCSS)
-	fmt.Fprintf(&b, `<p><a href="/">← all charts</a></p>`)
+	fmt.Fprintf(&b, `<p><a href="%s">← all charts</a></p>`, templates.URL("/"))
 	fmt.Fprintf(&b, `<h2>%s</h2><p>%s</p>`, html.EscapeString(e.Title), html.EscapeString(e.Description))
 
-	// Theme switcher.
-	b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">theme</span>`)
-	for _, g := range demos.ThemeGroups() {
-		href := fmt.Sprintf("/chart/%s?theme=%s&palette=%s%s", e.Slug, g.Name, palette, sharedSuffix)
-		b.WriteString(switchLink(href, g.Name, g.Name == themeName))
-	}
-	b.WriteString(`</div>`)
+	// The switchers navigate to query-param URLs only the live server can
+	// render; the prerendered export omits them entirely.
+	if !static {
+		// Theme switcher.
+		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">theme</span>`)
+		for _, g := range demos.ThemeGroups() {
+			href := templates.URL(fmt.Sprintf("/chart/%s?theme=%s&palette=%s%s", e.Slug, g.Name, palette, sharedSuffix))
+			b.WriteString(switchLink(href, g.Name, g.Name == themeName))
+		}
+		b.WriteString(`</div>`)
 
-	// Palette switcher: a dropdown over the full palette catalog, grouped by
-	// kind, navigating on change (each option's value is the page URL for that
-	// palette). A swatch strip previews the selected palette.
-	b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">palette</span>`)
-	b.WriteString(`<select class="tc-select" onchange="location.href=this.value">`)
-	fmt.Fprintf(&b, `<option value="%s"%s>default (theme colors)</option>`,
-		fmt.Sprintf("/chart/%s?theme=%s%s", e.Slug, themeName, sharedSuffix), selectedAttr(palette == ""))
-	for _, kind := range paletteKinds {
-		fmt.Fprintf(&b, `<optgroup label="%s">`, kind)
-		for _, p := range colors.PalettesByKind(kind) {
-			href := fmt.Sprintf("/chart/%s?theme=%s&palette=%s%s", e.Slug, themeName, p.ID, sharedSuffix)
-			label := p.Name
-			if p.ColorblindSafe {
-				label += " · colorblind-safe"
+		// Palette switcher: a dropdown over the full palette catalog, grouped by
+		// kind, navigating on change (each option's value is the page URL for that
+		// palette). A swatch strip previews the selected palette.
+		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">palette</span>`)
+		b.WriteString(`<select class="tc-select" onchange="location.href=this.value">`)
+		fmt.Fprintf(&b, `<option value="%s"%s>default (theme colors)</option>`,
+			templates.URL(fmt.Sprintf("/chart/%s?theme=%s%s", e.Slug, themeName, sharedSuffix)), selectedAttr(palette == ""))
+		for _, kind := range paletteKinds {
+			fmt.Fprintf(&b, `<optgroup label="%s">`, kind)
+			for _, p := range colors.PalettesByKind(kind) {
+				href := templates.URL(fmt.Sprintf("/chart/%s?theme=%s&palette=%s%s", e.Slug, themeName, p.ID, sharedSuffix))
+				label := p.Name
+				if p.ColorblindSafe {
+					label += " · colorblind-safe"
+				}
+				fmt.Fprintf(&b, `<option value="%s"%s>%s</option>`, href, selectedAttr(palette == p.ID), html.EscapeString(label))
 			}
-			fmt.Fprintf(&b, `<option value="%s"%s>%s</option>`, href, selectedAttr(palette == p.ID), html.EscapeString(label))
+			b.WriteString(`</optgroup>`)
 		}
-		b.WriteString(`</optgroup>`)
-	}
-	b.WriteString(`</select>`)
-	if p, ok := colors.LookupPalette(palette); ok {
-		b.WriteString(`<span class="tc-swatch-strip">`)
-		for _, c := range p.Swatch(8) {
-			fmt.Fprintf(&b, `<span style="background:%s"></span>`, html.EscapeString(c))
+		b.WriteString(`</select>`)
+		if p, ok := colors.LookupPalette(palette); ok {
+			b.WriteString(`<span class="tc-swatch-strip">`)
+			for _, c := range p.Swatch(8) {
+				fmt.Fprintf(&b, `<span style="background:%s"></span>`, html.EscapeString(c))
+			}
+			b.WriteString(`</span>`)
 		}
-		b.WriteString(`</span>`)
-	}
-	b.WriteString(`</div>`)
-
-	// baseTP is the theme(+palette) prefix shared by the animate and engine
-	// switchers.
-	baseTP := fmt.Sprintf("/chart/%s?theme=%s", e.Slug, themeName)
-	if palette != "" {
-		baseTP = fmt.Sprintf("/chart/%s?theme=%s&palette=%s", e.Slug, themeName, palette)
-	}
-
-	// Animate switcher: off (no animate param) / on (&animate=1). Hrefs preserve
-	// theme + palette + engine + space + scale.
-	b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">animate</span>`)
-	b.WriteString(switchLink(baseTP+engineSuffix+spaceSuffix+scaleSuffix, "off", !animate))
-	b.WriteString(switchLink(baseTP+"&animate=1"+engineSuffix+spaceSuffix+scaleSuffix, "on", animate))
-	b.WriteString(`</div>`)
-
-	// Engine switcher: only for Canvas-capable charts (scatterplot, heatmap).
-	// svg (default, no engine param) / canvas. Hrefs preserve theme + palette +
-	// animate + space + scale.
-	if e.CanvasRender != nil {
-		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">engine</span>`)
-		b.WriteString(switchLink(baseTP+animateSuffix+spaceSuffix+scaleSuffix, "svg", !canvasEngine))
-		b.WriteString(switchLink(baseTP+animateSuffix+"&engine=canvas"+spaceSuffix+scaleSuffix, "canvas", canvasEngine))
 		b.WriteString(`</div>`)
-	}
 
-	// Color-space switcher: only for charts with a SpaceRender (sequential/
-	// diverging scale). rgb (default) / lab / lch. Hrefs preserve theme +
-	// palette + animate + engine + scale.
-	if e.SpaceRender != nil {
-		aes := animateSuffix + engineSuffix + scaleSuffix
-		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">color space</span>`)
-		b.WriteString(switchLink(baseTP+aes, "rgb", spaceName == "rgb"))
-		b.WriteString(switchLink(baseTP+aes+"&space=lab", "lab", spaceName == "lab"))
-		b.WriteString(switchLink(baseTP+aes+"&space=lch", "lch", spaceName == "lch"))
-		b.WriteString(`</div>`)
-	}
+		// baseTP is the theme(+palette) prefix shared by the animate and engine
+		// switchers.
+		baseTP := templates.URL(fmt.Sprintf("/chart/%s?theme=%s", e.Slug, themeName))
+		if palette != "" {
+			baseTP = templates.URL(fmt.Sprintf("/chart/%s?theme=%s&palette=%s", e.Slug, themeName, palette))
+		}
 
-	// Value-scale switcher: only for charts with a ScaleRender (a continuous
-	// value axis). linear (default) / log. Hrefs preserve theme + palette +
-	// animate + engine + space.
-	if e.ScaleRender != nil {
-		aes := animateSuffix + engineSuffix + spaceSuffix
-		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">value scale</span>`)
-		b.WriteString(switchLink(baseTP+aes, "linear", !logScale))
-		b.WriteString(switchLink(baseTP+aes+"&scale=log", "log", logScale))
+		// Animate switcher: off (no animate param) / on (&animate=1). Hrefs preserve
+		// theme + palette + engine + space + scale.
+		b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">animate</span>`)
+		b.WriteString(switchLink(baseTP+engineSuffix+spaceSuffix+scaleSuffix, "off", !animate))
+		b.WriteString(switchLink(baseTP+"&animate=1"+engineSuffix+spaceSuffix+scaleSuffix, "on", animate))
 		b.WriteString(`</div>`)
+
+		// Engine switcher: only for Canvas-capable charts (scatterplot, heatmap).
+		// svg (default, no engine param) / canvas. Hrefs preserve theme + palette +
+		// animate + space + scale.
+		if e.CanvasRender != nil {
+			b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">engine</span>`)
+			b.WriteString(switchLink(baseTP+animateSuffix+spaceSuffix+scaleSuffix, "svg", !canvasEngine))
+			b.WriteString(switchLink(baseTP+animateSuffix+"&engine=canvas"+spaceSuffix+scaleSuffix, "canvas", canvasEngine))
+			b.WriteString(`</div>`)
+		}
+
+		// Color-space switcher: only for charts with a SpaceRender (sequential/
+		// diverging scale). rgb (default) / lab / lch. Hrefs preserve theme +
+		// palette + animate + engine + scale.
+		if e.SpaceRender != nil {
+			aes := animateSuffix + engineSuffix + scaleSuffix
+			b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">color space</span>`)
+			b.WriteString(switchLink(baseTP+aes, "rgb", spaceName == "rgb"))
+			b.WriteString(switchLink(baseTP+aes+"&space=lab", "lab", spaceName == "lab"))
+			b.WriteString(switchLink(baseTP+aes+"&space=lch", "lch", spaceName == "lch"))
+			b.WriteString(`</div>`)
+		}
+
+		// Value-scale switcher: only for charts with a ScaleRender (a continuous
+		// value axis). linear (default) / log. Hrefs preserve theme + palette +
+		// animate + engine + space.
+		if e.ScaleRender != nil {
+			aes := animateSuffix + engineSuffix + spaceSuffix
+			b.WriteString(`<div class="tc-switch"><span class="tc-switch-label">value scale</span>`)
+			b.WriteString(switchLink(baseTP+aes, "linear", !logScale))
+			b.WriteString(switchLink(baseTP+aes+"&scale=log", "log", logScale))
+			b.WriteString(`</div>`)
+		}
 	}
 
 	// Full-width chart (static wrapper or zoomable htmx.Mount container).

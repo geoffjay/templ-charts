@@ -65,7 +65,7 @@ templ IndexPage(props IndexPageProps) {
 	<ul class="list">
 		for _, p := range props.Pages {
 			<li>
-				<a href={ p.Href }>{ p.Title }</a>
+				<a href={ templ.URL(URL(p.Href)) }>{ p.Title }</a>
 				<p>{ p.Description }</p>
 			</li>
 		}

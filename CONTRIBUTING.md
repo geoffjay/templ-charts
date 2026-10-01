@@ -19,7 +19,8 @@ make templ   # generate Go from .templ sources
 make ci      # lint + test — should pass on a clean checkout
 ```
 
-To see charts rendered live, run the demo app:
+To see charts rendered live, browse the [live demo](https://geoffjay.github.io/templ-charts/)
+(a static export) or run the full demo app:
 
 ```sh
 make run-demo   # serves the demo on http://localhost:8000

@@ -56,6 +56,9 @@ func (a *App) Benchmark(w http.ResponseWriter, r *http.Request) {
 
 	var b strings.Builder
 	b.WriteString(`<h2>Render benchmark</h2>`)
+	if a.static {
+		b.WriteString(`<p><em>Note: this is the prerendered export — the timings below were measured on the machine that generated it, not a live server. Run <code>make run-demo</code> for live numbers.</em></p>`)
+	}
 	b.WriteString(`<p>Each row renders a stacked bar chart (4 keys per index) at the given number of index groups, ` +
 		`averaged over ` + fmt.Sprint(iters) + ` server-side renders via <code>render.String</code>. ` +
 		`Run <code>make bench</code> for the Go micro-benchmarks (d3 layout ports + chart render paths).</p>`)
